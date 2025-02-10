@@ -1,0 +1,12 @@
+@import "../../Styles/global.css";
+#router-container {
+  position: relative;
+  display: block;
+  margin-left: 180px;
+  height: 95%;
+  max-width: 100%;
+  background-color: white;
+  border-radius: 50px 0px 0px 50px;
+  padding-top: 2rem;
+  padding-left: 2rem;
+}/*# sourceMappingURL=style.css.map */

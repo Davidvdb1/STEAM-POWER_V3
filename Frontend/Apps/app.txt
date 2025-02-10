@@ -1,0 +1,3 @@
+Wat beschouwen we als een app?
+
+Zie het als de verschillende master components dat uw app zou kunnen bevatten
