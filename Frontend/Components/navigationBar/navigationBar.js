@@ -1,29 +1,26 @@
 //#region IMPORTS
-import "../../Components/moduleComponent/moduleComponent.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region navigationBar
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/modulebalkComponent/style.css';
+        @import './components/navigationBar/style.css';
     </style>
 
-    <div>
-        <modulecomponent-ɠ></modulecomponent-ɠ>
-        <modulecomponent-ɠ></modulecomponent-ɠ>
-    </div>
-
+<div class="navigationBar">
+    <p>kaas</p>
+</div>
 `;
-//#endregion TEMPLATE
+//#endregion navigationBar
 
 //#region CLASS
-window.customElements.define('modulebalk-ɠ', class extends HTMLElement {
+window.customElements.define('navigationbar-ɠ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
+        this.$example = this._shadowRoot.querySelector(".header"); 
     }
 
     // component attributes
@@ -31,7 +28,7 @@ window.customElements.define('modulebalk-ɠ', class extends HTMLElement {
         return [];
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
+    attributeChangedCallback(name, oldValue, newValue)  {
 
     }
 

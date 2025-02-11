@@ -1,25 +1,24 @@
 //#region IMPORTS
-import "../../Components/titelComponent/titelComponent.js"
-import "../../Components/ctaComponent/ctaComponent.js"
-import "../../Components/infoComponent/infoComponent.js"
-import "../../Components/sloganComponent/sloganComponent.js"
-import "../../Components/modulebalkComponent/modulebalkComponent.js"
-import "../../Components/header/header.js"
+import "../../Components/navigationBar/navigationBar.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region Header
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
-<header-れ></header-れ>
-<slogan-ɠ></slogan-ɠ>
-<info-ɠ></info-ɠ>
-<modulebalk-ɠ></modulebalk-ɠ>
-<cta-ɠ></cta-ɠ>
+    <style>
+        @import './components/header/style.css';
+    </style>
+
+    <header class="header">
+        <navigationbar-ɠ></navigationbar-ɠ>
+        <navigationbar-ɠ></navigationbar-ɠ>
+        <navigationbar-ɠ></navigationbar-ɠ>
+    </header>
 `;
-//#endregion TEMPLATE
+//#endregion Header
 
 //#region CLASS
-window.customElements.define('home-ɮ', class extends HTMLElement {
+window.customElements.define('header-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
