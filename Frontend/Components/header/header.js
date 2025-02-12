@@ -10,9 +10,7 @@ template.innerHTML = /*html*/`
     </style>
 
     <header class="header">
-        <navigationbar-ɠ></navigationbar-ɠ>
-        <navigationbar-ɠ></navigationbar-ɠ>
-        <navigationbar-ɠ></navigationbar-ɠ>
+        <navigationbar-れ></navigationbar-れ>
     </header>
 `;
 //#endregion Header

@@ -14,7 +14,7 @@ template.innerHTML = /*html*/`
 //#endregion TEMPLATE
 
 //#region CLASS
-window.customElements.define('example-ɠ', class extends HTMLElement {
+window.customElements.define('example-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });

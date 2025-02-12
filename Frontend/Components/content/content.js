@@ -1,42 +1,46 @@
 //#region IMPORTS
-import "../../Components/moduleComponent/moduleComponent.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/modulebalkComponent/style.css';
+        @import './components/template/style.css';
     </style>
 
-    <div>
-        <modulecomponent-ɠ></modulecomponent-ɠ>
-        <modulecomponent-ɠ></modulecomponent-ɠ>
+    <div class="content">
+        <h1>Content</h1>
+        <p></p>
     </div>
-
 `;
 //#endregion TEMPLATE
 
 //#region CLASS
-window.customElements.define('modulebalk-ɠ', class extends HTMLElement {
+window.customElements.define('content-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
+        this.$paragraph = this._shadowRoot.querySelector("p");
     }
 
     // component attributes
     static get observedAttributes() {
-        return [];
+        return ["active-tab"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
+        if (name === "active-tab") {
+            console.log(`Active tab is ${newValue} in content`);
+            this.$paragraph.textContent = `Active tab: ${newValue}`;
+        }
 
     }
 
     connectedCallback() {
-
+        if (!this.hasAttribute('active-tab')) {
+            this.setAttribute('active-tab', 'home');
+        }
     }
 
 });

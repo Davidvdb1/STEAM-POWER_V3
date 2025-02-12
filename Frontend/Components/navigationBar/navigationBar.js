@@ -1,4 +1,5 @@
 //#region IMPORTS
+import "../../Components/navigationList/navigationList.js"
 //#endregion IMPORTS
 
 //#region navigationBar
@@ -8,19 +9,19 @@ template.innerHTML = /*html*/`
         @import './components/navigationBar/style.css';
     </style>
 
-<div class="navigationBar">
-    <p>kaas</p>
-</div>
+    <div class="navigationBar">
+        <img src="./assets/images/logo.jpg" alt="Logo" class="nav-logo">
+        <navigationList-れ></navigationList-れ>
+    </div>
 `;
 //#endregion navigationBar
 
 //#region CLASS
-window.customElements.define('navigationbar-ɠ', class extends HTMLElement {
+window.customElements.define('navigationbar-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".header"); 
     }
 
     // component attributes
