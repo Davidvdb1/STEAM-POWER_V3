@@ -1,21 +1,19 @@
 //#region IMPORTS
-import "../../Components/example/example.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/subdirectory/template/style.css';
+        @import './components/pages/pageOne/style.css';
     </style>
 
-    <div class="example">
-    </div>
+    <p>Page One</p>
 `;
 //#endregion TEMPLATE
 
 //#region CLASS
-window.customElements.define('example-れ', class extends HTMLElement {
+window.customElements.define('pageone-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });

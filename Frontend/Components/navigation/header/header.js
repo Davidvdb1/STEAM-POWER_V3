@@ -1,21 +1,20 @@
 //#region IMPORTS
-import "../../Components/example/example.js"
+import "../../../Components/navigation/navigationBar/navigationBar.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region Header
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/subdirectory/template/style.css';
+        @import './components/navigation/header/style.css';
     </style>
 
-    <div class="example">
-    </div>
+    <navigationBar-れ></navigationBar-れ>
 `;
-//#endregion TEMPLATE
+//#endregion Header
 
 //#region CLASS
-window.customElements.define('example-れ', class extends HTMLElement {
+window.customElements.define('header-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });

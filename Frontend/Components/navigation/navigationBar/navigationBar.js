@@ -1,26 +1,25 @@
 //#region IMPORTS
-import "../../Components/example/example.js"
+import "../navigationList/navigationList.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region navigationBar
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/subdirectory/template/style.css';
+        @import './components/navigation/navigationBar/style.css';
     </style>
 
-    <div class="example">
-    </div>
+    <img src="./assets/images/logo.jpg" alt="Logo" class="nav-logo">
+    <navigationList-れ></navigationList-れ>
 `;
-//#endregion TEMPLATE
+//#endregion navigationBar
 
 //#region CLASS
-window.customElements.define('example-れ', class extends HTMLElement {
+window.customElements.define('navigationbar-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
     }
 
     // component attributes
@@ -28,7 +27,7 @@ window.customElements.define('example-れ', class extends HTMLElement {
         return [];
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
+    attributeChangedCallback(name, oldValue, newValue)  {
 
     }
 

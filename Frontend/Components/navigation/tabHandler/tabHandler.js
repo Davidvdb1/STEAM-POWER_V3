@@ -1,26 +1,27 @@
 //#region IMPORTS
-import "../../Components/example/example.js"
+import "../../../Components/navigation/header/header.js"
+import "../../pages/content/content.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/subdirectory/template/style.css';
+        @import './components/navigation/tabHandler/style.css';
     </style>
 
-    <div class="example">
-    </div>
+    <header-れ></header-れ>
+    <content-れ></content-れ> 
 `;
 //#endregion TEMPLATE
 
 //#region CLASS
-window.customElements.define('example-れ', class extends HTMLElement {
+window.customElements.define('tabhandler-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
+        this.$content = this._shadowRoot.querySelector("content-れ");
     }
 
     // component attributes
@@ -33,7 +34,12 @@ window.customElements.define('example-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        this.addEventListener("tab", this.handler);
+    }
 
+    handler(e) {
+        console.log("tabHandler recieved event");
+        this.$content.setAttribute("active-tab", e.detail);
     }
 
 });

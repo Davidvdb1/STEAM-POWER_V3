@@ -1,0 +1,21 @@
+div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1200px;
+}
+
+:host {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  padding: 10px;
+  border-radius: 10px;
+  height: 150px;
+}
+
+img {
+  height: 100px;
+}/*# sourceMappingURL=style.css.map */

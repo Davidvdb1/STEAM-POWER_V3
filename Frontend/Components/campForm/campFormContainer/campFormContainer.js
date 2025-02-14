@@ -2,20 +2,20 @@
 import "../../Components/example/example.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region CAMPFORMCONTAINER
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/subdirectory/template/style.css';
+        @import './components/campFormContainer/campFormContainer/style.css';
     </style>
 
     <div class="example">
     </div>
 `;
-//#endregion TEMPLATE
+//#endregion CAMPFORMCONTAINER 
 
 //#region CLASS
-window.customElements.define('example-れ', class extends HTMLElement {
+window.customElements.define('campformcontainer-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
