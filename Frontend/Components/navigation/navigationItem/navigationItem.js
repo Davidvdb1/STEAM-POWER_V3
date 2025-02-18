@@ -9,7 +9,7 @@ template.innerHTML = /*html*/`
     </style>
 
     <li class="navigationItem">
-        <button id="button" class="nav-link"></button>
+        <button id="" class=""></button>
     </li>
 `;
 //#endregion TEMPLATE
@@ -20,7 +20,7 @@ window.customElements.define('navigationitem-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$button = this._shadowRoot.querySelector("#button");
+        this.$button = this._shadowRoot.querySelector("button");
 
     }
 
@@ -40,13 +40,11 @@ window.customElements.define('navigationitem-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$button.addEventListener("click", () => {
-            console.log(`Button ${this.$button.id} clicked!`);
             this.tabHandler(this.$button.id);
         });
     }
 
     tabHandler(text) {
-        console.log(`Button ${text} recieved in handler`);
         this.dispatchEvent(new CustomEvent('tab', {
             bubbles: true,
             composed: true,

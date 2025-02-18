@@ -1,21 +1,20 @@
 //#region IMPORTS
-import "../../Components/example/example.js"
+import "../../navigation/tabHandler/tabHandler.js"
 //#endregion IMPORTS
 
-//#region FORMLABEL
+//#region CONTAINER
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/campFromContainer/formLabel/style.css';
+        @import './components/reusable/container/style.css';
     </style>
 
-    <div class="example">
-    </div>
+    <tabhandler-れ></tabhandler-れ> 
 `;
-//#endregion FORMLABEL
+//#endregion CONTAINER
 
 //#region CLASS
-window.customElements.define('formlabel-れ', class extends HTMLElement {
+window.customElements.define('container-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });

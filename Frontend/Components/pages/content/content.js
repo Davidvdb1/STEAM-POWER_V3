@@ -2,10 +2,7 @@
 import "../../../Components/pages/pageOne/pageOne.js"
 import "../../../Components/pages/pageTwo/pageTwo.js"
 import "../../../Components/pages/pageThree/pageThree.js"
-// import "../../Components/pageFour/pageFour.js"
-// import "../../Components/pageFive/pageFive.js"
-// import "../../Components/pageSix/pageSix.js"
-// import "../../Components/pageSeven/pageSeven.js"
+import "../../../Components/pages/campForm/campForm.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -14,12 +11,11 @@ template.innerHTML = /*html*/`
     <style>
         @import './components/pages/content/style.css';
     </style>
-
-    <h1>Content</h1>
-    <p></p>
+    
     <pageone-れ></pageone-れ>
     <pagetwo-れ></pagetwo-れ>
     <pagethree-れ></pagethree-れ> 
+    <campform-れ></campForm-れ>
 `;
 //#endregion TEMPLATE
 
@@ -29,17 +25,18 @@ window.customElements.define('content-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$paragraph = this._shadowRoot.querySelector("p");
         
         // Reference all pages in an array
         this.pages = [
             this._shadowRoot.querySelector('pageone-れ'),
             this._shadowRoot.querySelector('pagetwo-れ'),
             this._shadowRoot.querySelector('pagethree-れ'),
-            // this._shadowRoot.querySelector('pagefour-れ'),
-            // this._shadowRoot.querySelector('pagefive-れ'),
-            // this._shadowRoot.querySelector('pagesix-れ'),
-            // this._shadowRoot.querySelector('pageseven-れ')
+            this._shadowRoot.querySelector('pageone-れ'),
+            this._shadowRoot.querySelector('pagetwo-れ'),
+            this._shadowRoot.querySelector('pagethree-れ'),
+            this._shadowRoot.querySelector('pageone-れ'),
+            this._shadowRoot.querySelector('pagetwo-れ'),
+            this._shadowRoot.querySelector('campform-れ'),
         ];
     }
 
@@ -49,10 +46,7 @@ window.customElements.define('content-れ', class extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === "active-tab") {
-            console.log(`Active tab is ${newValue} in content`);
-            this.$paragraph.textContent = `Active tab: ${newValue}`;
-            
+        if (name === "active-tab") {            
             // Hide all pages
             this.pages.forEach(page => page.style.display = 'none');
 
@@ -66,14 +60,14 @@ window.customElements.define('content-れ', class extends HTMLElement {
 
     connectedCallback() {
         if (!this.hasAttribute('active-tab')) {
-            this.setAttribute('active-tab', 'home');
+            this.setAttribute('active-tab', 'campform');
         }
     }
 
     // Get the index of the page corresponding to the active-tab 
     getPageIndex(tab) {
         const pageNames = [
-            'home', 'overzicht', 'spel', 'microbit', 'groepen', 'sign-up', 'logout'
+            'home', 'overzicht', 'spel', 'microbit', 'groepen', 'users', 'sign-up', 'logout', 'campform'
         ];
         return pageNames.indexOf(tab);
     }

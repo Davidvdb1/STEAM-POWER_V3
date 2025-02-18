@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../Components/pages/container/container.js"
+import "../../Components/reusable/container/container.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE

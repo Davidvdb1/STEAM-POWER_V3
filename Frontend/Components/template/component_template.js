@@ -1,5 +1,4 @@
 //#region IMPORTS
-import "../../Components/example/example.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE

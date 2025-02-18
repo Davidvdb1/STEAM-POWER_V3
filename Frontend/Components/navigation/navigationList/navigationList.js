@@ -19,22 +19,18 @@ window.customElements.define('navigationlist-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$list = this._shadowRoot.querySelector(".navigationList");
+        this.$list = this._shadowRoot.querySelector("ul");
     }
 
-    // component attributes
     static get observedAttributes() {
         return ["active-tab"];
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-        if (name === "active-tab") {
-            console.log(`NavigationList received active-tab: ${newValue}`);
-        }
-
-    }
+    attributeChangedCallback(name, oldValue, newValue) {}
 
     connectedCallback() {
+
+        //dynamisch toevoegen van linken in de navigatie
         const items = [
             { id: "home", label: "Home" },
             { id: "overzicht", label: "Overzicht" },
@@ -44,9 +40,11 @@ window.customElements.define('navigationlist-れ', class extends HTMLElement {
             { id: "users", label: "Gebruikers" },
             { id: "sign-up", label: "Nieuw account"},
             { id: "logout", label: "Logout" },
+            { id: "campform", label: "Forum"}
         ];
 
-        items.forEach(({ id, label, style }) => {
+        //voor elk item in de navbar de id en label setten
+        items.forEach(({ id, label }) => {
             const item = document.createElement("navigationitem-れ");
             item.setAttribute("id", id);
             item.setAttribute("label", label);

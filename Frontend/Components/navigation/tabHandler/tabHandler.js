@@ -38,7 +38,6 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
     }
 
     handler(e) {
-        console.log("tabHandler recieved event");
         this.$content.setAttribute("active-tab", e.detail);
     }
 
