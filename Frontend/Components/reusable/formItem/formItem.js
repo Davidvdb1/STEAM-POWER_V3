@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import '/Frontend/Components/campForm/formItem/style.css';
+        @import '/Frontend/Components/reusable/formItem/style.css';
     </style>
 
     <label for=""></label>

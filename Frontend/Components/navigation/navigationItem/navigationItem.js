@@ -26,7 +26,7 @@ window.customElements.define('navigationitem-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ['label', 'id', 'class'];
+        return ['label', 'id'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -44,13 +44,12 @@ window.customElements.define('navigationitem-れ', class extends HTMLElement {
         });
     }
 
-    tabHandler(text) {
+    tabHandler(id) {
         this.dispatchEvent(new CustomEvent('tab', {
             bubbles: true,
             composed: true,
-            detail: text
-        }));
+            detail: id
+        })); 
     }
-
 });
 //#endregion CLASS

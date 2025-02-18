@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../../Components/navigation/navigationBar/navigationBar.js"
+import "../../../Components/navigation/navigationList/navigationList.js"
 //#endregion IMPORTS
 
 //#region Header
@@ -9,7 +9,8 @@ template.innerHTML = /*html*/`
         @import './components/navigation/header/style.css';
     </style>
 
-    <navigationBar-れ></navigationBar-れ>
+    <img src="./assets/images/logo.jpg" alt="Logo" class="nav-logo">
+    <navigationList-れ></navigationList-れ>
 `;
 //#endregion Header
 
@@ -19,21 +20,25 @@ window.customElements.define('header-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
+        this.$navigationList = this._shadowRoot.querySelector("navigationList-れ");
     }
 
     // component attributes
     static get observedAttributes() {
-        return [];
+        return ["tabs"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
+        if (name === "tabs") {
+            this.$navigationList.setAttribute("tabs", newValue);
+        }
 
     }
 
     connectedCallback() {
-
+        
     }
+    
 
 });
 //#endregion CLASS

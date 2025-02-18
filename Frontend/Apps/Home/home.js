@@ -1,12 +1,12 @@
 //#region IMPORTS
-import "../../Components/reusable/container/container.js"
+import "../../Components/navigation/tabHandler/tabHandler.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
 
-    <container-れ></container-れ>
+<tabhandler-れ></tabhandler-れ> 
 `;
 //#endregion TEMPLATE
 

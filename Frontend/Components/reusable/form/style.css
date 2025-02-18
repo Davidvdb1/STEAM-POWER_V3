@@ -10,9 +10,6 @@
 form {
   display: grid;
   height: auto;
-  grid-template-rows: repeat(7, auto [row-start]);
-  grid-template-columns: repeat(2, 50% [col-start]);
-  grid-template-areas: "title title" "startDate endDate" "startAge endAge" "startTime endTime" "location location" "imagePreview imagePreview" "image submit";
   padding: 50px;
 }
 
@@ -24,11 +21,11 @@ formitem-れ {
   margin-bottom: 10px;
 }
 
-formitem-れ[size=half] {
+formitem-れ[amountInRow=two] {
   width: 90%;
 }
 
-formitem-れ[size=full] {
+formitem-れ[amountInRow=one] {
   width: 95%;
 }
 
