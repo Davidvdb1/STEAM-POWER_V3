@@ -6,7 +6,7 @@ import "../formItem/formItem.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/reusable/form/style.css';
+        @import './Components/reusable/formContainer/style.css';
     </style>
 
     <form class="form">

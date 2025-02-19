@@ -1,17 +1,26 @@
 //#region IMPORTS
+import "../../reusable/campContainer/campContainer.js"
+import "../../reusable/campPanel/campPanel.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region CAMPOVERVIEWPAGE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/subdirectory/template/style.css';
+        @import './components/pages/campOverviewPage/style.css';
     </style>
+
+    <h1>Welkom bij TWA</h1>
+    <h2>Overzicht van de kampen</h2>
+    <camppanel-れ></camppanel-れ>
+    <campcontainer-れ></campcontainer-れ>
+
+
 `;
-//#endregion TEMPLATE
+//#endregion CAMPOVERVIEWPAGE
 
 //#region CLASS
-window.customElements.define('example-れ', class extends HTMLElement {
+window.customElements.define('campoverviewpage-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
