@@ -56,11 +56,26 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
 
         this.addEventListener("tab", this.tabHandler);   
         this.addEventListener("import", this.importHandler);   
-        this.$header.setAttribute("tabs", JSON.stringify(items))
+        this.$header.setAttribute("tabs", JSON.stringify(items));
+        
+        window.addEventListener('popstate', this.handlePopState.bind(this));
+        this.updateURL(this.landingPage);
     }
 
     tabHandler(e) {
         this.$content.setAttribute("active-tab", e.detail);
+        this.updateURL(e.detail);
+    }
+
+    handlePopState(event) {
+        const tab = event.state ? event.state.tab : this.landingPage;
+        this.$content.setAttribute("active-tab", tab);
+    }
+
+    updateURL(tab) {
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tab);
+        history.pushState({ tab }, '', url);
     }
 });
 //#endregion CLASS
