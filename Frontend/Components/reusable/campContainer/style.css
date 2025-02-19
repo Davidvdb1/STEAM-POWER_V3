@@ -1,0 +1,11 @@
+:host {
+  width: 80%;
+  max-width: 1500px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+  grid-template-rows: repeat(auto-fill, 1fr);
+  gap: 50px;
+  justify-content: center;
+  align-items: stretch;
+  margin-top: 50px;
+}/*# sourceMappingURL=style.css.map */

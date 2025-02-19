@@ -1,0 +1,25 @@
+[
+    {
+        "title": "Smart Gadget Shaping kamp (VK30)",
+        "startDate": "2025-02-19",
+        "endDate": "2025-02-26",
+        "startAge": "10",
+        "endAge": "15",
+        "startTime": "10:00",
+        "endTime": "16:00",
+        "location": "UCLL Techniek- en WetenschapsAcademie Leuven - Naamsesteenweg 355 , 3001 Heverlee",
+        "image": "C:\\fakepath\\campExample.webp"
+    },
+
+    {
+        "title": "IR 13 kamp",
+        "startDate": "2024-02-19",
+        "endDate": "2024-02-26",
+        "startAge": "8",
+        "endAge": "10",
+        "startTime": "11:00",
+        "endTime": "17:00",
+        "location": "Naamsesteenweg 355 , 3001 Heverlee",
+        "image": "C:\\fakepath\\campExample.webp"
+    }
+]
