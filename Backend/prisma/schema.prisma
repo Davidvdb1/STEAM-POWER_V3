@@ -19,3 +19,25 @@ model User {
     email       String  @unique
     password    String
 }
+
+model Kamp {
+    id          String  @id @default(uuid())
+    workshops   Workshop[]
+    naam        String
+    startdatum  DateTime
+    einddatum   DateTime
+    adres       String
+    starttijd   String
+    eindtijd    String
+    minLeeftijd Int
+    maxLeeftijd Int
+    foto        String
+    gearchiveerd    Boolean
+}
+
+model Workshop {
+    id          String  @id @default(uuid())
+    kampen      Kamp[]
+    naam        String
+    markdown    String
+}

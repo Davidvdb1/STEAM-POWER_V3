@@ -14,7 +14,7 @@ router.post('/register', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const user = await userService.getUserById(req.params.id);
+        const user = await userService.getById(req.params.id);
         if (!user) return res.status(400).json({ error: 'User not found' });
         res.status(200).json(user);
     } catch (error) {
