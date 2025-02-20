@@ -1,12 +1,12 @@
 const express = require('express');
-const kampService = require('../service/kampService');
+const campService = require('../service/campService');
 
 const router = express.Router();
 
 router.post('/', async (req, res) => {
     try {
-        const kamp = await kampService.create(req.body);
-        res.status(200).json({ message: 'kamp created', kamp });
+        const camp = await campService.create(req.body);
+        res.status(200).json({ message: 'Kamp gemaakt', camp });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -14,9 +14,9 @@ router.post('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const kamp = await kampService.getById(req.params.id);
-        if (!kamp) return res.status(400).json({ error: 'kamp not found' });
-        res.status(200).json(kamp);
+        const camp = await campService.getById(req.params.id);
+        if (!camp) return res.status(400).json({ error: 'Kamp niet gevonden' });
+        res.status(200).json(camp);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }
@@ -24,8 +24,8 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
     try {
-        const kamps = await kampService.getAll();
-        res.status(200).json(kamps);
+        const camps = await campService.getAll();
+        res.status(200).json(camps);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }

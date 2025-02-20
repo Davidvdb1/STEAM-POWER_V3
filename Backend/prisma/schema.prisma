@@ -18,33 +18,33 @@ model User {
     username    String  @unique
     email       String  @unique
     password    String
-    role        Role    @default(GAST)
+    role        Role    @default(GUEST)
 }
 
 enum Role {
     ADMIN
-    LEERKRACHT
-    GAST
+    TEACHER
+    GUEST
 }
 
-model Kamp {
+model Camp {
     id          String  @id @default(uuid())
     workshops   Workshop[]
-    naam        String
-    startdatum  DateTime
-    einddatum   DateTime
-    adres       String
-    starttijd   String
-    eindtijd    String
-    minLeeftijd Int
-    maxLeeftijd Int
-    foto        String
-    gearchiveerd    Boolean
+    name        String
+    startDate   DateTime
+    endDate     DateTime
+    adress      String
+    startTime   String
+    endTime     String
+    minAge      Int
+    maxAge      Int
+    picture     String
+    archived    Boolean
 }
 
 model Workshop {
     id          String  @id @default(uuid())
-    kampen      Kamp[]
-    naam        String
+    camps       Camp[]
+    name        String
     markdown    String
 }

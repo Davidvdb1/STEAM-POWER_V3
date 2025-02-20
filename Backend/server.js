@@ -2,7 +2,7 @@ const express = require('express');
 const { expressjwt } = require('express-jwt');
 require('dotenv').config();
 const userRoutes = require('./controller/userController');
-const kampRoutes = require('./controller/kampController');
+const campRoutes = require('./controller/campController');
 const workshopRoutes = require('./controller/workshopController');
 
 const app = express();
@@ -21,7 +21,7 @@ app.use(
 );
 
 app.use('/users', userRoutes);
-app.use('/kampen', kampRoutes);
+app.use('/camps', campRoutes);
 app.use('/workshops', workshopRoutes);
 
 app.get('/status', (req, res) => {

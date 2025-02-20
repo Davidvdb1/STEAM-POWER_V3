@@ -5,7 +5,7 @@ const { generateJWTtoken } = require('../util/jwt');
 class UserService {
     async register(userData) {
         const existingUser = await userRepository.findByEmail(userData.email);
-        if (existingUser) throw new Error('User already exists');
+        if (existingUser) throw new Error('Gebruiker met dit emailadres bestaat al');
 
         userData.password = await bcrypt.hash(userData.password, 10);
         const createdUser = await userRepository.create(userData);
@@ -23,10 +23,10 @@ class UserService {
     async login(userData) {
         try {
             const user = await userRepository.findByUsername(userData.username);
-            if (!user) throw new Error('User not found');
+            if (!user) throw new Error('Gebruiker niet gevonden');
 
             const isPasswordValid = await bcrypt.compare(userData.password, user.password);
-            if (!isPasswordValid) throw new Error('Invalid password');
+            if (!isPasswordValid) throw new Error('Onjuist wachtwoord');
 
             const JWT = generateJWTtoken(user.username, user.email, user.role);
             const response = {
@@ -37,7 +37,7 @@ class UserService {
             };
             return response;
         } catch (error) {
-            throw new Error('Incorrect username or password');
+            throw new Error('Verkeerde gebruikersnaam of wachtwoord');
         }
     }
 
