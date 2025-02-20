@@ -1,7 +1,76 @@
 :host {
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
     background-color: #002757;
-    padding: 20px;
-    width: 80%;
-    max-width: 1500px;
-    border-radius: 1000px;
+    padding: 30px;
+    width: 72%;
+    max-width: 1400px;
+    border-radius: 30px;
+    margin-bottom: 50px;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.288);
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    min-width: 500px;
+}
+
+.text {
+    background-color: #E30147;
+    color: white;
+    font-size: 1.1rem;  
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+    border-style: solid;
+    border-color: #E30147;
+
+    &:hover {
+        border-color: white;
+    }
+}
+
+.add {
+    background-color: #9FDAF9;
+    font-size: 1.1rem;
+    color: #002757;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+    border-style: solid;
+    border-color: #9FDAF9;
+
+    &:hover {
+        border-color: white;
+    }
+}
+
+.svg {
+    all: unset;
+    display: flex;
+    justify-content: center;  
+    cursor: pointer;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+    padding: 4px;
+
+    &:hover {
+        background-color: #E30147;
+    }
+}
+
+div {
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
 }
