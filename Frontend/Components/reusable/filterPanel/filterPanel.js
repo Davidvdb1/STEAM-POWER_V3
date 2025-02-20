@@ -1,25 +1,17 @@
 //#region IMPORTS
-import "../../reusable/campContainer/campContainer.js"
-import "../../reusable/campPanel/campPanel.js"
-import '../../reusable/filterPanel/filterPanel.js';
 //#endregion IMPORTS
 
-//#region CAMPOVERVIEWPAGE
+//#region FILTERPANEL
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/campOverviewPage/style.css';
+        @import './components/reusable/filterPanel/style.css';
     </style>
-    <camppanel-れ></camppanel-れ>
-    <filterpanel-れ></filterpanel-れ>
-    <campcontainer-れ></campcontainer-れ>
-
-
 `;
-//#endregion CAMPOVERVIEWPAGE
+//#endregion FILTERPANEL
 
 //#region CLASS
-window.customElements.define('campoverviewpage-れ', class extends HTMLElement {
+window.customElements.define('filterpanel-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });

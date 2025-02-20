@@ -8,12 +8,20 @@ template.innerHTML = /*html*/`
         @import './components/reusable/campPanel/style.css';
     </style>
 
-    <input type="text" placeholder="Zoek op kampnaam">
-    <button>filter</button>
-    <button>sorteren</button>
-    <button>zoeken</button>
-    <button>reset</button>
-    <button>+ nieuw kamp</button>
+    <div>
+        <input type="text" placeholder="Zoek op kampnaam">
+        <button id="filter" class="svg">
+            <img src="./Assets/SVGs/filter.png" alt="search" style="width: 40px;">
+        </button>
+        <button id="sort" class="svg">
+            <img src="./Assets/SVGs/sort.png" alt="search" style="width: 40px;">
+        </button>
+    </div>
+    <div>
+        <button id="reset" class="text">reset</button>
+        <button id="search" class="text">zoeken</button>
+        <button id="addCamp" class="add">+ nieuw kamp</button>
+    </div>
 `;
 //#endregion TEMPLATE
 
@@ -23,7 +31,8 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
+        this.$filter = this._shadowRoot.querySelector('#filter');
+        this.$sort = this._shadowRoot.querySelector('#sort');
     }
 
     // component attributes
@@ -36,6 +45,11 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        this.$filter.addEventListener('click', () => {
+            const text = document.createElement('p');
+            text.innerHTML = 'filter';
+            this._shadowRoot.appendChild(text);
+        });
 
     }
 
