@@ -1,16 +1,16 @@
 class Camp {
-    constructor({id, name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}) {
-        this.id = id;
-        this.name = name;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.address = address;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.minAge = minAge;
-        this.maxAge = maxAge;
-        this.picture = picture;
-        this.archived = archived;
+    constructor({id = null, name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}) {
+        this._id = id;
+        this._name = name;
+        this._startDate = startDate;
+        this._endDate = endDate;
+        this._address = address;
+        this._startTime = startTime;
+        this._endTime = endTime;
+        this._minAge = minAge;
+        this._maxAge = maxAge;
+        this._picture = picture;
+        this._archived = archived;
     }
 
     get id() {
@@ -69,14 +69,14 @@ class Camp {
     }
 
     set startDate(startDate) {
-        if (!startDate || startDate instanceof Date) {
+        if (!startDate || !(startDate instanceof Date)) {
             throw new Error('Ongeldige startdatum');
         }
         this._startDate = startDate;
     }
 
     set endDate(endDate) {
-        if (!endDate || endDate instanceof Date) {
+        if (!endDate || !(endDate instanceof Date)) {
             throw new Error('Ongeldige einddatum');
         }
         this._endDate = endDate;

@@ -1,8 +1,8 @@
 class Workshop {
-    constructor({id, name, markdown}) {
-        this.id = id;
-        this.name = name;
-        this.markdown = markdown;
+    constructor({id = null, name, markdown}) {
+        this._id = id;
+        this._name = name;
+        this._markdown = markdown;
     }
 
     get id() {

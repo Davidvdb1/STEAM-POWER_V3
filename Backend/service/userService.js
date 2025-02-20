@@ -9,9 +9,8 @@ class UserService {
         if (existingUser) throw new Error('Gebruiker met dit emailadres bestaat al');
 
         userData.password = await bcrypt.hash(userData.password, 10);
-        
-        const newUser = new User(userData);
 
+        const newUser = new User(userData);
         const createdUser = await userRepository.create(newUser);
 
         const JWT = generateJWTtoken(createdUser.username, createdUser.email, createdUser.role);
