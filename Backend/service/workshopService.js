@@ -3,7 +3,8 @@ const bcrypt = require('bcryptjs');
 
 class WorkshopService {
     async create(workshopData) {
-        return await workshopRepository.create(workshopData);
+        const newWorkshop = new Workshop(workshopData)
+        return await workshopRepository.create(newWorkshop);
     }
 
     async getById(id) {
