@@ -13,6 +13,10 @@ class UserRepository {
     async findById(id) {
         return await prisma.user.findUnique({ where: { id } });
     }
+
+    async findByUsername(username) {
+        return await prisma.user.findUnique({ where: { username } });
+    }
 }
 
 module.exports = new UserRepository();

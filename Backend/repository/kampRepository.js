@@ -9,6 +9,10 @@ class KampRepository {
     async findById(id) {
         return await prisma.kamp.findUnique({ where: { id } });
     }
+
+    async findAll() {
+        return await prisma.kamp.findMany();
+    }
 }
 
 module.exports = new KampRepository();

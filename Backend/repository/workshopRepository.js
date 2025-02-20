@@ -9,6 +9,10 @@ class WorkshopRepository {
     async findById(id) {
         return await prisma.workshop.findUnique({ where: { id } });
     }
+
+    async findAll() {
+        return await prisma.workshop.findMany();
+    }
 }
 
 module.exports = new WorkshopRepository();
