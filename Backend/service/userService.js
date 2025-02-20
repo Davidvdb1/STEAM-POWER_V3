@@ -10,7 +10,7 @@ class UserService {
         return await userRepository.create(userData);
     }
 
-    async getUserById(id) {
+    async getById(id) {
         return await userRepository.findById(id);
     }
 }
