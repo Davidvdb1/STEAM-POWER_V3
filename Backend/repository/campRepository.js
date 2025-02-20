@@ -1,17 +1,21 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const Camp = require('../model/camp');
 
 class CampRepository {
-    async create(campData) {
-        return await prisma.camp.create({ data: campData });
+    async create(camp) {
+        const prismaCamp = await prisma.camp.create({ data: camp });
+        return Camp.from(prismaCamp);
     }
 
     async findById(id) {
-        return await prisma.camp.findUnique({ where: { id } });
+        const prismaCamp = await prisma.camp.findUnique({ where: { id } });
+        return Camp.from(prismaCamp);
     }
 
     async findAll() {
-        return await prisma.camp.findMany();
+        const prismaCamps = await prisma.camp.findMany();
+        return prismaCamps.map(prismaCamp => Camp.from(prismaCamp));
     }
 }
 

@@ -3,7 +3,8 @@ const bcrypt = require('bcryptjs');
 
 class CampService {
     async create(campData) {
-        return await campRepository.create(campData);
+        const newCamp = new Camp(campData);
+        return await campRepository.create(newCamp);
     }
 
     async getById(id) {
