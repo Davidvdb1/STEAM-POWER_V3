@@ -3,8 +3,11 @@ const prisma = new PrismaClient();
 const Workshop = require('../model/workshop');
 
 class WorkshopRepository {
-    async create(workshopData) {
-        const prismaWorkshop = await prisma.workshop.create({ data: workshopData });
+    async create(workshop) {
+        const prismaWorkshop = await prisma.workshop.create({ data: {
+            name: workshop.name,
+            markdown: workshop.markdown,
+        } });
         return Workshop.from(prismaWorkshop);
     }
 

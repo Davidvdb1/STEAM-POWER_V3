@@ -1,12 +1,12 @@
 const utility = require("../util/utility");
 
 class User {
-    constructor({id, username, email, password, role}) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.role = role;
+    constructor({id = null, username, email, password, role}) {
+        this._id = id;
+        this._username = username;
+        this._email = email;
+        this._password = password;
+        this._role = role;
     }
 
     get id() {
@@ -48,14 +48,14 @@ class User {
     }
 
     set password(password) {
-        if (!username || typeof username !== 'string') {
+        if (!password || typeof password !== 'string' || password.length < 6) {
             throw new Error('Wachtwoord moet minstens 6 tekens lang zijn');
         }
         this._password = password;
     }
 
     set role(role) {
-        if (['ADMIN', 'TEACHER', 'GUEST'].contains(role)) {
+        if (!['ADMIN', 'TEACHER', 'GUEST'].includes(role)) {
             throw new Error('Ongeldige rol');
         }
         this._role = role;
