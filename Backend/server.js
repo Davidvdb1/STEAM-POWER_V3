@@ -1,14 +1,17 @@
 const express = require('express');
 const { expressjwt } = require('express-jwt');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const helmet = require('helmet');
 const userRoutes = require('./controller/userController');
 const campRoutes = require('./controller/campController');
 const workshopRoutes = require('./controller/workshopController');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
+dotenv.config();
 app.use(express.json());
+app.use(helmet());
+
+const PORT = process.env.PORT || 3000;
 
 app.use(
     expressjwt({
