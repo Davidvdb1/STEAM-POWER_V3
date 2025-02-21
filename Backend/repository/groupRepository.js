@@ -1,17 +1,17 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const group = require('../model/group');
+const Group = require('../model/group');
 
 class GroupRepository {
-    async create(group) {
-        const prismaGroup = await prisma.group.create({ data: { group } });
+    async create({name, code}) {
+        const prismaGroup = await prisma.group.create({ data: {name, code} });
         return group.from(prismaGroup);
     }
 
     async findById(id) {
         try {
             const prismaGroup = await prisma.group.findUnique({ where: { id } });
-            return group.from(prismaGroup);
+            return Group.from(prismaGroup);
         } catch (error) {
             return null;
         }
@@ -22,7 +22,7 @@ class GroupRepository {
             console.log(code);
             const prismaGroup = await prisma.group.findUnique({ where: { code } });
             console.log(prismaGroup);
-            return group.from(prismaGroup);
+            return Group.from(prismaGroup);
         } catch (error) {
             return null;
         }
@@ -31,7 +31,7 @@ class GroupRepository {
     async findByName(name) {
         try {
             const prismaGroup = await prisma.group.findUnique({ where: { name } });
-            return group.from(prismaGroup);
+            return Group.from(prismaGroup);
         } catch (error) {
             return null;
         }
@@ -39,7 +39,7 @@ class GroupRepository {
 
     async getAll() {
         const prismaGroups = await prisma.group.findMany();
-        return prismaGroups.map(group.from);
+        return prismaGroups.map(Group.from);
     }
 }
 

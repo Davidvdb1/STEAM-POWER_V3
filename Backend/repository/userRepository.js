@@ -3,8 +3,8 @@ const prisma = new PrismaClient();
 const User = require('../model/user');
 
 class UserRepository {
-    async create(user) {
-        const prismaUser = await prisma.user.create({ data: { user}});
+    async create({username, email, password, role}) {
+        const prismaUser = await prisma.user.create({ data: {username, email, password, role} });
         return User.from(prismaUser);
     }
 
