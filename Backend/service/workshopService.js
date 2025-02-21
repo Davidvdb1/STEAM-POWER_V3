@@ -1,5 +1,5 @@
 const workshopRepository = require('../repository/workshopRepository');
-const bcrypt = require('bcryptjs');
+const Workshop = require('../model/workshop');
 
 class WorkshopService {
     async create(workshopData) {

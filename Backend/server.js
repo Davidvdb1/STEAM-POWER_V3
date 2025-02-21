@@ -27,7 +27,7 @@ app.use(
 app.use('/users', userRoutes);
 app.use('/camps', campRoutes);
 app.use('/workshops', workshopRoutes);
-app.use('/groepen', groupRoutes);
+app.use('/groups', groupRoutes);
 
 app.get('/status', (req, res) => {
     res.send(`Server is running on http://localhost:${PORT}`);

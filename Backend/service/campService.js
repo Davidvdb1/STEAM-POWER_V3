@@ -1,8 +1,10 @@
 const campRepository = require('../repository/campRepository');
-const bcrypt = require('bcryptjs');
+const Camp = require('../model/camp');
 
 class CampService {
     async create(campData) {
+        campData.startDate = new Date(campData.startDate);
+        campData.endDate = new Date(campData.endDate);
         const newCamp = new Camp(campData);
         return await campRepository.create(newCamp);
     }
