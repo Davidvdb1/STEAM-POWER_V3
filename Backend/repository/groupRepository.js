@@ -24,7 +24,9 @@ class GroupRepository {
 
     async findByCode(code) {
         try {
+            console.log(code);
             const prismaGroup = await prisma.group.findUnique({ where: { code } });
+            console.log(prismaGroup);
             return group.from(prismaGroup);
         } catch (error) {
             return null;

@@ -1,4 +1,5 @@
-const { PrismaClient } = require('@prisma/client')
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ async function main() {
         data: {
             username: 'admin',
             email: 'admin@admin.admin',
-            password: 'admin123',
+            password: await bcrypt.hash('admin123', 10),
             role: 'ADMIN',
         },
     });
@@ -20,7 +21,7 @@ async function main() {
         data: {
             username: 'teacher',
             email: 'teacher@teacher.teacher',
-            password: 'teacher123',
+            password: await bcrypt.hash('teacher123', 10),
             role: 'TEACHER',
         },
     });
@@ -44,6 +45,18 @@ async function main() {
         data: {
             name: 'Workshop 1',
             markdown: 'Workshop 1 markdown',
+        },
+    });
+
+    const group1 = await prisma.group.create({
+        data: {
+            name: 'Groep 1',
+        },
+    });
+
+    const group2 = await prisma.group.create({
+        data: {
+            name: 'Groep 2',
         },
     });
 }

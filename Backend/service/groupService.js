@@ -31,8 +31,8 @@ class GroupService {
         const JWT = generateJWTtoken(group.name, 'GROUP');
         const response = {
             token: JWT,
-            username: user.username,
-            role: user.role,
+            name: group.name,
+            role: 'GROUP',
         };
         return response;
     }

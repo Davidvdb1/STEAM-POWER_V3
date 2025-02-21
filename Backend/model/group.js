@@ -28,8 +28,8 @@ class Group {
         this._code = code;
     }
 
-    static from(prismaUser) {
-        return new User(prismaUser);
+    static from(prismaGroup) {
+        return new Group(prismaGroup);
     }
 }
 

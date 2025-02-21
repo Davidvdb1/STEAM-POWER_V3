@@ -14,7 +14,7 @@ router.post('/', async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const JWT = await groupService.login(req.body);
+        const JWT = await groupService.login(req.body.code);
         res.status(200).json({ message: 'Succesvol ingelogd', JWT})
     } catch (error) {
         res.status(400).json({ error: error.message });
