@@ -37,7 +37,7 @@ class GroupRepository {
         }
     }
 
-    async getAll() {
+    async findAll() {
         const prismaGroups = await prisma.group.findMany();
         return prismaGroups.map(Group.from);
     }
