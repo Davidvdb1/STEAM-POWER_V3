@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const userRoutes = require('./controller/userController');
 const campRoutes = require('./controller/campController');
 const workshopRoutes = require('./controller/workshopController');
+const groupRoutes = require('./controller/groupController');
 
 const app = express();
 dotenv.config();
@@ -26,6 +27,7 @@ app.use(
 app.use('/users', userRoutes);
 app.use('/camps', campRoutes);
 app.use('/workshops', workshopRoutes);
+app.use('/groepen', groupRoutes);
 
 app.get('/status', (req, res) => {
     res.send(`Server is running on http://localhost:${PORT}`);

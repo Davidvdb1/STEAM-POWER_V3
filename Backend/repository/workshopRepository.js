@@ -18,7 +18,7 @@ class WorkshopRepository {
 
     async findAll() {
         const prismaWorkshops = await prisma.workshop.findMany();
-        return prismaWorkshops.map(prismaWorkshop => Workshop.from(prismaWorkshop));
+        return prismaWorkshops.map(Workshop.from);
     }
 }
 

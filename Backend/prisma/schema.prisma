@@ -26,13 +26,19 @@ enum Role {
     TEACHER
 }
 
+model Group {
+    id          String  @id @default(uuid())
+    name        String  @unique
+    code        String  @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+}
+
 model Camp {
     id          String  @id @default(uuid())
     workshops   Workshop[]
     name        String
     startDate   DateTime
     endDate     DateTime
-    address      String
+    address     String
     startTime   String
     endTime     String
     minAge      Int

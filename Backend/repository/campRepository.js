@@ -26,7 +26,7 @@ class CampRepository {
 
     async findAll() {
         const prismaCamps = await prisma.camp.findMany();
-        return prismaCamps.map(prismaCamp => Camp.from(prismaCamp));
+        return prismaCamps.map(Camp.from);
     }
 }
 
