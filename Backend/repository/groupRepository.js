@@ -5,7 +5,7 @@ const Group = require('../model/group');
 class GroupRepository {
     async create(group) {
         const prismaGroup = await prisma.group.create({ data: group });
-        return group.from(prismaGroup);
+        return Group.from(prismaGroup);
     }
 
     async findById(id) {
