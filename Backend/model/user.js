@@ -55,7 +55,7 @@ class User {
     }
 
     set role(role) {
-        if (!['ADMIN', 'TEACHER', 'GUEST'].includes(role)) {
+        if (!['ADMIN', 'TEACHER'].includes(role)) {
             throw new Error('Ongeldige rol');
         }
         this._role = role;

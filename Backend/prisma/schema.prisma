@@ -18,13 +18,12 @@ model User {
     username    String  @unique
     email       String  @unique
     password    String
-    role        Role    @default(GUEST)
+    role        Role
 }
 
 enum Role {
     ADMIN
     TEACHER
-    GUEST
 }
 
 model Camp {
@@ -33,7 +32,7 @@ model Camp {
     name        String
     startDate   DateTime
     endDate     DateTime
-    adress      String
+    address      String
     startTime   String
     endTime     String
     minAge      Int
