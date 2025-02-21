@@ -3,11 +3,8 @@ const prisma = new PrismaClient();
 const Workshop = require('../model/workshop');
 
 class WorkshopRepository {
-    async create(workshop) {
-        const prismaWorkshop = await prisma.workshop.create({ data: {
-            name: workshop.name,
-            markdown: workshop.markdown,
-        } });
+    async create({name, markdown}) {
+        const prismaWorkshop = await prisma.workshop.create({ data: {name, markdown} });
         return Workshop.from(prismaWorkshop);
     }
 
@@ -18,7 +15,7 @@ class WorkshopRepository {
 
     async findAll() {
         const prismaWorkshops = await prisma.workshop.findMany();
-        return prismaWorkshops.map(prismaWorkshop => Workshop.from(prismaWorkshop));
+        return prismaWorkshops.map(Workshop.from);
     }
 }
 

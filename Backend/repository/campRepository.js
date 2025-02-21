@@ -3,19 +3,8 @@ const prisma = new PrismaClient();
 const Camp = require('../model/camp');
 
 class CampRepository {
-    async create(camp) {
-        const prismaCamp = await prisma.camp.create({ data: {
-            name: camp.name,
-            startDate: camp.startDate,
-            endDate: camp.endDate,
-            address: camp.address,
-            startTime: camp.startTime,
-            endTime: camp.endTime,
-            minAge: camp.minAge,
-            maxAge: camp.maxAge,
-            picture: camp.picture,
-            archived: camp.archived
-        } });
+    async create({ name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}) {
+        const prismaCamp = await prisma.camp.create({ data: { name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived} });
         return Camp.from(prismaCamp);
     }
 
@@ -26,7 +15,7 @@ class CampRepository {
 
     async findAll() {
         const prismaCamps = await prisma.camp.findMany();
-        return prismaCamps.map(prismaCamp => Camp.from(prismaCamp));
+        return prismaCamps.map(Camp.from);
     }
 }
 

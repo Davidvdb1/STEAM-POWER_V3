@@ -18,13 +18,18 @@ model User {
     username    String  @unique
     email       String  @unique
     password    String
-    role        Role    @default(GUEST)
+    role        Role
 }
 
 enum Role {
     ADMIN
     TEACHER
-    GUEST
+}
+
+model Group {
+    id          String  @id @default(uuid())
+    name        String  @unique
+    code        String  @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
 }
 
 model Camp {
@@ -33,7 +38,7 @@ model Camp {
     name        String
     startDate   DateTime
     endDate     DateTime
-    adress      String
+    address     String
     startTime   String
     endTime     String
     minAge      Int
