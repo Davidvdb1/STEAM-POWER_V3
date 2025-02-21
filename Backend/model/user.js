@@ -1,7 +1,7 @@
 const utility = require("../util/utility");
 
 class User {
-    constructor({id = null, username, email, password, role}) {
+    constructor({id = undefined, username, email, password, role}) {
         if (!username || typeof username !== 'string') {
             throw new Error('Ongeldige gebruikersnaam');
         }

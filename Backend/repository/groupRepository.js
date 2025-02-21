@@ -3,8 +3,8 @@ const prisma = new PrismaClient();
 const Group = require('../model/group');
 
 class GroupRepository {
-    async create({name, code}) {
-        const prismaGroup = await prisma.group.create({ data: {name, code} });
+    async create(group) {
+        const prismaGroup = await prisma.group.create({ data: group });
         return group.from(prismaGroup);
     }
 

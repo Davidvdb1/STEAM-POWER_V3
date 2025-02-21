@@ -1,5 +1,5 @@
 class Group {
-    constructor({id = null, name, code = null}) {
+    constructor({id = undefined, name, code = undefined}) {
         if (!name || typeof name !== 'string') {
             throw new Error('Ongeldige naam');
         }
