@@ -4,18 +4,7 @@ const Camp = require('../model/camp');
 
 class CampRepository {
     async create(camp) {
-        const prismaCamp = await prisma.camp.create({ data: {
-            name: camp.name,
-            startDate: camp.startDate,
-            endDate: camp.endDate,
-            address: camp.address,
-            startTime: camp.startTime,
-            endTime: camp.endTime,
-            minAge: camp.minAge,
-            maxAge: camp.maxAge,
-            picture: camp.picture,
-            archived: camp.archived
-        } });
+        const prismaCamp = await prisma.camp.create({ data: { camp } });
         return Camp.from(prismaCamp);
     }
 

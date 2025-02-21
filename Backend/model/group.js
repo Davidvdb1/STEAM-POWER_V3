@@ -1,31 +1,12 @@
 class Group {
     constructor({id = null, name, code = null}) {
-        this._id = id;
-        this._name = name;
-        this._code = code;
-    }
-
-    get id() {
-        return this._id;
-    }
-
-    get name() {
-        return this._name;
-    }
-
-    get code() {
-        return this._code;
-    }
-
-    set name(name) {
         if (!name || typeof name !== 'string') {
-            throw new Error('Ongeldige gebruikersnaam');
+            throw new Error('Ongeldige naam');
         }
-        this._name = name;
-    }
 
-    set code(code) {
-        this._code = code;
+        this.id = id;
+        this.name = name;
+        this.code = code;
     }
 
     static from(prismaGroup) {
