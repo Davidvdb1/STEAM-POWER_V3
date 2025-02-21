@@ -48,8 +48,8 @@ class User {
     }
 
     set password(password) {
-        if (!password || typeof password !== 'string' || password.length < 6) {
-            throw new Error('Wachtwoord moet minstens 6 tekens lang zijn');
+        if (!password || typeof password !== 'string') {
+            throw new Error('Ongeldig wachtwoord');
         }
         this._password = password;
     }
