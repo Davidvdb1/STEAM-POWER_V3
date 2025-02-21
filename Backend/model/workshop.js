@@ -1,5 +1,5 @@
 class Workshop {
-    constructor({id = null, name, markdown}) {
+    constructor({id = undefined, name, markdown}) {
         if (!name || typeof name !== 'string') {
             throw new Error('Ongeldige naam');
         }

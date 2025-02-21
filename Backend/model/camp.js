@@ -1,5 +1,5 @@
 class Camp {
-    constructor({id = null, name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}) {
+    constructor({id = undefined, name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}) {
         if (!name || typeof name !== 'string') {
             throw new Error('Ongeldige naam');
         }
