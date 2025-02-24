@@ -6,9 +6,11 @@ class CampRepository {
     async create(camp, includeWorkshops = false) {
         camp.validate();
         const prismaCamp = await prisma.camp.create({
-            data: camp,
-            connect: {
-                workshops: camp.workshopIds.map(id => ({ id }))
+            data: {
+                ...camp,
+                workshops: {
+                    connect: camp.workshops
+                }
             },
             include: { workshops: includeWorkshops ? true : { select: { id: true } } }
         });
@@ -19,9 +21,11 @@ class CampRepository {
         camp.validate();
         const prismaCamp = await prisma.camp.update({
             where: { id: camp.id },
-            data: camp,
-            connect: {
-                workshops: camp.workshopIds.map(id => ({ id }))
+            data: {
+                ...camp,
+                workshops: {
+                    connect: camp.workshops
+                }
             },
             include: { workshops: includeWorkshops ? true : { select: { id: true } } }
         });
