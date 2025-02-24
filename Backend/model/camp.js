@@ -1,5 +1,5 @@
 class Camp {
-    constructor({id = undefined, name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}) {
+    constructor({id = undefined, workshops = [], name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}) {
         if (!name || typeof name !== 'string') {
             throw new Error('Ongeldige naam');
         }
@@ -32,6 +32,7 @@ class Camp {
         }
 
         this.id = id;
+        this.workshops = workshops;
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;

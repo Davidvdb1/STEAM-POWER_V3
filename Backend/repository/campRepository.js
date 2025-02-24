@@ -3,18 +3,29 @@ const prisma = new PrismaClient();
 const Camp = require('../model/camp');
 
 class CampRepository {
-    async create(camp) {
-        const prismaCamp = await prisma.camp.create({ data: camp });
+    async create(camp, includeWorkshops = false) {
+        const prismaCamp = await prisma.camp.create({
+            data: camp,
+            connect: {
+                workshops: camp.workshopIds.map(id => ({ id }))
+            },
+            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
+        });
         return Camp.from(prismaCamp);
     }
 
-    async findById(id) {
-        const prismaCamp = await prisma.camp.findUnique({ where: { id } });
+    async findById(id, includeWorkshops = false) {
+        const prismaCamp = await prisma.camp.findUnique({
+            where: { id },
+            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
+        });
         return Camp.from(prismaCamp);
     }
 
-    async findAll() {
-        const prismaCamps = await prisma.camp.findMany();
+    async findAll(includeWorkshops = false) {
+        const prismaCamps = await prisma.camp.findMany({ 
+            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
+        });
         return prismaCamps.map(Camp.from);
     }
 }
