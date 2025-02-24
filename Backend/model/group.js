@@ -1,12 +1,17 @@
 class Group {
-    constructor({id = undefined, name, code = undefined}) {
-        if (!name || typeof name !== 'string') {
-            throw new Error('Ongeldige naam');
-        }
-
+    constructor({id = undefined, name, code = undefined}, validate = true) {
         this.id = id;
         this.name = name;
         this.code = code;
+        if (validate) {
+            this.validate();
+        }
+    }
+
+    validate() {
+        if (!this.name || typeof this.name !== 'string') {
+            throw new Error('Ongeldige naam');
+        }
     }
 
     static from(prismaGroup) {
