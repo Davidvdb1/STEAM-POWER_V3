@@ -12,6 +12,15 @@ router.post('/', async (req, res) => {
     }
 })
 
+router.put('/', async (req, res) => {
+    try {
+        const group = await groupService.update(req.body);
+        res.status(200).json({ message: 'Groep aangepast', group });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+})
+
 router.post('/login', async (req, res) => {
     try {
         const JWT = await groupService.login(req.body.code);

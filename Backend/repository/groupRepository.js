@@ -9,6 +9,12 @@ class GroupRepository {
         return Group.from(prismaGroup);
     }
 
+    async update(group) {
+        group.validate();
+        const prismaGroup = await prisma.group.update({ where: { id: group.id }, data: group });
+        return Group.from(prismaGroup);
+    }
+
     async findById(id) {
         try {
             const prismaGroup = await prisma.group.findUnique({ where: { id } });
