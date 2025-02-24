@@ -4,6 +4,7 @@ const Workshop = require('../model/workshop');
 
 class WorkshopRepository {
     async create(workshop) {
+        workshop.validate();
         const prismaWorkshop = await prisma.workshop.create({ data: workshop });
         return Workshop.from(prismaWorkshop);
     }
