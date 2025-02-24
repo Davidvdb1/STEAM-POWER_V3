@@ -12,7 +12,6 @@ class CampService {
     }
 
     async getById(id, includeWorkshops = false) {
-        console.log('includeWorkshops', includeWorkshops);
         return await campRepository.findById(id, includeWorkshops);
     }
 
