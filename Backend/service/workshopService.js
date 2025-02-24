@@ -7,6 +7,14 @@ class WorkshopService {
         return await workshopRepository.create(newWorkshop);
     }
 
+    async update(workshopData) {
+        const workshopToUpdate = await workshopRepository.findById(workshopData.id);
+
+        const newWorkshop = new Workshop({...workshopToUpdate, ...workshopData, id: workshopToUpdate.id});
+        
+        return await workshopRepository.update(newWorkshop);
+    }
+
     async getById(id) {
         return await workshopRepository.findById(id);
     }

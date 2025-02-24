@@ -9,6 +9,12 @@ class WorkshopRepository {
         return Workshop.from(prismaWorkshop);
     }
 
+    async update(workshop) {
+        workshop.validate();
+        const prismaWorkshop = await prisma.workshop.update({ where: { id: workshop.id }, data: workshop });
+        return Workshop.from(prismaWorkshop);
+    }
+
     async findById(id) {
         const prismaWorkshop = await prisma.workshop.findUnique({ where: { id } });
         return Workshop.from(prismaWorkshop);

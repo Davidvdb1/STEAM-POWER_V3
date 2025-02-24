@@ -12,6 +12,15 @@ router.post('/', async (req, res) => {
     }
 })
 
+router.put('/', async (req, res) => {
+    try {
+        const workshop = await workshopService.update(req.body);
+        res.status(200).json({ message: 'Workshop aangepast', workshop });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+})
+
 router.get('/:id', async (req, res) => {
     try {
         const workshop = await workshopService.getById(req.params.id);
