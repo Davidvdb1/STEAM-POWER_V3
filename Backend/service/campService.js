@@ -11,12 +11,13 @@ class CampService {
         return await campRepository.create(newCamp);
     }
 
-    async getById(id) {
-        return await campRepository.findById(id);
+    async getById(id, includeWorkshops = false) {
+        console.log('includeWorkshops', includeWorkshops);
+        return await campRepository.findById(id, includeWorkshops);
     }
 
-    async getAll() {
-        return await campRepository.findAll();
+    async getAll(includeWorkshops = false) {
+        return await campRepository.findAll(includeWorkshops);
     }
 }
 
