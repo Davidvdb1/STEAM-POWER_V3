@@ -4,7 +4,14 @@ const Group = require('../model/group');
 
 class GroupRepository {
     async create(group) {
+        group.validate();
         const prismaGroup = await prisma.group.create({ data: group });
+        return Group.from(prismaGroup);
+    }
+
+    async update(group) {
+        group.validate();
+        const prismaGroup = await prisma.group.update({ where: { id: group.id }, data: group });
         return Group.from(prismaGroup);
     }
 

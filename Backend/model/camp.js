@@ -1,37 +1,7 @@
 class Camp {
-    constructor({id = undefined, name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}) {
-        if (!name || typeof name !== 'string') {
-            throw new Error('Ongeldige naam');
-        }
-        if (!startDate || !(startDate instanceof Date)) {
-            throw new Error('Ongeldige startdatum');
-        }
-        if (!endDate || !(endDate instanceof Date)) {
-            throw new Error('Ongeldige einddatum');
-        }
-        if (!address || typeof address !== 'string') {
-            throw new Error('Ongeldig adres');
-        }
-        if (!startTime || typeof startTime !== 'string') {
-            throw new Error('Ongeldige starttijd');
-        }
-        if (!endTime || typeof endTime !== 'string') {
-            throw new Error('Ongeldige eindtijd');
-        }
-        if (!minAge || typeof minAge !== 'number') {
-            throw new Error('Ongeldige minimum leeftijd');
-        }
-        if (!maxAge || typeof maxAge !== 'number') {
-            throw new Error('Ongeldige maximum leeftijd');
-        }
-        if (!picture || typeof picture !== 'string') {
-            throw new Error('Ongeldige afbeelding');
-        }
-        if (typeof archived !== 'boolean') {
-            throw new Error('Ongeldige waarde');
-        }
-
+    constructor({id = undefined, workshops = [], name, startDate, endDate, address, startTime, endTime, minAge, maxAge, picture, archived}, validate = true) {
         this.id = id;
+        this.workshops = workshops;
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -42,6 +12,42 @@ class Camp {
         this.maxAge = maxAge;
         this.picture = picture;
         this.archived = archived;
+        if (validate) {
+            this.validate();
+        }
+    }
+
+    validate() {
+        if (!this.name || typeof this.name !== 'string') {
+            throw new Error('Ongeldige naam');
+        }
+        if (!this.startDate || !(this.startDate instanceof Date)) {
+            throw new Error('Ongeldige startdatum');
+        }
+        if (!this.endDate || !(this.endDate instanceof Date)) {
+            throw new Error('Ongeldige einddatum');
+        }
+        if (!this.address || typeof this.address !== 'string') {
+            throw new Error('Ongeldig adres');
+        }
+        if (!this.startTime || typeof this.startTime !== 'string') {
+            throw new Error('Ongeldige starttijd');
+        }
+        if (!this.endTime || typeof this.endTime !== 'string') {
+            throw new Error('Ongeldige eindtijd');
+        }
+        if (!this.minAge || typeof this.minAge !== 'number') {
+            throw new Error('Ongeldige minimum leeftijd');
+        }
+        if (!this.maxAge || typeof this.maxAge !== 'number') {
+            throw new Error('Ongeldige maximum leeftijd');
+        }
+        if (!this.picture || typeof this.picture !== 'string') {
+            throw new Error('Ongeldige afbeelding');
+        }
+        if (typeof this.archived !== 'boolean') {
+            throw new Error('Ongeldige waarde');
+        }
     }
 
     static from(prismaCamp) {

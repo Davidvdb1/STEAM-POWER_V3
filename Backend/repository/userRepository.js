@@ -4,6 +4,7 @@ const User = require('../model/user');
 
 class UserRepository {
     async create(user) {
+        user.validate();
         const prismaUser = await prisma.user.create({ data: user });
         return User.from(prismaUser);
     }

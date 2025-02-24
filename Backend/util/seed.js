@@ -7,6 +7,7 @@ async function main() {
     await prisma.user.deleteMany();
     await prisma.camp.deleteMany();
     await prisma.workshop.deleteMany();
+    await prisma.group.deleteMany();
 
     const admin = await prisma.user.create({
         data: {
@@ -26,6 +27,13 @@ async function main() {
         },
     });
 
+    const workshop = await prisma.workshop.create({
+        data: {
+            name: 'Workshop 1',
+            markdown: 'Workshop 1 markdown',
+        },
+    });
+
     const camp = await prisma.camp.create({
         data: {
             name: 'Kamp 1',
@@ -38,13 +46,9 @@ async function main() {
             maxAge: 12,
             picture: 'https://via.placeholder.com/150',
             archived: false,
-        },
-    });
-
-    const workshop = await prisma.workshop.create({
-        data: {
-            name: 'Workshop 1',
-            markdown: 'Workshop 1 markdown',
+            workshops: {
+                connect: { id: workshop.id }
+            }
         },
     });
 

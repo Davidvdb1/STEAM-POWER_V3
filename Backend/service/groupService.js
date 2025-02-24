@@ -8,6 +8,13 @@ class GroupService {
         return await groupRepository.create(newgroup);
     }
 
+    async update(groupData) {
+        const groupToUpdate = await groupRepository.findById(groupData.id);
+        
+        const newGroup = new Group({ ...groupToUpdate, ...groupData, id: groupToUpdate.id });
+        return await groupRepository.update(newGroup);
+    }
+
     async getById(id) {
         return await groupRepository.findById(id);
     }
