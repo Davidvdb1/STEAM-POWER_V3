@@ -11,6 +11,17 @@ class CampService {
         return await campRepository.create(newCamp);
     }
 
+    async update(campData) {
+        const campToUpdate = await campRepository.findById(campData.id);
+
+        campData.startDate = new Date(campData.startDate);
+        campData.endDate = new Date(campData.endDate);
+
+        const newCamp = new Camp({...campToUpdate, ...campData, id: campToUpdate.id});
+        
+        return await campRepository.update(newCamp);
+    }
+
     async getById(id, includeWorkshops = false) {
         return await campRepository.findById(id, includeWorkshops);
     }

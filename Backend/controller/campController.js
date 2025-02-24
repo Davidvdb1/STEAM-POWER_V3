@@ -12,6 +12,15 @@ router.post('/', async (req, res) => {
     }
 })
 
+router.put('/', async (req, res) => {
+    try {
+        const camp = await campService.update(req.body);
+        res.status(200).json({ message: 'Kamp aangepast', camp });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+})
+
 router.get('/:id', async (req, res) => {
     try {
         const includeWorkshops = req.query.includeworkshops?.toLowerCase() === 'true';

@@ -15,6 +15,19 @@ class CampRepository {
         return Camp.from(prismaCamp);
     }
 
+    async update(camp, includeWorkshops = false) {
+        camp.validate();
+        const prismaCamp = await prisma.camp.update({
+            where: { id: camp.id },
+            data: camp,
+            connect: {
+                workshops: camp.workshopIds.map(id => ({ id }))
+            },
+            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
+        });
+        return Camp.from(prismaCamp);
+    }
+
     async findById(id, includeWorkshops = false) {
         const prismaCamp = await prisma.camp.findUnique({
             where: { id },
