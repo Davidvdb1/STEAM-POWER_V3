@@ -9,6 +9,7 @@ template.innerHTML = /*html*/`
         @import './Components/reusable/formContainer/style.css';
     </style>
 
+    <h1>Kamp toevoegen</h1> 
     <form class="form">
         <img id="imagePreview" src="" alt="Afbeelding preview">
         <button>Kamp opslaan</button>

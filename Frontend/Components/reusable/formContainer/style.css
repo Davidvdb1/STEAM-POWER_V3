@@ -1,6 +1,11 @@
 @charset "UTF-8";
 :host {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   background-color: white;
+  padding: 50px;
   width: 80%;
   border-radius: 10px;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
@@ -10,7 +15,8 @@
 form {
   display: grid;
   height: auto;
-  padding: 50px;
+  width: 100%;
+  gap: 20px;
 }
 
 formitem-れ {
@@ -19,14 +25,6 @@ formitem-れ {
   justify-content: flex-start;
   border-radius: 10px;
   margin-bottom: 10px;
-}
-
-formitem-れ[amountInRow=two] {
-  width: 90%;
-}
-
-formitem-れ[amountInRow=one] {
-  width: 95%;
 }
 
 #imagePreview {
@@ -43,7 +41,6 @@ button {
   all: unset;
   grid-area: submit;
   height: 18px;
-  width: 78.5%;
   display: flex;
   align-items: center;
   justify-content: center;

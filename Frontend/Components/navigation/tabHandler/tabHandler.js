@@ -51,7 +51,6 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
             { id: "users", label: "Gebruikers" },
             { id: "sign-up", label: "Nieuw account" },
             { id: "logout", label: "Logout" },
-            { id: "form", label: "Forum" },
         ];
 
         this.addEventListener("tab", this.tabHandler);   

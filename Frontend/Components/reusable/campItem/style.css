@@ -6,6 +6,7 @@
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   padding: 20px;
   width: 100%;
+  max-width: 725px;
   box-sizing: border-box;
 }
 

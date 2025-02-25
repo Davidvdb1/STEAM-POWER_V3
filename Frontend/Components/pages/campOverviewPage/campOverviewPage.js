@@ -11,7 +11,6 @@ template.innerHTML = /*html*/`
         @import './components/pages/campOverviewPage/style.css';
     </style>
     <camppanel-れ></camppanel-れ>
-    <filterpanel-れ></filterpanel-れ>
     <campcontainer-れ></campcontainer-れ>
 
 
@@ -24,7 +23,7 @@ window.customElements.define('campoverviewpage-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
+        this.$campContainer = this._shadowRoot.querySelector("campcontainer-れ");
     }
 
     // component attributes
@@ -37,7 +36,16 @@ window.customElements.define('campoverviewpage-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        this.addEventListener("sort", this.sortHandler);
+        this.addEventListener("search", this.searchHandler);
+    }
 
+    sortHandler(e) {
+        this.$campContainer.setAttribute("sort", e.detail);
+    }
+
+    searchHandler(e) {
+        this.$campContainer.setAttribute("search", e.detail);
     }
 
 });
