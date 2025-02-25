@@ -1,4 +1,6 @@
 //#region IMPORTS
+import "../sortPanel/sortPanel.js"
+import "../filterPanel/filterPanel.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -8,19 +10,14 @@ template.innerHTML = /*html*/`
         @import './components/reusable/campPanel/style.css';
     </style>
 
-    <div>
-        <input type="text" placeholder="Zoek op kampnaam">
-        <button id="filter" class="svg">
-            <img src="./Assets/SVGs/filter.png" alt="search" style="width: 40px;">
-        </button>
-        <button id="sort" class="svg">
-            <img src="./Assets/SVGs/sort.png" alt="search" style="width: 40px;">
-        </button>
+    <div id="searchPanel">
+        <input id="search" type="text" placeholder="Zoek op kampnaam">
+        <sortpanel-れ id="sort"></sortpanel-れ>
+        <filterpanel-れ id="filter"></filterpanel-れ>
     </div>
-    <div>
+    <div id="buttonPanel">
         <button id="reset" class="text">reset</button>
-        <button id="search" class="text">zoeken</button>
-        <button id="addCamp" class="add">+ nieuw kamp</button>
+        <button id="addCamp" class="add">kamp toevoegen</button>
     </div>
 `;
 //#endregion TEMPLATE
@@ -33,6 +30,9 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$filter = this._shadowRoot.querySelector('#filter');
         this.$sort = this._shadowRoot.querySelector('#sort');
+        this.$searchPanel = this._shadowRoot.querySelector('#searchPanel');
+        this.$search = this._shadowRoot.querySelector('#search');
+        this.$addCamp = this._shadowRoot.querySelector('#addCamp');
     }
 
     // component attributes
@@ -45,13 +45,33 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        this.$filter.addEventListener('click', () => {
-            const text = document.createElement('p');
-            text.innerHTML = 'filter';
-            this._shadowRoot.appendChild(text);
+        this.$search.addEventListener('input', () => {
+            this.searchHandler(this.$search.value);
         });
 
+        this.$addCamp.addEventListener('click', () => {
+            this.tabHandler('form')
+        });
     }
+
+    searchHandler(text) {
+        this.dispatchEvent(new CustomEvent('search', {
+            bubbles: true,
+            composed: true,
+            detail: text
+        })); 
+    }
+
+    tabHandler(id) {
+        this.dispatchEvent(new CustomEvent('tab', {
+            bubbles: true,
+            composed: true,
+            detail: id
+        })); 
+    }
+
+
+    
 
 });
 //#endregion CLASS
