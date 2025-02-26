@@ -3,6 +3,7 @@ import "../../../Components/navigation/header/header.js"
 import "../../pages/content/content.js"
 import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
+import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
 //#endregion IMPORTS
 
@@ -45,7 +46,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
             { id: "workshoppage", label: "Workshop" },
             { id: "overzicht", label: "Overzicht" },
             { id: "spel", label: "Spel" },
-            { id: "microbit", label: "Micro:bit" },
+            { id: "microbitpage", label: "Micro:bit" },
             { id: "groepen", label: "Groepen" },
             { id: "users", label: "Gebruikers" },
             { id: "sign-up", label: "Nieuw account" },
