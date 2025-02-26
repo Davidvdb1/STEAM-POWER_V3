@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Video_Pressed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250.88 252.12">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke-linejoin: round;
+      }
+
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke: #f2fafe;
+        stroke-width: 20px;
+      }
+
+      .cls-2 {
+        stroke-miterlimit: 10;
+      }
+
+      .cls-3 {
+        fill: #0c2534;
+      }
+    </style>
+  </defs>
+  <rect class="cls-3" x="0" y="1.24" width="250.88" height="250.88" rx="35.91" ry="35.91"/>
+  <rect class="cls-2" x="59.59" y="78.43" width="143.22" height="98.05" rx="30.52" ry="30.52"/>
+  <polygon class="cls-1" points="107.97 105.92 107.97 148.99 157.55 127.46 107.97 105.92"/>
+</svg>

@@ -1,7 +1,7 @@
 //#region IMPORTS
-import "../../reusable/campContainer/campContainer.js"
-import "../../reusable/campPanel/campPanel.js"
-import '../../reusable/filterPanel/filterPanel.js';
+import "../../camp/campContainer/campContainer.js"
+import "../../camp/campPanel/campPanel.js"
+import '../../filterAndSort/filterPanel/filterPanel.js';
 //#endregion IMPORTS
 
 //#region CAMPOVERVIEWPAGE

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Modal_Pressed" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 250.88 252.12">
+  <defs>
+    <style>
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5 {
+        fill: none;
+      }
+
+      .cls-1, .cls-3 {
+        stroke-linecap: round;
+      }
+
+      .cls-1, .cls-3, .cls-4, .cls-5 {
+        stroke: #f2fafe;
+      }
+
+      .cls-1, .cls-5 {
+        stroke-width: 10px;
+      }
+
+      .cls-6 {
+        fill: #0c2534;
+      }
+
+      .cls-3 {
+        stroke-width: 7px;
+      }
+
+      .cls-4 {
+        stroke-width: 9px;
+      }
+
+      .cls-7, .cls-8 {
+        fill: #f2fafe;
+      }
+
+      .cls-8 {
+        stroke: #0c2534;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-9 {
+        clip-path: url(#clippath);
+      }
+    </style>
+    <clipPath id="clippath">
+      <polygon class="cls-2" points="74.42 220.35 22.65 220.35 22.65 62.09 78.86 62.09 78.86 173.02 188.3 173.02 188.3 220.35 74.42 220.35"/>
+    </clipPath>
+  </defs>
+  <rect class="cls-6" x="0" y="1.24" width="250.88" height="250.88" rx="35.91" ry="35.91"/>
+  <g id="ModalIcon">
+    <g id="BaseWindow">
+      <g class="cls-9">
+        <g id="Mask_Group_24" data-name="Mask Group 24">
+          <path id="Path_387" data-name="Path 387" class="cls-8" d="M153.09,210.38h-87.96c-14.69-.02-26.59-11.92-26.61-26.61v-87.96c.02-14.69,11.92-26.59,26.61-26.61h87.96c14.69.02,26.59,11.92,26.61,26.61v87.94c-.02,14.69-11.92,26.59-26.61,26.61h0ZM65.13,81.04c-8.16,0-14.77,6.62-14.78,14.78v87.94c0,8.16,6.62,14.77,14.78,14.78h87.96c8.16,0,14.77-6.62,14.78-14.78v-87.94c0-8.16-6.62-14.77-14.78-14.78h-87.96Z"/>
+          <line id="Line_311" data-name="Line 311" class="cls-4" x1="48.54" y1="107.2" x2="78.12" y2="107.2"/>
+        </g>
+      </g>
+    </g>
+    <g id="PopupWindow">
+      <path id="Path_387-2" data-name="Path 387-2" class="cls-7" d="M187.96,164.65h-75.41c-12.59-.01-22.8-10.22-22.81-22.81v-75.41c.01-12.59,10.22-22.8,22.81-22.81h75.42c12.59.01,22.8,10.22,22.81,22.81v75.4c-.01,12.59-10.22,22.8-22.81,22.81h0ZM112.55,53.75c-6.99,0-12.66,5.67-12.67,12.67v75.4c0,6.99,5.67,12.66,12.67,12.67h75.42c6.99,0,12.66-5.67,12.67-12.67v-75.4c0-6.99-5.67-12.66-12.67-12.67h-75.42Z"/>
+    </g>
+    <g id="Group_328" data-name="Group 328">
+      <line id="Line_312" data-name="Line 312" class="cls-1" x1="64.81" y1="31.77" x2="64.81" y2="55.44"/>
+      <line id="Line_313" data-name="Line 313" class="cls-1" x1="76.64" y1="43.6" x2="52.98" y2="43.6"/>
+    </g>
+    <path id="Path_707" data-name="Path 707" class="cls-5" d="M99.55,77.5h103.02"/>
+    <path id="Path_705" data-name="Path 705" class="cls-3" d="M188.31,62.73h-1.21"/>
+    <path id="Path_706" data-name="Path 706" class="cls-3" d="M173.84,62.73h-1.93"/>
+  </g>
+</svg>

@@ -1,11 +1,9 @@
 //#region IMPORTS
 import "../../../Components/navigation/header/header.js"
 import "../../pages/content/content.js"
-import "../../pages/pageOne/pageOne.js"
-import "../../pages/pageTwo/pageTwo.js"
-import "../../pages/pageThree/pageThree.js"
+import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
-import "../../reusable/formContainer/formContainer.js"
+import "../../camp/formContainer/formContainer.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -28,7 +26,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$content = this._shadowRoot.querySelector("content-れ");
         this.$header = this._shadowRoot.querySelector("header-れ");  
-        this.landingPage = 'campoverviewpage';
+        this.landingPage = 'workshoppage';
     }
 
     // component attributes
@@ -44,6 +42,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this.$content.setAttribute("active-tab", this.landingPage);
         const items = [
             { id: "campoverviewpage", label: "Home" },
+            { id: "workshoppage", label: "Workshop" },
             { id: "overzicht", label: "Overzicht" },
             { id: "spel", label: "Spel" },
             { id: "microbit", label: "Micro:bit" },
