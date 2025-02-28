@@ -40,10 +40,10 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
         }
     }
     
-
     connectedCallback() {
 
     }
+
 
 });
 //#endregion CLASS

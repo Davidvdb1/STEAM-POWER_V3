@@ -26,7 +26,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$content = this._shadowRoot.querySelector("content-れ");
         this.$header = this._shadowRoot.querySelector("header-れ");  
-        this.landingPage = 'workshoppage';
+        this.landingPage = 'campoverviewpage';
     }
 
     // component attributes

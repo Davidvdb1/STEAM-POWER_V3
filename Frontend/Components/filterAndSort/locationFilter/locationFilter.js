@@ -1,35 +1,30 @@
 //#region IMPORTS
 //#endregion IMPORTS
 
-//#region DATEFILTER
+//#region LOCATIONFILTER
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/filterAndSort/dateFilter/style.css';
+        @import './components/filterAndSort/locationFilter/style.css';
     </style>
      
     <div>
-        <div class="date">
-            <label for="startDate">Van:</label>
-            <input type="date" id="startDate" placeholder="Startdatum">
-        </div>
-        <div class="date">
-            <label for="endDate">Tot:</label>
-            <input type="date" id="endDate" placeholder="Einddatum">
+        <div class="location">
+            <label for="location">locatie:</label>
+            <input type="text" id="location" placeholder="locatie">
         </div>
     </div>
     <button id="filterButton">Filter</button>
 `;
-//#endregion DATEFILTER
+//#endregion LOCATIONFILTER
 
 //#region CLASS
-window.customElements.define('datefilter-れ', class extends HTMLElement {
+window.customElements.define('locationfilter-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$startDate = this._shadowRoot.querySelector("#startDate");
-        this.$endDate = this._shadowRoot.querySelector("#endDate");
+        this.$location = this._shadowRoot.querySelector("#location");
         this.$filterButton = this._shadowRoot.querySelector("#filterButton");
     }
 
@@ -44,15 +39,15 @@ window.customElements.define('datefilter-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$filterButton.addEventListener('click', () => {
-            this.dateFilter(this.$startDate.value, this.$endDate.value);
+            this.locationFilter(this.$location.value);
         });
     }
 
-    dateFilter(begin, end) {
-        this.dispatchEvent(new CustomEvent('dateFilter', {
+    locationFilter(location) {
+        this.dispatchEvent(new CustomEvent('locationFilter', {
             bubbles: true,
             composed: true,
-            detail: { begin, end }
+            detail: location
         }));
     }
 

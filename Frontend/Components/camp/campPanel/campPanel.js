@@ -33,6 +33,7 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
         this.$searchPanel = this._shadowRoot.querySelector('#searchPanel');
         this.$search = this._shadowRoot.querySelector('#search');
         this.$addCamp = this._shadowRoot.querySelector('#addCamp');
+        this.$reset = this._shadowRoot.querySelector('#reset');
     }
 
     // component attributes
@@ -52,6 +53,11 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
         this.$addCamp.addEventListener('click', () => {
             this.tabHandler('form')
         });
+
+        this.$reset.addEventListener('click', () => {
+            this.resetHandler();
+            this.searchHandler(this.$search.value);
+        });
     }
 
     searchHandler(text) {
@@ -70,8 +76,26 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
         })); 
     }
 
-
+    resetHandler() {
+        this.$search.value = "";
     
-
+        const sortSelect = this.$sort.shadowRoot.querySelector("select");
+        if (sortSelect) {
+            sortSelect.value = "none";
+            sortSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+    
+        const filterSelect = this.$filter.shadowRoot.querySelector("select");
+        if (filterSelect) {
+            filterSelect.value = "none";
+            filterSelect.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+    
+        this.dispatchEvent(new CustomEvent('reset', {
+            bubbles: true,
+            composed: true
+        }));
+    }
+    
 });
 //#endregion CLASS
