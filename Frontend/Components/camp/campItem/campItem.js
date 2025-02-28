@@ -91,9 +91,9 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
             this.$age.innerHTML += ` ${newValue} jaar`;
         }
 
-        // if (name === "image") {
-        //     this.$image.src = newValue;
-        // }
+        if (name === "image") {
+            this.$image.src = newValue;
+        }
 
     }
 

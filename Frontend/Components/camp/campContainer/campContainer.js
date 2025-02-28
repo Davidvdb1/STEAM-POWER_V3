@@ -21,8 +21,6 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$campList = this._shadowRoot.querySelector("#camp-list");
         this.camps = [];
-        
-        // Opslag voor actieve filters en sortering
         this.activeFilters = {
             search: "",
             date: null,
@@ -31,7 +29,7 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
             sort: "none"
         };
     }
-    
+
     static get observedAttributes() {
         return ["sort", "search", "datefilter", "agefilter", "locationfilter", "reset", "resetfilter"];
     }
@@ -53,7 +51,6 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
             this.activeFilters.age = newValue ? Number(newValue) : null;
         }
         
-    
         if (name === "locationfilter") {
             this.activeFilters.location = newValue.toLowerCase();
         }
@@ -75,89 +72,17 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
                 age: null,
                 location: ""
             };
-            console.log(this.activeFilters);
         }
-        
-    
+
         this.applyFiltersAndSort();
     }
-    
 
-    connectedCallback() {
-        this.camps = [
-            {
-                "title": "Robotica Avontuur (RK20)",
-                "startDate": "2025-04-10",
-                "endDate": "2025-04-15",
-                "startAge": "12",
-                "endAge": "16",
-                "startTime": "09:30",
-                "endTime": "15:30",
-                "location": "UCLL Techniek- en WetenschapsAcademie Leuven - Naamsesteenweg 355, 3001 Heverlee",
-                "image": "C:\\fakepathe\\roboticsCamp.webp"
-            },
-            {
-                "title": "Game Development Kamp (GD15)",
-                "startDate": "2025-07-05",
-                "endDate": "2025-07-12",
-                "startAge": "10",
-                "endAge": "14",
-                "startTime": "10:00",
-                "endTime": "16:00",
-                "location": "UCLL Digital Lab Leuven - Naamsesteenweg 355, 3001 Heverlee",
-                "image": "C:\\fakepath\\gameDevCamp.webp"
-            },
-            {
-                "title": "AI en Machine Learning Kamp (AI22)",
-                "startDate": "2025-08-01",
-                "endDate": "2025-08-07",
-                "startAge": "13",
-                "endAge": "17",
-                "startTime": "09:00",
-                "endTime": "14:00",
-                "location": "UCLL Innovatiecentrum - Naamsesteenweg 355, 3001 Heverlee",
-                "image": "C:\\fakepath\\aiCamp.webp"
-            },
-            {
-                "title": "Elektronica en Circuits Kamp (EC10)",
-                "startDate": "2025-10-20",
-                "endDate": "2025-10-25",
-                "startAge": "11",
-                "endAge": "15",
-                "startTime": "10:30",
-                "endTime": "15:30",
-                "location": "UCLL Makerspace - Naamsesteenweg 355, 3001 Heverlee",
-                "image": "C:\\fakepath\\electronicsCamp.webp"
-            },
-            {
-                "title": "Smart Gadget Shaping kamp (VK30)",
-                "startDate": "2025-02-19",
-                "endDate": "2025-02-26",
-                "startAge": "10",
-                "endAge": "15",
-                "startTime": "10:00",
-                "endTime": "16:00",
-                "location": "UCLL Techniek- en WetenschapsAcademie Leuven - Naamsesteenweg 355 , 3001 Heverlee",
-                "image": "C:\\fakepath\\campExample.webp"
-            },
-            {
-                "title": "IR 13 kamp",
-                "startDate": "2024-02-19",
-                "endDate": "2024-02-26",
-                "startAge": "8",
-                "endAge": "10",
-                "startTime": "11:00",
-                "endTime": "17:00",
-                "location": "Naamsesteenweg 355 , 3001 Heverlee",
-                "image": "C:\\fakepath\\campExample.webp"
-            }
-        ]
-
-        this.renderCamps(this.camps);
+    async connectedCallback() {
+        await this.fetchCamps();
     }
 
     renderCamps(campList) {
-        this.$campList.innerHTML = ""; 
+        this.$campList.innerHTML = "";
         campList.forEach(camp => {
             let campItem = document.createElement('campitem-れ');
             campItem.setAttribute("title", camp.title);
@@ -211,6 +136,33 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
     
         this.renderCamps(filteredCamps);
     }
-    
+
+    //service
+    async fetchCamps() {
+        try {
+            const url = window.env.BACKEND_URL
+            const response = await fetch(url + '/camps')
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            this.camps = data.map(camp => ({
+                title: camp.name,
+                startDate: camp.startDate,
+                endDate: camp.endDate,
+                startAge: camp.minAge,
+                endAge: camp.maxAge,
+                startTime: camp.startTime,
+                endTime: camp.endTime,
+                location: camp.address,
+                image: camp.picture
+            }));
+
+            this.renderCamps(this.camps);
+        } catch (error) {
+            console.error("Fout bij ophalen van kampen:", error);
+        }
+    }
 });
 //#endregion CLASS
