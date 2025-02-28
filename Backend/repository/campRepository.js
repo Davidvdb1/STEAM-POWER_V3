@@ -4,7 +4,7 @@ const Camp = require('../model/camp');
 
 class CampRepository {
     async create(camp, includeWorkshops = false) {
-        // camp.validate();
+        camp.validate();
         const prismaCamp = await prisma.camp.create({
             data: {
                 ...camp,
@@ -18,7 +18,7 @@ class CampRepository {
     }
 
     async update(camp, includeWorkshops = false) {
-        // camp.validate();
+        camp.validate();
         const prismaCamp = await prisma.camp.update({
             where: { id: camp.id },
             data: {

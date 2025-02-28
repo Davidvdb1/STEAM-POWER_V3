@@ -195,7 +195,7 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         reader.onload = (e) => {
             const imgElement = new Image();
             imgElement.src = e.target.result;
-            imgElement.style.maxWidth = '645px';
+            imgElement.style.maxWidth = '685px';
             imgElement.style.height = 'auto';
             imgElement.classList.add('resizable'); 
             imgElement.style.cursor = "move"; // Zet de standaard cursor naar 'move'
@@ -266,7 +266,7 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
             let newWidth = this.startWidth + deltaX;
             let newHeight = newWidth / this.aspectRatio;
 
-            newWidth = Math.max(50, Math.min(newWidth, 645));
+            newWidth = Math.max(50, Math.min(newWidth, 685));
             newHeight = newWidth / this.aspectRatio;
     
             this.currentElement.style.width = `${newWidth}px`;

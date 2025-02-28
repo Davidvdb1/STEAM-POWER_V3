@@ -85,6 +85,7 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
         this.$campList.innerHTML = "";
         campList.forEach(camp => {
             let campItem = document.createElement('campitem-れ');
+            campItem.setAttribute("id", camp.id);
             campItem.setAttribute("title", camp.title);
             campItem.setAttribute("startDate", camp.startDate);
             campItem.setAttribute("endDate", camp.endDate);
@@ -148,6 +149,7 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
 
             const data = await response.json();
             this.camps = data.map(camp => ({
+                id: camp.id,
                 title: camp.name,
                 startDate: camp.startDate,
                 endDate: camp.endDate,

@@ -3,6 +3,7 @@ import "../../../Components/navigation/header/header.js"
 import "../../pages/content/content.js"
 import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
+import "../../pages/campInfoPage/campInfoPage.js"
 import "../../camp/formContainer/formContainer.js"
 //#endregion IMPORTS
 
@@ -26,7 +27,8 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$content = this._shadowRoot.querySelector("content-れ");
         this.$header = this._shadowRoot.querySelector("header-れ");  
-        this.landingPage = 'campoverviewpage';
+        this.landingPage = "campinfopage";
+        this.componentID = "e06b5cdb-3a2f-4186-a340-8996d444e3a4";
     }
 
     // component attributes
@@ -40,6 +42,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$content.setAttribute("active-tab", this.landingPage);
+        this.$content.setAttribute("componentid", this.componentID);
         const items = [
             { id: "campoverviewpage", label: "Home" },
             { id: "workshoppage", label: "Workshop" },
@@ -52,7 +55,8 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
             { id: "logout", label: "Logout" },
         ];
 
-        this.addEventListener("tab", this.tabHandler);   
+        this.addEventListener("tab", this.tabHandler);
+        this.addEventListener("tabID", this.tabIdHandler);   
         this.addEventListener("import", this.importHandler);   
         this.$header.setAttribute("tabs", JSON.stringify(items));
         
@@ -62,7 +66,13 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
 
     tabHandler(e) {
         this.$content.setAttribute("active-tab", e.detail);
+        this.$content.setAttribute("componentid", "");
         this.updateURL(e.detail);
+    }
+
+    tabIdHandler(e) {
+        this.$content.setAttribute("active-tab", e.detail.tabID);
+        this.$content.setAttribute("componentid", e.detail.componentID);
     }
 
     handlePopState(event) {

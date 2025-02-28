@@ -5,7 +5,19 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/workshop/workshopPreview/style.css';
+        :host {
+            display: block;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 50px;
+            max-width: 685px;
+            width: 100%;
+            height: auto; 
+            max-height: fit-content; 
+            overflow-y: auto;
+        }
     </style>
 `;
 //#endregion WORKSHOPPREVIEW
@@ -32,7 +44,19 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
             } else {
                 this._shadowRoot.innerHTML = /*html*/`
                     <style>
-                        @import './components/workshop/workshopPreview/style.css';
+                        :host {
+                            display: block;
+                            background-color: white;
+                            border-radius: 10px;
+                            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+                            padding: 20px;
+                            margin-bottom: 50px;
+                            max-width: 685px;
+                            width: 100%;
+                            height: auto; 
+                            max-height: fit-content; 
+                            overflow-y: auto;
+                        }
                     </style>
                     <div id="preview-content">${newValue}</div>
                 `;

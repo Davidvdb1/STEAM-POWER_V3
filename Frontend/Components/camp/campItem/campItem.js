@@ -29,7 +29,7 @@ template.innerHTML = /*html*/`
         <img src="./Assets/SVGs/age1.png" alt="age" style="width: 30px; height: 30px;">
         <p class="age"></p>
     </div>
-
+    <button class="action-button">Meer info</button>
 `;
 //#endregion CAMPITEM
 
@@ -47,6 +47,7 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
         this.$endTime = this._shadowRoot.querySelector(".endTime");
         this.$location = this._shadowRoot.querySelector(".location");
         this.$age = this._shadowRoot.querySelector(".age");
+        this.$button = this._shadowRoot.querySelector(".action-button");
     }
 
     // component attributes
@@ -98,8 +99,17 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-
+        this.$button.addEventListener('click', () => {
+            this.campInfoHandler("campinfopage", this.getAttribute("id"));
+        });
     }
 
+    campInfoHandler(tabID, componentID) {
+        this.dispatchEvent(new CustomEvent('tabID', {
+            bubbles: true,
+            composed: true,
+            detail: {tabID, componentID}
+        })); 
+    }
 });
 //#endregion CLASS

@@ -96,35 +96,21 @@ window.customElements.define('form-れ', class extends HTMLElement {
     
         this.items.forEach(({ id }) => {
             const input = this.shadowRoot.querySelector(`formitem-れ[id="${id}"]`);
-    
-            console.log(`Controleren input voor ${id}:`, input); // Debugging
-            if (!input) {
-                console.error(`Input niet gevonden voor ${id}`);
-                return;
-            }
+            if (!input) return;
     
             const realInput = input.shadowRoot.querySelector("input");
-            console.log(`Echte input voor ${id}:`, realInput); // Controleer of de input bestaat
     
-            if (realInput && realInput.type === "file") {
-                const file = realInput.files[0];
-                console.log("Geselecteerd bestand:", file); // Debugging
-    
-                if (file) {
-                    const reader = new FileReader();
-                    fileReaders.push(new Promise((resolve) => {
-                        reader.onload = (e) => {
-                            formData["picture"] = e.target.result; // Converteer afbeelding naar Base64
-                            console.log("Base64 afbeelding:", formData["picture"]); // Debugging
-                            resolve();
-                        };
-                        reader.readAsDataURL(file);
-                    }));
-                } else {
-                    console.warn("Geen bestand geselecteerd.");
-                }
+            if (realInput?.type === "file" && realInput.files[0]) {
+                const reader = new FileReader();
+                fileReaders.push(new Promise((resolve) => {
+                    reader.onload = (e) => {
+                        formData["picture"] = e.target.result; 
+                        resolve();
+                    };
+                    reader.readAsDataURL(realInput.files[0]);
+                }));
             } else {
-                formData[id] = realInput ? realInput.value : "";
+                formData[id] = realInput?.value || "";
             }
         });
     
@@ -139,13 +125,13 @@ window.customElements.define('form-れ', class extends HTMLElement {
             startTime: formData.startTime,
             endTime: formData.endTime,
             address: formData.location,
-            picture: formData.picture, // Gebruik standaard afbeelding als geen bestand
+            picture: formData.picture || "", 
             archived: false
         };
     
-        console.log("Verzonden JSON:", fixedData); // Controleer JSON in console
         this.createCamp(fixedData);
     }
+    
 
     tabHandler(id) {
         this.dispatchEvent(new CustomEvent('tab', {
@@ -164,7 +150,6 @@ window.customElements.define('form-れ', class extends HTMLElement {
     //service
     async createCamp(data) {
         try {
-            console.log(data.name);
             const url = window.env.BACKEND_URL;
             const response = await fetch(url + '/camps', {
                 method: "POST",
