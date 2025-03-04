@@ -2,6 +2,9 @@
 //#endregion IMPORTS
 
 //#region MICROBITPAGE
+const NORDIC_UART_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
+const RX_CHARACTERISTIC_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
+
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
@@ -29,8 +32,26 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-
+        this.connectToDevice();
     }
 
-});
-//#endregion CLASS
+    async connectToDevice() {
+        const device = await navigator.bluetooth.requestDevice({
+            filters: [{ namePrefix: "BBC micro:bit" }],
+            optionalServices: [ NORDIC_UART_SERVICE_UUID ] // Nordic UART Service
+        });
+
+        const server = await device.gatt.connect();
+
+        const uartService = await server.getPrimaryService(NORDIC_UART_SERVICE_UUID); // Nordic UART Service
+        const rxCharacteristic = await uartService.getCharacteristic(RX_CHARACTERISTIC_UUID); // RX Characteristic
+
+        await rxCharacteristic.startNotifications();
+        rxCharacteristic.addEventListener('characteristicvaluechanged', this.handleCharacteristicValueChanged);
+    }
+    
+    handleCharacteristicValueChanged(event) {
+        const value = new TextDecoder().decode(event.target.value);
+        console.log('Received data:', value);
+    }
+});//#endregion CLASS
