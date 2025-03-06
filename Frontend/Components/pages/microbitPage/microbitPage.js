@@ -15,8 +15,9 @@ template.innerHTML = /*html*/`
     <style>
         @import './components/pages/microbitPage/style.css';
     </style>
+    <microbitBluetoothConnection-れ></microbitBluetoothConnection-れ>
     <p>Microbit Page</p>
-    <button id="button">button</button>
+    <p>Pin 0 Value: <span id="pin0Value">0</span></p>
 `;
 //#endregion MICROBITPAGE
 
@@ -32,7 +33,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.pinDataCharacteristic = null;
         this.pinAdConfigurationCharacteristic = null;
         this.pinIoConfigurationCharacteristic = null;
-        this.handleCharacteristicValueChanged = this.handleCharacteristicValueChanged.bind(this);
     }
 
     // component attributes
@@ -96,7 +96,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         console.log(3);
 
         await this.pinDataCharacteristic.startNotifications();
-        this.pinDataCharacteristic.addEventListener('characteristicvaluechanged', this.handleCharacteristicValueChanged);
+        this.pinDataCharacteristic.addEventListener('characteristicvaluechanged', this.handleCharacteristicValueChanged.bind(this));
         console.log(4);
         this.delay(2000);
         this.configurePin0AsAnalogInput();
@@ -109,5 +109,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
     handleCharacteristicValueChanged(event) {
         const value = new DataView(event.target.value.buffer).getUint8(1, true);
         console.log('Received analog data:', value);
+        this._shadowRoot.getElementById('pin0Value').textContent = value;
     }
 });//#endregion CLASS
