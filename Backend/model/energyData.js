@@ -1,14 +1,30 @@
 class EnergyData {
-    constructor({ id = undefined, imestamp = undefined, value, type }) {
+    constructor({ id = undefined, timestamp = undefined, groupId, value, time }, validate = true) {
         this.id = id;
+        this.groupId = groupId;
         this.timestamp = timestamp;
         this.value = value;
-        this.type = type;
+        this.time = time;
+        if (validate) {
+            this.validate();
+        }
     }
 
     validate() {
-        if (!this.timestamp || !this.value || !this.type) {
-            throw new Error('Invalid energy data');
+        if (!this.groupId || typeof this.groupId !== 'number') {
+            throw new Error('Invalid groupId');
+        }
+        if (!this.value || typeof this.value !== 'number') {
+            throw new Error('Invalid value');
+        }
+        if (!this.time || !(this.time instanceof Date)) {
+            throw new Error('Invalid time');
         }
     }
+
+    static from(prismaEnergyData) {
+        return new EnergyData(prismaEnergyData, validate = false);
+    }
 }
+
+module.exports = EnergyData;

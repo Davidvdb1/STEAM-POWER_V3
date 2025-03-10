@@ -58,8 +58,8 @@ model EnergyData {
     id          String  @id @default(uuid())
     group       Group   @relation(fields: [groupId], references: [id])
     groupId     String
-    date        DateTime
-    energy      Int
+    date        DateTime    @default(now())
+    value       Int
     type        EnergyType
 }
 
