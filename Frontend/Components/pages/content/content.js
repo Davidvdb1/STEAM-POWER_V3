@@ -19,7 +19,7 @@ window.customElements.define('content-れ', class extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["active-tab", "componentid"];
+        return ["active-tab", "camp", "workshop"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -40,9 +40,14 @@ window.customElements.define('content-れ', class extends HTMLElement {
             }
         }
 
-        if (name === "componentid") {
+        if (name === "camp") {
             const childComponent = this._shadowRoot.querySelector(this.getAttribute("active-tab") + '-れ');
-            childComponent.setAttribute("componentid", newValue);
+            childComponent.setAttribute("camp", newValue);
+        }
+
+        if (name === "workshop") {
+            const childComponent = this._shadowRoot.querySelector(this.getAttribute("active-tab") + '-れ');
+            childComponent.setAttribute("workshop", newValue);
         }
     }
 

@@ -7,12 +7,19 @@ class WorkshopService {
         return await workshopRepository.create(newWorkshop);
     }
 
-    async update(workshopData) {
-        const workshopToUpdate = await workshopRepository.findById(workshopData.id);
-
-        const newWorkshop = new Workshop({...workshopToUpdate, ...workshopData, id: workshopToUpdate.id});
-        
-        return await workshopRepository.update(newWorkshop);
+    async update(id, updatedData) {
+        const existingWorkshop = await workshopRepository.findById(id);
+        if (!existingWorkshop) {
+            throw new Error("Workshop niet gevonden");
+        }
+    
+        Object.keys(updatedData).forEach(key => {
+            if (updatedData[key] !== undefined) {
+                existingWorkshop[key] = updatedData[key];
+            }
+        });
+    
+        return await workshopRepository.update(id, existingWorkshop);
     }
 
     async getById(id) {

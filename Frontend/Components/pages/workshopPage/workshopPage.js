@@ -22,20 +22,32 @@ window.customElements.define('workshoppage-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$preview = this._shadowRoot.querySelector("workshoppreview-れ");
+        this.$form = this._shadowRoot.querySelector("workshopforum-れ");
     }
 
     // component attributes
     static get observedAttributes() {
-        return [];
+        return ["workshop"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-
+        if (name === "workshop") {
+            this.$form.setAttribute("id", newValue);
+        }
     }
 
     connectedCallback() {
-        this.addEventListener("preview", this.previewHandler);   
+        this.addEventListener("preview", this.previewHandler);
+    
+        setTimeout(() => {
+            const button = this.$preview?.shadowRoot?.querySelector("#edit");
+            if (button) {
+                button.remove();
+            }
+        }, 0);
     }
+    
+    
 
     previewHandler(e) {
         this.$preview.setAttribute("html", e.detail);
