@@ -9,7 +9,7 @@ template.innerHTML = /*html*/`
         @import './Components/camp/formContainer/style.css';
     </style>
 
-    <h1>Kamp toevoegen</h1> 
+    <h1>Kamp forum</h1> 
     <p id="statusmessage"></p>
     <form class="form">
         <img id="imagePreview" src="" alt="Afbeelding preview">
@@ -27,6 +27,7 @@ window.customElements.define('form-れ', class extends HTMLElement {
         this.$form = this._shadowRoot.querySelector(".form");
         this.$imagePreview = this._shadowRoot.querySelector("#imagePreview");
         this.$button = this._shadowRoot.querySelector("button");
+        this.camp = null;
         
         this.items = [
             { id: "title", label: "Kamp titel", type: "text", amountInRow: "one" },
@@ -56,11 +57,13 @@ window.customElements.define('form-れ', class extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return [];
+        return ["camp"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-
+        if (name === "camp") {
+            this.fetchCampWithId(newValue);
+        }
     }
 
     connectedCallback() {
@@ -73,12 +76,15 @@ window.customElements.define('form-れ', class extends HTMLElement {
             field.setAttribute("amountInRow", amountInRow);
             this.$form.appendChild(field);
         });
-    
-        console.log("Alle formItems geladen:", this.$form.querySelectorAll("formItem-れ")); // Debugging
-    
+        
         this.$button.addEventListener("click", async (event) => {
             event.preventDefault();
-            this.formatAndSendData();
+            const campID = this.getAttribute("camp");
+            if (campID) {
+                this.formatAndSendData(campID);
+            } else {
+                this.formatAndSendData(null);
+            }
         });
     
         this.addEventListener("image", this.previewImage);
@@ -90,7 +96,7 @@ window.customElements.define('form-れ', class extends HTMLElement {
         this.$imagePreview.style.display = "block";
     }
 
-    async formatAndSendData() {
+    async formatAndSendData(campID) {
         const formData = {};
         const fileReaders = [];
     
@@ -100,7 +106,7 @@ window.customElements.define('form-れ', class extends HTMLElement {
     
             const realInput = input.shadowRoot.querySelector("input");
     
-            if (realInput?.type === "file" && realInput.files[0]) {
+            if (realInput?.type === "file" && realInput.files.length > 0) {
                 const reader = new FileReader();
                 fileReaders.push(new Promise((resolve) => {
                     reader.onload = (e) => {
@@ -116,6 +122,10 @@ window.customElements.define('form-れ', class extends HTMLElement {
     
         await Promise.all(fileReaders);
     
+        if (!formData.picture && this.camp?.picture) {
+            formData.picture = this.camp.picture;
+        }
+    
         const fixedData = {
             name: formData.title,
             startDate: new Date(formData.startDate).toISOString(),
@@ -125,12 +135,17 @@ window.customElements.define('form-れ', class extends HTMLElement {
             startTime: formData.startTime,
             endTime: formData.endTime,
             address: formData.location,
-            picture: formData.picture || "", 
+            picture: formData.picture || "",  
             archived: false
         };
     
-        this.createCamp(fixedData);
+        if (campID) {
+            this.updateCamp(fixedData);
+        } else {
+            this.createCamp(fixedData);
+        }
     }
+    
     
 
     tabHandler(id) {
@@ -147,6 +162,41 @@ window.customElements.define('form-れ', class extends HTMLElement {
         statusMessage.style.color = type === "success" ? "green" : "red";
     }  
 
+    updateFormFields() {
+        if (!this.camp) return;
+    
+        const formValues = {
+            title: this.camp.name,
+            startDate: this.camp.startDate.split("T")[0],
+            endDate: this.camp.endDate.split("T")[0], 
+            startAge: this.camp.minAge,
+            endAge: this.camp.maxAge,
+            startTime: this.camp.startTime,
+            endTime: this.camp.endTime,
+            location: this.camp.address,
+            image: this.camp.picture,
+        };
+    
+        Object.entries(formValues).forEach(([id, value]) => {
+            const input = this.shadowRoot.querySelector(`formitem-れ[id="${id}"]`);
+            if (input) {
+                const realInput = input.shadowRoot.querySelector("input");
+                if (realInput) {
+                    if (realInput.type === "file") {
+                        return;
+                    }
+                    realInput.value = value;
+                }
+            }
+        });
+    
+        if (this.camp.picture) {
+            this.$imagePreview.setAttribute("src", this.camp.picture);
+            this.$imagePreview.style.display = "block";
+        }
+    }
+    
+
     //service
     async createCamp(data) {
         try {
@@ -161,20 +211,59 @@ window.customElements.define('form-れ', class extends HTMLElement {
     
             if (response.ok) {
                 const result = await response.json();
-                console.log("Succesvol toegevoegd:", result);
                 this.updateStatusMessage("✅ Kamp succesvol toegevoegd!", "success");
                 setTimeout(() => {
                     this.tabHandler("campoverviewpage");
                 }, 1000);        
             } else {
-                console.error("Fout bij toevoegen:", response.statusText);
                 this.updateStatusMessage("❌ Er is een fout opgetreden bij het opslaan van het kamp.", "error");
             }
         } catch (error) {
-            console.error("Netwerkfout:", error);
             this.updateStatusMessage("❌ Kan geen verbinding maken met de server.", "error");
         }
     }
+
+    async fetchCampWithId(id) {
+        try {
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(`${url}/camps/${id}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
     
+            this.camp = await response.json();
+            this.updateFormFields();
+    
+        } catch (error) {
+            console.error("Fout bij ophalen van kampen:", error);
+        }
+    }
+    
+    async updateCamp(data) {
+        try {
+            const ID = this.getAttribute("camp");
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(url + `/camps/${ID}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+    
+            if (response.ok) {
+                const result = await response.json();
+                this.updateStatusMessage("✅ Kamp succesvol aangepast!", "success");
+                setTimeout(() => {
+                    this.tabHandler("campoverviewpage");
+                }, 1000);        
+            } else {
+                this.updateStatusMessage("❌ Er is een fout opgetreden bij het aanpassen van het kamp.", "error");
+            }
+        } catch (error) {
+            this.updateStatusMessage("❌ Kan geen verbinding maken met de server.", "error");
+        }
+    }
 });
 //#endregion CLASS

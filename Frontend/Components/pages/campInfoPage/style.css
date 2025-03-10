@@ -5,7 +5,6 @@
   justify-content: center;
   width: 80%;
   max-width: 1500px;
-  gap: 50px;
 }
 
 #workshops {
@@ -16,4 +15,29 @@
   justify-content: center;
   align-items: stretch;
   width: 100%;
+  margin-top: 80px;
+}
+
+button {
+  background-color: #9FDAF9;
+  margin: 10px;
+  white-space: nowrap;
+  font-size: 1.1rem;
+  color: #002757;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  font-weight: bold;
+  border-style: solid;
+  border-color: #9FDAF9;
+}
+button:hover {
+  border-color: #002757;
+}
+
+#campinfo {
+  margin-top: 30px;
+  margin-bottom: 50px;
 }/*# sourceMappingURL=style.css.map */

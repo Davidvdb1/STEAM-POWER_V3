@@ -10,9 +10,12 @@ template.innerHTML = /*html*/`
         @import './components/pages/campInfoPage/style.css';
     </style>
 
-    <h1>Kamp Informatie</h1>
-    <div id="campinfo"></div>
-    <h1>Workshops</h1>
+    <h1 id="camptitle"></h1>
+    <h2>Workshops</h2>
+    <div id="buttons">
+        <button id="addexisting">Voeg Bestaande Workshop Toe</button>
+        <button id="addnew">Voeg Nieuwe Workshop Toe</button>
+    </div>
     <div id="workshops"></div>
 `;
 //#endregion CAMPINFOPAGE
@@ -25,50 +28,52 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$campInfo = this._shadowRoot.querySelector("#campinfo");
         this.$workshops = this._shadowRoot.querySelector("#workshops");
+        this.$title = this._shadowRoot.querySelector("#camptitle");
+        this.$addExisting = this._shadowRoot.querySelector("#addexisting");
+        this.$addNew = this._shadowRoot.querySelector("#addnew");
         this.camp = null;
     }
 
     // component attributes
     static get observedAttributes() {
-        return ["componentid"];
+        return ["camp"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === "componentid") {
+        if (name === "camp") {
             this.fetchCampWithId(newValue);
         }
+    }
+
+    connectedCallback() {
+        // this.$addExisting.addEventListener('click', () => {
+        //     this.tabWithWorkshopHandler("workshoppage", this.getAttribute("componentid"));
+        // });
+
+        this.$addNew.addEventListener('click', () => {
+            this.tabWithCampHandler("workshoppage", "camp", this.getAttribute("camp"));
+        });
     }
 
     updateCampInfo() {
         if (!this.camp) return;
 
-        let campItem = document.createElement('campitem-れ');
-        campItem.setAttribute("id", this.camp.id);
-        campItem.setAttribute("title", this.camp.name); 
-        campItem.setAttribute("startdate", this.camp.startDate); 
-        campItem.setAttribute("enddate", this.camp.endDate);
-        campItem.setAttribute("startage", this.camp.minAge);
-        campItem.setAttribute("endage", this.camp.maxAge);
-        campItem.setAttribute("starttime", this.camp.startTime);
-        campItem.setAttribute("endtime", this.camp.endTime);
-        campItem.setAttribute("location", this.camp.address);
-        campItem.setAttribute("image", this.camp.picture);
-
-        const button = campItem._shadowRoot.querySelector("button");
-        if (button) {
-            button.remove(); 
-        }
-
         this.camp.workshops.forEach(workshop => {
             let workshopPreview = document.createElement('workshoppreview-れ');
             workshopPreview.setAttribute("html", workshop.html);
+            workshopPreview.setAttribute("id", workshop.id);
             this.$workshops.appendChild(workshopPreview);
         })
 
+        this.$title.innerHTML = this.camp.name;
+    }
 
-        // Verwijder oude content en voeg de nieuwe toe
-        this.$campInfo.innerHTML = ""; 
-        this.$campInfo.appendChild(campItem);
+    tabWithCampHandler(tabID, componentName, componentID) {
+        this.dispatchEvent(new CustomEvent('tabID', {
+            bubbles: true,
+            composed: true,
+            detail: {tabID, componentName, componentID}
+        })); 
     }
 
     //service

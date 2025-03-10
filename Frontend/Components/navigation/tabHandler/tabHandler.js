@@ -27,8 +27,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$content = this._shadowRoot.querySelector("content-れ");
         this.$header = this._shadowRoot.querySelector("header-れ");  
-        this.landingPage = "campinfopage";
-        this.componentID = "e06b5cdb-3a2f-4186-a340-8996d444e3a4";
+        this.landingPage = "campoverviewpage";
     }
 
     // component attributes
@@ -41,8 +40,19 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabFromUrl = urlParams.get("tab");
+        const campIDFromUrl = urlParams.get("camp");
+        const workshopIDFromUrl = urlParams.get("workshop");
+    
+        this.landingPage = tabFromUrl
+        this.campID = campIDFromUrl
+        this.workshopID = workshopIDFromUrl 
+    
         this.$content.setAttribute("active-tab", this.landingPage);
-        this.$content.setAttribute("componentid", this.componentID);
+        this.$content.setAttribute("camp", this.campID);
+        this.$content.setAttribute("workshop", this.workshopID);
+    
         const items = [
             { id: "campoverviewpage", label: "Home" },
             { id: "workshoppage", label: "Workshop" },
@@ -54,36 +64,58 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
             { id: "sign-up", label: "Nieuw account" },
             { id: "logout", label: "Logout" },
         ];
-
+    
         this.addEventListener("tab", this.tabHandler);
-        this.addEventListener("tabID", this.tabIdHandler);   
-        this.addEventListener("import", this.importHandler);   
+        this.addEventListener("tabID", this.tabIdHandler);
         this.$header.setAttribute("tabs", JSON.stringify(items));
-        
+    
         window.addEventListener('popstate', this.handlePopState.bind(this));
-        this.updateURL(this.landingPage);
+    
+        this.updateURL(this.landingPage, this.campID, this.workshopID);
     }
-
+    
+    
     tabHandler(e) {
         this.$content.setAttribute("active-tab", e.detail);
-        this.$content.setAttribute("componentid", "");
-        this.updateURL(e.detail);
+        this.$content.setAttribute("camp", "");
+        this.$content.setAttribute("workshop", "");
+        this.updateURL(e.detail, ""); 
     }
-
+    
     tabIdHandler(e) {
-        this.$content.setAttribute("active-tab", e.detail.tabID);
-        this.$content.setAttribute("componentid", e.detail.componentID);
+        this.$content.setAttribute("active-tab", e.detail.tabId);
+        this.$content.setAttribute(e.detail.componentName, e.detail.componentId);
+        this.updateURL(e.detail.tabId, e.detail.componentId);
     }
-
+    
     handlePopState(event) {
-        const tab = event.state ? event.state.tab : this.landingPage;
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = event.state?.tab || urlParams.get("tab")
+        const camp = event.state?.camp || urlParams.get("camp")
+        const workshop = event.state?.workshop || urlParams.get("workshop")
+    
         this.$content.setAttribute("active-tab", tab);
+        this.$content.setAttribute("camp", camp);
+        this.$content.setAttribute("workshop", workshop);
     }
-
-    updateURL(tab) {
+    
+    updateURL(tab, camp, workshop) {
         const url = new URL(window.location);
         url.searchParams.set('tab', tab);
-        history.pushState({ tab }, '', url);
-    }
+        
+        if (camp) {
+            url.searchParams.set('camp', camp);
+        } else {
+            url.searchParams.delete('camp');
+        }
+
+        if (workshop) {
+            url.searchParams.set('workshop', workshop);
+        } else {
+            url.searchParams.delete('workshop');
+        }
+    
+        history.pushState({ tab, camp: camp, workshop: workshop }, '', url);
+    }    
 });
 //#endregion CLASS
