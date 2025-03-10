@@ -1,4 +1,5 @@
 //#region IMPORTS
+import "../../camp/deleteCampPopup/deleteCampPopup.js";
 //#endregion IMPORTS
 
 //#region CAMPITEM
@@ -8,6 +9,12 @@ template.innerHTML = /*html*/`
         @import './components/camp/campItem/style.css';
     </style>
 
+
+    <img id="settings" src="./Assets/SVGs/settings.png" alt="settings" style="width: 26px; height: 25px;">
+    <div id="dropdown">
+        <a href="#" class="update" data-id="1">Bewerken</a>
+        <a href="#" class="delete" data-id="1">Verwijderen</a>
+    </div>
     <img class="image" src="../Frontend/Assets/images/campExample.webp" alt="campImage">
     <h2 class="title"></h2>
 
@@ -48,6 +55,11 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
         this.$location = this._shadowRoot.querySelector(".location");
         this.$age = this._shadowRoot.querySelector(".age");
         this.$button = this._shadowRoot.querySelector(".action-button");
+        this.$settings = this._shadowRoot.querySelector("#settings");
+        this.$dropdown = this._shadowRoot.querySelector("#dropdown");
+        this.$dropdown.style.display = "none";
+        this.$update = this._shadowRoot.querySelector(".update");
+        this.$delete = this._shadowRoot.querySelector(".delete");
     }
 
     // component attributes
@@ -100,15 +112,69 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$button.addEventListener('click', () => {
-            this.campInfoHandler("campinfopage", this.getAttribute("id"));
+            this.campInfoHandler("campinfopage", "camp", this.getAttribute("id"));
         });
-    }
+    
+        this.$settings.addEventListener("click", (event) => {
+            event.stopPropagation(); 
+            this.toggleDropdown();
+        });
+    
+        document.addEventListener("click", (event) => {
+            if (!this.contains(event.target)) {
+                this.$dropdown.style.display = "none";
+            }
+        });
+    
+        this.$dropdown.addEventListener("click", (event) => {
+            event.stopPropagation();
+        });
+    
+        this.$update.addEventListener("click", (event) => {
+            event.preventDefault();
+            this.campInfoHandler("form", "camp", this.getAttribute("id"));
+        });
+    
+        this.$delete.addEventListener("click", (event) => {
+            event.preventDefault();
+            
+            if (document.querySelector("deletecamppopup-れ")) return;
+        
+            const popup = document.createElement("deletecamppopup-れ");
+            popup.setAttribute("camp-id", this.getAttribute("id"));
+        
+            popup.addEventListener("campDeleted", (event) => {
+                this.tabHandler("campoverviewpage");
 
-    campInfoHandler(tabID, componentID) {
+            });
+        
+            document.body.appendChild(popup);
+        });
+        
+    }
+    
+
+    campInfoHandler(tabId, componentName, componentId) {
         this.dispatchEvent(new CustomEvent('tabID', {
             bubbles: true,
             composed: true,
-            detail: {tabID, componentID}
+            detail: {tabId, componentName, componentId}
+        })); 
+    }
+
+    toggleDropdown() {
+        if (this.$dropdown.style.display === "none") {
+            this.$dropdown.style.display = "block";
+        } else {
+            this.$dropdown.style.display = "none";
+        }
+    }
+
+    tabHandler(id) {
+        this.dispatchEvent(new CustomEvent('tab', {
+            bubbles: true,
+            composed: true,
+            detail: id
         })); 
     }
 });

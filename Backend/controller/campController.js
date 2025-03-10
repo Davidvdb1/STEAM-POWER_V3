@@ -42,4 +42,44 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.put('/:id', async (req, res) => {
+    try {
+        const campId = req.params.id;
+        const updatedData = req.body;
+        
+        if (!campId) {
+            return res.status(400).json({ error: "Kamp ID is vereist" });
+        }
+        const updatedCamp = await campService.update(campId, updatedData);
+        if (!updatedCamp) {
+            return res.status(404).json({ error: "Kamp niet gevonden" });
+        }
+        res.status(200).json({ message: "Kamp aangepast", camp: updatedCamp });
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const campId = req.params.id;
+
+        if (!campId) {
+            return res.status(400).json({ error: "Kamp ID is vereist" });
+        }
+
+        const deletedCamp = await campService.delete(campId);
+        if (!deletedCamp) {
+            return res.status(404).json({ error: "Kamp niet gevonden" });
+        }
+
+        res.status(200).json({ message: "Kamp succesvol verwijderd" });
+
+    } catch (error) {
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+});
+
+
+
 module.exports = router;
