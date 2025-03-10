@@ -11,23 +11,39 @@ class CampService {
         return await campRepository.create(newCamp);
     }
 
-    async update(campData) {
-        const campToUpdate = await campRepository.findById(campData.id);
-
-        campData.startDate = new Date(campData.startDate);
-        campData.endDate = new Date(campData.endDate);
-
-        const newCamp = new Camp({...campToUpdate, ...campData, id: campToUpdate.id});
-        
-        return await campRepository.update(newCamp);
-    }
-
     async getById(id, includeWorkshops = false) {
         return await campRepository.findById(id, includeWorkshops);
     }
 
     async getAll(includeWorkshops = false) {
         return await campRepository.findAll(includeWorkshops);
+    }
+
+    async update(id, updatedData) {
+        if (updatedData.startDate) updatedData.startDate = new Date(updatedData.startDate);
+        if (updatedData.endDate) updatedData.endDate = new Date(updatedData.endDate);
+        
+        const existingCamp = await campRepository.findById(id);
+        if (!existingCamp) {
+            throw new Error("Kamp niet gevonden");
+        }
+    
+        Object.keys(updatedData).forEach(key => {
+            if (updatedData[key] !== undefined) {
+                existingCamp[key] = updatedData[key];
+            }
+        });
+    
+        return await campRepository.update(id, existingCamp);
+    }
+
+    async delete(id) {
+        const existingCamp = await campRepository.findById(id);
+        if (!existingCamp) {
+            throw new Error("Kamp niet gevonden");
+        }
+    
+        return await campRepository.delete(id);
     }
 }
 
