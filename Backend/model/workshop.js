@@ -1,20 +1,7 @@
 class Workshop {
-    constructor({id = undefined, name, markdown}, validate = true) {
+    constructor({id = undefined, html}, validate = true) {
         this.id = id;
-        this.name = name;
-        this.markdown = markdown;
-        if (validate) {
-            this.validate();
-        }
-    }
-
-    validate() {
-        if (!this.name || typeof this.name !== 'string') {
-            throw new Error('Ongeldige naam');
-        }
-        if (!this.markdown || typeof this.markdown !== 'string') {
-            throw new Error('Ongeldige markdown');
-        }
+        this.html = html;
     }
 
     static from(prismaWorkshop) {

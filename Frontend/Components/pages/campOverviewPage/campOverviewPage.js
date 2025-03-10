@@ -38,6 +38,11 @@ window.customElements.define('campoverviewpage-れ', class extends HTMLElement {
     connectedCallback() {
         this.addEventListener("sort", this.sortHandler);
         this.addEventListener("search", this.searchHandler);
+        this.addEventListener("dateFilter", this.dateFilterHandler);
+        this.addEventListener("ageFilter", this.ageFilterHandler);
+        this.addEventListener("locationFilter", this.locationFilterHandler);
+        this.addEventListener("reset", this.resetHandler);
+        this.addEventListener("resetFilter", this.resetFilterHandler);
     }
 
     sortHandler(e) {
@@ -46,6 +51,27 @@ window.customElements.define('campoverviewpage-れ', class extends HTMLElement {
 
     searchHandler(e) {
         this.$campContainer.setAttribute("search", e.detail);
+    }
+
+    dateFilterHandler(e) {
+        console.log(e.detail);
+        this.$campContainer.setAttribute("datefilter", JSON.stringify(e.detail));
+    }
+
+    ageFilterHandler(e) {
+        this.$campContainer.setAttribute("agefilter", e.detail);
+    }
+
+    locationFilterHandler(e) {
+        this.$campContainer.setAttribute("locationfilter", e.detail);
+    }
+
+    resetFilterHandler() {
+        this.$campContainer.setAttribute("resetFilter" , true);
+    }
+
+    resetHandler() {
+        this.$campContainer.setAttribute("reset" , true);
     }
 
 });

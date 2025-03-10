@@ -1,5 +1,7 @@
 //#region IMPORTS
 import '../dateFilter/dateFilter.js';
+import '../ageFilter/ageFilter.js';
+import '../locationFilter/locationFilter.js';
 //#endregion IMPORTS
 
 //#region FILTERPANEL
@@ -16,6 +18,8 @@ template.innerHTML = /*html*/`
         <option value="date">filter op datum</option>
         <option value="age">filter op leeftijd</option>
     </select>
+
+    <div id="filterPanel"></div>
     
 
 `;
@@ -28,6 +32,7 @@ window.customElements.define('filterpanel-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$filter = this._shadowRoot.querySelector("#filter");
+        this.$filterPanel = this._shadowRoot.querySelector("#filterPanel");
     }
 
     // component attributes
@@ -46,23 +51,18 @@ window.customElements.define('filterpanel-れ', class extends HTMLElement {
     }
 
     filterChanged(filter) {
-        if (filter === "none") {
-            this._shadowRoot.querySelector("#selectedFilter").innerHTML = "";
-        }
-        if (filter === "location") {
-            this._shadowRoot.querySelector("#selectedFilter").innerHTML = /*html*/`
-                <input type="text" id="location" placeholder="Locatie">
-            `;
-        }
-        if (filter === "date") {
-            this._shadowRoot.appendChild(document.createElement('datefilter-れ'));
-        }
-        if (filter === "age") {
-            this._shadowRoot.querySelector("#selectedFilter").innerHTML = /*html*/`
-                <input type="number" id="startAge" placeholder="leeftijd">
-            `;
-        }
+        this.$filterPanel.replaceChildren();
+        this.resetFilter();
+        this.$filterPanel.appendChild(document.createElement(`${filter}filter-れ`));
     }
+
+    resetFilter() {
+        this.dispatchEvent(new CustomEvent('resetFilter', {
+            bubbles: true,
+            composed: true,
+        })); 
+    }
+
     
 
 });

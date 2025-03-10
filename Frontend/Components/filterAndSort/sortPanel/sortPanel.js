@@ -38,6 +38,7 @@ window.customElements.define('sortpanel-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$selection.addEventListener('change', (event) => {
+            console.log("kaasje")
             this.sortHandler(event.target.value);
         });
     }

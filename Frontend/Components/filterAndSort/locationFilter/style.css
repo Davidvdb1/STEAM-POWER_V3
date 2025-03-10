@@ -1,0 +1,41 @@
+:host {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.location {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  color: white;
+  font-size: 1.1rem;
+  align-items: center;
+}
+
+button {
+  background-color: #E30147;
+  color: white;
+  font-size: 1.1rem;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  font-weight: bold;
+  border-style: solid;
+  border-color: #E30147;
+}
+button:hover {
+  border-color: white;
+}/*# sourceMappingURL=style.css.map */

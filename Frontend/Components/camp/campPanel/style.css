@@ -1,12 +1,9 @@
 :host {
   display: flex;
-  flex-wrap: wrap;
   gap: 15px;
   justify-content: space-between;
   background-color: #002757;
   padding: 30px;
-  width: 72%;
-  max-width: 1500px;
   min-width: 620px;
   border-radius: 30px;
   margin-bottom: 50px;
@@ -79,6 +76,14 @@ div {
 
 #searchPanel {
   display: flex;
+  flex-wrap: nowrap;
   justify-content: flex-start;
+  align-self: stretch;
+}
+
+#buttonPanel {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
   align-self: stretch;
 }/*# sourceMappingURL=style.css.map */

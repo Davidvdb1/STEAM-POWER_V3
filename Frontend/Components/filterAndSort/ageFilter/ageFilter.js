@@ -1,35 +1,30 @@
 //#region IMPORTS
 //#endregion IMPORTS
 
-//#region DATEFILTER
+//#region AGEFILTER
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/filterAndSort/dateFilter/style.css';
+        @import './components/filterAndSort/ageFilter/style.css';
     </style>
      
     <div>
-        <div class="date">
-            <label for="startDate">Van:</label>
-            <input type="date" id="startDate" placeholder="Startdatum">
-        </div>
-        <div class="date">
-            <label for="endDate">Tot:</label>
-            <input type="date" id="endDate" placeholder="Einddatum">
+        <div class="age">
+            <label for="age">leeftijd:</label>
+            <input type="number" id="age" placeholder="leeftijd">
         </div>
     </div>
     <button id="filterButton">Filter</button>
 `;
-//#endregion DATEFILTER
+//#endregion AGEFILTER
 
 //#region CLASS
-window.customElements.define('datefilter-れ', class extends HTMLElement {
+window.customElements.define('agefilter-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$startDate = this._shadowRoot.querySelector("#startDate");
-        this.$endDate = this._shadowRoot.querySelector("#endDate");
+        this.$age = this._shadowRoot.querySelector("#age");
         this.$filterButton = this._shadowRoot.querySelector("#filterButton");
     }
 
@@ -44,15 +39,15 @@ window.customElements.define('datefilter-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$filterButton.addEventListener('click', () => {
-            this.dateFilter(this.$startDate.value, this.$endDate.value);
+            this.dateFilter(this.$age.value);
         });
     }
 
-    dateFilter(begin, end) {
-        this.dispatchEvent(new CustomEvent('dateFilter', {
+    dateFilter(age) {
+        this.dispatchEvent(new CustomEvent('ageFilter', {
             bubbles: true,
             composed: true,
-            detail: { begin, end }
+            detail: age
         }));
     }
 

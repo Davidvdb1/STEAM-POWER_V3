@@ -8,6 +8,7 @@ template.innerHTML = /*html*/`
         @import './components/workshop/workshopForm/style.css';
     </style>
 
+    <h1>Workshop Editor</h1>
     <div id="toolbar">
         <img id="bold-image" src="../Frontend/Assets/SVGs/textIcons/Bold_Idle.svg" alt="Bold Icon">
         <img id="underline-image" src="../Frontend/Assets/SVGs/textIcons/Underline_Idle.svg" alt="Underline Icon">
@@ -76,6 +77,12 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
                 setTimeout(() => this.updateButtonState(), 10);
             }
         });
+
+        document.addEventListener('selectionchange', () => {
+            this.updateButtonState();
+            this.updateHeadingSelection();
+        });
+        
     
         this.imageButton.addEventListener("click", () => {
             this.imageInput.click();
@@ -84,10 +91,28 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         this.textEditor.addEventListener('keydown', (event) => {
             if (event.key === "Enter") {
                 setTimeout(() => {
-                    document.execCommand('formatBlock', false, this.currentHeading || 'P');
-                }, 10); 
+                    const selection = document.getSelection();
+                    const range = selection.getRangeAt(0);
+                    const parentBlock = range.commonAncestorContainer.closest('li, p, h1, h2, h3, h4');
+        
+                    if (parentBlock) {
+                        const tagName = parentBlock.tagName.toUpperCase();
+        
+                        // Blijf in dezelfde heading als je in een lijst zit
+                        if (parentBlock.closest('li') && ['H1', 'H2', 'H3', 'H4'].includes(tagName)) {
+                            document.execCommand('formatBlock', false, tagName);
+                            this.headingSelect.value = tagName;
+                        }
+                    } else {
+                        // Controleer of de gebruiker dubbel Enter drukt om uit de bulletlist te gaan
+                        if (document.getSelection().focusNode.nodeType === Node.TEXT_NODE && document.getSelection().focusNode.textContent.trim() === '') {
+                            document.execCommand('formatBlock', false, 'P'); // Reset naar normale tekst
+                            this.headingSelect.value = "P";
+                        }
+                    }
+                }, 10);
             }
-        });       
+        }); 
     }
     
 
@@ -110,10 +135,45 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
     }
 
     changeHeading() {
-        const headingTag = this.headingSelect.value;
-        document.execCommand('formatBlock', false, headingTag);
-        this.currentHeading = headingTag;
-        this.textEditor.focus();
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+    
+        const range = selection.getRangeAt(0);
+        let listItem = range.commonAncestorContainer.closest('li');
+    
+        if (listItem) {
+            // Haal ALLE tekst op en strip eventuele extra HTML
+            let textContent = listItem.textContent.trim();
+    
+            // Verwijder ALLE bestaande headings binnen het <li>
+            listItem.querySelectorAll('h1, h2, h3, h4').forEach(h => h.remove());
+    
+            // Maak een nieuwe heading-tag en voeg de tekst toe
+            const newHeading = document.createElement(this.headingSelect.value);
+            newHeading.textContent = textContent;
+    
+            // Zorg ervoor dat ALLEEN de heading in het <li> staat
+            listItem.innerHTML = ''; 
+            listItem.appendChild(newHeading);
+    
+            this.textEditor.focus();
+        } else {
+            // Gebruik standaard formatBlock als het GEEN lijst-item is
+            document.execCommand('formatBlock', false, this.headingSelect.value);
+        }
+    }    
+    
+    updateHeadingSelection() {
+        const activeBlock = document.queryCommandValue("formatBlock"); // Haal de huidige blokopmaak op
+        const tagName = activeBlock.toUpperCase(); // Zet om naar uppercase voor consistentie
+    
+        // Controleer of het een geldige heading of paragraaf is
+        const validHeadings = ['P', 'H1', 'H2', 'H3', 'H4'];
+        if (validHeadings.includes(tagName)) {
+            this.headingSelect.value = tagName;
+        } else {
+            this.headingSelect.value = 'P'; // Fallback naar paragraaf
+        }
     }
     
     insertBulletList() {
@@ -195,7 +255,6 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
             document.addEventListener('mousemove', this.resize.bind(this));
             document.addEventListener('mouseup', this.stopResize.bind(this));
         } else {
-            // Als we niet in de resize-zone zitten, start een drag-beweging
             this.startDrag(imgElement, e);
         }
     }
@@ -204,15 +263,12 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         if (this.isResizing) {
             const deltaX = e.clientX - this.startX;
     
-            // Bereken de nieuwe breedte en hoogte met de aspect ratio
             let newWidth = this.startWidth + deltaX;
             let newHeight = newWidth / this.aspectRatio;
-    
-            // Maximale en minimale breedte instellen
+
             newWidth = Math.max(50, Math.min(newWidth, 685));
             newHeight = newWidth / this.aspectRatio;
     
-            // Pas de afmetingen toe
             this.currentElement.style.width = `${newWidth}px`;
             this.currentElement.style.height = `${newHeight}px`;
         }
@@ -226,39 +282,6 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         this.previewHandler();
     }
 
-    
-    startDrag(imgElement, e) {
-        e.preventDefault();
-    
-        this.isDragging = true;
-        this.dragElement = imgElement;
-        this.dragStartX = e.clientX;
-        this.dragStartY = e.clientY;
-        this.initialLeft = imgElement.offsetLeft;
-        this.initialTop = imgElement.offsetTop;
-    
-        document.addEventListener('mousemove', this.drag.bind(this));
-        document.addEventListener('mouseup', this.stopDrag.bind(this));
-    }
-    
-    drag(e) {
-        if (this.isDragging) {
-            const deltaX = e.clientX - this.dragStartX;
-            const deltaY = e.clientY - this.dragStartY;
-    
-            this.dragElement.style.position = "relative";
-            this.dragElement.style.left = `${this.initialLeft + deltaX}px`;
-            this.dragElement.style.top = `${this.initialTop + deltaY}px`;
-        }
-    }
-
-    stopDrag() {
-        this.isDragging = false;
-        this.dragElement = null;
-        document.removeEventListener('mousemove', this.drag.bind(this));
-        document.removeEventListener('mouseup', this.stopDrag.bind(this));
-    }
-    
     saveContent() {
         console.log("Saved content:", this.textEditor.innerHTML);
     }

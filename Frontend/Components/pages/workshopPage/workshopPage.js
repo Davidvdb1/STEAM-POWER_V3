@@ -10,9 +10,7 @@ template.innerHTML = /*html*/`
         @import './components/pages/workshopPage/style.css';
     </style>
 
-    <h1>Workshop Editor</h1>
     <workshopforum-れ></workshopforum-れ>
-    <h1>Preview</h1>
     <workshoppreview-れ></workshoppreview-れ>
 `;
 //#endregion WORKSHOPPAGE

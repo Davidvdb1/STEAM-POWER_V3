@@ -33,3 +33,22 @@ div {
     object-fit: cover; 
     margin-bottom: 20px;
 }
+
+.action-button {
+    align-self: flex-end;
+    background-color: #9FDAF9;
+    font-size: 1.1rem;
+    color: #002757;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3sease-in-out;
+    font-weight: bold;
+    border-style: solid;
+    border-color: #9FDAF9;
+
+    &:hover {
+        border-color: #002757;
+    }
+}
