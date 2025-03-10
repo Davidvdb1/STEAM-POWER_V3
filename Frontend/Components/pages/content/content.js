@@ -19,12 +19,11 @@ window.customElements.define('content-れ', class extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["active-tab"];
+        return ["active-tab", "componentid"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "active-tab" && newValue) {
-            // delete the previous page if it exists
             if (oldValue) {
                 const oldPage = this._shadowRoot.querySelector(oldValue + '-れ');
                 if (oldPage) {
@@ -32,7 +31,6 @@ window.customElements.define('content-れ', class extends HTMLElement {
                 }
             }
 
-            // Check if the page exists
             const newPageName = newValue + '-れ';
             if (customElements.get(newPageName)) {
                 const newPage = document.createElement(newPageName);
@@ -40,6 +38,11 @@ window.customElements.define('content-れ', class extends HTMLElement {
             } else {
                 console.warn(`Component ${newPageName} is niet geregistreerd.`);
             }
+        }
+
+        if (name === "componentid") {
+            const childComponent = this._shadowRoot.querySelector(this.getAttribute("active-tab") + '-れ');
+            childComponent.setAttribute("componentid", newValue);
         }
     }
 

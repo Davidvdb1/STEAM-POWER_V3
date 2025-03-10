@@ -1,0 +1,16 @@
+:host {
+    width: 80%;
+    max-width: 1500px;
+    display: flex; /* Zorgt ervoor dat de container zijn inhoud correct weergeeft */
+    justify-content: center;
+}
+
+#camp-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
+    grid-template-rows: repeat(auto-fill, 1fr);
+    gap: 50px;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+}

@@ -44,8 +44,7 @@ model Camp {
 model Workshop {
     id          String  @id @default(uuid())
     camps       Camp[]
-    name        String
-    markdown    String
+    html        String
 }
 
 model Group {

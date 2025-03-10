@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Italic_Idle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250.88 252.12">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+        stroke: #0c2534;
+        stroke-linecap: round;
+        stroke-miterlimit: 10;
+        stroke-width: 20px;
+      }
+
+      .cls-2 {
+        fill: #f2fafe;
+      }
+    </style>
+  </defs>
+  <rect class="cls-2" x=".1" y="1.24" width="250.88" height="250.88" rx="35.91" ry="35.91"/>
+  <line class="cls-1" x1="124.83" y1="43.3" x2="179.05" y2="43.3"/>
+  <line class="cls-1" x1="71.83" y1="208.82" x2="124.83" y2="208.82"/>
+  <line class="cls-1" x1="154.46" y1="43.3" x2="95.48" y2="208.82"/>
+</svg>

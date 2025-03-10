@@ -8,11 +8,14 @@ const workshopRoutes = require('./controller/workshopController');
 const groupRoutes = require('./controller/groupController');
 
 const app = express();
+const cors = require('cors');
 dotenv.config();
-app.use(express.json());
 app.use(helmet());
 
 const PORT = process.env.PORT || 3000;
+
+app.use(express.json({ limit: '10mb' })); 
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use(
     expressjwt({
@@ -23,6 +26,13 @@ app.use(
         // path: ['/users/login', '/users/register', '/status']
     })
 );
+
+
+app.use(cors({
+    origin: 'http://127.0.0.1:5500', // Zet dit op de URL van je frontend
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type,Authorization'
+}));
 
 app.use('/users', userRoutes);
 app.use('/camps', campRoutes);

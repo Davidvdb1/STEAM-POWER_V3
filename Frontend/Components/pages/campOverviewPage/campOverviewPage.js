@@ -1,7 +1,7 @@
 //#region IMPORTS
-import "../../reusable/campContainer/campContainer.js"
-import "../../reusable/campPanel/campPanel.js"
-import '../../reusable/filterPanel/filterPanel.js';
+import "../../camp/campContainer/campContainer.js"
+import "../../camp/campPanel/campPanel.js"
+import '../../filterAndSort/filterPanel/filterPanel.js';
 //#endregion IMPORTS
 
 //#region CAMPOVERVIEWPAGE
@@ -11,7 +11,6 @@ template.innerHTML = /*html*/`
         @import './components/pages/campOverviewPage/style.css';
     </style>
     <camppanel-れ></camppanel-れ>
-    <filterpanel-れ></filterpanel-れ>
     <campcontainer-れ></campcontainer-れ>
 
 
@@ -24,7 +23,7 @@ window.customElements.define('campoverviewpage-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
+        this.$campContainer = this._shadowRoot.querySelector("campcontainer-れ");
     }
 
     // component attributes
@@ -37,7 +36,42 @@ window.customElements.define('campoverviewpage-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        this.addEventListener("sort", this.sortHandler);
+        this.addEventListener("search", this.searchHandler);
+        this.addEventListener("dateFilter", this.dateFilterHandler);
+        this.addEventListener("ageFilter", this.ageFilterHandler);
+        this.addEventListener("locationFilter", this.locationFilterHandler);
+        this.addEventListener("reset", this.resetHandler);
+        this.addEventListener("resetFilter", this.resetFilterHandler);
+    }
 
+    sortHandler(e) {
+        this.$campContainer.setAttribute("sort", e.detail);
+    }
+
+    searchHandler(e) {
+        this.$campContainer.setAttribute("search", e.detail);
+    }
+
+    dateFilterHandler(e) {
+        console.log(e.detail);
+        this.$campContainer.setAttribute("datefilter", JSON.stringify(e.detail));
+    }
+
+    ageFilterHandler(e) {
+        this.$campContainer.setAttribute("agefilter", e.detail);
+    }
+
+    locationFilterHandler(e) {
+        this.$campContainer.setAttribute("locationfilter", e.detail);
+    }
+
+    resetFilterHandler() {
+        this.$campContainer.setAttribute("resetFilter" , true);
+    }
+
+    resetHandler() {
+        this.$campContainer.setAttribute("reset" , true);
     }
 
 });

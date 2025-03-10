@@ -1,11 +1,11 @@
 //#region IMPORTS
 import "../../../Components/navigation/header/header.js"
 import "../../pages/content/content.js"
-import "../../pages/pageOne/pageOne.js"
-import "../../pages/pageTwo/pageTwo.js"
-import "../../pages/pageThree/pageThree.js"
+import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
-import "../../reusable/formContainer/formContainer.js"
+import "../../pages/campInfoPage/campInfoPage.js"
+import "../../pages/microbitPage/microbitPage.js"
+import "../../camp/formContainer/formContainer.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -28,7 +28,8 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$content = this._shadowRoot.querySelector("content-れ");
         this.$header = this._shadowRoot.querySelector("header-れ");  
-        this.landingPage = 'campoverviewpage';
+        this.landingPage = "campinfopage";
+        this.componentID = "e06b5cdb-3a2f-4186-a340-8996d444e3a4";
     }
 
     // component attributes
@@ -42,19 +43,21 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$content.setAttribute("active-tab", this.landingPage);
+        this.$content.setAttribute("componentid", this.componentID);
         const items = [
             { id: "campoverviewpage", label: "Home" },
+            { id: "workshoppage", label: "Workshop" },
             { id: "overzicht", label: "Overzicht" },
             { id: "spel", label: "Spel" },
-            { id: "microbit", label: "Micro:bit" },
+            { id: "microbitpage", label: "Micro:bit" },
             { id: "groepen", label: "Groepen" },
             { id: "users", label: "Gebruikers" },
             { id: "sign-up", label: "Nieuw account" },
             { id: "logout", label: "Logout" },
-            { id: "form", label: "Forum" },
         ];
 
-        this.addEventListener("tab", this.tabHandler);   
+        this.addEventListener("tab", this.tabHandler);
+        this.addEventListener("tabID", this.tabIdHandler);   
         this.addEventListener("import", this.importHandler);   
         this.$header.setAttribute("tabs", JSON.stringify(items));
         
@@ -64,7 +67,13 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
 
     tabHandler(e) {
         this.$content.setAttribute("active-tab", e.detail);
+        this.$content.setAttribute("componentid", "");
         this.updateURL(e.detail);
+    }
+
+    tabIdHandler(e) {
+        this.$content.setAttribute("active-tab", e.detail.tabID);
+        this.$content.setAttribute("componentid", e.detail.componentID);
     }
 
     handlePopState(event) {

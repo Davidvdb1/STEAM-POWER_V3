@@ -1,0 +1,13 @@
+:host {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 50px;
+  max-width: 685px;
+  width: 100%;
+  height: auto;
+  max-height: -moz-fit-content;
+  max-height: fit-content;
+  overflow-y: auto;
+}/*# sourceMappingURL=style.css.map */
