@@ -2,9 +2,10 @@
 //#endregion IMPORTS
 
 //#region MICROBITBLUETOOTHCONNECTION
-const NORDIC_UART_SERVICE_UUID = '6e400001-b5a3-f393-e0a9-e50e24dcca9e';
-const RX_CHARACTERISTIC_UUID = '6e400002-b5a3-f393-e0a9-e50e24dcca9e';
-const TX_CHARACTERISTIC_UUID = '6e400003-b5a3-f393-e0a9-e50e24dcca9e';
+const IOPINSERVICE_SERVICE_UUID = "e95d127b-251d-470a-a062-fa1922dfa9a8";
+const PINDATA_CHARACTERISTIC_UUID = "e95d8d00-251d-470a-a062-fa1922dfa9a8";
+const PINADCONFIGURATION_CHARACTERISTIC_UUID = "e95d5899-251d-470a-a062-fa1922dfa9a8";
+const PINIOCONFIGURATION_CHARACTERISTIC_UUID = "e95db9fe-251d-470a-a062-fa1922dfa9a8";
 
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
@@ -26,6 +27,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         this.pinDataCharacteristic = null;
         this.pinAdConfigurationCharacteristic = null;
         this.pinIoConfigurationCharacteristic = null;
+        this.paused = false;
     }
 
     // component attributes
@@ -38,12 +40,13 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     }
 
     connectedCallback() {
-        this.addEventListener('startbluetoothconnection', this.init);
-        this.addEventListener('pausebluetoothconnection', this.pause);
-        this.addEventListener('stopbluetoothconnection', this.disconnect);
+        document.addEventListener('startbluetoothconnection', this.init.bind(this));
+        document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
+        document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
     }
 
     async init() {
+        this.paused = false;
         await this.requestDevice();
         await this.connectToDevice();
         await this.configurePins();
@@ -51,12 +54,16 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     }
 
     async pause() {
-        this.characteristics.forEach(characteristic => {
-            this.stopMonitoring(characteristic);
-        });
+        this.paused = !this.paused;
+        if (this.paused) {
+            await this.stopMonitoring();
+        } else {
+            await this.startMonitoring();
+        }
     }
 
     async disconnect() {
+        this.paused = false;
         this.device.removeEventListener("gattserverdisconnected", this.connectToDevice);
         this.device.gatt.disconnect();
         this.services = [];
@@ -87,6 +94,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
 
     async startMonitoring() {
         await this.pinDataCharacteristic.startNotifications();
+        this.readPin0Value();
     }
 
     async stopMonitoring() {
@@ -94,8 +102,18 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     }
     
     handleCharacteristicValueChanged(event) {
+        const view = event.target.value;
         const value = new DataView(view.buffer).getUint8(1, true); // Get the analog value from the second byte
-        console.log('Received data:', value);
+        const valueChangedEvent = new CustomEvent('pin0valuechanged', { detail: value, bubbles: true, composed: true });
+        document.dispatchEvent(valueChangedEvent);
+    }
+
+    async readPin0Value() {
+        const view = await this.pinDataCharacteristic.readValue();
+        const analogValue = new DataView(view.buffer).getUint8(1, true);
+        
+        const event = new CustomEvent('pin0valuechanged', { detail: analogValue, bubbles: true, composed: true });
+        document.dispatchEvent(event);
     }
 
     async configurePins() {
