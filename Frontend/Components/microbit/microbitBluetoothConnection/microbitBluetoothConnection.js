@@ -43,6 +43,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
+        document.addEventListener('setbluetoothdatainterval', this.setIntervalTime.bind(this));
     }
 
     async init() {
@@ -87,30 +88,24 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         this.pinDataCharacteristic = await this.ioPinService.getCharacteristic(PINDATA_CHARACTERISTIC_UUID); // Pin Data Characteristic
         this.pinAdConfigurationCharacteristic = await this.ioPinService.getCharacteristic(PINADCONFIGURATION_CHARACTERISTIC_UUID); // Pin AD Configuration Characteristic
         this.pinIoConfigurationCharacteristic = await this.ioPinService.getCharacteristic(PINIOCONFIGURATION_CHARACTERISTIC_UUID); // Pin IO Configuration Characteristic
-
-        this.pinDataCharacteristic.addEventListener('characteristicvaluechanged', this.handleCharacteristicValueChanged);
-        
     }
 
     async startMonitoring() {
-        await this.pinDataCharacteristic.startNotifications();
-        this.readPin0Value();
+        this.monitoringInterval = setInterval(async () => {
+            if (!this.paused) {
+                await this.readPin0Value();
+            }
+        }, this.intervalTime || 2000);
     }
 
     async stopMonitoring() {
-        await this.pinDataCharacteristic.stopNotifications();
-    }
-    
-    handleCharacteristicValueChanged(event) {
-        const view = event.target.value;
-        const value = new DataView(view.buffer).getUint8(1, true); // Get the analog value from the second byte
-        const valueChangedEvent = new CustomEvent('pin0valuechanged', { detail: value, bubbles: true, composed: true });
-        document.dispatchEvent(valueChangedEvent);
+        clearInterval(this.monitoringInterval);
     }
 
     async readPin0Value() {
         const view = await this.pinDataCharacteristic.readValue();
         const analogValue = new DataView(view.buffer).getUint8(1, true);
+        console.log(view);
         
         const event = new CustomEvent('pin0valuechanged', { detail: analogValue, bubbles: true, composed: true });
         document.dispatchEvent(event);
@@ -119,16 +114,25 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     async configurePins() {
         try {
             // Configure Pin 0 as Analog (Update the Pin AD Configuration Bitmask)
-            const adFlags = new Uint8Array([0x01, 0x00, 0x00, 0x00]); // Set bit 0 for Pin 0
+            const adFlags = new Uint8Array([0x01, 0x00, 0x00, 0x00]); // Set bit 0 and bit 1 for Pin 0 and Pin 1
             await this.pinAdConfigurationCharacteristic.writeValue(adFlags);
-            console.log('Configured pin 0 as analog input');
-    
+            console.log('Configured pin 0 and pin 1 as analog input');
+
             // Configure Pin 0 as Input (Update the Pin IO Configuration Bitmask)
-            const ioFlagsIn = new Uint8Array([0x01, 0x00, 0x00, 0x00]); // Set bit 0 for Pin 0
+            const ioFlagsIn = new Uint8Array([0x01, 0x00, 0x00, 0x00]);
             await this.pinIoConfigurationCharacteristic.writeValue(ioFlagsIn);
-            console.log('Configured pin 0 as input');
+            console.log('Configured pin 0 and pin 1 as input');
         } catch (error) {
-            console.error('Error configuring pin 0:', error);
+            console.error('Error configuring pins:', error);
+        }
+    }
+
+    async setIntervalTime(event) {
+        console.log(event);
+        this.intervalTime = event.detail;
+        if (this.monitoringInterval) {
+            await this.stopMonitoring();
+            await this.startMonitoring();
         }
     }
 

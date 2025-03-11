@@ -17,6 +17,14 @@ template.innerHTML = /*html*/`
     <button id="startButton">Start Bluetooth Connection</button>
     <button id="pauseButton">Pause Bluetooth Connection</button>
     <button id="endButton">End Bluetooth Connection</button>
+    <label for="intervalSelect">Select Interval:</label>
+    <select id="intervalSelect">
+        <option value="none"></option>
+        <option value="1000">1 second</option>
+        <option value="2000">2 seconds</option>
+        <option value="5000">5 seconds</option>
+        <option value="10000">10 seconds</option>
+    </select>
 `;
 //#endregion MICROBITPAGE
 
@@ -41,6 +49,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this._shadowRoot.getElementById('startButton').addEventListener('click', () => this.startBluetoothConnection());
         this._shadowRoot.getElementById('pauseButton').addEventListener('click', () => this.pauseBluetoothConnection());
         this._shadowRoot.getElementById('endButton').addEventListener('click', () => this.endBluetoothConnection());
+        this._shadowRoot.getElementById('intervalSelect').addEventListener('change', (event) => this.setBluetoothDataInterval(event));
 
         document.addEventListener('pin0valuechanged', this.updatePin0Value.bind(this));
     }
@@ -63,6 +72,13 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
     updatePin0Value(event) {
         const pin0Value = event.detail;
         this._shadowRoot.getElementById('pin0Value').textContent = pin0Value;
+    }
+
+    setBluetoothDataInterval(event) {
+        if (event.target.value === 'none') return;
+        const interval = parseInt(event.target.value, 10);
+        const customEvent = new CustomEvent('setbluetoothdatainterval', { detail: interval, bubbles: true, composed: true });
+        document.dispatchEvent(customEvent);
     }
 });
 //#endregion CLASS
