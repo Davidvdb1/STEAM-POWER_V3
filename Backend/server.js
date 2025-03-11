@@ -14,8 +14,8 @@ app.use(helmet());
 
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '10mb' })); 
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '100mb' })); 
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 app.use(
     expressjwt({
@@ -23,7 +23,6 @@ app.use(
         algorithms: ['HS256'],
     }).unless({
         path: ['/users/login', '/users/register', '/status', /^\/.*/], // last regex matches all routes
-        // path: ['/users/login', '/users/register', '/status']
     })
 );
 

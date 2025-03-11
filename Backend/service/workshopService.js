@@ -29,6 +29,10 @@ class WorkshopService {
     async getAll() {
         return await workshopRepository.findAll();
     }
+
+    async getByTitle(title) {
+        return await workshopRepository.findByTitle(title);
+    }
 }
 
 module.exports = new WorkshopService();

@@ -25,7 +25,7 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ['html', "id"];
+        return ['html', "workshop"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -36,16 +36,16 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
     
     connectedCallback() {   
         this.$edit.addEventListener('click', () => {
-            this.tabWithWorkshopHandler("workshoppage", "workshop", this.getAttribute("id")); 
+            this.tabWithWorkshopHandler("workshoppage", "workshop", this.getAttribute("workshop")); 
         })
 
     }
 
-    tabWithWorkshopHandler(tabID, componentName, componentID) {
+    tabWithWorkshopHandler(tabId, componentName, componentId) {
         this.dispatchEvent(new CustomEvent('tabID', {
             bubbles: true,
             composed: true,
-            detail: {tabID, componentName, componentID}
+            detail: {tabId, componentName, componentId}
         })); 
     }
 

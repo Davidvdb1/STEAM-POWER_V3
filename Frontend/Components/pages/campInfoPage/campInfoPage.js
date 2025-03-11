@@ -31,7 +31,7 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
         this.$title = this._shadowRoot.querySelector("#camptitle");
         this.$addExisting = this._shadowRoot.querySelector("#addexisting");
         this.$addNew = this._shadowRoot.querySelector("#addnew");
-        this.camp = null;
+        this.$camp = null;
     }
 
     // component attributes
@@ -56,23 +56,23 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
     }
 
     updateCampInfo() {
-        if (!this.camp) return;
+        if (!this.$camp) return;
 
-        this.camp.workshops.forEach(workshop => {
+        this.$camp.workshops.forEach(workshop => {
             let workshopPreview = document.createElement('workshoppreview-れ');
             workshopPreview.setAttribute("html", workshop.html);
-            workshopPreview.setAttribute("id", workshop.id);
+            workshopPreview.setAttribute("workshop", workshop.id);
             this.$workshops.appendChild(workshopPreview);
         })
 
-        this.$title.innerHTML = this.camp.name;
+        this.$title.innerHTML = this.$camp.name;
     }
 
-    tabWithCampHandler(tabID, componentName, componentID) {
+    tabWithCampHandler(tabId, componentName, componentId) {
         this.dispatchEvent(new CustomEvent('tabID', {
             bubbles: true,
             composed: true,
-            detail: {tabID, componentName, componentID}
+            detail: {tabId, componentName, componentId}
         })); 
     }
 
@@ -86,7 +86,7 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
     
-            this.camp = await response.json();
+            this.$camp = await response.json();
             this.updateCampInfo();
     
         } catch (error) {

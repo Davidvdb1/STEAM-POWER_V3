@@ -15,6 +15,10 @@ class CampService {
         return await campRepository.findById(id, includeWorkshops);
     }
 
+    async getByTitle(title, includeWorkshops = false) {
+        return await campRepository.findByTitle(title, includeWorkshops);
+    }
+
     async getAll(includeWorkshops = false) {
         return await campRepository.findAll(includeWorkshops);
     }
@@ -44,6 +48,10 @@ class CampService {
         }
     
         return await campRepository.delete(id);
+    }
+
+    async addWorkshop(campId, workshopId) {
+        return await campRepository.addWorkshop(campId, workshopId);
     }
 }
 
