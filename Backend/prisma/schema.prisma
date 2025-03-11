@@ -50,5 +50,6 @@ model Camp {
 model Workshop {
     id          String  @id @default(uuid())
     camps       Camp[]
+    title       String
     html        String
 }

@@ -16,6 +16,7 @@ window.customElements.define('content-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+        this.landingPage = "campoverviewpage"
     }
 
     static get observedAttributes() {
