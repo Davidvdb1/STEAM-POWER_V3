@@ -47,23 +47,31 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     }
 
     async init() {
+        if (!navigator.bluetooth) return; // TODO: Show error message "Bluetooth not supported on this browser"
+        
+        console.log('Connecting...');
         this.paused = false;
         await this.requestDevice();
         await this.connectToDevice();
+        console.log('Configuring device...');
         await this.configurePins();
+        console.log('Starting monitoring...');
         await this.startMonitoring();
     }
 
     async pause() {
         this.paused = !this.paused;
         if (this.paused) {
+            console.log('Pausing connection...');
             await this.stopMonitoring();
         } else {
+            console.log('Unpausing connection...');
             await this.startMonitoring();
         }
     }
 
     async disconnect() {
+        console.log('Disconnecting...');
         this.paused = false;
         this.device.removeEventListener("gattserverdisconnected", this.connectToDevice);
         this.device.gatt.disconnect();
@@ -76,18 +84,18 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     async requestDevice() {
         this.device = await navigator.bluetooth.requestDevice({
             filters: [{ namePrefix: "BBC micro:bit" }],
-            optionalServices: [IOPINSERVICE_SERVICE_UUID] // Nordic UART Service
+            optionalServices: [IOPINSERVICE_SERVICE_UUID]
         });
     }
 
     async connectToDevice() {
         this.server = await this.device.gatt.connect();
         
-        this.ioPinService = await this.server.getPrimaryService(IOPINSERVICE_SERVICE_UUID); // IO Pin Service
+        this.ioPinService = await this.server.getPrimaryService(IOPINSERVICE_SERVICE_UUID);
 
-        this.pinDataCharacteristic = await this.ioPinService.getCharacteristic(PINDATA_CHARACTERISTIC_UUID); // Pin Data Characteristic
-        this.pinAdConfigurationCharacteristic = await this.ioPinService.getCharacteristic(PINADCONFIGURATION_CHARACTERISTIC_UUID); // Pin AD Configuration Characteristic
-        this.pinIoConfigurationCharacteristic = await this.ioPinService.getCharacteristic(PINIOCONFIGURATION_CHARACTERISTIC_UUID); // Pin IO Configuration Characteristic
+        this.pinDataCharacteristic = await this.ioPinService.getCharacteristic(PINDATA_CHARACTERISTIC_UUID);
+        this.pinAdConfigurationCharacteristic = await this.ioPinService.getCharacteristic(PINADCONFIGURATION_CHARACTERISTIC_UUID);
+        this.pinIoConfigurationCharacteristic = await this.ioPinService.getCharacteristic(PINIOCONFIGURATION_CHARACTERISTIC_UUID);
     }
 
     async startMonitoring() {
@@ -102,10 +110,9 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         clearInterval(this.monitoringInterval);
     }
 
-    async readPin0Value() {
+    async readPin0Value() { // TODO: Read all pins and make function tos set which pins are read
         const view = await this.pinDataCharacteristic.readValue();
         const analogValue = new DataView(view.buffer).getUint8(1, true);
-        console.log(view);
         
         const event = new CustomEvent('pin0valuechanged', { detail: analogValue, bubbles: true, composed: true });
         document.dispatchEvent(event);
@@ -128,16 +135,12 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     }
 
     async setIntervalTime(event) {
-        console.log(event);
         this.intervalTime = event.detail;
+        console.log('Interval time set to:', this.intervalTime);
         if (this.monitoringInterval) {
             await this.stopMonitoring();
             await this.startMonitoring();
         }
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 });
 //#endregion CLASS
