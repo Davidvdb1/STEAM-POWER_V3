@@ -26,12 +26,6 @@ enum Role {
     TEACHER
 }
 
-model Group {
-    id          String  @id @default(uuid())
-    name        String  @unique
-    code        String  @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
-}
-
 model Camp {
     id          String  @id @default(uuid())
     workshops   Workshop[]
@@ -51,4 +45,26 @@ model Workshop {
     id          String  @id @default(uuid())
     camps       Camp[]
     html        String
+}
+
+model Group {
+    id          String  @id @default(uuid())
+    name        String  @unique
+    code        String  @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+    energyData  EnergyData[]
+}
+
+model EnergyData {
+    id          String  @id @default(uuid())
+    group       Group   @relation(fields: [groupId], references: [id])
+    groupId     String
+    date        DateTime    @default(now())
+    value       Int
+    type        EnergyType
+}
+
+enum EnergyType {
+    SOLAR
+    WATER
+    WIND
 }
