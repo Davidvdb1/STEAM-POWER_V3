@@ -20,10 +20,16 @@ template.innerHTML = /*html*/`
     <label for="intervalSelect">Select Interval:</label>
     <select id="intervalSelect">
         <option value="none"></option>
-        <option value="1000">1 second</option>
-        <option value="2000">2 seconds</option>
-        <option value="5000">5 seconds</option>
-        <option value="10000">10 seconds</option>
+        <option value="500">0.5 seconde</option>
+        <option value="1000">1 seconde</option>
+        <option value="2000">2 seconden</option>
+        <option value="5000">5 seconden</option>
+        <option value="10000">10 seconden</option>
+        <option value="30000">30 seconden</option>
+        <option value="60000">1 minuut</option>
+        <option value="120000">2 minuten</option>
+        <option value="300000">5 minuten</option>
+        <option value="600000">10 minuten</option>
     </select>
 `;
 //#endregion MICROBITPAGE
