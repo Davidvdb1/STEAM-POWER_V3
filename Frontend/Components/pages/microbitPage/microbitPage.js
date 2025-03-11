@@ -13,7 +13,8 @@ template.innerHTML = /*html*/`
         @import './components/pages/microbitPage/style.css';
     </style>
     <p>Microbit Page</p>
-    <p>Pin 0 Value: <span id="pin0Value">0</span></p>
+    <p>last 5 measurements: </p>
+    <ul id="measurementList"></ul>
     <button id="startButton">Start Bluetooth Connection</button>
     <button id="pauseButton">Pause Bluetooth Connection</button>
     <button id="endButton">End Bluetooth Connection</button>
@@ -40,6 +41,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+        this.energyData = [];
     }
 
     // component attributes
@@ -57,7 +59,9 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this._shadowRoot.getElementById('endButton').addEventListener('click', () => this.endBluetoothConnection());
         this._shadowRoot.getElementById('intervalSelect').addEventListener('change', (event) => this.setBluetoothDataInterval(event));
 
-        document.addEventListener('pin0valuechanged', this.updatePin0Value.bind(this));
+        document.addEventListener('energydatareading', this.updateEnergyDataList.bind(this));
+
+        this.getEnergyData().then(response => response.json()).then(data => this.energyData = data);
     }
 
     startBluetoothConnection() {
@@ -75,9 +79,23 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         document.dispatchEvent(event);
     }
 
-    updatePin0Value(event) {
-        const pin0Value = event.detail;
-        this._shadowRoot.getElementById('pin0Value').textContent = pin0Value;
+    updateEnergyDataList(event) {
+        const data = event.detail;
+        this.energyData.push(data);
+        if (this.energyData.length > 5) {
+            this.energyData.shift();
+        }
+        this.renderMeasurementList();
+    }
+
+    renderMeasurementList() {
+        const list = this._shadowRoot.getElementById('measurementList');
+        list.innerHTML = '';
+        this.energyData.forEach((data, index) => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `Measurement ${index + 1}: ${JSON.stringify(data)}`;
+            list.appendChild(listItem);
+        });
     }
 
     setBluetoothDataInterval(event) {
@@ -85,6 +103,16 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const interval = parseInt(event.target.value, 10);
         const customEvent = new CustomEvent('setbluetoothdatainterval', { detail: interval, bubbles: true, composed: true });
         document.dispatchEvent(customEvent);
+    }
+
+    // service
+    async getEnergyData() { // TODO: move this to graph component
+        const groupId = localStorage.getItem('groupId');
+        try {
+            return await fetch(window.env.BACKEND_URL + `/energydata/${groupId}`);
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
 //#endregion CLASS

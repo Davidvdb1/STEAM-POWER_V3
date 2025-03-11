@@ -113,9 +113,15 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     async readPin0Value() { // TODO: Read all pins and make function tos set which pins are read
         const view = await this.pinDataCharacteristic.readValue();
         const analogValue = new DataView(view.buffer).getUint8(1, true);
+
+        const groupId = localStorage.getItem('groupId');
+        const time = new Date().toISOString();
+        const data = { groupId, analogValue, time };
         
-        const event = new CustomEvent('pin0valuechanged', { detail: analogValue, bubbles: true, composed: true });
+        const event = new CustomEvent('energydatareading', { detail: data, bubbles: true, composed: true });
         document.dispatchEvent(event);
+
+        this.postEnergyData(data);
     }
 
     async configurePins() {
@@ -140,6 +146,23 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         if (this.monitoringInterval) {
             await this.stopMonitoring();
             await this.startMonitoring();
+        }
+    }
+
+    // service
+    async postEnergyData(data = { groupId, value, time }) {
+        try {
+            const jwt = localStorage.getItem('token');
+            response = await fetch(window.env.BACKEND_URL + '/energydata', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify(data)
+            });
+        } catch (error) {
+            console.error(error);
         }
     }
 });
