@@ -9,6 +9,7 @@ template.innerHTML = /*html*/`
     </style>
 
     <h1>Workshop Editor</h1>
+    <p id="statusmessage"></p>
     <div id="toolbar">
         <img id="bold-image" src="../Frontend/Assets/SVGs/textIcons/Bold_Idle.svg" alt="Bold Icon">
         <img id="underline-image" src="../Frontend/Assets/SVGs/textIcons/Underline_Idle.svg" alt="Underline Icon">
@@ -54,8 +55,22 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         this.boldImage.classList.add('toolbar-button');
         this.underlineImage.classList.add('toolbar-button');
         this.italicImage.classList.add('toolbar-button');
+        this.workshop = null
 
     }
+
+    static get observedAttributes() {
+        return ["id"];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === "id") {
+            if (newValue) {
+                this.fetchWorkshopWithId(newValue);
+            }
+        }
+    }
+
 
     connectedCallback() {
         this.boldImage.addEventListener('click', this.toggleBold.bind(this));
@@ -213,18 +228,16 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
             this.textEditor.appendChild(newParagraph);
             newParagraph.focus(); 
     
-            // Voeg event listener toe voor resizing direct op de afbeelding
             imgElement.addEventListener('mousedown', this.startResize.bind(this, imgElement));
     
-            // **✅ Voeg hier de cursor wijziging toe!**
             imgElement.addEventListener('mousemove', (e) => {
                 const boundingBox = imgElement.getBoundingClientRect();
                 const isNearEdge = (e.clientX >= boundingBox.right - 15) && (e.clientY >= boundingBox.bottom - 15);
     
                 if (isNearEdge) {
-                    imgElement.style.cursor = "se-resize"; // Resize cursor
+                    imgElement.style.cursor = "se-resize"; 
                 } else {
-                    imgElement.style.cursor = "move"; // Drag cursor
+                    imgElement.style.cursor = "move";
                 }
             });
     
@@ -283,7 +296,12 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
     }
 
     saveContent() {
-        console.log("Saved content:", this.textEditor.innerHTML);
+        const id = this.getAttribute("id");
+        if (id) {
+            this.updateWorkshop(this.textEditor.innerHTML);
+        } else {
+            this.createWorkshop(this.textEditor.innerHTML);
+        }
     }
 
     updateButtonState() {
@@ -299,6 +317,90 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
             detail: this.textEditor.innerHTML
         })); 
     }
+
+    fillEditorWithWorkshop(html) {
+        this.textEditor.innerHTML = html;
+        this.previewHandler();
+    }
+
+    updateStatusMessage(message, type) {
+        const statusMessage = this._shadowRoot.querySelector("#statusmessage");
+        statusMessage.textContent = message;
+        statusMessage.style.color = type === "success" ? "green" : "red";
+    }  
+    
+    
+    //service
+    async fetchWorkshopWithId(id) {
+        try {
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(`${url}/workshops/${id}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            this.workshop = await response.json();
+            this.fillEditorWithWorkshop(this.workshop.html);
+    
+        } catch (error) {
+            console.error("Fout bij ophalen van workshop:", error);
+        }
+    }
+
+    async createWorkshop(html) {
+        try {
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(`${url}/workshops`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ html })
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            this.workshop = await response.json();
+            this.updateStatusMessage("✅ Workshop succesvol aangemaakt!", "success");
+            setTimeout(() => {
+                history.back();  // 🔙 Ga terug naar de vorige pagina
+            }, 1000);  
+        } catch (error) {
+            console.error("Fout bij aanmaken van workshop:", error);
+            this.updateStatusMessage("❌ Fout bij aanmaken van workshop.", "error");
+        }
+    }
+
+    async updateWorkshop(html) {
+        try {
+            const ID = this.getAttribute("id");
+            const url = window.env.BACKEND_URL;
+            const data = { html: html };
+            const response = await fetch(url + `/workshops/${ID}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+    
+            if (response.ok) {
+                const result = await response.json();
+                this.updateStatusMessage("✅ Workshop succesvol aangepast!", "success");
+                setTimeout(() => {
+                    history.back();  // 🔙 Ga terug naar de vorige pagina
+                }, 1000);        
+            }
+
+        } catch (error) {
+            console.error("Fout bij updaten van workshop:", error);
+            this.updateStatusMessage("❌ Fout bij aanpassen van workshop.", "error");
+        }
+    }
+
     
 });
 //#endregion CLASS

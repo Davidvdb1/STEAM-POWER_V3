@@ -1,5 +1,5 @@
 class Workshop {
-    constructor({id = undefined, html}, validate = true) {
+    constructor({id = undefined, html}) {
         this.id = id;
         this.html = html;
     }

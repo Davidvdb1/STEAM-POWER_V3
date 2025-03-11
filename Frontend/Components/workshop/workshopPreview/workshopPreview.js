@@ -5,20 +5,11 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        :host {
-            display: block;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin-bottom: 50px;
-            max-width: 685px;
-            width: 100%;
-            height: auto; 
-            max-height: fit-content; 
-            overflow-y: auto;
-        }
+        @import './components/workshop/workshopPreview/style.css';
     </style>
+
+    <img id="edit" src="./Assets/SVGs/edit.png" alt="settings" style="width: 26px; height: 25px;">
+    <div id="preview-content"></div>
 `;
 //#endregion WORKSHOPPREVIEW
 
@@ -28,44 +19,34 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+        this.$previewContent = this._shadowRoot.querySelector("#preview-content");
+        this.$edit = this._shadowRoot.querySelector("#edit");
     }
 
     // component attributes
     static get observedAttributes() {
-        return ['html'];
+        return ['html', "id"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === 'html') {
-            const previewContainer = this._shadowRoot.querySelector('#preview-content');
-    
-            if (previewContainer) {
-                previewContainer.innerHTML = newValue; // Alleen de inhoud bijwerken
-            } else {
-                this._shadowRoot.innerHTML = /*html*/`
-                    <style>
-                        :host {
-                            display: block;
-                            background-color: white;
-                            border-radius: 10px;
-                            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-                            padding: 20px;
-                            margin-bottom: 50px;
-                            max-width: 685px;
-                            width: 100%;
-                            height: auto; 
-                            max-height: fit-content; 
-                            overflow-y: auto;
-                        }
-                    </style>
-                    <div id="preview-content">${newValue}</div>
-                `;
-            }
+            this.$previewContent.innerHTML = newValue;
         }
     }
     
-    connectedCallback() {
+    connectedCallback() {   
+        this.$edit.addEventListener('click', () => {
+            this.tabWithWorkshopHandler("workshoppage", "workshop", this.getAttribute("id")); 
+        })
 
+    }
+
+    tabWithWorkshopHandler(tabID, componentName, componentID) {
+        this.dispatchEvent(new CustomEvent('tabID', {
+            bubbles: true,
+            composed: true,
+            detail: {tabID, componentName, componentID}
+        })); 
     }
 
 

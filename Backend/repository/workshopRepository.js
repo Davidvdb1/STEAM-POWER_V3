@@ -4,14 +4,23 @@ const Workshop = require('../model/workshop');
 
 class WorkshopRepository {
     async create(workshop) {
-        workshop.validate();
         const prismaWorkshop = await prisma.workshop.create({ data: workshop });
         return Workshop.from(prismaWorkshop);
     }
 
-    async update(workshop) {
-        workshop.validate();
-        const prismaWorkshop = await prisma.workshop.update({ where: { id: workshop.id }, data: workshop });
+    async update(id, updatedWorkshop) {
+        const existingWorkshop = await this.findById(id);
+        if (!existingWorkshop) {
+            throw new Error("Workshop niet gevonden");
+        }
+
+        const prismaWorkshop = await prisma.workshop.update({
+            where: { id },
+            data: {
+                ...updatedWorkshop,
+            },
+        });
+
         return Workshop.from(prismaWorkshop);
     }
 
