@@ -6,6 +6,8 @@ import "../../pages/campOverviewPage/campOverviewPage.js"
 import "../../pages/campInfoPage/campInfoPage.js"
 import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
+import "../../pages/userLoginPage/userLoginPage.js"
+import "../../pages/groupLoginPage/groupLoginPage.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -64,6 +66,8 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
             { id: "users", label: "Gebruikers" },
             { id: "sign-up", label: "Nieuw account" },
             { id: "logout", label: "Logout" },
+            { id: "userloginpage", label: "Leerkracht aanmelden" },
+            { id: "grouploginpage", label: "Groep aanmelden" }
         ];
     
         this.addEventListener("tab", this.tabHandler);
