@@ -1,8 +1,7 @@
 const express = require('express');
-const { EnergyDataService } = require('../service/energyDataService');
+const energyDataService = require('../service/energyDataService');
 
 const router = express.Router();
-const energyDataService = new EnergyDataService();
 
 router.post('/', async (req, res) => {
     try {
