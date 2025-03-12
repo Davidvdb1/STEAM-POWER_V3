@@ -55,7 +55,11 @@ window.customElements.define('grouploginform-れ', class extends HTMLElement {
                 sessionStorage.setItem('loggedInUser',
                     JSON.stringify(token)
                 );
-                // TODO: redirect to home page
+                this.dispatchEvent(new CustomEvent('tab', {
+                    bubbles: true,
+                    composed: true,
+                    detail: "campoverviewpage"
+                }));
             } else {
                 const message = await response.json();
                 this.errorMessageElement.textContent = message.error || 'Inloggen mislukt. Probeer het opnieuw.';
