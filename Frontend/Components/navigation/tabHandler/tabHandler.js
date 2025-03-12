@@ -11,7 +11,7 @@ import "../../pages/groupLoginPage/groupLoginPage.js"
 import "../../authentication/logout/logout.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region TABHANDLER
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
@@ -21,7 +21,7 @@ template.innerHTML = /*html*/`
     <header-れ></header-れ>
     <content-れ></content-れ> 
 `;
-//#endregion TEMPLATE
+//#endregion TABHANDLER
 
 //#region CLASS
 window.customElements.define('tabhandler-れ', class extends HTMLElement {

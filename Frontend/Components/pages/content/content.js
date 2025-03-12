@@ -1,14 +1,14 @@
 //#region IMPORTS
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region CONTENT
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
         @import './components/pages/content/style.css';
     </style>
 `;
-//#endregion TEMPLATE
+//#endregion CONTENT
 
 //#region CLASS
 window.customElements.define('content-れ', class extends HTMLElement {

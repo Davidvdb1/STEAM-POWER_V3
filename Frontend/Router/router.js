@@ -4,7 +4,7 @@ import "../Apps/Home/home.js"
 //#endregion IMPORTS
 
 
-//#region TEMPLATE
+//#region ROUTER
 const router = document.createElement('template');
 router.innerHTML = /* html */ `
 <style>
@@ -12,7 +12,7 @@ router.innerHTML = /* html */ `
 </style>
 <div id="router-container">
 </div>`;
-//#endregion TEMPLATE
+//#endregion ROUTER
 
 //#region CLASS
 window.customElements.define('router-ɮ', class extends HTMLElement {

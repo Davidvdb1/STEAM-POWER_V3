@@ -2,7 +2,7 @@
 import "../../../Components/navigation/navigationItem/navigationItem.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region NAVIGATIONLIST
 let template = document.createElement('template');
 template.innerHTML = /*html*/`  
     <style>
@@ -11,7 +11,7 @@ template.innerHTML = /*html*/`
 
     <ul class="navigationList"></ul>
 `;
-//#endregion TEMPLATE
+//#endregion NAVIGATIONLIST
 
 //#region CLASS
 window.customElements.define('navigationlist-れ', class extends HTMLElement {

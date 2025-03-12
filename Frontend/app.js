@@ -2,12 +2,12 @@
 import "./Apps/Home/home.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region APP
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
 <home-ɮ></home-ɮ>
     `;
-//#endregion TEMPLATE
+//#endregion APP
 //#region CLASS
 window.customElements.define('main-ɮ', class extends HTMLElement {
     constructor() {
