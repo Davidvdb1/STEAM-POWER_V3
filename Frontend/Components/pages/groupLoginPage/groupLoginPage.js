@@ -1,23 +1,23 @@
 //#region IMPORTS
-import "../../Components/navigation/tabHandler/tabHandler.js"
-import "../../Components/microbit/microbitBluetoothConnection/microbitBluetoothConnection.js"
+import "../../../Components/authentication/groupLoginForm/groupLoginForm.js"
 //#endregion IMPORTS
 
-//#region HOME
+//#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
-    <tabhandler-れ></tabhandler-れ> 
-    <microbitbluetoothconnection-れ></microbitbluetoothconnection-れ>
+    <style>
+        @import './components/pages/groupLoginPage/style.css';
+    </style>
+    <grouploginform-れ></grouploginform-れ>
 `;
-//#endregion HOME
+//#endregion TEMPLATE
 
 //#region CLASS
-window.customElements.define('home-ɮ', class extends HTMLElement {
+window.customElements.define('grouploginpage-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
     }
 
     // component attributes

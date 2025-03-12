@@ -1,0 +1,14 @@
+.group-login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.group-login-page .login-container {
+  background-color: white;
+  padding: 40px;
+  border-radius: 5px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}/*# sourceMappingURL=style.css.map */

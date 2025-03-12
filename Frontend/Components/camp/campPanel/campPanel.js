@@ -3,7 +3,7 @@ import "../../filterAndSort/sortPanel/sortPanel.js"
 import "../../filterAndSort/filterPanel/filterPanel.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region CAMPPANEL
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
@@ -20,7 +20,7 @@ template.innerHTML = /*html*/`
         <button id="addCamp" class="add">kamp toevoegen</button>
     </div>
 `;
-//#endregion TEMPLATE
+//#endregion CAMPPANEL
 
 //#region CLASS
 window.customElements.define('camppanel-れ', class extends HTMLElement {

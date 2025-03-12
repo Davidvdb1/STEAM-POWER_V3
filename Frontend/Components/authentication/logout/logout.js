@@ -1,23 +1,21 @@
 //#region IMPORTS
-import "../../Components/navigation/tabHandler/tabHandler.js"
-import "../../Components/microbit/microbitBluetoothConnection/microbitBluetoothConnection.js"
 //#endregion IMPORTS
 
-//#region HOME
+//#region LOGOUT
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
-    <tabhandler-れ></tabhandler-れ> 
-    <microbitbluetoothconnection-れ></microbitbluetoothconnection-れ>
+    <style>
+        @import './components/authentication/userLoginForm/style.css';
+    </style>
 `;
-//#endregion HOME
+//#endregion LOGOUT
 
 //#region CLASS
-window.customElements.define('home-ɮ', class extends HTMLElement {
+window.customElements.define('logout-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$example = this._shadowRoot.querySelector(".example");
     }
 
     // component attributes
@@ -30,8 +28,12 @@ window.customElements.define('home-ɮ', class extends HTMLElement {
     }
 
     connectedCallback() {
-
-    }
-
+        sessionStorage.removeItem('loggedInUser');
+        this.dispatchEvent(new CustomEvent('tab', {
+            bubbles: true,
+            composed: true,
+            detail: "campoverviewpage"
+        }));
+    }    
 });
 //#endregion CLASS
