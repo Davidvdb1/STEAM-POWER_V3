@@ -8,6 +8,7 @@ import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
 import "../../pages/userLoginPage/userLoginPage.js"
 import "../../pages/groupLoginPage/groupLoginPage.js"
+import "../../authentication/logout/logout.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
