@@ -9,7 +9,7 @@ template.innerHTML = /*html*/`
     </style>
     <form class="group-login-form">
         <input type="text" placeholder="Code" required>
-        <button type="submit">Login</button>
+        <button type="submit">Aanmelden</button>
     </form>
 `;
 //#endregion TEMPLATE

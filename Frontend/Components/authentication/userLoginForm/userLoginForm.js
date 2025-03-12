@@ -8,9 +8,9 @@ template.innerHTML = /*html*/`
         @import './components/authentication/userLoginForm/style.css';
     </style>
     <form class="user-login-form">
-        <input type="text" placeholder="Username" required>
-        <input type="password" placeholder="Password" required>
-        <button type="submit">Login</button>
+        <input type="text" placeholder="Gebruikersnaam" required>
+        <input type="password" placeholder="Wachtwoord" required>
+        <button type="submit">Aanmelden</button>
     </form>
 `;
 //#endregion TEMPLATE
