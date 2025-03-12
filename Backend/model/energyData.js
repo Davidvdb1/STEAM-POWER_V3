@@ -1,8 +1,7 @@
 class EnergyData {
-    constructor({ id = undefined, timestamp = undefined, groupId, value, time }, validate = true) {
+    constructor({ id = undefined, groupId, value, time }, validate = true) {
         this.id = id;
         this.groupId = groupId;
-        this.timestamp = timestamp;
         this.value = value;
         this.time = time;
         if (validate) {
@@ -11,7 +10,7 @@ class EnergyData {
     }
 
     validate() {
-        if (!this.groupId || typeof this.groupId !== 'number') {
+        if (!this.groupId || typeof this.groupId !== 'string') {
             throw new Error('Invalid groupId');
         }
         if (!this.value || typeof this.value !== 'number') {

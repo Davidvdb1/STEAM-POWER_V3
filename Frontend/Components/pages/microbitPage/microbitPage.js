@@ -107,7 +107,9 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
 
     // service
     async getEnergyData() { // TODO: move this to graph component
-        const groupId = localStorage.getItem('groupId');
+        // const groupId = localStorage.getItem('groupId');
+        const groupId = "20e2ab26-b9e3-4655-af75-d050145fe1a2"
+
         try {
             return await fetch(window.env.BACKEND_URL + `/energydata/${groupId}`);
         } catch (error) {

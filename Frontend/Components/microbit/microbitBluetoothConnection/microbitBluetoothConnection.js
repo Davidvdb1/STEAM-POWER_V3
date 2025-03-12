@@ -112,11 +112,12 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
 
     async readPin0Value() { // TODO: Read all pins and make function tos set which pins are read
         const view = await this.pinDataCharacteristic.readValue();
-        const analogValue = new DataView(view.buffer).getUint8(1, true);
+        const value = new DataView(view.buffer).getUint8(1, true);
 
-        const groupId = localStorage.getItem('groupId');
+        // const groupId = localStorage.getItem('groupId');
+        const groupId = "20e2ab26-b9e3-4655-af75-d050145fe1a2"
         const time = new Date().toISOString();
-        const data = { groupId, analogValue, time };
+        const data = { groupId, value, time };
         
         const event = new CustomEvent('energydatareading', { detail: data, bubbles: true, composed: true });
         document.dispatchEvent(event);

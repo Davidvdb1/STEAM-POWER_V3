@@ -3,6 +3,7 @@ const EnergyData = require('../model/energyData');
 
 class EnergyDataService {
     async create(data) {
+        data.time = new Date(data.time);
         const energyData = new EnergyData(data);
         return await energyDataRepository.create(energyData);
     }
