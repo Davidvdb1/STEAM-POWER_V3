@@ -35,8 +35,9 @@ class GroupService {
         const group = await groupRepository.findByCode(code);
         if (!group) throw new Error('Geen groep met deze code gevonden');
 
-        const JWT = generateJWTtoken(group.name, 'GROUP');
+        const JWT = generateJWTtoken(group.id, group.name, 'GROUP');
         const response = {
+            groupId: group.id,
             token: JWT,
             name: group.name,
             role: 'GROUP',
