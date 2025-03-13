@@ -1,7 +1,7 @@
 //#region IMPORTS
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region NAVIGATIONITEM
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
@@ -12,7 +12,7 @@ template.innerHTML = /*html*/`
         <button id="" class=""></button>
     </li>
 `;
-//#endregion TEMPLATE
+//#endregion NAVIGATIONITEM
 
 //#region CLASS
 window.customElements.define('navigationitem-れ', class extends HTMLElement {

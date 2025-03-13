@@ -42,9 +42,11 @@ model Camp {
 }
 
 model Workshop {
-    id    String @id @default(uuid())
-    camps Camp[]
-    html  String
+    id          String  @id @default(uuid())
+    camp        Camp?    @relation(fields: [campId], references: [id])
+    campId      String?
+    title       String
+    html        String
 }
 
 model Group {

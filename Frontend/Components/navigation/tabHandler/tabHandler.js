@@ -6,9 +6,12 @@ import "../../pages/campOverviewPage/campOverviewPage.js"
 import "../../pages/campInfoPage/campInfoPage.js"
 import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
+import "../../pages/userLoginPage/userLoginPage.js"
+import "../../pages/groupLoginPage/groupLoginPage.js"
+import "../../authentication/logout/logout.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region TABHANDLER
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
@@ -18,7 +21,7 @@ template.innerHTML = /*html*/`
     <header-れ></header-れ>
     <content-れ></content-れ> 
 `;
-//#endregion TEMPLATE
+//#endregion TABHANDLER
 
 //#region CLASS
 window.customElements.define('tabhandler-れ', class extends HTMLElement {
@@ -64,6 +67,8 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
             { id: "users", label: "Gebruikers" },
             { id: "sign-up", label: "Nieuw account" },
             { id: "logout", label: "Logout" },
+            { id: "userloginpage", label: "Leerkracht aanmelden" },
+            { id: "grouploginpage", label: "Groep aanmelden" }
         ];
     
         this.addEventListener("tab", this.tabHandler);

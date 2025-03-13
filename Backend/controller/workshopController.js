@@ -49,4 +49,19 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.get('/title/:title', async (req, res) => {
+    try {
+        const workshop = await workshopService.getByTitle(req.params.title);
+        if (!workshop) {
+            console.log("❌ Workshop niet gevonden:", req.params.title);
+            return res.status(400).json({ error: 'Workshop niet gevonden' });
+        }
+        res.status(200).json(workshop);
+    } catch (error) {
+        console.error("❌ Fout in GET /title/:title:", error);
+        res.status(500).json({ error: 'Internal server error', details: error.message });
+    }
+});
+
+
 module.exports = router;
