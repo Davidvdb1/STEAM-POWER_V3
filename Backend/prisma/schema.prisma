@@ -49,7 +49,8 @@ model Camp {
 
 model Workshop {
     id          String  @id @default(uuid())
-    camps       Camp[]
+    camp        Camp?    @relation(fields: [campId], references: [id])
+    campId      String?
     title       String
     html        String
 }

@@ -98,6 +98,21 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.get('/unlinked-workshops/:campId', async (req, res) => {
+    try {
+        const { campId } = req.params;
 
+        if (!campId) {
+            return res.status(400).json({ error: "Camp ID is vereist" });
+        }
+
+        const workshops = await campService.getUnlinkedWorkshops(campId);
+
+        res.status(200).json(workshops);
+    } catch (error) {
+        console.error("❌ Fout bij ophalen van niet-gekoppelde workshops:", error);
+        res.status(500).json({ error: "Internal server error", details: error.message });
+    }
+});
 
 module.exports = router;

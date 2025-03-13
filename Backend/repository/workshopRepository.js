@@ -52,6 +52,26 @@ class WorkshopRepository {
         const prismaWorkshops = await prisma.workshop.findMany();
         return prismaWorkshops.map(Workshop.from);
     }
+
+    async findUnlinkedWorkshops(campId) {
+        try {
+            const workshops = await prisma.workshop.findMany({
+                where: {
+                    campId: { not: campId.toString() } 
+                },
+                select: {
+                    id: true,
+                    title: true,
+                    campId: true
+                }
+            });
+            return workshops;
+        } catch (error) {
+            console.error("❌ Fout bij ophalen van niet-gekoppelde workshops uit database:", error);
+            throw new Error("Databasequery mislukt voor niet-gekoppelde workshops");
+        }
+    }
+    
 }
 
 module.exports = new WorkshopRepository();

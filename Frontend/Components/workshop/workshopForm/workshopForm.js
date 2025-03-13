@@ -9,15 +9,15 @@ template.innerHTML = /*html*/`
     </style>
 
     <h1>Workshop Editor</h1>
-    <p id="statusmessage"></p>
     <input type="text" id="title" placeholder="Titel">
     <div id="toolbar">
-        <img id="bold-image" src="../Frontend/Assets/SVGs/textIcons/Bold_Idle.svg" alt="Bold Icon">
-        <img id="underline-image" src="../Frontend/Assets/SVGs/textIcons/Underline_Idle.svg" alt="Underline Icon">
+        <img id="bold-image" src="../Frontend/Assets/SVGs/textIcons/Bold_Idle.svg" alt="Bold Icon" class='toolbar-button'>
+        <img id="underline-image" src="../Frontend/Assets/SVGs/textIcons/Underline_Idle.svg" alt="Underline Icon" class='toolbar-button'>
         <img id="italic-image" src="../Frontend/Assets/SVGs/textIcons/Italic_Idle.svg" alt="Italics Icon" class='toolbar-button'>
         <img id="link-image" src="../Frontend/Assets/SVGs/textIcons/Link_Idle.svg" alt="Link Icon" class='toolbar-button'>
         <img id="list-image" src="../Frontend/Assets/SVGs/textIcons/List_Idle.svg" alt="Bullet List Icon" class='toolbar-button'>
         <img id="image-image" src="../Frontend/Assets/SVGs/textIcons/Image_Idle.svg" alt="Link Icon" class='toolbar-button'>
+        <img id="html-image" src="../Frontend/Assets/SVGs/textIcons/Modal_Idle.svg" alt="html Icon" class='toolbar-button'>
         <input type="file" id="image-input" class="image-input">
         <select id="heading-select">
             <option value="P">P</option>
@@ -33,6 +33,7 @@ template.innerHTML = /*html*/`
     </div>
  
     <button>Save</button>
+    <p id="statusmessage"></p>
 `;
 //#endregion WORKSHOPFORUM
 
@@ -42,7 +43,7 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-
+    
         this.$boldImage = this._shadowRoot.querySelector('#bold-image');
         this.$underlineImage = this._shadowRoot.querySelector('#underline-image');
         this.$italicImage = this._shadowRoot.querySelector('#italic-image');
@@ -53,14 +54,24 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         this.$textEditor = this._shadowRoot.querySelector('#text-editor-p-tag');
         this.$bulletListImage = this._shadowRoot.querySelector('#list-image');
         this.$saveButton = this._shadowRoot.querySelector('button');
-        this.$boldImage.classList.add('toolbar-button');
-        this.$underlineImage.classList.add('toolbar-button');
-        this.$italicImage.classList.add('toolbar-button');
-        this.$workshop = null;
+        this.$htmlEditor = this._shadowRoot.querySelector('#html-image');
         this.$title = this._shadowRoot.querySelector("#title");
-
+    
+        // 🔹 Creëer een textarea voor HTML-weergave
+        this.$htmlTextarea = document.createElement("textarea");
+        this.$htmlTextarea.style.display = "none";  // Verberg standaard
+        this.$htmlTextarea.style.width = "100%";
+        this.$htmlTextarea.style.height = "300px";
+        this.$htmlTextarea.style.fontFamily = "monospace";
+        this.$htmlTextarea.style.fontSize = "14px";
+        this.$htmlTextarea.style.border = "1px solid #ccc";
+        this.$htmlTextarea.style.padding = "10px";
+        this.$htmlTextarea.style.resize = "vertical";
+    
+        // Voeg de textarea toe NA de editor
+        this.$textEditor.parentNode.insertBefore(this.$htmlTextarea, this.$textEditor.nextSibling);
     }
-
+    
     static get observedAttributes() {
         return ["workshop"];
     }
@@ -81,9 +92,12 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         this.$linkImage.addEventListener('click', this.insertLink.bind(this));
         this.$imageInput.addEventListener('change', this.insertImage.bind(this));
         this.$saveButton.addEventListener('click', this.saveContent.bind(this));
-        this.$textEditor.addEventListener('input', this.previewHandler.bind(this));
+        this.$textEditor.addEventListener('input', this.textPreviewHandler.bind(this));
+        this.$htmlTextarea.addEventListener('input', this.htmlPreviewHandler.bind(this));
         this.$headingSelect.addEventListener('change', this.changeHeading.bind(this));
         this.$bulletListImage.addEventListener('click', this.insertBulletList.bind(this));
+        this.$htmlEditor.addEventListener('click', () => this.toggleHtmlEditor());
+
     
         document.addEventListener('selectionchange', () => {
             this.updateButtonState();
@@ -150,6 +164,22 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         document.execCommand('italic', false, null);
         this.updateButtonState();
     }
+
+    toggleHtmlEditor() {
+        const isHtmlMode = this.$textEditor.style.display === "none"; 
+    
+        if (isHtmlMode) {
+            this.$textEditor.innerHTML = this.$htmlTextarea.value;
+            this.$textEditor.style.display = "block";
+            this.$htmlTextarea.style.display = "none";
+        } else {
+            this.$htmlTextarea.value = this.$textEditor.innerHTML;
+            this.$textEditor.style.display = "none";
+            this.$htmlTextarea.style.display = "block";
+        }
+    }
+    
+    
 
     changeHeading() {
         const selection = window.getSelection();
@@ -300,28 +330,40 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
     saveContent() {
         const workshop = this.getAttribute("workshop");
         const camp = this.getAttribute("camp");
+    
+        const content = this.$textEditor.style.display === "none" 
+            ? this.$htmlTextarea.value  
+            : this.$textEditor.innerHTML;
+    
         if (workshop) {
-            this.updateWorkshop(this.$textEditor.innerHTML, this.$title.value);
+            this.updateWorkshop(content, this.$title.value);
         } 
         
         if (camp) {
-            this.createWorkshop(this.$textEditor.innerHTML, this.$title.value);
+            this.createWorkshop(content, this.$title.value);
         }
-
-        
     }
-
+    
     updateButtonState() {
         this.$boldImage.classList.toggle('active', document.queryCommandState('bold'));
         this.$underlineImage.classList.toggle('active', document.queryCommandState('underline'));
         this.$italicImage.classList.toggle('active', document.queryCommandState('italic'));
+        this.$htmlEditor.classList.toggle('active', document.queryCommandState('html'));
     }
 
-    previewHandler() {
+    textPreviewHandler() {
         this.dispatchEvent(new CustomEvent('preview', {
             bubbles: true,
             composed: true,
             detail: this.$textEditor.innerHTML
+        })); 
+    }
+
+    htmlPreviewHandler() {
+        this.dispatchEvent(new CustomEvent('preview', {
+            bubbles: true,
+            composed: true,
+            detail: this.$htmlTextarea.value
         })); 
     }
 
@@ -454,7 +496,6 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
             }
     
             const data = await response.json();
-            console.log("✅ Workshop succesvol toegevoegd aan kamp:", data);
     
             return data;
         } catch (error) {
