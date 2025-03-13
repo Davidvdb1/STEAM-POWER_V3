@@ -27,12 +27,16 @@ window.customElements.define('workshoppage-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ["workshop"];
+        return ["workshop", "camp"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "workshop") {
-            this.$form.setAttribute("id", newValue);
+            this.$form.setAttribute("workshop", newValue);
+        }
+
+        if (name === "camp") {
+            this.$form.setAttribute("camp", newValue);
         }
     }
 

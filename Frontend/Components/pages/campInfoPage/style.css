@@ -1,3 +1,4 @@
+@charset "UTF-8";
 :host {
   display: flex;
   flex-direction: column;
@@ -10,7 +11,6 @@
 #workshops {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
-  grid-template-rows: repeat(auto-fill, 1fr);
   gap: 50px;
   justify-content: center;
   align-items: stretch;
@@ -20,7 +20,6 @@
 
 button {
   background-color: #9FDAF9;
-  margin: 10px;
   white-space: nowrap;
   font-size: 1.1rem;
   color: #002757;
@@ -32,7 +31,9 @@ button {
   font-weight: bold;
   border-style: solid;
   border-color: #9FDAF9;
+  width: 350px;
 }
+
 button:hover {
   border-color: #002757;
 }
@@ -40,4 +41,71 @@ button:hover {
 #campinfo {
   margin-top: 30px;
   margin-bottom: 50px;
+}
+
+#buttons {
+  display: flex;
+  gap: 50px;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 🌟 Dropdown Styling */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+  min-width: 330px;
+  border-radius: 5px;
+  padding: 10px;
+  z-index: 10;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dropdown.open .dropdown-content {
+  display: block;
+}
+
+/* 🌟 Styling voor de checkbox lijst */
+#workshopList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#workshopList li {
+  padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+#workshopList li label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+#workshopList input[type=checkbox] {
+  transform: scale(1.2);
+}
+
+#confirmSelection {
+  width: 100%;
+  margin-bottom: 10px;
+  background-color: #E30147;
+  color: #002757;
+  border-color: #E30147;
+}
+
+#confirmSelection:hover {
+  border-color: #6d0123;
 }/*# sourceMappingURL=style.css.map */

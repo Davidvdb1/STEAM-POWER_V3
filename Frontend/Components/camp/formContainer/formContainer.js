@@ -10,10 +10,10 @@ template.innerHTML = /*html*/`
     </style>
 
     <h1>Kamp forum</h1> 
-    <p id="statusmessage"></p>
     <form class="form">
         <img id="imagePreview" src="" alt="Afbeelding preview">
         <button>Kamp opslaan</button>
+        <p id="statusmessage"></p>
     </form>
 `;
 //#endregion FORM

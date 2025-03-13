@@ -1,7 +1,8 @@
 class Workshop {
-    constructor({id = undefined, html}) {
+    constructor({id = undefined, title, html}) {
         this.id = id;
         this.html = html;
+        this.title = title;
     }
 
     static from(prismaWorkshop) {
