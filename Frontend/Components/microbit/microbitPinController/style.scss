@@ -1,0 +1,23 @@
+#pin-configurations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.pin-configuration {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    width: 150px;
+}
+
+.pin-configuration label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.pin-configuration select {
+    margin-bottom: 10px;
+}

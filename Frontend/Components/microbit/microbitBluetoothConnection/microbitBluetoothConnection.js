@@ -138,9 +138,8 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         } else {
             this.pinConfiguration.set(event.detail.pin, event.detail.configuration);
         }
-        console.log('Pin configuration set to:', this.pinConfiguration);
         await this.configurePins();
-        sessionStorage.setItem('pinConfiguration', JSON.stringify(this.pinConfiguration));
+        sessionStorage.setItem('pinConfiguration', JSON.stringify(Object.fromEntries(this.pinConfiguration)));
     }
 
     async configurePins() {
@@ -175,7 +174,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
             const response = await this.postEnergyData({...data, pin});
             const body = await response.json();
             const datapoint = body.energyData;
-
+            
             const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
             document.dispatchEvent(event);
 
