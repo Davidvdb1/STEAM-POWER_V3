@@ -114,10 +114,10 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         const view = await this.pinDataCharacteristic.readValue();
         const value = new DataView(view.buffer).getUint8(1, true);
 
-        // const groupId = localStorage.getItem('groupId');
-        const groupId = "20e2ab26-b9e3-4655-af75-d050145fe1a2"
+        const groupId = JSON.parse(sessionStorage.getItem('loggedInUser')).groupId;
+    
         const time = new Date().toISOString();
-        const data = { groupId, value, time };
+        const data = { groupId, value, time, type: 'SOLAR' };
         
         const event = new CustomEvent('energydatareading', { detail: data, bubbles: true, composed: true });
         document.dispatchEvent(event);
@@ -151,9 +151,9 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     }
 
     // service
-    async postEnergyData(data = { groupId, value, time }) {
+    async postEnergyData(data = { groupId, value, time, type }) {
         try {
-            const jwt = localStorage.getItem('token');
+            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
             response = await fetch(window.env.BACKEND_URL + '/energydata', {
                 method: 'POST',
                 headers: {
