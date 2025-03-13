@@ -1,10 +1,11 @@
 class EnergyData {
-    constructor({ id = undefined, groupId, value, time, type }, validate = true) {
+    constructor({ id = undefined, groupId, value, time, type, pin }, validate = true) {
         this.id = id;
         this.groupId = groupId;
         this.value = value;
         this.time = time;
         this.type = type;
+        this.pin = pin;
         if (validate) {
             this.validate();
         }
