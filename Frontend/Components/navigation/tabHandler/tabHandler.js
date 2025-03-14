@@ -8,6 +8,7 @@ import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
 import "../../pages/userLoginPage/userLoginPage.js"
 import "../../pages/groupLoginPage/groupLoginPage.js"
+import "../../pages/workshopInfo/workshopInfo.js"   
 import "../../authentication/logout/logout.js"
 //#endregion IMPORTS
 
@@ -49,7 +50,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         const campIDFromUrl = urlParams.get("camp");
         const workshopIDFromUrl = urlParams.get("workshop");
     
-        this.landingPage = tabFromUrl
+        this.landingPage = tabFromUrl || "campoverviewpage";
         this.campID = campIDFromUrl
         this.workshopID = workshopIDFromUrl 
     

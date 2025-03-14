@@ -20,10 +20,15 @@ class CampRepository {
     async findById(id, includeWorkshops = false) {
         const prismaCamp = await prisma.camp.findUnique({
             where: { id },
-            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
+            include: { 
+                workshops: includeWorkshops 
+                    ? { orderBy: { position: 'asc' } } 
+                    : { select: { id: true } }
+            }
         });
         return prismaCamp ? Camp.from(prismaCamp) : null;
     }
+    
 
     async findByTitle(title, includeWorkshops = false) {
         const prismaCamp = await prisma.camp.findUnique({

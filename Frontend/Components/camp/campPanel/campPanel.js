@@ -81,7 +81,7 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
     
         const sortSelect = this.$sort.shadowRoot.querySelector("select");
         if (sortSelect) {
-            sortSelect.value = "none";
+            sortSelect.value = "date";
             sortSelect.dispatchEvent(new Event("change", { bubbles: true }));
         }
     

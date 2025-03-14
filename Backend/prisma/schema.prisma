@@ -38,7 +38,7 @@ model Camp {
     minAge      Int
     maxAge      Int
     picture     String
-    archived    Boolean
+    archived    Boolean @default(false)
 }
 
 model Workshop {
@@ -47,6 +47,8 @@ model Workshop {
     campId      String?
     title       String
     html        String
+    position    Int
+    archived    Boolean @default(false)
 }
 
 model Group {

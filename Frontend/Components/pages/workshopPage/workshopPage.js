@@ -44,9 +44,13 @@ window.customElements.define('workshoppage-れ', class extends HTMLElement {
         this.addEventListener("preview", this.previewHandler);
     
         setTimeout(() => {
-            const button = this.$preview?.shadowRoot?.querySelector("#edit");
-            if (button) {
-                button.remove();
+            const edit = this.$preview?.shadowRoot?.querySelector("#edit");
+            const visible = this.$preview?.shadowRoot?.querySelector("#visible");
+            if (edit) {
+                edit.remove();
+            }
+            if (visible) {
+                visible.remove();
             }
         }, 0);
     }
