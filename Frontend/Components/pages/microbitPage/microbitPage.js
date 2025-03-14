@@ -1,12 +1,8 @@
 //#region IMPORTS
+import '../../microbit/microbitPinController/microbitPinController.js';
 //#endregion IMPORTS
 
 //#region MICROBITPAGE
-const IOPINSERVICE_SERVICE_UUID = "e95d127b-251d-470a-a062-fa1922dfa9a8";
-const PINDATA_CHARACTERISTIC_UUID = "e95d8d00-251d-470a-a062-fa1922dfa9a8";
-const PINADCONFIGURATION_CHARACTERISTIC_UUID = "e95d5899-251d-470a-a062-fa1922dfa9a8";
-const PINIOCONFIGURATION_CHARACTERISTIC_UUID = "e95db9fe-251d-470a-a062-fa1922dfa9a8";
-
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
@@ -33,6 +29,7 @@ template.innerHTML = /*html*/`
         <option value="300000">5 minuten</option>
         <option value="600000">10 minuten</option>
     </select>
+    <microbitpincontroller-れ></microbitpincontroller-れ>
 `;
 //#endregion MICROBITPAGE
 
@@ -97,7 +94,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
     renderMeasurementList() {
         const list = this._shadowRoot.getElementById('measurementList');
         list.innerHTML = '';
-        this.energyData.slice(-5).forEach((data, index) => {
+        this.energyData.slice(-10).forEach((data, index) => {
             const listItem = document.createElement('li');
             listItem.textContent = `Measurement ${index + 1}: ${data.value} ${data.type} pin ${data.pin} at ${data.time}`;
             list.appendChild(listItem);
