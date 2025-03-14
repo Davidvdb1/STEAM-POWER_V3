@@ -166,7 +166,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         const pinValues = new Map();
         for (let i = 0; i < view.byteLength; i += 2) {
             const pinNumber = view.getUint8(i);
-            const pinValue = view.getUint8(i + 1);
+            const pinValue = Math.round(view.getUint8(i + 1) * 1023 / 255); // convert 8 bit value to 10 bit value
             pinValues.set(pinNumber, {groupId, value: pinValue, type: this.pinConfiguration.get(pinNumber).type, time: new Date().toISOString()});
         }
         
