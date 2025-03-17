@@ -8,7 +8,9 @@ template.innerHTML = /*html*/`
         @import './components/questions/adminQuestionComponent/style.css';
     </style>
     <div class="container">
-        <div class="image-box"></div>
+        <div class="image-box">
+            <img id="picture" src="" alt="Question Image" />
+        </div>
         <div class="text-content">
             <div class="title" id="title"></div>
             <div class="description" id="description"></div>
@@ -40,20 +42,12 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
 
-        this.image;
-        this.title;
-        this.description;
-        this.power;
-        this.score;
-        this.active;
-
-
         this.$toggleActive = this._shadowRoot.querySelector('#active');
     }
 
     // component attributes
     static get observedAttributes() {
-        return ['data-id', 'data-title', 'data-description', 'data-wattage', 'data-score', 'data-active'];
+        return ['data-id', 'data-title', 'data-description', 'data-wattage', 'data-score', 'data-active', 'data-picture'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -73,6 +67,9 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
             case 'data-active':
                 this.$toggleActive.checked = newValue === "false" ? false : true;
                 break;
+            case 'data-picture':
+                this._shadowRoot.querySelector('#picture').src = newValue;
+                break;
         }
     }
 
@@ -85,7 +82,7 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
         });
 
         this.$delete.addEventListener('click', () => {
-            // Logic to delete the question
+            this.dispatchEvent(new CustomEvent("request-delete"))
         });
 
         this.$toggleActive.addEventListener("change", async (event) => {
@@ -103,9 +100,6 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
                 console.log(error)
                 event.target.checked = !event.target.checked;
             }
-
-
-
         });
     }
 });

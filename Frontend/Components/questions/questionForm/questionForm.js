@@ -5,42 +5,40 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/questions/newQuestionModal/style.css';
+        @import './components/questions/questionForm/style.css';
     </style>
-    <div class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2 id="modal-title">Add New Question</h2>
             <form id="new-question-form">
 
-                <label for="title">Title:</label>
+                <label for="title">Titel:</label>
                 <input type="text" id="title" name="title" required>
+                <span class="error-message" id="title-error"></span>
 
-                <label for="description">Description:</label>
+                <label for="description">Beschrijving:</label>
                 <textarea id="description" name="description" required></textarea>
+                <span class="error-message" id="description-error"></span>
 
                 <label for="wattage">Wattage:</label>
-                <input type="number" id="wattage" name="wattage" required>
+                <input type="number" id="wattage" name="wattage" min="0" required>
+                <span class="error-message" id="wattage-error"></span>
 
+                <label for="score">Score:</label>
+                <input type="number" id="score" name="score" min="0" required>
+                <span class="error-message" id="score-error"></span>
 
                 <div class="picture-box">
                     <img id="picture-preview" src="" alt="Question Picture" />
                 </div>
-                <label for="picture">Picture:</label>
-                <input type="file" id="picture" name="picture" required>
-
-                <label for="score">Score:</label>
-                <input type="number" id="score" name="score" required>
+                <label for="picture">Afbeelding:</label>
+                <input type="file" id="picture" name="picture">
+                <span class="error-message" id="picture-error"></span>
 
                 <button id="submit-button">Save Question</button>
             </form>
-        </div>
-    </div>
 `;
 //#endregion TEMPLATE
 
 //#region CLASS
-window.customElements.define('newquestionmodal-れ', class extends HTMLElement {
+window.customElements.define('newquestionform-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
@@ -73,19 +71,8 @@ window.customElements.define('newquestionmodal-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        this.$modal = this._shadowRoot.querySelector('.modal');
-        this.$modalTitle = this._shadowRoot.querySelector('#modal-title');
-
-        this.$modalTitle.textContent = this.hasAttribute("data-id") ? "Pas aan" : "Voeg toe"
-
-
-        this.$close = this._shadowRoot.querySelector('.close');
         this.$submitButton = this._shadowRoot.querySelector('#submit-button');
         this.$form = this._shadowRoot.querySelector('#new-question-form');
-
-        this.$close.addEventListener('click', () => {
-            this.remove();
-        });
 
         this.$submitButton.addEventListener('click', this.handleSubmit.bind(this));
 
@@ -93,6 +80,13 @@ window.customElements.define('newquestionmodal-れ', class extends HTMLElement {
         this.$picturePreview = this._shadowRoot.querySelector('.picture-box img');
 
         this.$pictureInput.addEventListener('change', this.handlePicturePreview.bind(this));
+
+        // Make picture input required only if data-id is not set
+        if (!this.hasAttribute('data-id')) {
+            this.$pictureInput.setAttribute('required', 'required');
+        } else {
+            this.$pictureInput.removeAttribute('required');
+        }
     }
 
     handlePicturePreview(event) {
@@ -106,8 +100,38 @@ window.customElements.define('newquestionmodal-れ', class extends HTMLElement {
         }
     }
 
+    validateForm() {
+        let isValid = true;
+        const fields = ['title', 'description', 'wattage', 'score'];
+        fields.forEach(field => {
+            const input = this._shadowRoot.querySelector(`#${field}`);
+            const errorMessage = this._shadowRoot.querySelector(`#${field}-error`);
+            if (!input.checkValidity()) {
+                errorMessage.textContent = input.validationMessage;
+                isValid = false;
+            } else {
+                errorMessage.textContent = '';
+            }
+        });
+
+        // Validate picture input only if required
+        const pictureInput = this._shadowRoot.querySelector('#picture');
+        const pictureErrorMessage = this._shadowRoot.querySelector('#picture-error');
+        if (pictureInput.hasAttribute('required') && !pictureInput.checkValidity()) {
+            pictureErrorMessage.textContent = pictureInput.validationMessage;
+            isValid = false;
+        } else {
+            pictureErrorMessage.textContent = '';
+        }
+
+        return isValid;
+    }
+
     async handleSubmit(event) {
         event.preventDefault();
+        if (!this.validateForm()) {
+            return;
+        }
         const formData = new FormData(this.$form);
         const data = Object.fromEntries(formData.entries());
 
@@ -146,11 +170,10 @@ window.customElements.define('newquestionmodal-れ', class extends HTMLElement {
             });
 
             if (response.ok) {
-                this.dispatchEvent(new CustomEvent("question-modal:succes", {
+                this.dispatchEvent(new CustomEvent("question-form:succes", {
                     bubbles: true,
                     composed: true
                 }))
-                this.remove();
             } else {
                 const error = await response.json();
                 alert(error.message);

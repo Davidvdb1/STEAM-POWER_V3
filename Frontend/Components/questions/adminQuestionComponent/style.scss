@@ -88,3 +88,18 @@ button {
         border-color: #002757
     }
 }
+
+button#delete {
+    background-color: #F9A9A9;
+    border-color: #F9A9A9;
+    color: #570000;
+
+    &:hover {
+        border-color: #570000;
+    }
+}
+
+img {
+    width: 100%;
+    height: auto;
+}

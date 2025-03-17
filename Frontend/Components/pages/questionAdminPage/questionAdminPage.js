@@ -1,6 +1,9 @@
 //#region IMPORTS
 import "../../questions/adminQuestionComponent/adminQuestionComponent.js"
 import "../../questions/newQuestionModal/newQuestionModal.js"
+import "../../questions/modal/genericModal.js"
+import "../../questions/questionForm/questionForm.js"
+import "../../questions/confirmDeleteForm/confirmDeleteForm.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -36,12 +39,12 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         this.$addQuestionButton = this._shadowRoot.querySelector("#add-question");
         this.$questionsContainer = this._shadowRoot.querySelector("#questions-container");
 
-        this.$addQuestionButton.addEventListener('click', () => {
-            const newQuestionModal = document.createElement("newquestionmodal-れ");
-            this._shadowRoot.appendChild(newQuestionModal);
-        });
+        this.$addQuestionButton.addEventListener('click', () => this.openQuestionModal());
 
-        this.addEventListener("question-modal:succes", async () => {
+        this.addEventListener("confirm-delete", (e) => this.deleteQuestion(e.detail.id))
+
+        this.addEventListener("question-form:succes", async () => {
+
             await this.fetchQuestions();
         })
 
@@ -68,8 +71,64 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
             questionElement.setAttribute('data-wattage', question.wattage);
             questionElement.setAttribute('data-score', question.score);
             questionElement.setAttribute('data-active', question.active);
-            questionElement.addEventListener('edit', () => this.editQuestion(question));
+            questionElement.setAttribute('data-picture', question.picture); // Add this line
+            questionElement.addEventListener('edit', () => this.openQuestionModal(question));
+            questionElement.addEventListener('request-delete', () => this.openDeleteQuestionModal(question.id));
             this.$questionsContainer.appendChild(questionElement);
+        });
+    }
+
+    async deleteQuestion(id) {
+        try {
+            const response = await fetch(`${window.env.BACKEND_URL}/questions/${id}`, {
+                method: 'DELETE'
+            });
+            if (response.ok) {
+                await this.fetchQuestions();
+            } else {
+                const error = await response.json();
+                alert(error.message);
+            }
+        } catch (error) {
+            console.error('Error deleting question:', error);
+        }
+    }
+
+    openDeleteQuestionModal(id) {
+        const confirmationModal = document.createElement("generic-modal-れ");
+        const confirmationForm = document.createElement("confirmQuestionDeleteForm-れ");
+        confirmationForm.setAttribute("id", id);
+        this._shadowRoot.appendChild(confirmationModal);
+
+        confirmationModal.addEventListener("confirm-delete", () => confirmationModal.remove());
+        confirmationModal.addEventListener("cancel-delete", () => confirmationModal.remove());
+
+        confirmationModal.setTitle("Ben je zeker?")
+        confirmationModal.setBody(confirmationForm);
+    }
+
+    openQuestionModal(question) {
+        const questionModal = document.createElement("generic-modal-れ");
+        const questionForm = document.createElement("newquestionform-れ");
+        this._shadowRoot.appendChild(questionModal);
+
+        questionModal.setTitle("Voeg vraag toe");
+        if (question) {
+            questionModal.setTitle("Pas vraag aan");
+
+            questionForm.setAttribute('data-id', question.id);
+            questionForm.setAttribute('data-title', question.title);
+            questionForm.setAttribute('data-description', question.description);
+            questionForm.setAttribute('data-wattage', question.wattage);
+            questionForm.setAttribute('data-score', question.score);
+            questionForm.setAttribute('data-active', question.active);
+            questionForm.setAttribute('data-picture', question.picture);
+        }
+
+        questionModal.setBody(questionForm);
+
+        questionModal.addEventListener("question-form:succes", async () => {
+            setTimeout(() => questionModal.close(), 1000);
         });
     }
 
@@ -79,10 +138,21 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         editQuestionModal.setAttribute('data-title', question.title);
         editQuestionModal.setAttribute('data-description', question.description);
         editQuestionModal.setAttribute('data-wattage', question.wattage);
-        editQuestionModal.setAttribute('data-image', question.image);
         editQuestionModal.setAttribute('data-score', question.score);
         editQuestionModal.setAttribute('data-active', question.active);
+        editQuestionModal.setAttribute('data-picture', question.picture); // Add this line
         this._shadowRoot.appendChild(editQuestionModal);
+    }
+
+    addQuestion() {
+        const newQuestionModal = document.createElement("generic-modal-れ");
+        const newQuestionForm = document.createElement("newquestionform-れ");
+        this._shadowRoot.appendChild(newQuestionModal);
+        newQuestionModal.setTitle("Voeg vraag toe");
+        newQuestionModal.setBody(newQuestionForm);
+        newQuestionModal.addEventListener("question-form:succes", async () => {
+            newQuestionModal.close();
+        });
     }
 });
 //#endregion CLASS
