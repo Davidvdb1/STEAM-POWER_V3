@@ -20,6 +20,19 @@ class CampRepository {
     async findById(id, includeWorkshops = false) {
         const prismaCamp = await prisma.camp.findUnique({
             where: { id },
+            include: { 
+                workshops: includeWorkshops 
+                    ? { orderBy: { position: 'asc' } } 
+                    : { select: { id: true } }
+            }
+        });
+        return prismaCamp ? Camp.from(prismaCamp) : null;
+    }
+    
+
+    async findByTitle(title, includeWorkshops = false) {
+        const prismaCamp = await prisma.camp.findUnique({
+            where: { title },
             include: { workshops: includeWorkshops ? true : { select: { id: true } } }
         });
         return prismaCamp ? Camp.from(prismaCamp) : null;
@@ -66,7 +79,29 @@ class CampRepository {
 
         return true;
     }
-    
+
+    async addWorkshop(campId, workshopId) {
+        const existingCamp = await this.findById(campId, true);
+        if (!existingCamp) {
+            throw new Error("Kamp niet gevonden");
+        }
+
+        const existingWorkshop = await prisma.workshop.findUnique({ where: { id: workshopId } });
+        if (!existingWorkshop) {
+            throw new Error("Workshop niet gevonden");
+        }
+
+        await prisma.camp.update({
+            where: { id: campId },
+            data: {
+                workshops: {
+                    connect: { id: workshopId }
+                }
+            }
+        });
+
+        return true;
+    }
 }
 
 module.exports = new CampRepository();

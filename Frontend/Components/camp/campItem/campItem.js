@@ -11,6 +11,7 @@ template.innerHTML = /*html*/`
 
 
     <img id="settings" src="./Assets/SVGs/settings.png" alt="settings" style="width: 26px; height: 25px;">
+    <img id="visible" src="" alt="settings" style="width: 26px; height: 25px;">
     <div id="dropdown">
         <a href="#" class="update" data-id="1">Bewerken</a>
         <a href="#" class="delete" data-id="1">Verwijderen</a>
@@ -56,6 +57,7 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
         this.$age = this._shadowRoot.querySelector(".age");
         this.$button = this._shadowRoot.querySelector(".action-button");
         this.$settings = this._shadowRoot.querySelector("#settings");
+        this.$visible = this._shadowRoot.querySelector("#visible");
         this.$dropdown = this._shadowRoot.querySelector("#dropdown");
         this.$dropdown.style.display = "none";
         this.$update = this._shadowRoot.querySelector(".update");
@@ -64,7 +66,7 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ["title", "startdate", "enddate", "startage", "endage", "starttime", "endtime", "location", "image"];
+        return ["title", "startdate", "enddate", "startage", "endage", "starttime", "endtime", "location", "image", "archived"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -108,6 +110,15 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
             this.$image.src = newValue;
         }
 
+        if (name === "archived") {
+            if (newValue === "true") {
+                this.$visible.src = "./Assets/SVGs/visibility-off.svg";
+                this.style.opacity = "0.4";
+            } else {
+                this.$visible.src = "./Assets/SVGs/visibility-on.svg";
+                this.style.opacity = "1";
+            }
+        }
     }
 
     connectedCallback() {
@@ -119,6 +130,12 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
             event.stopPropagation(); 
             this.toggleDropdown();
         });
+
+        this.$visible.addEventListener("click", (event) => {
+            event.stopPropagation(); 
+            this.toggleVisibility();
+        });
+
     
         document.addEventListener("click", (event) => {
             if (!this.contains(event.target)) {
@@ -170,12 +187,41 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
         }
     }
 
+    toggleVisibility() {
+        if (this.getAttribute("archived") === "true") {
+            this.updateCamp({archived: false});
+            this.setAttribute("archived", "false");
+        } else {
+            this.updateCamp({archived: true});
+            this.setAttribute("archived", "true");
+        }
+    }
+
     tabHandler(id) {
         this.dispatchEvent(new CustomEvent('tab', {
             bubbles: true,
             composed: true,
             detail: id
         })); 
+    }
+
+    //services
+    async updateCamp(data) {
+        try {
+            const ID = this.getAttribute("id");
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(url + `/camps/${ID}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+    
+            const result = await response.json(); 
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 });
 //#endregion CLASS

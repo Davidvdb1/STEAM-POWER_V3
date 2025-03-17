@@ -8,6 +8,8 @@ import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
 import "../../pages/userLoginPage/userLoginPage.js"
 import "../../pages/groupLoginPage/groupLoginPage.js"
+import "../../pages/workshopInfo/workshopInfo.js"   
+import "../../pages/graphPage/graphPage.js"
 import "../../authentication/logout/logout.js"
 //#endregion IMPORTS
 
@@ -49,7 +51,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         const campIDFromUrl = urlParams.get("camp");
         const workshopIDFromUrl = urlParams.get("workshop");
     
-        this.landingPage = tabFromUrl
+        this.landingPage = tabFromUrl || "campoverviewpage";
         this.campID = campIDFromUrl
         this.workshopID = workshopIDFromUrl 
     
@@ -59,10 +61,11 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
     
         const items = [
             { id: "campoverviewpage", label: "Home" },
-            { id: "workshoppage", label: "Workshop" },
-            { id: "overzicht", label: "Overzicht" },
+            { id: "leaderboard", label: "Leaderboard" },
+            { id: "quiz", label: "Quiz" },
             { id: "spel", label: "Spel" },
             { id: "microbitpage", label: "Micro:bit" },
+            { id: "graphpage", label: "Grafieken" },
             { id: "groepen", label: "Groepen" },
             { id: "users", label: "Gebruikers" },
             { id: "sign-up", label: "Nieuw account" },

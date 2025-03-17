@@ -1,6 +1,8 @@
 const campRepository = require('../repository/campRepository');
 const Camp = require('../model/camp');
 const Workshop = require('../model/workshop');
+const workshopRepository = require('../repository/workshopRepository');
+
 
 class CampService {
     async create(campData) {
@@ -13,6 +15,10 @@ class CampService {
 
     async getById(id, includeWorkshops = false) {
         return await campRepository.findById(id, includeWorkshops);
+    }
+
+    async getByTitle(title, includeWorkshops = false) {
+        return await campRepository.findByTitle(title, includeWorkshops);
     }
 
     async getAll(includeWorkshops = false) {
@@ -45,6 +51,22 @@ class CampService {
     
         return await campRepository.delete(id);
     }
+
+    async addWorkshop(campId, workshopId) {
+        return await campRepository.addWorkshop(campId, workshopId);
+    }
+
+    async getUnlinkedWorkshops(campId) {
+        try {
+            const workshops = await workshopRepository.findUnlinkedWorkshops(campId);
+            return workshops.map(workshop => ({ title: workshop.title, id: workshop.id, campId: workshop.campId }));
+
+        } catch (error) {
+            console.error("❌ Fout bij ophalen van niet-gekoppelde workshops:", error);
+            throw new Error("Databasefout bij ophalen van niet-gekoppelde workshops");
+        }
+    }
+    
 }
 
 module.exports = new CampService();
