@@ -42,11 +42,11 @@ model Camp {
 }
 
 model Workshop {
-    id          String  @id @default(uuid())
-    camp        Camp?    @relation(fields: [campId], references: [id])
-    campId      String?
-    title       String
-    html        String
+    id     String  @id @default(uuid())
+    camp   Camp?   @relation(fields: [campId], references: [id])
+    campId String?
+    title  String
+    html   String
 }
 
 model Group {
@@ -72,9 +72,11 @@ enum EnergyType {
 }
 
 model Question {
-    id          String @id @default(uuid())
+    id          String  @id @default(uuid())
     title       String
     description String
     picture     String
     wattage     Int
+    score       Int
+    active      Boolean @default(true)
 }

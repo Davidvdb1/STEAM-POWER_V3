@@ -113,7 +113,7 @@ async function main() {
         });
         createdCamps.push(camp); // Bewaar het camp object met zijn ID
     }
-    
+
 
     const workshop = await prisma.workshop.create({
         data: {
@@ -158,6 +158,10 @@ async function main() {
             name: 'Groep 2',
         },
     });
+
+
+    // Questions
+    
 }
 
 (async () => {
