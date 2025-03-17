@@ -3,7 +3,7 @@ class Question {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.picture = picture;
+        this.picture = typeof picture === 'string' ? picture : '';
         this.wattage = parseInt(wattage);
         this.score = parseInt(score);
         this.active = active;
@@ -29,6 +29,9 @@ class Question {
         }
         if (typeof this.active !== 'boolean') {
             error += "Active must be a boolean\n";
+        }
+        if (typeof this.picture !== 'string' || this.picture.trim() === "") {
+            error += "Picture must be a non-empty string\n";
         }
 
         if (error.length > 0) {
