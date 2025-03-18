@@ -1,5 +1,6 @@
 //#region IMPORTS
 import '../../microbit/microbitPinController/microbitPinController.js';
+import '../../microbit/microbitGraphs/microbitGraphs.js';
 //#endregion IMPORTS
 
 //#region MICROBITPAGE
@@ -30,6 +31,7 @@ template.innerHTML = /*html*/`
         <option value="600000">10 minuten</option>
     </select>
     <microbitpincontroller-れ></microbitpincontroller-れ>
+    <microbitgraphs-れ></microbitgraphs-れ>
 `;
 //#endregion MICROBITPAGE
 
