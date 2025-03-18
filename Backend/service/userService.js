@@ -13,8 +13,9 @@ class UserService {
         const newUser = new User(userData);
         const createdUser = await userRepository.create(newUser);
 
-        const JWT = generateJWTtoken(createdUser.username, createdUser.role);
+        const JWT = generateJWTtoken(createdUser.id, createdUser.username, createdUser.role);
         const response = {
+            userId: createdUser.id,
             token: JWT,
             username: createdUser.username,
             role: createdUser.role,
@@ -30,8 +31,9 @@ class UserService {
             const isPasswordValid = await bcrypt.compare(userData.password, user.password);
             if (!isPasswordValid) throw new Error('Onjuist wachtwoord');
 
-            const JWT = generateJWTtoken(user.username, user.role);
+            const JWT = generateJWTtoken(user.id, user.username, user.role);
             const response = {
+                userId: user.id,
                 token: JWT,
                 username: user.username,
                 role: user.role,
