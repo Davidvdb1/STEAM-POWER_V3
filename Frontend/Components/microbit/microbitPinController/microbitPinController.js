@@ -8,13 +8,15 @@ template.innerHTML = /*html*/`
     <style>
         @import './components/microbit/microbitPinController/style.css';
     </style>
+    <div id="pinAdderContainer">
+        <select id="pinSelect">
+            <!-- Options will be dynamically generated here -->
+        </select>
+        <button id="addPinButton">Add Pin</button>
+    </div>
     <div id="pinFormsContainer">
         <!-- Forms will be dynamically generated here -->
     </div>
-    <select id="pinSelect">
-        <!-- Options will be dynamically generated here -->
-    </select>
-    <button id="addPinButton">Add Pin</button>
 `;
 //#endregion MICROBITPINCONTROLLER
 
@@ -44,7 +46,7 @@ window.customElements.define('microbitpincontroller-れ', class extends HTMLElem
     }
 
     async render() {
-        this.delay(100).then(() => {
+        this.delay(200).then(() => {
             this.pinConfiguration = JSON.parse(sessionStorage.getItem('pinConfiguration')) || {};
             this.renderPinConfiguration();
             this.renderPinOptions();

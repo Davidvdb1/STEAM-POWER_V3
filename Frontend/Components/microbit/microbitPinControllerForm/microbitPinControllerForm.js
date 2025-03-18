@@ -8,16 +8,16 @@ template.innerHTML = /*html*/`
         @import './components/microbit/microbitPinControllerForm/style.css';
     </style>
     <form>
-        <p>Pin <span id="pinNumber"></span>:</p>
-        <label for="pinSelect">Bron:</label>
+        <p>Pin <span id="pinNumber"></span></p>
         <select id="typeSelectPin">
-            <option value="none">Geen</option>
             <option value="SOLAR">Zon</option>
             <option value="WIND">Wind</option>
             <option value="WATER">Water</option>
         </select>
-        <button type="button" id="activateButton">Activate</button>
-        <button type="button" id="removeButton">Remove</button>
+        <div id="buttonContainer">
+            <button type="button" id="activateButton">Aan</button>
+            <button type="button" id="removeButton">Verwijder</button>
+        </div>
     </form>
 `;
 //#endregion MICROBITPINCONTROLLERFORM
@@ -41,36 +41,38 @@ window.customElements.define('microbitpincontrollerform-れ', class extends HTML
         }
         if (name === 'type') {
             this._shadowRoot.getElementById('typeSelectPin').value = newValue;
+            this._shadowRoot.querySelector('form').setAttribute('data-type', newValue);
         }
         if (name === 'active') {
             const activateButton = this._shadowRoot.getElementById('activateButton');
-            activateButton.textContent = newValue === 'true' ? 'Deactivate' : 'Activate';
+            activateButton.textContent = newValue === 'true' ? 'Uit' : 'Aan';
+            const form = this._shadowRoot.querySelector('form');
+            form.setAttribute('data-active', newValue);
+            if (newValue === 'true') {
+                activateButton.classList.add('deactivate');
+            } else {
+                activateButton.classList.remove('deactivate');
+            }
         }
     }
 
     connectedCallback() {
-        this._shadowRoot.getElementById('typeSelectPin').addEventListener('change', () => this.setPin());
-        this._shadowRoot.getElementById('activateButton').addEventListener('click', () => this.toggleActive());
+        this._shadowRoot.getElementById('typeSelectPin').addEventListener('change', (event) => this.setPin(event.target.value, this.getAttribute('active')));
+        this._shadowRoot.getElementById('activateButton').addEventListener('click', () => this.setPin(this.getAttribute('type'), this.getAttribute('active') === 'true' ? 'false' : 'true'));
         this._shadowRoot.getElementById('removeButton').addEventListener('click', () => this.removePin());
+        const form = this._shadowRoot.querySelector('form');
+        form.setAttribute('data-type', this.getAttribute('type'));
+        form.setAttribute('data-active', this.getAttribute('active'));
     }
 
-    setPin() {
-        const type = this._shadowRoot.getElementById('typeSelectPin').value;
+    setPin(type = this.getAttribute('type'), active = this.getAttribute('active')) {
         const pin = this.getAttribute('pin');
-        const isActive = this.getAttribute('active') === 'true';
-        const data = { pin: pin, configuration: { io: 'input', ad: 'analog', type: type, active: isActive } };
+        const data = { pin: pin, configuration: { io: 'input', ad: 'analog', type: type, active: active } };
 
         const customEvent = new CustomEvent('setpinconfiguration', { detail: data, bubbles: true, composed: true });
         document.dispatchEvent(customEvent);
         const rerenderEvent = new CustomEvent('rerender', { bubbles: true, composed: true });
         this.dispatchEvent(rerenderEvent);
-    }
-
-    toggleActive() {
-        const isActive = this.getAttribute('active') === 'true';
-        this.setAttribute('active', !isActive);
-
-        this.setPin();
     }
 
     removePin() {
