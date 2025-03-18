@@ -164,7 +164,6 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         const groupId = JSON.parse(sessionStorage.getItem('loggedInUser')).groupId;
 
         const view = await this.pinDataCharacteristic.readValue(); // list of 2 byte pairs: [pinNumber, pinValue]
-        console.log(view);
         const pinValues = {};
         for (let i = 0; i < view.byteLength; i += 2) {
             const pinNumber = view.getUint8(i);
