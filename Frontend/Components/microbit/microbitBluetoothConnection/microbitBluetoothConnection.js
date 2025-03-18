@@ -28,7 +28,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         this.pinAdConfigurationCharacteristic = null;
         this.pinIoConfigurationCharacteristic = null;
         this.paused = false;
-        this.pinConfiguration = new Map();
+        this.pinConfiguration = {};
     }
 
     // component attributes
@@ -44,12 +44,14 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
+        document.addEventListener('setbluetoothdatainterval', this.setIntervalTime.bind(this));
+        document.addEventListener('setpinconfiguration', this.setPinConfiguration.bind(this));
     }
 
     async init() {
         if (!navigator.bluetooth) return; // TODO: Show error message "Bluetooth not supported on this browser"
         
-        console.log('Searvhing for devices...');
+        console.log('Searching for devices...');
         this.paused = false;
         await this.requestDevice();
         console.log('Connecting to device...');
@@ -58,9 +60,6 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         await this.configurePins();
         console.log('Starting monitoring...');
         await this.startMonitoring();
-        
-        document.addEventListener('setbluetoothdatainterval', this.setIntervalTime.bind(this));
-        document.addEventListener('setpinconfiguration', this.setPinConfiguration.bind(this));
     }
 
     async pause() {
@@ -83,15 +82,11 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         this.pinDataCharacteristic = null;
         this.pinAdConfigurationCharacteristic = null;
         this.pinIoConfigurationCharacteristic = null;
-        this.pinConfiguration = Map();
         
         this.device.removeEventListener("gattserverdisconnected", this.connectToDevice);
         this.device.gatt.disconnect();
 
         await this.stopMonitoring();
-
-        document.removeEventListener('setbluetoothdatainterval', this.setIntervalTime);
-        document.removeEventListener('setpinconfiguration', this.setPinConfiguration);
     }
 
     async requestDevice() {
@@ -126,7 +121,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     async setIntervalTime(event) {
         this.intervalTime = event.detail;
         console.log('Interval time set to:', this.intervalTime);
-        if (this.monitoringInterval) {
+        if (this.monitoringInterval && this.device) {
             await this.stopMonitoring();
             await this.startMonitoring();
         }
@@ -134,27 +129,33 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
 
     async setPinConfiguration(event) {
         if (event.detail.remove) {
-            this.pinConfiguration.delete(event.detail.pin);
+            delete this.pinConfiguration[event.detail.pin];
         } else {
-            this.pinConfiguration.set(event.detail.pin, event.detail.configuration);
+            this.pinConfiguration[event.detail.pin] = event.detail.configuration;
         }
-        await this.configurePins();
-        sessionStorage.setItem('pinConfiguration', JSON.stringify(Object.fromEntries(this.pinConfiguration)));
+        if (this.device) {
+            await this.configurePins();
+        }
+        sessionStorage.setItem('pinConfiguration', JSON.stringify(this.pinConfiguration));
     }
 
     async configurePins() {
-        let adFlags = 0b00000000000000000000; // 20 bits for 20 pins
-        let ioFlags = 0b00000000000000000000;
-        this.pinConfiguration.forEach(async (configuration, pin) => {
+        let adFlags = 0n; // Use BigInt for 20 bits
+        let ioFlags = 0n;
+        Object.keys(this.pinConfiguration).forEach((pin) => {
+            const configuration = this.pinConfiguration[pin];
+            if (!configuration.active) {
+                return;
+            }
             if (configuration.ad == 'analog') {
-                adFlags |= 1 << pin;
+                adFlags |= 1n << BigInt(pin);
             }
             if (configuration.io == 'input') {
-                ioFlags |= 1 << pin;
+                ioFlags |= 1n << BigInt(pin);
             }
         });
-        const adFlagsBuffer = new Uint16Array([adFlags]).buffer;
-        const ioFlagsBuffer = new Uint16Array([ioFlags]).buffer;
+        const adFlagsBuffer = new Uint16Array([Number(adFlags)]).buffer;
+        const ioFlagsBuffer = new Uint16Array([Number(ioFlags)]).buffer;
         await this.pinIoConfigurationCharacteristic.writeValue(adFlagsBuffer);
         await this.pinAdConfigurationCharacteristic.writeValue(ioFlagsBuffer);
     }
@@ -163,14 +164,15 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         const groupId = JSON.parse(sessionStorage.getItem('loggedInUser')).groupId;
 
         const view = await this.pinDataCharacteristic.readValue(); // list of 2 byte pairs: [pinNumber, pinValue]
-        const pinValues = new Map();
+        console.log(view);
+        const pinValues = {};
         for (let i = 0; i < view.byteLength; i += 2) {
             const pinNumber = view.getUint8(i);
             const pinValue = Math.round(view.getUint8(i + 1) * 1023 / 255); // convert 8 bit value to 10 bit value
-            pinValues.set(pinNumber, {groupId, value: pinValue, type: this.pinConfiguration.get(pinNumber).type, time: new Date().toISOString()});
+            pinValues[pinNumber] = {groupId, value: pinValue, type: this.pinConfiguration[pinNumber].type, time: new Date().toISOString()};
         }
-        
-        pinValues.forEach(async (data, pin) => { // TODO: adapt functions to handle map instead of single value
+        Object.keys(pinValues).forEach(async (pin) => {
+            const data = pinValues[pin];
             const response = await this.postEnergyData({...data, pin});
             const body = await response.json();
             const datapoint = body.energyData;
