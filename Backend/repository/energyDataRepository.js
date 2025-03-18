@@ -6,7 +6,6 @@ class EnergyDataRepository {
     async create(data) {
         const energyData = new EnergyData(data);
         energyData.validate();
-        console.log("Incoming data before processing (repository):", data); // Debugging
         const prismaEnergyData = await prisma.energyData.create({ data: energyData });
         return EnergyData.from(prismaEnergyData);
     }
