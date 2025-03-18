@@ -62,6 +62,8 @@ window.customElements.define('microbitpincontrollerform-れ', class extends HTML
 
         const customEvent = new CustomEvent('setpinconfiguration', { detail: data, bubbles: true, composed: true });
         document.dispatchEvent(customEvent);
+        const rerenderEvent = new CustomEvent('rerender', { bubbles: true, composed: true });
+        this.dispatchEvent(rerenderEvent);
     }
 
     toggleActive() {
@@ -76,8 +78,8 @@ window.customElements.define('microbitpincontrollerform-れ', class extends HTML
         const data = { pin: pin, remove: true };
         const customEvent = new CustomEvent('setpinconfiguration', { detail: data, bubbles: true, composed: true });
         document.dispatchEvent(customEvent);
-
-        this.remove();
+        const rerenderEvent = new CustomEvent('rerender', { bubbles: true, composed: true });
+        this.dispatchEvent(rerenderEvent);
     }
 });
 //#endregion CLASS

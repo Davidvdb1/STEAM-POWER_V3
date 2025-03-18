@@ -40,12 +40,21 @@ window.customElements.define('microbitpincontroller-れ', class extends HTMLElem
         this.renderPinConfiguration();
         this.renderPinOptions();
         this._shadowRoot.getElementById('addPinButton').addEventListener('click', () => this.addPin());
+        this.addEventListener('rerender', this.render);
+    }
+
+    async render() {
+        this.delay(100).then(() => {
+            this.pinConfiguration = JSON.parse(sessionStorage.getItem('pinConfiguration')) || {};
+            this.renderPinConfiguration();
+            this.renderPinOptions();
+        });
     }
 
     async renderPinConfiguration() {
         const container = this._shadowRoot.getElementById('pinFormsContainer');
         container.innerHTML = ''; // Clear existing forms
-        for (let i = 0; i <= 20; i++) {
+        for (let i = 0; i <= 18; i++) {
             if (this.pinConfiguration[i]) {
                 const configuration = this.pinConfiguration[i];
                 const formElement = document.createElement('microbitpincontrollerform-れ');
@@ -60,7 +69,7 @@ window.customElements.define('microbitpincontroller-れ', class extends HTMLElem
     renderPinOptions() {
         const pinSelect = this._shadowRoot.getElementById('pinSelect');
         pinSelect.innerHTML = ''; // Clear existing options
-        for (let i = 0; i <= 20; i++) {
+        for (let i = 0; i <= 18; i++) {
             if (!this.pinConfiguration[i]) {
                 const option = document.createElement('option');
                 option.value = i;
@@ -77,9 +86,11 @@ window.customElements.define('microbitpincontroller-れ', class extends HTMLElem
             const event = new CustomEvent('setpinconfiguration', { detail: { pin: selectedPin, configuration: {ad: 'analog', io: 'input', type: 'SOLAR', active: false} }, bubbles: true, composed: true });
             document.dispatchEvent(event);
         }
-        this.pinConfiguration = JSON.parse(sessionStorage.getItem('pinConfiguration')) || {};
-        this.renderPinConfiguration();
-        this.renderPinOptions();
+        this.render();
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 });
 //#endregion CLASS

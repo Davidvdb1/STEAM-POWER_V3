@@ -140,7 +140,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     }
 
     async configurePins() {
-        let adFlags = 0n; // Use BigInt for 20 bits
+        let adFlags = 0n;
         let ioFlags = 0n;
         Object.keys(this.pinConfiguration).forEach((pin) => {
             const configuration = this.pinConfiguration[pin];
@@ -154,8 +154,8 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
                 ioFlags |= 1n << BigInt(pin);
             }
         });
-        const adFlagsBuffer = new Uint16Array([Number(adFlags)]).buffer;
-        const ioFlagsBuffer = new Uint16Array([Number(ioFlags)]).buffer;
+        const adFlagsBuffer = new Uint32Array([Number(adFlags)]).buffer;
+        const ioFlagsBuffer = new Uint32Array([Number(ioFlags)]).buffer;
         await this.pinIoConfigurationCharacteristic.writeValue(adFlagsBuffer);
         await this.pinAdConfigurationCharacteristic.writeValue(ioFlagsBuffer);
     }
