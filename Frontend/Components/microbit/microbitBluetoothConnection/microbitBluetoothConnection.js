@@ -173,7 +173,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         }
         Object.keys(pinValues).forEach(async (pin) => {
             const data = pinValues[pin];
-            const response = await this.postEnergyData({...data, pin});
+            const response = await this.postEnergyData({...data, pin: Number(pin)});
             const body = await response.json();
             const datapoint = body.energyData;
             
@@ -184,7 +184,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     }
 
     // service
-    async postEnergyData(data = { groupId, value, time, type }) {
+    async postEnergyData(data = { groupId, value, time, type, pin }) {
         try {
             const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
             return await fetch(window.env.BACKEND_URL + '/energydata', {
