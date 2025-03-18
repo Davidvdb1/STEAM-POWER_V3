@@ -27,7 +27,7 @@ window.customElements.define('navigationlist-れ', class extends HTMLElement {
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === "tabs") {
+        if (name === "tabs") {  
             const items = JSON.parse(newValue);
 
             // voor elk item in de navbar de id en label setten
