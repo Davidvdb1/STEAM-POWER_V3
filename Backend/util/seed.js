@@ -120,6 +120,8 @@ async function main() {
             title: 'Workshop 1',
             camp: { connect: { id: createdCamps[1].id } },
             html: `<h1><b>Workshop 1</b></h1><div><b><br></b></div><div><b>qrbqb<i>qdrbqdrbqdrbbq</i></b></div><div><b><i><br></i></b></div><div><a href="https://chatgpt.com/c/67c175a2-4350-8007-b8a0-f01805dc29cb">https://chatgpt.com/c/67c175a2-4350-8007-b8a0-f01805dc29cb</a><br><br><br></div><br><div class="image-wrapper"><img src="${image}" class="resizable" style="max-width: 685px; height: 457.001px; cursor: move; width: 685px;"></div>`,
+            archived: false,
+            position: 1
         },
     });
 
@@ -128,6 +130,8 @@ async function main() {
             title: 'Workshop 2',
             camp: { connect: { id: createdCamps[2].id } },
             html: `<h1><b>Workshop 2</b></h1><div><b><br></b></div><div><b>qrbqb<i>qdrbqdrbqdrbbq</i></b></div><div><b><i><br></i></b></div><div><a href="https://chatgpt.com/c/67c175a2-4350-8007-b8a0-f01805dc29cb">https://chatgpt.com/c/67c175a2-4350-8007-b8a0-f01805dc29cb</a><br><br><br></div><br><div class="image-wrapper"><img src="${image}" class="resizable" style="max-width: 685px; height: 457.001px; cursor: move; width: 685px;"></div>`,
+            archived: false,
+            position: 1
         },
     });
 
@@ -136,6 +140,8 @@ async function main() {
             title: 'Workshop 3',
             camp: { connect: { id: createdCamps[3].id } },
             html: `<h1><b>Workshop 3</b></h1><div><b><br></b></div><div><b>qrbqb<i>qdrbqdrbqdrbbq</i></b></div><div><b><i><br></i></b></div><div><a href="https://chatgpt.com/c/67c175a2-4350-8007-b8a0-f01805dc29cb">https://chatgpt.com/c/67c175a2-4350-8007-b8a0-f01805dc29cb</a><br><br><br></div><br><div class="image-wrapper"><img src="${image}" class="resizable" style="max-width: 685px; height: 457.001px; cursor: move; width: 685px;"></div>`,
+            archived: false,
+            position: 1
         },
     });
 
@@ -144,6 +150,8 @@ async function main() {
             title: 'Workshop 4',
             camp: { connect: { id: createdCamps[4].id } },
             html: `<h1><b>Workshop 4</b></h1><div><b><br></b></div><div><b>qrbqb<i>qdrbqdrbqdrbbq</i></b></div><div><b><i><br></i></b></div><div><a href="https://chatgpt.com/c/67c175a2-4350-8007-b8a0-f01805dc29cb">https://chatgpt.com/c/67c175a2-4350-8007-b8a0-f01805dc29cb</a><br><br><br></div><br><div class="image-wrapper"><img src="${image}" class="resizable" style="max-width: 685px; height: 457.001px; cursor: move; width: 685px;"></div>`,
+            archived: false,
+            position: 1
         },
     });
 

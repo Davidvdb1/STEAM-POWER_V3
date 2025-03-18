@@ -65,6 +65,17 @@ div {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
 }
 
+#visible {
+    position: absolute;
+    top: 50px;
+    right: 8px;
+    cursor: pointer;
+    padding: 5px; 
+    background-color: #f2fafe;
+    border-radius: 20%; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+}
+
 #dropdown {
     display: none;
     position: absolute !important;

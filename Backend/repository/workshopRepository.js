@@ -4,9 +4,25 @@ const Workshop = require('../model/workshop');
 
 class WorkshopRepository {
     async create(workshop) {
-        const prismaWorkshop = await prisma.workshop.create({ data: workshop });
+        console.log(workshop);
+        const lastWorkshop = await prisma.workshop.findFirst({
+            where: { campId: workshop.id },
+            orderBy: { position: 'desc' }, 
+        });
+    
+        const newPosition = lastWorkshop ? lastWorkshop.position + 1 : 1;
+    
+        const prismaWorkshop = await prisma.workshop.create({
+            data: {
+                title: workshop.title,
+                html: workshop.html,
+                position: newPosition
+            },
+        });
+    
         return Workshop.from(prismaWorkshop);
     }
+    
 
     async update(id, updatedWorkshop) {
         const existingWorkshop = await this.findById(id);
@@ -71,7 +87,42 @@ class WorkshopRepository {
             throw new Error("Databasequery mislukt voor niet-gekoppelde workshops");
         }
     }
+
+    async updatePosition(id, newPosition) {
+        return await prisma.workshop.update({
+            where: { id },
+            data: { position: newPosition }
+        });
+    }
+
+    async findWorkshopByPosition(campId, position) {
+        return await prisma.workshop.findFirst({
+            where: { 
+                campId: campId,  // 🔹 Zorgt dat we NIET per ongeluk een workshop uit een ander kamp pakken!
+                position: position
+            }
+        });
+    }
     
+    async findWorkshopsByCamp(campId) {
+        return await prisma.workshop.findMany({
+            where: { campId },
+            orderBy: { position: 'asc' }
+        });
+    }    
+
+    async swapPositions(id1, id2, position1, position2) {
+        return await prisma.$transaction([
+            prisma.workshop.update({
+                where: { id: id1 },
+                data: { position: position2 }
+            }),
+            prisma.workshop.update({
+                where: { id: id2 },
+                data: { position: position1 }
+            })
+        ]);
+    }
 }
 
 module.exports = new WorkshopRepository();

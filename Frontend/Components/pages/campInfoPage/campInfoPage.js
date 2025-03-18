@@ -64,6 +64,7 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
 
         this.$addExisting.addEventListener("click", () => this.toggleDropdown());
         this.$confirmButton.addEventListener("click", () => this.confirmSelection());
+        this.addEventListener("updateCampInfoPage", () => this.fetchCampWithId(this.getAttribute("camp")));
     }
 
     toggleDropdown() {
@@ -73,35 +74,42 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
     async confirmSelection() {
         this.$dropdown.classList.toggle("open");
         console.log("Selected workshops:", this.$selectedWorkshops);
-        const workshopPromises = [...this.$selectedWorkshops].map(async (workshopId) => {
-            const workshop = await this.fetchWorkshopWithId(workshopId);
-            return this.createWorkshop(workshop.html, workshop.title);
-        });
     
-        await Promise.all(workshopPromises);
-        this.updateStatusMessage("✅ Alle workshops zijn succesvol verwerkt. Pagina wordt herladen...", "success");
-
+        for (const workshopId of this.$selectedWorkshops) {
+            const workshop = await this.fetchWorkshopWithId(workshopId);
+            await this.createWorkshop(workshop.html, workshop.title, this.getAttribute("camp"));
+        }
+    
         setTimeout(() => {
             window.location.reload();
         }, 1000);
     }
-    
 
     updateCampInfo() {
         if (!this.$camp) return;
-
+    
         this.$workshops.innerHTML = "";
-
-        this.$camp.workshops.forEach(workshop => {
+    
+        const sortedWorkshops = [...this.$camp.workshops].sort((a, b) => a.position - b.position);
+    
+        sortedWorkshops.forEach(workshop => {
             let workshopPreview = document.createElement('workshoppreview-れ');
             workshopPreview.setAttribute("html", workshop.html);
             workshopPreview.setAttribute("workshop", workshop.id);
+            workshopPreview.setAttribute("archived", workshop.archived);
+
+            workshopPreview.addEventListener("click", () => {
+                this.tabWithCampHandler("workshopinfo", "workshop", workshop.id);
+            });
+    
             this.$workshops.appendChild(workshopPreview);
         });
-
+    
         this.$title.innerHTML = this.$camp.name;
         this.fetchUnlinkedWorkshops();
     }
+    
+    
 
     updateStatusMessage(message, type) {
         const statusMessage = this._shadowRoot.querySelector("#statusmessage");
@@ -153,6 +161,8 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
         })); 
     }
 
+
+    //services
     async fetchCampWithId(id) {
         try {
             const url = window.env.BACKEND_URL;
@@ -249,7 +259,7 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
         }
     }
 
-    async createWorkshop(html, title) {
+    async createWorkshop(html, title, id) {
         try {
             const url = window.env.BACKEND_URL;
             const response = await fetch(`${url}/workshops`, {
@@ -257,7 +267,7 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ html, title })
+                body: JSON.stringify({ html, title, id })
             });
     
             if (!response.ok) {
@@ -275,6 +285,7 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
             // 🔹 Voeg de workshop toe aan het kamp
             const campId = this.getAttribute("camp");
             await this.addWorkshopToCamp(campId, workshop.id);
+            this.updateStatusMessage("✅ Alle workshops zijn succesvol verwerkt. Pagina wordt herladen...", "success");
     
         } catch (error) {
             console.error("❌ Fout bij aanmaken van workshop:", error);

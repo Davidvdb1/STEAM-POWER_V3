@@ -27,26 +27,28 @@ enum Role {
 }
 
 model Camp {
-    id        String     @id @default(uuid())
-    workshops Workshop[]
-    name      String
-    startDate DateTime
-    endDate   DateTime
-    address   String
-    startTime String
-    endTime   String
-    minAge    Int
-    maxAge    Int
-    picture   String
-    archived  Boolean
+    id          String  @id @default(uuid())
+    workshops   Workshop[]
+    name        String
+    startDate   DateTime
+    endDate     DateTime
+    address     String
+    startTime   String
+    endTime     String
+    minAge      Int
+    maxAge      Int
+    picture     String
+    archived    Boolean @default(false)
 }
 
 model Workshop {
-    id     String  @id @default(uuid())
-    camp   Camp?   @relation(fields: [campId], references: [id])
-    campId String?
-    title  String
-    html   String
+    id          String  @id @default(uuid())
+    camp        Camp?    @relation(fields: [campId], references: [id])
+    campId      String?
+    title       String
+    html        String
+    position    Int
+    archived    Boolean @default(false)
 }
 
 model Group {
@@ -57,12 +59,13 @@ model Group {
 }
 
 model EnergyData {
-    id      String     @id @default(uuid())
-    group   Group      @relation(fields: [groupId], references: [id])
-    groupId String
-    date    DateTime   @default(now())
-    value   Int
-    type    EnergyType
+    id          String  @id @default(uuid())
+    pin         Int     @default(0)
+    group       Group   @relation(fields: [groupId], references: [id])
+    groupId     String
+    time        DateTime    @default(now())
+    value       Int
+    type        EnergyType
 }
 
 enum EnergyType {

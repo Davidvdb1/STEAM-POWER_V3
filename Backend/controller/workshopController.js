@@ -63,5 +63,21 @@ router.get('/title/:title', async (req, res) => {
     }
 });
 
+router.put('/:id/move', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { direction } = req.body;
+
+        if (!["up", "down"].includes(direction)) {
+            return res.status(400).json({ error: "Invalid direction. Use 'up' or 'down'." });
+        }
+
+        const result = await workshopService.moveWorkshop(id, direction);
+        res.status(200).json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 module.exports = router;

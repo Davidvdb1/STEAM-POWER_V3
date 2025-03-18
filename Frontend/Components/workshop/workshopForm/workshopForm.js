@@ -340,7 +340,7 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         } 
         
         if (camp) {
-            this.createWorkshop(content, this.$title.value);
+            this.createWorkshop(content, this.$title.value, camp);
         }
     }
     
@@ -398,7 +398,7 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
         }
     }
 
-    async createWorkshop(html, title) {
+    async createWorkshop(html, title, id) {
         try {
             const url = window.env.BACKEND_URL;
             const response = await fetch(`${url}/workshops`, {
@@ -406,7 +406,7 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ html, title })
+                body: JSON.stringify({ html, title, id })
             });
     
             if (!response.ok) {

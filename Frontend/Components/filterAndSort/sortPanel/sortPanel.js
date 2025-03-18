@@ -10,9 +10,8 @@ template.innerHTML = /*html*/`
 
     <img src="./Assets/SVGs/sort.png" alt="search" style="width: 35px; height: 35px;">
     <select>
-        <option value="none" selected>Geen sortering</option>
         <option value="name" >Sorteer op titel</option>
-        <option value="date">Sorteer op datum</option>
+        <option value="date" selected>Sorteer op datum</option>
     </select>
 `;
 //#endregion SORTPANEL
@@ -38,7 +37,6 @@ window.customElements.define('sortpanel-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$selection.addEventListener('change', (event) => {
-            console.log("kaasje")
             this.sortHandler(event.target.value);
         });
     }
@@ -50,8 +48,5 @@ window.customElements.define('sortpanel-れ', class extends HTMLElement {
             detail: attribute
         })); 
     }
-
-
-
 });
 //#endregion CLASS
