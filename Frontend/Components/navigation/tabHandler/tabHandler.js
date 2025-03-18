@@ -12,6 +12,7 @@ import "../../pages/workshopInfo/workshopInfo.js"
 import "../../pages/graphPage/graphPage.js"
 import "../../authentication/logout/logout.js"
 import "../../pages/questionAdminPage/questionAdminPage.js"
+import "../../pages/quizPage/quizPage.js"
 //#endregion IMPORTS
 
 //#region TABHANDLER
