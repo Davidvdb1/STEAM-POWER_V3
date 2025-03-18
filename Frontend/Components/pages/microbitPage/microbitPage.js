@@ -15,7 +15,6 @@ template.innerHTML = /*html*/`
     <button id="startButton">Start Bluetooth Connection</button>
     <button id="pauseButton">Pause Bluetooth Connection</button>
     <button id="endButton">End Bluetooth Connection</button>
-    <button id="setPinsButton">setPins</button>
     <label for="intervalSelect">Select Interval:</label>
     <select id="intervalSelect">
         <option value="none"></option>
@@ -57,7 +56,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this._shadowRoot.getElementById('startButton').addEventListener('click', () => this.startBluetoothConnection());
         this._shadowRoot.getElementById('pauseButton').addEventListener('click', () => this.pauseBluetoothConnection());
         this._shadowRoot.getElementById('endButton').addEventListener('click', () => this.endBluetoothConnection());
-        this._shadowRoot.getElementById('setPinsButton').addEventListener('click', () => this.setPins());
         this._shadowRoot.getElementById('intervalSelect').addEventListener('change', (event) => this.setBluetoothDataInterval(event));
 
         document.addEventListener('energydatareading', this.updateEnergyDataList.bind(this));
@@ -68,12 +66,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
 
     startBluetoothConnection() {
         const event = new CustomEvent('startbluetoothconnection', { bubbles: true, composed: true });
-        document.dispatchEvent(event);
-    }
-
-    setPins() {
-        const data = {pin: 0, configuration: {io: 'input', ad: 'analog', type: 'SOLAR'}};
-        const event = new CustomEvent('setpinconfiguration', { detail: data, bubbles: true, composed: true });
         document.dispatchEvent(event);
     }
 

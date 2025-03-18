@@ -1,4 +1,5 @@
 //#region IMPORTS
+import '../microbitPinControllerForm/microbitPinControllerForm.js';
 //#endregion IMPORTS
 
 //#region MICROBITPINCONTROLLER
@@ -7,40 +8,14 @@ template.innerHTML = /*html*/`
     <style>
         @import './components/microbit/microbitPinController/style.css';
     </style>
-    <div>
-        <form>
-            <p>Pin 0:</p>
-            <label for="pinSelect">Bron:</label>
-            <select id="typeSelect">
-                <option value="none">Geen</option>
-                <option value="SOLAR">Zon</option>
-                <option value="WIND">Wind</option>
-                <option value="WATER">Water</option>
-            </select>
-            <button id="setPin0Button">Set Pin 0</button>
-        </form>
-        <form>
-            <p>Pin 1:</p>
-            <label for="pinSelect">Bron:</label>
-            <select id="typeSelect">
-                <option value="none">Geen</option>
-                <option value="SOLAR">Zon</option>
-                <option value="WIND">Wind</option>
-                <option value="WATER">Water</option>
-            </select>
-            <button id="setPin1Button">Set Pin 1</button>
-        </form>
-        <form>
-            <p>Pin 2:</p>
-            <label for="pinSelect">Bron:</label>
-            <select id="typeSelect">
-                <option value="none">Geen</option>
-                <option value="SOLAR">Zon</option>
-                <option value="WIND">Wind</option>
-                <option value="WATER">Water</option>
-            </select>
-            <button id="setPin2Button">Set Pin 2</button>
-        </form>
+    <div id="pinAdderContainer">
+        <select id="pinSelect">
+            <!-- Options will be dynamically generated here -->
+        </select>
+        <button id="addPinButton">Add Pin</button>
+    </div>
+    <div id="pinFormsContainer">
+        <!-- Forms will be dynamically generated here -->
     </div>
 `;
 //#endregion MICROBITPINCONTROLLER
@@ -51,7 +26,7 @@ window.customElements.define('microbitpincontroller-れ', class extends HTMLElem
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.pinConfiguration = JSON.parse(sessionStorage.getItem('pinConfiguration'));
+        this.pinConfiguration = JSON.parse(sessionStorage.getItem('pinConfiguration')) || {};
     }
 
     // component attributes
@@ -64,28 +39,60 @@ window.customElements.define('microbitpincontroller-れ', class extends HTMLElem
     }
 
     connectedCallback() {
-        this._shadowRoot.getElementById('setPin0Button').addEventListener('click', (event) => this.setPin(event, 0));
-        this._shadowRoot.getElementById('setPin1Button').addEventListener('click', (event) => this.setPin(event, 1));
-        this._shadowRoot.getElementById('setPin2Button').addEventListener('click', (event) => this.setPin(event, 2));
+        this.renderPinConfiguration();
+        this.renderPinOptions();
+        this._shadowRoot.getElementById('addPinButton').addEventListener('click', () => this.addPin());
+        this.addEventListener('rerender', this.render);
     }
 
-    async setPin(e, pin) {
-        e.preventDefault();
-        const form = e.target.closest('form');
-        const typeSelect = form.querySelector('#typeSelect');
-        const type = typeSelect.options[typeSelect.selectedIndex].value;
-        if (type === 'none') {
-            const data = {pin: pin, remove: true};
-            const event = new CustomEvent('setpinconfiguration', { detail: data, bubbles: true, composed: true });
-            document.dispatchEvent(event)
-        } else {
-            const data = {pin: pin, configuration: {io: 'input', ad: 'analog', type: type}};
-            const event = new CustomEvent('setpinconfiguration', { detail: data, bubbles: true, composed: true });
-            document.dispatchEvent(event);
+    async render() {
+        this.delay(200).then(() => {
+            this.pinConfiguration = JSON.parse(sessionStorage.getItem('pinConfiguration')) || {};
+            this.renderPinConfiguration();
+            this.renderPinOptions();
+        });
+    }
+
+    async renderPinConfiguration() {
+        const container = this._shadowRoot.getElementById('pinFormsContainer');
+        container.innerHTML = ''; // Clear existing forms
+        for (let i = 0; i <= 18; i++) {
+            if (this.pinConfiguration[i]) {
+                const configuration = this.pinConfiguration[i];
+                const formElement = document.createElement('microbitpincontrollerform-れ');
+                formElement.setAttribute('pin', i);
+                formElement.setAttribute('type', configuration.type);
+                formElement.setAttribute('active', configuration.active);
+                container.appendChild(formElement);
+            }
         }
     }
 
-    
+    renderPinOptions() {
+        const pinSelect = this._shadowRoot.getElementById('pinSelect');
+        pinSelect.innerHTML = ''; // Clear existing options
+        for (let i = 0; i <= 18; i++) {
+            if (!this.pinConfiguration[i]) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `Pin ${i}`;
+                pinSelect.appendChild(option);
+            }
+        }
+    }
 
+    addPin() {
+        const pinSelect = this._shadowRoot.getElementById('pinSelect');
+        const selectedPin = pinSelect.value;
+        if (selectedPin !== '') {
+            const event = new CustomEvent('setpinconfiguration', { detail: { pin: selectedPin, configuration: {ad: 'analog', io: 'input', type: 'SOLAR', active: false} }, bubbles: true, composed: true });
+            document.dispatchEvent(event);
+        }
+        this.render();
+    }
+
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 });
 //#endregion CLASS

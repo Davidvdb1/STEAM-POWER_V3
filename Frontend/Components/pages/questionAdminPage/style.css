@@ -1,0 +1,29 @@
+@charset "UTF-8";
+:host {
+  display: block;
+  max-width: 1500px;
+  width: 80%;
+}
+
+adminquestioncomponent-れ {
+  margin-bottom: 2rem;
+}
+
+button {
+  background-color: #9FDAF9;
+  margin: 10px;
+  white-space: nowrap;
+  font-size: 1.1rem;
+  color: #002757;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  font-weight: bold;
+  border-style: solid;
+  border-color: #9FDAF9;
+}
+button:hover {
+  border-color: #002757;
+}/*# sourceMappingURL=style.css.map */
