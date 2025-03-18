@@ -7,6 +7,9 @@ const campRoutes = require('./controller/campController');
 const workshopRoutes = require('./controller/workshopController');
 const groupRoutes = require('./controller/groupController');
 const energyDataRoutes = require('./controller/energyDataController');
+const questionsRoutes = require('./controller/questionController');
+
+
 
 const app = express();
 const cors = require('cors');
@@ -15,7 +18,7 @@ app.use(helmet());
 
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '100mb' })); 
+app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 app.use(
@@ -39,6 +42,7 @@ app.use('/camps', campRoutes);
 app.use('/workshops', workshopRoutes);
 app.use('/groups', groupRoutes);
 app.use('/energydata', energyDataRoutes);
+app.use('/questions', questionsRoutes);
 
 app.get('/status', (req, res) => {
     res.send(`Server is running on http://localhost:${PORT}`);
