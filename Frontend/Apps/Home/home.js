@@ -6,8 +6,8 @@ import "../../Components/microbit/microbitBluetoothConnection/microbitBluetoothC
 //#region HOME
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
-    <tabhandler-れ></tabhandler-れ> 
     <microbitbluetoothconnection-れ></microbitbluetoothconnection-れ>
+    <tabhandler-れ></tabhandler-れ>
 `;
 //#endregion HOME
 
