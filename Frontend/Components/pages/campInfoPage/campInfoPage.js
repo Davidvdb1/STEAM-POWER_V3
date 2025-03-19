@@ -13,9 +13,16 @@ template.innerHTML = /*html*/`
     <h1 id="camptitle"></h1>
     <h2>Workshops</h2>
     <div id="buttons">
-        <button id="addexisting">Voeg Bestaande Workshop Toe</button>
-        <button id="addnew">Voeg Nieuwe Workshop Toe</button>
+        <div class="dropdown">
+            <button id="addexisting">Bestaande Workshop Toevoegen</button>
+            <div class="dropdown-content">
+                <button id="confirmSelection">Bevestigen</button>
+                <ul id="workshopList"></ul>
+            </div>
+        </div>
+        <button id="addnew">Nieuwe Workshop Toevoegen</button>
     </div>
+    <p id="statusmessage"></p>
     <div id="workshops"></div>
 `;
 //#endregion CAMPINFOPAGE
@@ -30,8 +37,13 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
         this.$workshops = this._shadowRoot.querySelector("#workshops");
         this.$title = this._shadowRoot.querySelector("#camptitle");
         this.$addExisting = this._shadowRoot.querySelector("#addexisting");
+        this.$workshopList = this._shadowRoot.querySelector("#workshopList");
         this.$addNew = this._shadowRoot.querySelector("#addnew");
-        this.camp = null;
+        this.$dropdown = this._shadowRoot.querySelector(".dropdown");
+        this.$confirmButton = this._shadowRoot.querySelector("#confirmSelection");
+        this.$camp = null;
+        this.$unlinkedworkshops = null;
+        this.$selectedWorkshops = new Set();
     }
 
     // component attributes
@@ -46,37 +58,111 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        // this.$addExisting.addEventListener('click', () => {
-        //     this.tabWithWorkshopHandler("workshoppage", this.getAttribute("componentid"));
-        // });
-
         this.$addNew.addEventListener('click', () => {
             this.tabWithCampHandler("workshoppage", "camp", this.getAttribute("camp"));
         });
+
+        this.$addExisting.addEventListener("click", () => this.toggleDropdown());
+        this.$confirmButton.addEventListener("click", () => this.confirmSelection());
+        this.addEventListener("updateCampInfoPage", () => this.fetchCampWithId(this.getAttribute("camp")));
+    }
+
+    toggleDropdown() {
+        this.$dropdown.classList.toggle("open");
+    }
+
+    async confirmSelection() {
+        this.$dropdown.classList.toggle("open");
+        console.log("Selected workshops:", this.$selectedWorkshops);
+    
+        for (const workshopId of this.$selectedWorkshops) {
+            const workshop = await this.fetchWorkshopWithId(workshopId);
+            await this.createWorkshop(workshop.html, workshop.title, this.getAttribute("camp"));
+        }
+    
+        setTimeout(() => {
+            window.location.reload();
+        }, 1000);
     }
 
     updateCampInfo() {
-        if (!this.camp) return;
-
-        this.camp.workshops.forEach(workshop => {
+        if (!this.$camp) return;
+    
+        this.$workshops.innerHTML = "";
+    
+        const sortedWorkshops = [...this.$camp.workshops].sort((a, b) => a.position - b.position);
+    
+        sortedWorkshops.forEach(workshop => {
             let workshopPreview = document.createElement('workshoppreview-れ');
             workshopPreview.setAttribute("html", workshop.html);
-            workshopPreview.setAttribute("id", workshop.id);
-            this.$workshops.appendChild(workshopPreview);
-        })
+            workshopPreview.setAttribute("workshop", workshop.id);
+            workshopPreview.setAttribute("archived", workshop.archived);
 
-        this.$title.innerHTML = this.camp.name;
+            workshopPreview.addEventListener("click", () => {
+                this.tabWithCampHandler("workshopinfo", "workshop", workshop.id);
+            });
+    
+            this.$workshops.appendChild(workshopPreview);
+        });
+    
+        this.$title.innerHTML = this.$camp.name;
+        this.fetchUnlinkedWorkshops();
+    }
+    
+    
+
+    updateStatusMessage(message, type) {
+        const statusMessage = this._shadowRoot.querySelector("#statusmessage");
+        statusMessage.textContent = message;
+        statusMessage.style.color = type === "success" ? "green" : "red";
     }
 
-    tabWithCampHandler(tabID, componentName, componentID) {
+    populateWorkshopDropdown(workshops) {
+        this.$workshopList.innerHTML = "";
+    
+        if (workshops.length === 0) {
+            this.$workshopList.innerHTML = "<li>Geen beschikbare workshops</li>";
+        }
+    
+        workshops.forEach(async (workshop) => {
+
+            const campName = await this.fetchCampNameWithId(workshop.campId)
+            const li = document.createElement("li");
+            const label = document.createElement("label");
+            const checkbox = document.createElement("input");
+    
+            checkbox.type = "checkbox";
+            checkbox.value = workshop.title;
+            checkbox.addEventListener("change", () => this.toggleSelection(workshop.id, checkbox.checked));
+    
+            label.appendChild(checkbox);
+    
+            const title = workshop.title + " - " + campName;
+            label.appendChild(document.createTextNode(title));
+    
+            li.appendChild(label);
+            this.$workshopList.appendChild(li);
+        });
+    }
+
+    toggleSelection(workshopId, isChecked) {
+        if (isChecked) {
+            this.$selectedWorkshops.add(workshopId);
+        } else {
+            this.$selectedWorkshops.delete(workshopId);
+        }
+    }
+
+    tabWithCampHandler(tabId, componentName, componentId) {
         this.dispatchEvent(new CustomEvent('tabID', {
             bubbles: true,
             composed: true,
-            detail: {tabID, componentName, componentID}
+            detail: {tabId, componentName, componentId}
         })); 
     }
 
-    //service
+
+    //services
     async fetchCampWithId(id) {
         try {
             const url = window.env.BACKEND_URL;
@@ -86,11 +172,124 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
     
-            this.camp = await response.json();
+            this.$camp = await response.json();
             this.updateCampInfo();
     
         } catch (error) {
             console.error("Fout bij ophalen van kampen:", error);
+        }
+    }
+
+    async fetchCampNameWithId(id) {
+        try {
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(`${url}/camps/${id}?includeworkshops=true`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const camp = await response.json();
+            return camp.name;
+
+    
+        } catch (error) {
+            console.error("Fout bij ophalen van kampen:", error);
+        }
+    }
+
+
+    async fetchUnlinkedWorkshops() {
+        try {
+            if (!this.$camp || !this.$camp.id) return;
+    
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(`${url}/camps/unlinked-workshops/${this.$camp.id}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const workshops = await response.json();
+    
+            this.$unlinkedworkshops = workshops;
+            this.populateWorkshopDropdown(this.$unlinkedworkshops);
+        } catch (error) {
+            console.error("Fout bij ophalen van niet-gekoppelde workshops:", error);
+        }
+    }
+
+    async fetchWorkshopWithId(id) {
+        try {
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(`${url}/workshops/${id}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const workshop = await response.json();
+            return workshop;
+    
+        } catch (error) {
+            console.error("Fout bij ophalen van workshop:", error);
+        }
+    }
+
+    async addWorkshopToCamp(campId, workshopId) {
+        try {
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(`${url}/camps/${campId}/workshop/${workshopId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+    
+            if (!response.ok) {
+                throw new Error(`❌ HTTP error! Status: ${response.status}`);
+            }
+    
+            const data = await response.json();
+    
+            return data;
+        } catch (error) {
+            console.error("❌ Fout bij toevoegen van workshop aan kamp:", error);
+            return null; // Zorgt ervoor dat de functie geen crash veroorzaakt
+        }
+    }
+
+    async createWorkshop(html, title, id) {
+        try {
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(`${url}/workshops`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ html, title, id })
+            });
+    
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            this.$workshop = await response.json();
+            const workshop = this.$workshop.workshop
+
+    
+            if (!workshop || !workshop.id) {
+                throw new Error("Workshop ID niet gevonden na aanmaken!");
+            }
+    
+            // 🔹 Voeg de workshop toe aan het kamp
+            const campId = this.getAttribute("camp");
+            await this.addWorkshopToCamp(campId, workshop.id);
+            this.updateStatusMessage("✅ Alle workshops zijn succesvol verwerkt. Pagina wordt herladen...", "success");
+    
+        } catch (error) {
+            console.error("❌ Fout bij aanmaken van workshop:", error);
+            this.updateStatusMessage("❌ Fout bij aanmaken van workshop.", "error");
         }
     }
 });

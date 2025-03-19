@@ -28,6 +28,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         this.pinAdConfigurationCharacteristic = null;
         this.pinIoConfigurationCharacteristic = null;
         this.paused = false;
+        this.pinConfiguration = {};
     }
 
     // component attributes
@@ -44,14 +45,16 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
         document.addEventListener('setbluetoothdatainterval', this.setIntervalTime.bind(this));
+        document.addEventListener('setpinconfiguration', this.setPinConfiguration.bind(this));
     }
 
     async init() {
         if (!navigator.bluetooth) return; // TODO: Show error message "Bluetooth not supported on this browser"
         
-        console.log('Connecting...');
+        console.log('Searching for devices...');
         this.paused = false;
         await this.requestDevice();
+        console.log('Connecting to device...');
         await this.connectToDevice();
         console.log('Configuring device...');
         await this.configurePins();
@@ -73,12 +76,17 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     async disconnect() {
         console.log('Disconnecting...');
         this.paused = false;
-        this.device.removeEventListener("gattserverdisconnected", this.connectToDevice);
-        this.device.gatt.disconnect();
-        this.services = [];
-        this.characteristics = [];
         this.device = null;
         this.server = null;
+        this.ioPinService = null;
+        this.pinDataCharacteristic = null;
+        this.pinAdConfigurationCharacteristic = null;
+        this.pinIoConfigurationCharacteristic = null;
+        
+        this.device.removeEventListener("gattserverdisconnected", this.connectToDevice);
+        this.device.gatt.disconnect();
+
+        await this.stopMonitoring();
     }
 
     async requestDevice() {
@@ -101,7 +109,7 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
     async startMonitoring() {
         this.monitoringInterval = setInterval(async () => {
             if (!this.paused) {
-                await this.readPin0Value();
+                await this.readPinValues();
             }
         }, this.intervalTime || 2000);
     }
@@ -110,36 +118,84 @@ window.customElements.define('microbitbluetoothconnection-れ', class extends HT
         clearInterval(this.monitoringInterval);
     }
 
-    async readPin0Value() { // TODO: Read all pins and make function tos set which pins are read
-        const view = await this.pinDataCharacteristic.readValue();
-        const analogValue = new DataView(view.buffer).getUint8(1, true);
-        
-        const event = new CustomEvent('pin0valuechanged', { detail: analogValue, bubbles: true, composed: true });
-        document.dispatchEvent(event);
-    }
-
-    async configurePins() {
-        try {
-            // Configure Pin 0 as Analog (Update the Pin AD Configuration Bitmask)
-            const adFlags = new Uint8Array([0x01, 0x00, 0x00, 0x00]); // Set bit 0 and bit 1 for Pin 0 and Pin 1
-            await this.pinAdConfigurationCharacteristic.writeValue(adFlags);
-            console.log('Configured pin 0 and pin 1 as analog input');
-
-            // Configure Pin 0 as Input (Update the Pin IO Configuration Bitmask)
-            const ioFlagsIn = new Uint8Array([0x01, 0x00, 0x00, 0x00]);
-            await this.pinIoConfigurationCharacteristic.writeValue(ioFlagsIn);
-            console.log('Configured pin 0 and pin 1 as input');
-        } catch (error) {
-            console.error('Error configuring pins:', error);
-        }
-    }
-
     async setIntervalTime(event) {
         this.intervalTime = event.detail;
         console.log('Interval time set to:', this.intervalTime);
-        if (this.monitoringInterval) {
+        if (this.monitoringInterval && this.device) {
             await this.stopMonitoring();
             await this.startMonitoring();
+        }
+    }
+
+    async setPinConfiguration(event) {
+        if (event.detail.remove) {
+            delete this.pinConfiguration[event.detail.pin];
+        } else {
+            this.pinConfiguration[event.detail.pin] = event.detail.configuration;
+        }
+        if (this.device) {
+            await this.configurePins();
+        }
+        sessionStorage.setItem('pinConfiguration', JSON.stringify(this.pinConfiguration));
+    }
+
+    async configurePins() {
+        let adFlags = 0n;
+        let ioFlags = 0n;
+        Object.keys(this.pinConfiguration).forEach((pin) => {
+            const configuration = this.pinConfiguration[pin];
+            if (!configuration.active) {
+                return;
+            }
+            if (configuration.ad == 'analog') {
+                adFlags |= 1n << BigInt(pin);
+            }
+            if (configuration.io == 'input') {
+                ioFlags |= 1n << BigInt(pin);
+            }
+        });
+        const adFlagsBuffer = new Uint32Array([Number(adFlags)]).buffer;
+        const ioFlagsBuffer = new Uint32Array([Number(ioFlags)]).buffer;
+        await this.pinIoConfigurationCharacteristic.writeValue(adFlagsBuffer);
+        await this.pinAdConfigurationCharacteristic.writeValue(ioFlagsBuffer);
+    }
+
+    async readPinValues() {
+        const groupId = JSON.parse(sessionStorage.getItem('loggedInUser')).groupId;
+
+        const view = await this.pinDataCharacteristic.readValue(); // list of 2 byte pairs: [pinNumber, pinValue]
+        const pinValues = {};
+        for (let i = 0; i < view.byteLength; i += 2) {
+            const pinNumber = view.getUint8(i);
+            const pinValue = Math.round(view.getUint8(i + 1) * 1023 / 255); // convert 8 bit value to 10 bit value
+            pinValues[pinNumber] = {groupId, value: pinValue, type: this.pinConfiguration[pinNumber].type, time: new Date().toISOString()};
+        }
+        Object.keys(pinValues).forEach(async (pin) => {
+            const data = pinValues[pin];
+            const response = await this.postEnergyData({...data, pin: Number(pin)});
+            const body = await response.json();
+            const datapoint = body.energyData;
+            
+            const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
+            document.dispatchEvent(event);
+
+        });
+    }
+
+    // service
+    async postEnergyData(data = { groupId, value, time, type, pin }) {
+        try {
+            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
+            return await fetch(window.env.BACKEND_URL + '/energydata', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify(data)
+            });
+        } catch (error) {
+            console.error(error);
         }
     }
 });

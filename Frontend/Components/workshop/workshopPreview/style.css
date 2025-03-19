@@ -8,15 +8,15 @@
   max-width: 685px;
   width: 100%;
   height: auto;
-  max-height: -moz-fit-content;
-  max-height: fit-content;
+  min-height: 140px;
+  max-height: 800px;
   overflow-y: auto;
   position: relative;
+  cursor: pointer;
 }
 
-#edit {
+.buttons {
   position: absolute;
-  top: 8px;
   right: 8px;
   cursor: pointer;
   padding: 5px;

@@ -1,0 +1,81 @@
+form {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #000;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+form p {
+  font-weight: bold;
+  margin: auto;
+}
+
+#buttonContainer {
+  margin: auto;
+  margin-top: 10px;
+}
+
+#activateButton {
+  background-color: #81c784;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+#activateButton.deactivate {
+  background-color: #e57373;
+}
+
+#removeButton {
+  background-color: #e57373;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+#typeSelectPin {
+  margin-right: 5px;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+form[data-type=SOLAR] {
+  background-color: #fff9c4;
+}
+
+form[data-type=WIND] {
+  background-color: #b3e5fc;
+}
+
+form[data-type=WATER] {
+  background-color: #90caf9;
+  color: white;
+}
+
+form[data-active=false] {
+  background-color: #e0e0e0;
+}
+
+option[value=SOLAR] {
+  background-color: #fff9c4;
+}
+
+option[value=WIND] {
+  background-color: #b3e5fc;
+}
+
+option[value=WATER] {
+  background-color: #90caf9;
+  color: white;
+}
+
+option:hover {
+  background-color: inherit;
+}/*# sourceMappingURL=style.css.map */
