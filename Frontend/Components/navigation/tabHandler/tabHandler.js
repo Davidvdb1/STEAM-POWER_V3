@@ -9,7 +9,6 @@ import "../../camp/formContainer/formContainer.js"
 import "../../pages/userLoginPage/userLoginPage.js"
 import "../../pages/groupLoginPage/groupLoginPage.js"
 import "../../pages/workshopInfo/workshopInfo.js"   
-import "../../pages/graphPage/graphPage.js"
 import "../../authentication/logout/logout.js"
 import "../../pages/questionAdminPage/questionAdminPage.js"
 //#endregion IMPORTS
@@ -66,7 +65,6 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
             { id: "quiz", label: "Quiz" },
             { id: "spel", label: "Spel" },
             { id: "microbitpage", label: "Micro:bit" },
-            { id: "graphpage", label: "Grafieken" },
             { id: "groepen", label: "Groepen" },
             { id: "users", label: "Gebruikers" },
             { id: "sign-up", label: "Nieuw account" },

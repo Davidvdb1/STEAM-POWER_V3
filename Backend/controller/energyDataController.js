@@ -18,7 +18,9 @@ router.get('/:groupId', async (req, res) => {
         res.status(200).json(energyData);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
+        console.log(error);
     }
 });
+
 
 module.exports = router;
