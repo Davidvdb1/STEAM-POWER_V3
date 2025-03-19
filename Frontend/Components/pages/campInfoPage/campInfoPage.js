@@ -94,7 +94,7 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
     
         sortedWorkshops.forEach(workshop => {
             let workshopPreview = document.createElement('workshoppreview-れ');
-            workshopPreview.setAttribute("html", workshop.html);
+            workshopPreview.updateWorkshopPreview(workshop.html);
             workshopPreview.setAttribute("workshop", workshop.id);
             workshopPreview.setAttribute("archived", workshop.archived);
 
