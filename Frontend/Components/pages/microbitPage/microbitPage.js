@@ -32,11 +32,11 @@ template.innerHTML = /*html*/`
     <microbitpincontroller-れ></microbitpincontroller-れ>
     <label for="rangeSelect">tijdspanne selecteren:</label>
     <select id="rangeSelect">
-    <option value="halfMinute" selected>30 seconden</option>
+    <option value="halfMinute">30 seconden</option>
     <option value="tenMinutes">10 minuten</option>
     <option value="oneHour">1 uur</option>
     <option value="sixHour">6 uur</option>
-    <option value="oneDay">1 dag</option>
+    <option value="oneDay" selected>24 uur</option>
     </select>
     <microbitgraphs-れ></microbitgraphs-れ>
 `;
@@ -68,14 +68,12 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this._shadowRoot.getElementById('endButton').addEventListener('click', () => this.endBluetoothConnection());
         this._shadowRoot.getElementById('intervalSelect').addEventListener('change', (event) => this.setBluetoothDataInterval(event));
         
-        document.addEventListener('energydatareading', this.updateEnergyDataList.bind(this));
+        document.addEventListener('energydatareading', this.updateEnergyData.bind(this));
+        
+        await this.getEnergyData()
     
-        // Ophaalactie bij laden van de pagina
-        await this.fetchAndUpdateEnergyData();
-    
-        // Event listener voor range-selectie
         this.$rangeSelect.addEventListener('change', async (event) => {
-            await this.fetchAndUpdateEnergyData(event.target.value);
+            this.liveTeamData.setAttribute('range', event.target.value);
         });
     }
     
@@ -95,21 +93,11 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         document.dispatchEvent(event);
     }
 
-    updateEnergyDataList(event) {
+    updateEnergyData(event) {
         const data = event.detail;
+        console.log("testttt" + data)
         this.energyData.push(data);
-        this.renderMeasurementList();
         this.liveTeamData.updateGraph(this.energyData, data);
-    }
-
-    renderMeasurementList() {
-        const list = this._shadowRoot.getElementById('measurementList');
-        list.innerHTML = '';
-        this.energyData.slice(-10).forEach((data, index) => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `Measurement ${index + 1}: ${data.value} ${data.type} pin ${data.pin} at ${data.time}`;
-            list.appendChild(listItem);
-        });
     }
 
     setBluetoothDataInterval(event) {
@@ -119,39 +107,25 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         document.dispatchEvent(customEvent);
     }
 
-    // service
-    async fetchAndUpdateEnergyData(range = 'halfMinute') {
-        try {
-            const data = await this.getEnergyData(range);
-    
-            if (Array.isArray(data)) {
-                this.energyData = data;
-                console.log("testing" + data)
-            } else {
-                console.warn("Gehaalde energyData is geen array, reset naar lege array.");
-                this.energyData = [];
-            }
-    
-            this.renderMeasurementList();
-            this.liveTeamData.updateGraph(this.energyData);
-            this.liveTeamData.setAttribute('range', range);
-        } catch (error) {
-            console.error("Fout bij het ophalen van energyData:", error);
-            this.energyData = [];
-        }
+    initGraphs() {
+        this.liveTeamData.updateGraph(this.energyData);
     }
+
     
     // 🔹 Functie die alleen de fetch uitvoert en data teruggeeft
-    async getEnergyData(range = 'halfMinute') {
+    async getEnergyData() {
         try {
             const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
             if (!groupId) throw new Error("Geen geldig groupId gevonden!");
     
-            const response = await fetch(`${window.env.BACKEND_URL}/energydata/${groupId}?range=${range}`);
+            const response = await fetch(`${window.env.BACKEND_URL}/energydata/${groupId}`);
             
             if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
-            
-            return await response.json();
+        
+            this.energyData = await response.json();
+            this.initGraphs();
+            console.log("Opgeladen energyData:", this.energyData);
+
         } catch (error) {
             console.error("Fout bij ophalen van energyData:", error);
             return [];

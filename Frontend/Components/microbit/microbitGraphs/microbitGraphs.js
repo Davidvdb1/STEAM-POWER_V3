@@ -50,43 +50,74 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
         if (!this.chart) return;
     
         const now = new Date();
-        let minTime;
+        let minTime, interval, formatter;
     
         switch (range) {
             case 'halfMinute':
                 minTime = new Date(now.getTime() - 30 * 1000); // 30 seconden geleden
+                formatter = (value) => {
+                    let date = new Date(value);
+                    let hours = date.getHours();
+                    let minutes = date.getMinutes();
+                    let seconds = date.getSeconds();
+                
+                    // Laat enkel labels zien als de seconden een veelvoud van 10 zijn (10, 20, 30, etc.)
+                    if (seconds % 10 === 0) {
+                        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}'${seconds.toString().padStart(2, '0')}"`;
+                    }
+                    return ''; // Geen label tonen als het niet op een 10-seconde mark is
+                };
+                
                 break;
             case 'tenMinutes':
                 minTime = new Date(now.getTime() - 10 * 60 * 1000); // 10 minuten geleden
+                formatter = '{HH}:{mm}';
                 break;
             case 'oneHour':
                 minTime = new Date(now.getTime() - 60 * 60 * 1000); // 1 uur geleden
+                formatter = '{HH}:{mm}';
                 break;
             case 'sixHour':
                 minTime = new Date(now.getTime() - 6 * 60 * 60 * 1000); // 6 uur geleden
+                formatter = '{HH}:{mm}';
                 break;
             case 'oneDay':
                 minTime = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 uur geleden
+                formatter = '{HH}:{mm}';
                 break;
             default:
                 console.error(`Ongeldige range: ${range}`);
                 return;
         }
     
-        // Update de X-as limieten in de grafiek
+        // Update de X-as instellingen
         this.chart.setOption({
             xAxis: {
                 min: minTime.getTime(), // Nieuwe minimale tijd
                 max: now.getTime(), // Huidige tijd als maximum
-                axisLabel: { formatter: '{HH}:{mm}' } // Tijdsaanduiding
+                axisLabel: {
+                    formatter: formatter, // Gebruik de dynamische formatter
+                    interval: interval // Pas de label-interval aan
+                },
+                axisTick: {
+                    interval: interval // Pas de tick-interval aan
+                }
             }
         });
     }
     
+    
+    
 
     connectedCallback() {
         this.initChart();
+    
+        // Start een interval dat de X-as elke seconde bijwerkt
+        this.xAxisInterval = setInterval(() => {
+            this.updateXAxis(this.getAttribute("range") || "oneDay");
+        }, 1000); // Elke seconde bijwerken
     }
+    
 
     initChart() {
         if (!this.$liveEnergy) {
