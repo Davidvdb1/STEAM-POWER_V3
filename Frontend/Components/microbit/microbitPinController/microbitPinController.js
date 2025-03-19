@@ -1,5 +1,6 @@
 //#region IMPORTS
-import '../microbitPinControllerForm/microbitPinControllerForm.js';
+import '../microbitAdvancedPinController/microbitAdvancedPinController.js';
+import '../microbitBasicPinController/microbitBasicPinController.js';
 //#endregion IMPORTS
 
 //#region MICROBITPINCONTROLLER
@@ -8,14 +9,9 @@ template.innerHTML = /*html*/`
     <style>
         @import './components/microbit/microbitPinController/style.css';
     </style>
-    <div id="pinAdderContainer">
-        <select id="pinSelect">
-            <!-- Options will be dynamically generated here -->
-        </select>
-        <button id="addPinButton">Add Pin</button>
-    </div>
-    <div id="pinFormsContainer">
-        <!-- Forms will be dynamically generated here -->
+    <button id="toggleViewButton">Switch to Advanced</button>
+    <div id="pinControllerContainer">
+        
     </div>
 `;
 //#endregion MICROBITPINCONTROLLER
@@ -26,73 +22,45 @@ window.customElements.define('microbitpincontroller-れ', class extends HTMLElem
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.pinConfiguration = JSON.parse(sessionStorage.getItem('pinConfiguration')) || {};
-    }
 
-    // component attributes
-    static get observedAttributes() {
-        return [];
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-
+        this.isAdvancedView = sessionStorage.getItem('isAdvancedView') === 'true';
+        this.pinControllerContainer = this._shadowRoot.getElementById('pinControllerContainer');
+        this.toggleViewButton = this._shadowRoot.getElementById('toggleViewButton');
     }
 
     connectedCallback() {
-        this.renderPinConfiguration();
-        this.renderPinOptions();
-        this._shadowRoot.getElementById('addPinButton').addEventListener('click', () => this.addPin());
-        this.addEventListener('rerender', this.render);
+        if (this.isAdvancedView) {
+            this.showAdvancedView();
+        } else {
+            this.showBasicView();
+        }
+        this._shadowRoot.getElementById('toggleViewButton').addEventListener('click', () => this.toggleView());
     }
 
-    async render() {
-        this.delay(200).then(() => {
-            this.pinConfiguration = JSON.parse(sessionStorage.getItem('pinConfiguration')) || {};
-            this.renderPinConfiguration();
-            this.renderPinOptions();
-        });
-    }
-
-    async renderPinConfiguration() {
-        const container = this._shadowRoot.getElementById('pinFormsContainer');
-        container.innerHTML = ''; // Clear existing forms
-        for (let i = 0; i <= 18; i++) {
-            if (this.pinConfiguration[i]) {
-                const configuration = this.pinConfiguration[i];
-                const formElement = document.createElement('microbitpincontrollerform-れ');
-                formElement.setAttribute('pin', i);
-                formElement.setAttribute('type', configuration.type);
-                formElement.setAttribute('active', configuration.active);
-                container.appendChild(formElement);
-            }
+    toggleView() {
+        this.isAdvancedView = !this.isAdvancedView;
+        sessionStorage.setItem('isAdvancedView', this.isAdvancedView); // Store view state in sessionStorage
+        if (this.isAdvancedView) {
+            this.showAdvancedView();
+        } else {
+            this.showBasicView();
         }
     }
 
-    renderPinOptions() {
-        const pinSelect = this._shadowRoot.getElementById('pinSelect');
-        pinSelect.innerHTML = ''; // Clear existing options
-        for (let i = 0; i <= 18; i++) {
-            if (!this.pinConfiguration[i]) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = `Pin ${i}`;
-                pinSelect.appendChild(option);
-            }
-        }
+    showBasicView() {
+        this.pinControllerContainer.innerHTML = '';
+        const basicPinController = document.createElement('microbitbasicpincontroller-れ');
+        this.pinControllerContainer.appendChild(basicPinController);
+
+        this.toggleViewButton.textContent = 'Toon geavanceerde opties';
     }
 
-    addPin() {
-        const pinSelect = this._shadowRoot.getElementById('pinSelect');
-        const selectedPin = pinSelect.value;
-        if (selectedPin !== '') {
-            const event = new CustomEvent('setpinconfiguration', { detail: { pin: selectedPin, configuration: {ad: 'analog', io: 'input', type: 'SOLAR', active: false} }, bubbles: true, composed: true });
-            document.dispatchEvent(event);
-        }
-        this.render();
-    }
+    showAdvancedView() {
+        this.pinControllerContainer.innerHTML = '';
+        const advancedPinController = document.createElement('microbitadvancedpincontroller-れ');
+        this.pinControllerContainer.appendChild(advancedPinController);
 
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        this.toggleViewButton.textContent = 'Toon basis opties';
     }
 });
 //#endregion CLASS
