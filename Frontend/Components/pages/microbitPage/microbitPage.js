@@ -30,6 +30,14 @@ template.innerHTML = /*html*/`
         <option value="600000">10 minuten</option>
     </select>
     <microbitpincontroller-れ></microbitpincontroller-れ>
+    <label for="rangeSelect">tijdspanne selecteren:</label>
+    <select id="rangeSelect">
+    <option value="halfMinute" selected>30 seconden</option>
+    <option value="tenMinutes">10 minuten</option>
+    <option value="oneHour">1 uur</option>
+    <option value="sixHour">6 uur</option>
+    <option value="oneDay">1 dag</option>
+    </select>
     <microbitgraphs-れ></microbitgraphs-れ>
 `;
 //#endregion MICROBITPAGE
@@ -40,6 +48,8 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+        this.liveTeamData = this._shadowRoot.querySelector('microbitgraphs-れ');
+        this.$rangeSelect = this._shadowRoot.querySelector('#rangeSelect');
         this.energyData = [];
     }
 
@@ -57,12 +67,18 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this._shadowRoot.getElementById('pauseButton').addEventListener('click', () => this.pauseBluetoothConnection());
         this._shadowRoot.getElementById('endButton').addEventListener('click', () => this.endBluetoothConnection());
         this._shadowRoot.getElementById('intervalSelect').addEventListener('change', (event) => this.setBluetoothDataInterval(event));
-
+        
         document.addEventListener('energydatareading', this.updateEnergyDataList.bind(this));
-
-        await this.getEnergyData().then(response => response.json()).then(data => this.energyData = data);
-        this.renderMeasurementList();
+    
+        // Ophaalactie bij laden van de pagina
+        await this.fetchAndUpdateEnergyData();
+    
+        // Event listener voor range-selectie
+        this.$rangeSelect.addEventListener('change', async (event) => {
+            await this.fetchAndUpdateEnergyData(event.target.value);
+        });
     }
+    
 
     startBluetoothConnection() {
         const event = new CustomEvent('startbluetoothconnection', { bubbles: true, composed: true });
@@ -83,6 +99,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const data = event.detail;
         this.energyData.push(data);
         this.renderMeasurementList();
+        this.liveTeamData.updateGraph(this.energyData, data);
     }
 
     renderMeasurementList() {
@@ -103,12 +120,41 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
     }
 
     // service
-    async getEnergyData() { // TODO: move this to graph component
-        const groupId = JSON.parse(sessionStorage.getItem('loggedInUser')).groupId;
+    async fetchAndUpdateEnergyData(range = 'halfMinute') {
         try {
-            return await fetch(window.env.BACKEND_URL + `/energydata/${groupId}`);
+            const data = await this.getEnergyData(range);
+    
+            if (Array.isArray(data)) {
+                this.energyData = data;
+                console.log("testing" + data)
+            } else {
+                console.warn("Gehaalde energyData is geen array, reset naar lege array.");
+                this.energyData = [];
+            }
+    
+            this.renderMeasurementList();
+            this.liveTeamData.updateGraph(this.energyData);
+            this.liveTeamData.setAttribute('range', range);
         } catch (error) {
-            console.error(error);
+            console.error("Fout bij het ophalen van energyData:", error);
+            this.energyData = [];
+        }
+    }
+    
+    // 🔹 Functie die alleen de fetch uitvoert en data teruggeeft
+    async getEnergyData(range = 'halfMinute') {
+        try {
+            const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
+            if (!groupId) throw new Error("Geen geldig groupId gevonden!");
+    
+            const response = await fetch(`${window.env.BACKEND_URL}/energydata/${groupId}?range=${range}`);
+            
+            if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
+            
+            return await response.json();
+        } catch (error) {
+            console.error("Fout bij ophalen van energyData:", error);
+            return [];
         }
     }
 });
