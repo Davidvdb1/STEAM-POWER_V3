@@ -1,11 +1,11 @@
 //#region IMPORTS
 //#endregion IMPORTS
 
-//#region MICROBITPINCONTROLLERFORM
+//#region MICROBITADVANCEDPINCONTROLLERFORM
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/microbit/microbitPinControllerForm/style.css';
+        @import './components/microbit/microbitAdvancedPinControllerForm/style.css';
     </style>
     <form>
         <p>Pin <span id="pinNumber"></span></p>
@@ -20,10 +20,10 @@ template.innerHTML = /*html*/`
         </div>
     </form>
 `;
-//#endregion MICROBITPINCONTROLLERFORM
+//#endregion MICROBITADVANCEDPINCONTROLLERFORM
 
 //#region CLASS
-window.customElements.define('microbitpincontrollerform-れ', class extends HTMLElement {
+window.customElements.define('microbitadvancedpincontrollerform-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
