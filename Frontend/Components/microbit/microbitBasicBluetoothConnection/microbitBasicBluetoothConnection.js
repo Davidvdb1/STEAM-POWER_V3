@@ -132,8 +132,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
 
         const extract10BitValue = (byte) => {
             const highBits = (byte & 0b11000000) >> 6; // Extract the first 2 bits
-            const value = (byte << 2) | highBits; // Combine to form a 10-bit number
-            return value;
+            return (byte << 2) | highBits; // Combine to form a 10-bit number
         };
 
         const pinValues = [];
