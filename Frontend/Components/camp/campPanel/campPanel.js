@@ -34,6 +34,8 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
         this.$search = this._shadowRoot.querySelector('#search');
         this.$addCamp = this._shadowRoot.querySelector('#addCamp');
         this.$reset = this._shadowRoot.querySelector('#reset');
+        this.$buttonPanel = this._shadowRoot.querySelector('#buttonPanel');
+        this.loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
     }
 
     // component attributes
@@ -46,6 +48,11 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        console.log(this.loggedInUser);
+        if (!this.loggedInUser || this.loggedInUser.role !== "ADMIN") {
+            this.$buttonPanel.style.display = "none";
+        }
+        
         this.$search.addEventListener('input', () => {
             this.searchHandler(this.$search.value);
         });
