@@ -95,7 +95,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
 
     updateEnergyData(event) {
         const data = event.detail;
-        console.log("testttt" + data)
         this.energyData.push(data);
         this.liveTeamData.updateGraph(this.energyData, data);
     }
@@ -124,8 +123,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         
             this.energyData = await response.json();
             this.initGraphs();
-            console.log("Opgeladen energyData:", this.energyData);
-
         } catch (error) {
             console.error("Fout bij ophalen van energyData:", error);
             return [];

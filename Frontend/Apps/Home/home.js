@@ -1,12 +1,13 @@
 //#region IMPORTS
 import "../../Components/navigation/tabHandler/tabHandler.js"
 import "../../Components/microbit/microbitBluetoothConnection/microbitBluetoothConnection.js"
+import "../../Components/microbit/microbitBasicBluetoothConnection/microbitBasicBluetoothConnection.js"
 //#endregion IMPORTS
 
 //#region HOME
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
-    <microbitbluetoothconnection-れ></microbitbluetoothconnection-れ>
+    <microbitbasicbluetoothconnection-れ></microbitbasicbluetoothconnection-れ>
     <tabhandler-れ></tabhandler-れ>
 `;
 //#endregion HOME
