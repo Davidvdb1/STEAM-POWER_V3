@@ -9,8 +9,8 @@ class EnergyDataService {
     }
     
 
-    async getAllByGroup(groupId, range='halfMinute') {
-        return await energyDataRepository.getAllByGroup(groupId, range);
+    async getAllByGroup(groupId) {
+        return await energyDataRepository.getAllByGroup(groupId);
     }
 }
 

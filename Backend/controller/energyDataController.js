@@ -14,8 +14,7 @@ router.post('/', async (req, res) => {
 
 router.get('/:groupId', async (req, res) => {
     try {
-        const range = req.query.range?.toString() || 'halfMinute'; // Standaard naar 'halfMinute'
-        const energyData = await energyDataService.getAllByGroup(req.params.groupId, range);
+        const energyData = await energyDataService.getAllByGroup(req.params.groupId);
         res.status(200).json(energyData);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
