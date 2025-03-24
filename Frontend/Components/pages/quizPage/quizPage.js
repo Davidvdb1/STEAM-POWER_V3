@@ -28,6 +28,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.$container = this.shadowRoot.querySelector("#container");
 
         this.powerSource = "";
+        this.loggedInGroupId = "";
 
 
     }
@@ -42,6 +43,10 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+
+        this.loggedInGroupId = JSON.parse(sessionStorage.getItem('loggedInUser')).groupId;
+        console.log(this.loggedInGroupId);
+
         this.addEventListener("quizmenu:startquiz", this.handleQuizStart.bind(this));
         this.addEventListener("quizgame:endquiz", this.handleQuizEnd.bind(this));
     }
@@ -55,7 +60,18 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     handleQuizEnd(e) {
         this.endScores = e.detail.scores;
 
+        this.submitScore();
         this.endQuiz();
+    }
+
+    async submitScore() {
+        // method for submitting bonus to a group
+        // submit scores, backend handles bonus creation and assignment
+        try {
+
+        } catch (error) {
+
+        }
     }
 
     async endQuiz() {
