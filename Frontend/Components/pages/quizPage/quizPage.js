@@ -1,6 +1,7 @@
 //#region IMPORTS
 import '../../quiz/quizMenu/quizMenuComponent.js';
 import '../../quiz/quizGame/quizGameComponent.js';
+import '../../quiz/quizEndScreen/quizEndScreenComponent.js';
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -58,8 +59,8 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     }
 
     async endQuiz() {
-        const quizEndElement = document.createElement("h1");
-        quizEndElement.innerText = { ...this.endScores };
+        const quizEndElement = document.createElement("quiz-end-れ");
+        quizEndElement.setAttribute("data-end-score", JSON.stringify({ ...this.endScores }));
 
         this.$container.innerHTML = "";
         this.$container.appendChild(quizEndElement);
