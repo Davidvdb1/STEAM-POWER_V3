@@ -54,6 +54,10 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     handleQuizEnd(e) {
         this.endScores = e.detail.scores;
 
+        this.endQuiz();
+    }
+
+    async endQuiz() {
         const quizEndElement = document.createElement("h1");
         quizEndElement.innerText = { ...this.endScores };
 
