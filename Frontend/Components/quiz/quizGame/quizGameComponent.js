@@ -1,5 +1,6 @@
 //#region IMPORTS
 import "../../quiz/quizQuestionComponent/quizQuestionComponent.js";
+import "../../quiz/answerFeedBackComponent/answerFeedbackComponent.js";
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -15,7 +16,7 @@ template.innerHTML = /*html*/`
                 <p>Huidig vermogen: <span id="energy"></span>W</p>
             </div>
             <div id="score-feedback-panel">
-            
+                <answer-feedback-component-れ></answer-feedback-component-れ>
             </div>
         </div>
         <div id="question-container">
@@ -65,7 +66,7 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
         this.$questionContainer = this.shadowRoot.querySelector("#question-container");
         this.$feedbackPanel = this.shadowRoot.querySelector("#score-feedback-panel");
         this.$currentPowerGeneratedText = this.shadowRoot.querySelector("#energy");
-
+        this.$answerFeedback = this.shadowRoot.querySelector("answer-feedback-component-れ");
         setTimeout(this.updateCurrentPower.bind(this), 500);
 
         this.currentQuestionIndex = 0;
@@ -123,7 +124,8 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
         const { isCorrect, error } = this.validateAnswer(userAnswer, correctAnswer, this.errorMargin);
 
         if (isCorrect) {
-            this.$feedbackPanel.innerText = "Correct!";
+            //this.$feedbackPanel.innerText = "Correct!";
+            this.$answerFeedback.error = error;
             this.scores[this.currentQuestionIndex] = error * this.questions[this.currentQuestionIndex].score;
             console.log(`
                     error on answer: ${error}
@@ -132,21 +134,27 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
                     max points for question: ${this.questions[this.currentQuestionIndex].score}
                     calculated end score (idk why): ${this.scores[this.currentQuestionIndex]}
                 `);
-            this.moveToNextQuestion();
+            setTimeout(() => {
+                this.moveToNextQuestion();
+            }, 1000);
         } else {
             this.currentAttempts++;
             if (this.currentAttempts >= this.maxAttempts) {
-                this.$feedbackPanel.innerText = `Incorrect! The correct answer was: ${correctAnswer}`;
+                //this.$feedbackPanel.innerText = `Incorrect! The correct answer was: ${correctAnswer}`; 
+                this.$answerFeedback.error = error;
                 this.scores[this.currentQuestionIndex] = 0;
-                this.moveToNextQuestion();
+                setTimeout(() => {
+                    this.moveToNextQuestion();
+                }, 1000);
             } else {
-                this.$feedbackPanel.innerText = `Incorrect! You have ${this.maxAttempts - this.currentAttempts} attempts left. Error: ${error}`;
+                //this.$feedbackPanel.innerText = `Incorrect! You have ${this.maxAttempts - this.currentAttempts} attempts left. Error: ${error}`;
+                this.$answerFeedback.error = error;
             }
         }
     }
 
     validateAnswer(userAnswer, correctAnswer, errorMargin) {
-        const error = Math.abs((correctAnswer - userAnswer) / correctAnswer);
+        const error = ((userAnswer - correctAnswer) / correctAnswer);
 
         const isCorrect = error <= errorMargin;
 
