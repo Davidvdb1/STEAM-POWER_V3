@@ -3,6 +3,7 @@ import "../../../Components/navigation/header/header.js"
 import "../../pages/content/content.js"
 import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
+import "../../pages/groupOverviewPage/groupOverviewPage.js"
 import "../../pages/campInfoPage/campInfoPage.js"
 import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
@@ -81,7 +82,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
             "TEACHER": [
                 { id: "campoverviewpage", label: "Home" },
                 { id: "leaderboard", label: "Leaderboard" },
-                { id: "groepen", label: "Groepen" },
+                { id: "groupoverviewpage", label: "Groepen" },
                 { id: "users", label: "Gebruikers" },
                 { id: "logout", label: "Logout" },
                 { id: "questionadmin", label: "Vragen aanpassen" },
@@ -92,7 +93,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "quiz", label: "Quiz" },
                 { id: "spel", label: "Spel" },
                 { id: "microbitpage", label: "Micro:bit" },
-                { id: "groepen", label: "Groepen" },
+                { id: "groupoverviewpage", label: "Groepen" },
                 { id: "users", label: "Gebruikers" },
                 { id: "sign-up", label: "Nieuw account" },
                 { id: "questionadmin", label: "Vragen aanpassen" },
