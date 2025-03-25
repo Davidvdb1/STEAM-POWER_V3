@@ -43,6 +43,7 @@ model Workshop {
 model Group {
     id         String       @id @default(uuid())
     name       String       @unique
+    description String
     code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
     energyData EnergyData[]
 }

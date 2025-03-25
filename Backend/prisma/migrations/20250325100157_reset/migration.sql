@@ -48,7 +48,8 @@ CREATE TABLE "Workshop" (
 CREATE TABLE "Group" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "code" TEXT NOT NULL DEFAULT "substring"(md5((random())::text), 1, 6),
+    "description" TEXT NOT NULL,
+    "code" TEXT NOT NULL DEFAULT substring(md5(random()::text), 1, 6),
 
     CONSTRAINT "Group_pkey" PRIMARY KEY ("id")
 );
@@ -60,8 +61,22 @@ CREATE TABLE "EnergyData" (
     "time" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "type" "EnergyType" NOT NULL,
     "value" INTEGER NOT NULL,
+    "pin" INTEGER NOT NULL,
 
     CONSTRAINT "EnergyData_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Question" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
+    "picture" TEXT NOT NULL,
+    "wattage" INTEGER NOT NULL,
+    "score" INTEGER NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+
+    CONSTRAINT "Question_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

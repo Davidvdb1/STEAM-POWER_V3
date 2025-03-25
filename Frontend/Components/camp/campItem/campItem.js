@@ -102,6 +102,16 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        // Check if user is admin
+        const user = JSON.parse(sessionStorage.getItem('user')) || {};
+        const isAdmin = user.role === 'ADMIN';
+        
+        // Hide settings and visible icons if not admin
+        if (!isAdmin) {
+            this.$settings.style.display = 'none';
+            this.$visible.style.display = 'none';
+        }
+        
         this.$button.addEventListener('click', () => {
             this.campInfoHandler("campinfopage", "camp", this.campId);
         });

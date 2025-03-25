@@ -46,6 +46,15 @@ class GroupRepository {
         const prismaGroups = await prisma.group.findMany();
         return prismaGroups.map(Group.from);
     }
+
+    async deleteById(id) {
+        try {
+            await prisma.group.delete({ where: { id } });
+            return true;
+        } catch (error) {
+            throw new Error('Kon groep niet verwijderen');
+        }
+    }
 }
 
 module.exports = new GroupRepository();

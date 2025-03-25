@@ -158,12 +158,14 @@ async function main() {
     const group1 = await prisma.group.create({
         data: {
             name: 'Groep 1',
+            description: 'Hallo',
         },
     });
 
     const group2 = await prisma.group.create({
         data: {
             name: 'Groep 2',
+            description: 'Hoi',
         },
     });
 
