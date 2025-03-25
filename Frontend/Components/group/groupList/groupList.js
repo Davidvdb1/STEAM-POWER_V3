@@ -92,13 +92,7 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             const editBtn = document.createElement('button');
             editBtn.className = 'edit-btn';
             editBtn.textContent = 'Pas aan';
-            editBtn.addEventListener('click', () => {
-                this.dispatchEvent(new CustomEvent('edit-group', {
-                    bubbles: true,
-                    composed: true,
-                    detail: { id: group.id }
-                }));
-            });
+            editBtn.addEventListener('click', () => this.handleEditClick(group.id));
             editCell.appendChild(editBtn);
             row.appendChild(editCell);
             
@@ -106,48 +100,29 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
         });
     }
 
-    async handleDeleteClick(groupId) {
-        const response = await this.deleteGroup(groupId);
-        if (response.ok) {
-            this.groups = this.groups.filter(group => group.id !== groupId);
-            this.renderGroups();
-        } else {
-            console.error('Error deleting group:', response);
-        }
+    handleDeleteClick(groupId) {
+        // Dispatch delete-group event instead of making API call directly
+        this.dispatchEvent(new CustomEvent('delete-group', {
+            bubbles: true,
+            composed: true,
+            detail: { groupId }
+        }));
     }
 
     handleEditClick(groupId) {
-        console.log('Edit group:', groupId);
-    }
-
-    // service
-    async deleteGroup(groupId) {
-        try {
-            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
-            return await fetch(window.env.BACKEND_URL + '/groups/' + groupId, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${jwt}`
+        // For now, just dispatch edit-group event
+        // In a real implementation, you might want to show a form and then dispatch the event with updated data
+        const group = this.groups.find(g => g.id === groupId);
+        if (group) {
+            this.dispatchEvent(new CustomEvent('edit-group', {
+                bubbles: true,
+                composed: true,
+                detail: { 
+                    groupId: group.id,
+                    name: group.name,
+                    description: group.description
                 }
-            });
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    async editGroup({ groupId, name, description }) {
-        try {
-            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
-            return await fetch(window.env.BACKEND_URL + '/groups', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${jwt}`
-                },
-                body: JSON.stringify({groupId, name, description})
-            });
-        } catch (error) {
-            console.error(error);
+            }));
         }
     }
 });

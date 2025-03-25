@@ -20,6 +20,8 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+        this.addGroup = this._shadowRoot.querySelector('addgroup-れ');
+        this.groupList = this._shadowRoot.querySelector('grouplist-れ');
         this.groups = [];
     }
 
@@ -34,22 +36,18 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
     connectedCallback() {
         this.fetchGroups();
         
-        this._shadowRoot.querySelector('addgroup-れ').addEventListener('group-added', (e) => {
-            this.groups.push(e.detail);
-            this.updateGroupList();
-        });
-        this._shadowRoot.querySelector('addgroup-れ').addEventListener('groups-updated', (e) => {
-            this.groups = e.detail;
-            this.updateGroupList();
-        });
+        // Replace the 'group-added' event listener with 'create-group'
+        this.addGroup.addEventListener('create-group', this.handleCreateGroup.bind(this));
+        
+        // Event listeners for group operations from groupList
+        this.groupList.addEventListener('delete-group', this.handleDeleteGroup.bind(this));
+        this.groupList.addEventListener('edit-group', this.handleEditGroup.bind(this));
     }
 
     async fetchGroups() {
-        // TODO: Implement actual fetch from backend
-        // For now, using dummy data for demonstration
         const response = await this.getGroups();
         if (response.ok) {
-            const data = await response.json()
+            const data = await response.json();
             this.groups = data;
             this.updateGroupList();
         } else {
@@ -60,6 +58,41 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
     updateGroupList() {
         const groupList = this._shadowRoot.querySelector('grouplist-れ');
         groupList.setAttribute('groups', JSON.stringify(this.groups));
+    }
+
+    async handleDeleteGroup(event) {
+        const { groupId } = event.detail;
+        const response = await this.deleteGroup(groupId);
+        if (response.ok) {
+            this.groups = this.groups.filter(group => group.id !== groupId);
+            this.updateGroupList();
+        } else {
+            console.error('Error deleting group:', response);
+        }
+    }
+
+    async handleEditGroup(event) {
+        const { groupId, name, description } = event.detail;
+        const response = await this.editGroup({ groupId, name, description });
+        if (response.ok) {
+            // Update the group in the list
+            const updatedGroup = await response.json();
+            const index = this.groups.findIndex(g => g.id === groupId);
+            if (index !== -1) {
+                this.groups[index] = updatedGroup;
+                this.updateGroupList();
+            }
+        } else {
+            console.error('Error editing group:', response);
+        }
+    }
+
+    async handleCreateGroup(event) {
+        const { name, description } = event.detail;
+        const response = await this.createGroup(name, description);
+        const newGroup = await response.json().then(data => data.group);
+        this.groups.push(newGroup);
+        this.updateGroupList();
     }
 
     // service
@@ -77,5 +110,50 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
         }
     }
 
+    async deleteGroup(groupId) {
+        try {
+            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
+            return await fetch(window.env.BACKEND_URL + '/groups/' + groupId, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${jwt}`
+                }
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async editGroup({ groupId, name, description }) {
+        try {
+            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
+            return await fetch(window.env.BACKEND_URL + '/groups', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify({ groupId, name, description })
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async createGroup(name, description) {
+        try {
+            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
+            return await fetch(window.env.BACKEND_URL + '/groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${jwt}`
+                },
+                body: JSON.stringify({ name, description })
+            });
+        } catch (error) {
+            console.error('Error creating group:', error);
+        }
+    }
 });
 //#endregion CLASS
