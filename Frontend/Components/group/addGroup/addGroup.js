@@ -8,11 +8,11 @@ template.innerHTML = /*html*/`
         @import './components/group/addGroup/style.css';
     </style>
     <form>
-        <label for="groupname">Groupname:</label><br>
+        <label for="groupname">Groepsnaam:</label><br>
         <input type="text" id="groupname" name="groupname" required><br>
-        <label for="description">Description:</label><br>
+        <label for="description">Beschrijving:</label><br>
         <input type="text" id="description" name="description"><br>
-        <input type="submit" value="Create Group">
+        <input type="submit" value="Maak groep aan">
     </form>
 `;
 //#endregion ADDGROUP
