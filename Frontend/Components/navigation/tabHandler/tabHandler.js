@@ -4,6 +4,7 @@ import "../../pages/content/content.js"
 import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
 import "../../pages/groupOverviewPage/groupOverviewPage.js"
+import "../../pages/userOverviewPage/userOverviewPage.js"
 import "../../pages/campInfoPage/campInfoPage.js"
 import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
@@ -94,7 +95,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "spel", label: "Spel" },
                 { id: "microbitpage", label: "Micro:bit" },
                 { id: "groupoverviewpage", label: "Groepen" },
-                { id: "users", label: "Gebruikers" },
+                { id: "useroverviewpage", label: "Gebruikers" },
                 { id: "sign-up", label: "Nieuw account" },
                 { id: "questionadmin", label: "Vragen aanpassen" },
                 { id: "logout", label: "Logout" },
