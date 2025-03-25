@@ -56,6 +56,13 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
     }
 
     updateGroupList() {
+        // Sort groups alphabetically by name
+        this.groups.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+        
         const groupList = this._shadowRoot.querySelector('grouplist-れ');
         groupList.setAttribute('groups', JSON.stringify(this.groups));
     }
