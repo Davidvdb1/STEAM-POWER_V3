@@ -72,12 +72,12 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
     }
 
     async handleEditGroup(event) {
-        const { groupId, name, description } = event.detail;
-        const response = await this.editGroup({ groupId, name, description });
+        const { id, name, description } = event.detail;
+        const response = await this.editGroup({ id, name, description });
         if (response.ok) {
             // Update the group in the list
-            const updatedGroup = await response.json();
-            const index = this.groups.findIndex(g => g.id === groupId);
+            const updatedGroup = await response.json().then(data => data.group);
+            const index = this.groups.findIndex(g => g.id === id);
             if (index !== -1) {
                 this.groups[index] = updatedGroup;
                 this.updateGroupList();
@@ -124,7 +124,7 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
         }
     }
 
-    async editGroup({ groupId, name, description }) {
+    async editGroup({ id, name, description }) {
         try {
             const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
             return await fetch(window.env.BACKEND_URL + '/groups', {
@@ -133,7 +133,7 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${jwt}`
                 },
-                body: JSON.stringify({ groupId, name, description })
+                body: JSON.stringify({ id, name, description })
             });
         } catch (error) {
             console.error(error);

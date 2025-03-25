@@ -27,6 +27,7 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.groups = [];
+        this.editing = [];
     }
 
     // component attributes
@@ -56,23 +57,43 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
         table.innerHTML = '';
         table.appendChild(headerRow);
         
-        // Create a row for each group directly
         this.groups.forEach(group => {
             const row = document.createElement('tr');
+            row.dataset.groupId = group.id;
             
             // Name cell
             const nameCell = document.createElement('td');
             nameCell.className = 'name';
-            nameCell.textContent = group.name;
+            
+            if (this.editing.includes(group.id)) {
+                // Input field for name when in edit mode
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'edit-name-input';
+                nameInput.value = group.name;
+                nameCell.appendChild(nameInput);
+            } else {
+                nameCell.textContent = group.name;
+            }
             row.appendChild(nameCell);
             
             // Description cell
             const descriptionCell = document.createElement('td');
             descriptionCell.className = 'description';
-            descriptionCell.textContent = group.description;
+            
+            if (this.editing.includes(group.id)) {
+                // Input field for description when in edit mode
+                const descInput = document.createElement('input');
+                descInput.type = 'text';
+                descInput.className = 'edit-description-input';
+                descInput.value = group.description || '';
+                descriptionCell.appendChild(descInput);
+            } else {
+                descriptionCell.textContent = group.description;
+            }
             row.appendChild(descriptionCell);
             
-            // Code cell
+            // Code cell - not editable
             const codeCell = document.createElement('td');
             codeCell.className = 'code';
             codeCell.textContent = group.code;
@@ -91,7 +112,7 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             const editCell = document.createElement('td');
             const editBtn = document.createElement('button');
             editBtn.className = 'edit-btn';
-            editBtn.textContent = 'Pas aan';
+            editBtn.textContent = this.editing.includes(group.id) ? 'Opslaan' : 'Pas aan';
             editBtn.addEventListener('click', () => this.handleEditClick(group.id));
             editCell.appendChild(editBtn);
             row.appendChild(editCell);
@@ -101,7 +122,6 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
     }
 
     handleDeleteClick(groupId) {
-        // Dispatch delete-group event instead of making API call directly
         this.dispatchEvent(new CustomEvent('delete-group', {
             bubbles: true,
             composed: true,
@@ -110,20 +130,27 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
     }
 
     handleEditClick(groupId) {
-        // For now, just dispatch edit-group event
-        // In a real implementation, you might want to show a form and then dispatch the event with updated data
-        const group = this.groups.find(g => g.id === groupId);
-        if (group) {
+        if (this.editing.includes(groupId)) {
+            const row = this._shadowRoot.querySelector(`tr[data-group-id="${groupId}"]`);
+            
+            const newName = row.querySelector('.edit-name-input').value;
+            const newDescription = row.querySelector('.edit-description-input').value;
+            
+            this.editing = this.editing.filter(id => id !== groupId);
+            
             this.dispatchEvent(new CustomEvent('edit-group', {
                 bubbles: true,
                 composed: true,
-                detail: { 
-                    groupId: group.id,
-                    name: group.name,
-                    description: group.description
+                detail: {
+                    id: groupId,
+                    name: newName,
+                    description: newDescription
                 }
             }));
+        } else {
+            this.editing.push(groupId);
         }
+        this.renderGroups();
     }
 });
 //#endregion CLASS
