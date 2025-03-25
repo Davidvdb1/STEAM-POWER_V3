@@ -19,7 +19,6 @@ template.innerHTML = /*html*/`
         }
     </style>
 
-    <h1>Energy Data Graph</h1>
     <div id="energylive"></div>
 `;
 //#endregion MICROBITGRAPHS
@@ -133,11 +132,11 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
         try {
             this.chart = echarts.init(this.$liveEnergy);
             this.chart.setOption({
-                title: { text: 'Energy Data', left: 'center' },
                 tooltip: { trigger: 'axis' },
+                color: ['#f39c12', '#BAB9B6', '#3EA4F0'],
                 legend: {
                     data: ['SOLAR', 'WIND', 'WATER'],
-                    top: '10%'
+                    top: '5%'
                 },
                 xAxis: {
                     type: 'time',
@@ -148,7 +147,7 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
                 yAxis: {
                     type: 'value',
                     min: 0,
-                    max: 1100 // Max zoals gevraagd
+                    max: 1200 // Max zoals gevraagd
                 },
                 series: [
                     {
@@ -189,16 +188,35 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
         } else {
             this.$data = dataList;
         }
-
-        const solarData = this.$data.filter(d => d.type === 'SOLAR')
-            .map(d => [new Date(d.time), d.value]);
-
-        const windData = this.$data.filter(d => d.type === 'WIND')
-            .map(d => [new Date(d.time), d.value]);
-
-        const waterData = this.$data.filter(d => d.type === 'WATER')
-            .map(d => [new Date(d.time), d.value]);
-
+    
+        const threshold = 5000; // 5 seconden in milliseconden
+        let solarData = [], windData = [], waterData = [];
+    
+        // Sorteer de data op tijd
+        this.$data.sort((a, b) => new Date(a.time) - new Date(b.time));
+    
+        for (let i = 0; i < this.$data.length; i++) {
+            let current = this.$data[i];
+            let previous = this.$data[i - 1];
+    
+            let time = new Date(current.time).getTime();
+            let value = current.value;
+    
+            if (previous) {
+                let prevTime = new Date(previous.time).getTime();
+                if (time - prevTime > threshold) {
+                    // Voeg een gat in de grafiek toe door een null-waarde
+                    solarData.push([prevTime + 1, null]);
+                    windData.push([prevTime + 1, null]);
+                    waterData.push([prevTime + 1, null]);
+                }
+            }
+    
+            if (current.type === 'SOLAR') solarData.push([time, value]);
+            if (current.type === 'WIND') windData.push([time, value]);
+            if (current.type === 'WATER') waterData.push([time, value]);
+        }
+    
         this.chart.setOption({
             series: [
                 { name: 'SOLAR', data: solarData },

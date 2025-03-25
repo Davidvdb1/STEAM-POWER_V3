@@ -9,8 +9,7 @@ template.innerHTML = /*html*/`
     <style>
         @import './components/pages/microbitPage/style.css';
     </style>
-    <p>Microbit Page</p>
-    <p>last 5 measurements: </p>
+
     <ul id="measurementList"></ul>
     <button id="startButton">Start Bluetooth Connection</button>
     <button id="pauseButton">Pause Bluetooth Connection</button>
