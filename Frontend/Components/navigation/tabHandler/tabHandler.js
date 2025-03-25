@@ -34,6 +34,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this.$content = this._shadowRoot.querySelector("content-れ");
         this.$header = this._shadowRoot.querySelector("header-れ");
         this.landingPage = "campoverviewpage";
+        this.loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
     }
 
     // component attributes
@@ -59,32 +60,62 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this.$content.setAttribute("camp", this.campID);
         this.$content.setAttribute("workshop", this.workshopID);
 
-        const items = [
-            { id: "campoverviewpage", label: "Home" },
-            { id: "leaderboard", label: "Leaderboard" },
-            { id: "quiz", label: "Quiz" },
-            { id: "spel", label: "Spel" },
-            { id: "microbitpage", label: "Micro:bit" },
-            { id: "groepen", label: "Groepen" },
-            { id: "users", label: "Gebruikers" },
-            { id: "sign-up", label: "Nieuw account" },
-            { id: "logout", label: "Logout" },
-            { id: "userloginpage", label: "Leerkracht aanmelden" },
-            { id: "questionadmin", label: "Vragen aanpassen" },
-            { id: "grouploginpage", label: "Groep aanmelden" }
-        ];
-
         this.addEventListener("tab", this.tabHandler);
         this.addEventListener("tabID", this.tabIdHandler);
-        this.$header.setAttribute("tabs", JSON.stringify(items));
+
+        this.renderHeader();
 
         window.addEventListener('popstate', this.handlePopState.bind(this));
 
         this.updateURL(this.landingPage, this.campID, this.workshopID);
     }
 
+    renderHeader() {
+        const role = this.loggedInUser?.role;
+        const items = {
+            "GUEST": [
+                { id: "campoverviewpage", label: "Home" },
+                { id: "userloginpage", label: "Leerkracht aanmelden" },
+                { id: "grouploginpage", label: "Groep aanmelden" },
+            ],
+            "TEACHER": [
+                { id: "campoverviewpage", label: "Home" },
+                { id: "leaderboard", label: "Leaderboard" },
+                { id: "groepen", label: "Groepen" },
+                { id: "users", label: "Gebruikers" },
+                { id: "logout", label: "Logout" },
+                { id: "questionadmin", label: "Vragen aanpassen" },
+            ],
+            "ADMIN": [
+                { id: "campoverviewpage", label: "Home" },
+                { id: "leaderboard", label: "Leaderboard" },
+                { id: "quiz", label: "Quiz" },
+                { id: "spel", label: "Spel" },
+                { id: "microbitpage", label: "Micro:bit" },
+                { id: "groepen", label: "Groepen" },
+                { id: "users", label: "Gebruikers" },
+                { id: "sign-up", label: "Nieuw account" },
+                { id: "questionadmin", label: "Vragen aanpassen" },
+                { id: "logout", label: "Logout" },
+            ],
+            "GROUP": [
+                { id: "campoverviewpage", label: "Home" },
+                { id: "leaderboard", label: "Leaderboard" },
+                { id: "quiz", label: "Quiz" },
+                { id: "spel", label: "Spel" },
+                { id: "microbitpage", label: "Micro:bit" },
+                { id: "logout", label: "Logout" },
+            ]
+        };
+
+        this.$header.setAttribute("tabs", JSON.stringify(items[role] || items["GUEST"]));
+    }
 
     tabHandler(e) {
+        if (this.loggedInUser?.role != JSON.parse(sessionStorage.getItem('loggedInUser'))?.role) {
+            this.loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            this.renderHeader();
+        }
         this.$content.setAttribute("active-tab", e.detail);
         this.$content.setAttribute("camp", "");
         this.$content.setAttribute("workshop", "");
