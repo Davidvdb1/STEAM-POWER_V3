@@ -58,6 +58,15 @@ window.customElements.define('campinfopage-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        // Check if user is admin
+        const user = JSON.parse(sessionStorage.getItem('loggedInUser')) || {};
+        const isAdmin = user.role === 'ADMIN';
+        
+        // Hide buttons if not admin
+        if (!isAdmin) {
+            this._shadowRoot.querySelector('#buttons').style.display = 'none';
+        }
+        
         this.$addNew.addEventListener('click', () => {
             this.tabWithCampHandler("workshoppage", "camp", this.getAttribute("camp"));
         });

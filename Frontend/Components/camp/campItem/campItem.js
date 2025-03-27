@@ -62,54 +62,15 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
         this.$dropdown.style.display = "none";
         this.$update = this._shadowRoot.querySelector(".update");
         this.$delete = this._shadowRoot.querySelector(".delete");
+        this.campId = null
     }
 
     // component attributes
     static get observedAttributes() {
-        return ["title", "startdate", "enddate", "startage", "endage", "starttime", "endtime", "location", "image", "archived"];
+        return ["archived"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === "title") {
-            this.$title.innerHTML = newValue;
-        }
-
-        if (name === "startdate") {
-            const date = new Date(newValue);
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            this.$startDate.innerHTML = date.toLocaleDateString('nl-NL', options);
-        }
-
-        if (name === "starttime") {
-            this.$startTime.innerHTML = newValue;
-        }
-
-        if (name === "enddate") {
-            const date = new Date(newValue);
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            this.$endDate.innerHTML = date.toLocaleDateString('nl-NL', options);
-        }
-
-        if (name === "endtime") {
-            this.$endTime.innerHTML = newValue;
-        }
-
-        if (name === "location") {
-            this.$location.innerHTML = newValue;
-        }
-
-        if (name === "startage") {
-            this.$age.innerHTML = `Vanaf ${newValue} t.e.m.`;
-        }
-
-        if (name === "endage") {
-            this.$age.innerHTML += ` ${newValue} jaar`;
-        }
-
-        if (name === "image") {
-            this.$image.src = newValue;
-        }
-
         if (name === "archived") {
             if (newValue === "true") {
                 this.$visible.src = "./Assets/SVGs/visibility-off.svg";
@@ -121,9 +82,38 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
         }
     }
 
+    placeCampInfo(camp) {
+        this.$startTime.innerHTML = camp.startTime;
+        this.$endTime.innerHTML = camp.endTime;
+        this.$title.innerHTML = camp.title;
+        this.$location.innerHTML = camp.location;
+        this.$age.innerHTML = `Vanaf ${camp.startAge} t.e.m.`;
+        this.$age.innerHTML += ` ${camp.endAge} jaar`;
+        this.$image.src = camp.image;
+        this.campId = camp.id
+
+        const startDate = new Date(camp.startDate);
+        const startDateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        this.$startDate.innerHTML = startDate.toLocaleDateString('nl-NL', startDateOptions);
+
+        const endDate = new Date(camp.endAge);
+        const endDateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        this.$endDate.innerHTML = endDate.toLocaleDateString('nl-NL', endDateOptions);
+    }
+
     connectedCallback() {
+        // Check if user is admin
+        const user = JSON.parse(sessionStorage.getItem('user')) || {};
+        const isAdmin = user.role === 'ADMIN';
+        
+        // Hide settings and visible icons if not admin
+        if (!isAdmin) {
+            this.$settings.style.display = 'none';
+            this.$visible.style.display = 'none';
+        }
+        
         this.$button.addEventListener('click', () => {
-            this.campInfoHandler("campinfopage", "camp", this.getAttribute("id"));
+            this.campInfoHandler("campinfopage", "camp", this.campId);
         });
     
         this.$settings.addEventListener("click", (event) => {
@@ -149,7 +139,7 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
     
         this.$update.addEventListener("click", (event) => {
             event.preventDefault();
-            this.campInfoHandler("form", "camp", this.getAttribute("id"));
+            this.campInfoHandler("form", "camp", this.campId);
         });
     
         this.$delete.addEventListener("click", (event) => {
@@ -158,7 +148,7 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
             if (document.querySelector("deletecamppopup-れ")) return;
         
             const popup = document.createElement("deletecamppopup-れ");
-            popup.setAttribute("camp-id", this.getAttribute("id"));
+            popup.setAttribute("camp-id", this.campId);
         
             popup.addEventListener("campDeleted", (event) => {
                 this.tabHandler("campoverviewpage");
@@ -208,7 +198,7 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
     //services
     async updateCamp(data) {
         try {
-            const ID = this.getAttribute("id");
+            const ID = this.campId;
             const url = window.env.BACKEND_URL;
             const response = await fetch(url + `/camps/${ID}`, {
                 method: "PUT",
