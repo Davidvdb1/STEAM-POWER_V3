@@ -80,15 +80,12 @@ button {
     &:hover {
         border-color: #002757
     }
-}
 
-button#delete {
-    background-color: #F9A9A9;
-    border-color: #F9A9A9;
-    color: #570000;
-
-    &:hover {
-        border-color: #570000;
+    &:disabled {
+        background-color: #D3D3D3;
+        color: #A9A9A9;
+        border-color: #D3D3D3;
+        cursor: not-allowed;
     }
 }
 

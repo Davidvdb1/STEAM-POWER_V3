@@ -76,6 +76,9 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this.$submitAnswerButton = this._shadowRoot.querySelector("#submit-answer");
         this.$answerInput = this._shadowRoot.querySelector("input[type='text']");
 
+        this._maxAttempts = 3; // Set the maximum number of attempts
+        this._currentAttempts = 0;
+
         this.$submitAnswerButton.addEventListener("click", () => {
             const answer = this.$answerInput.value;
             this.dispatchEvent(new CustomEvent("submit-answer", {
@@ -85,6 +88,34 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
             }));
         });
     }
+
+    set currentAttempts(value) {
+        this._currentAttempts = value;
+
+        if (this._currentAttempts >= this._maxAttempts) {
+            this.disableInput();
+        }
+    }
+
+    get currentAttempts() {
+        return this._currentAttempts;
+    }
+
+    set maxAttempts(value) {
+        this._maxAttempts = value;
+    }
+
+    get maxAttempts() {
+        return this._maxAttempts;
+    }
+
+    disableInput() {
+        console.log("Input disabled");
+        this.$answerInput.disabled = true;
+        this.$submitAnswerButton.disabled = true;
+    }
+
+
 
 });
 //#endregion CLASS

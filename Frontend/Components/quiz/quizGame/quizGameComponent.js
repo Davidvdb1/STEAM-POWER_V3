@@ -16,6 +16,7 @@ template.innerHTML = /*html*/`
                 <p>Huidig vermogen: <span id="energy"></span>W</p>
             </div>
             <div id="score-feedback-panel">
+                <span id="score-feedback-text"></span>
                 <answer-feedback-component-れ></answer-feedback-component-れ>
             </div>
         </div>
@@ -64,14 +65,13 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.$questionContainer = this.shadowRoot.querySelector("#question-container");
-        this.$feedbackPanel = this.shadowRoot.querySelector("#score-feedback-panel");
+        this.$feedbackText = this.shadowRoot.querySelector("#score-feedback-text");
         this.$currentPowerGeneratedText = this.shadowRoot.querySelector("#energy");
         this.$answerFeedback = this.shadowRoot.querySelector("answer-feedback-component-れ");
         setTimeout(this.updateCurrentPower.bind(this), 500);
+        this.currentQuizQuestion = null;
 
         this.currentQuestionIndex = 0;
-        this.maxAttempts = 3; // Set the maximum number of attempts
-        this.currentAttempts = 0;
 
         this.showQuestion();
     }
@@ -86,17 +86,17 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
         this.$questionContainer.innerHTML = "";
 
         const question = this.questions[this.currentQuestionIndex];
-        const quizQuestion = document.createElement("quiz-question-れ");
-        quizQuestion.setAttribute("data-id", question.id);
-        quizQuestion.setAttribute("data-title", question.title);
-        quizQuestion.setAttribute("data-description", question.description);
-        quizQuestion.setAttribute("data-wattage", question.wattage);
-        quizQuestion.setAttribute("data-picture", question.picture);
-        quizQuestion.setAttribute("data-actual-question", this.generateQuestion());
+        this.currentQuizQuestion = document.createElement("quiz-question-れ");
+        this.currentQuizQuestion.setAttribute("data-id", question.id);
+        this.currentQuizQuestion.setAttribute("data-title", question.title);
+        this.currentQuizQuestion.setAttribute("data-description", question.description);
+        this.currentQuizQuestion.setAttribute("data-wattage", question.wattage);
+        this.currentQuizQuestion.setAttribute("data-picture", question.picture);
+        this.currentQuizQuestion.setAttribute("data-actual-question", this.generateQuestion());
 
-        quizQuestion.addEventListener("submit-answer", this.handleAnswer.bind(this));
+        this.currentQuizQuestion.addEventListener("submit-answer", this.handleAnswer.bind(this));
 
-        this.$questionContainer.appendChild(quizQuestion);
+        this.$questionContainer.appendChild(this.currentQuizQuestion);
     }
 
     generateQuestion() {
@@ -124,30 +124,21 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
         const { isCorrect, error } = this.validateAnswer(userAnswer, correctAnswer, this.errorMargin);
 
         if (isCorrect) {
-            //this.$feedbackPanel.innerText = "Correct!";
+            this.$feedbackText.style.color = "green";
+            this.$feedbackText.innerText = "Correct!";
             this.$answerFeedback.error = error;
-            this.scores[this.currentQuestionIndex] = error * this.questions[this.currentQuestionIndex].score;
-            console.log(`
-                    error on answer: ${error}
-                    0.05 - error on answer: ${0.05 - error}
-                    0.05 - error * score: ${(0.05 - error) * this.questions[this.currentQuestionIndex].score}
-                    max points for question: ${this.questions[this.currentQuestionIndex].score}
-                    calculated end score (idk why): ${this.scores[this.currentQuestionIndex]}
-                `);
-            setTimeout(() => {
-                this.moveToNextQuestion();
-            }, 1000);
+            this.scores[this.currentQuestionIndex] = this.questions[this.currentQuestionIndex].score;
+            this.moveToNextQuestion();
         } else {
-            this.currentAttempts++;
-            if (this.currentAttempts >= this.maxAttempts) {
+            this.currentQuizQuestion.currentAttempts++;
+            if (this.currentQuizQuestion.currentAttempts >= this.currentQuizQuestion.maxAttempts) {
                 //this.$feedbackPanel.innerText = `Incorrect! The correct answer was: ${correctAnswer}`; 
                 this.$answerFeedback.error = error;
                 this.scores[this.currentQuestionIndex] = 0;
-                setTimeout(() => {
-                    this.moveToNextQuestion();
-                }, 1000);
+                this.moveToNextQuestion();
             } else {
-                //this.$feedbackPanel.innerText = `Incorrect! You have ${this.maxAttempts - this.currentAttempts} attempts left. Error: ${error}`;
+                this.$feedbackText.style.color = "red";
+                this.$feedbackText.innerText = `Incorrect! You have ${this.currentQuizQuestion.maxAttempts - this.currentQuizQuestion.currentAttempts} attempts left.`;
                 this.$answerFeedback.error = error;
             }
         }
@@ -156,25 +147,30 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
     validateAnswer(userAnswer, correctAnswer, errorMargin) {
         const error = ((userAnswer - correctAnswer) / correctAnswer);
 
-        const isCorrect = error <= errorMargin;
+        const isCorrect = Math.abs(error) <= errorMargin;
 
         return { isCorrect, error }
     }
 
     moveToNextQuestion() {
-        this.currentAttempts = 0;
         this.currentQuestionIndex++;
-        if (this.currentQuestionIndex >= this.questions.length) {
-            this.dispatchEvent(new CustomEvent("quizgame:endquiz", {
-                bubbles: true,
-                composed: true,
-                detail: {
-                    scores: this.scores
-                }
-            }));
-        } else {
-            this.showQuestion();
-        }
+        this.currentQuizQuestion.disableInput();
+
+        setTimeout(() => {
+            if (this.currentQuestionIndex >= this.questions.length) {
+                this.dispatchEvent(new CustomEvent("quizgame:endquiz", {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        scores: this.scores
+                    }
+                }));
+            } else {
+
+                this.showQuestion();
+            }
+        }, 2000);
+
     }
 });
 //#endregion CLASS

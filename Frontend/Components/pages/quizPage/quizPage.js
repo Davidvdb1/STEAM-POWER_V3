@@ -99,8 +99,9 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             if (!response.ok)
                 throw new Error;
 
-
-            return response.json();
+            const data = await response.json();
+            const filteredQuestions = data.filter(question => question.active === true);
+            return filteredQuestions;
         } catch (error) {
             alert("could not fetch data from backend");
         }

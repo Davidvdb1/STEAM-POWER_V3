@@ -39,7 +39,8 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
     set error(value) {
         this._error = value;
 
-        this.setPercentage(50 + value * 50);
+        this.setPercentage(50 + value * 500);
+        console.log(this._error);
     }
 
     setPercentage(value) {
@@ -51,6 +52,8 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
         }
 
         this._shadowRoot.querySelector('div').style.setProperty('--value', value);
+
+        console.log(value);
     }
 
 });
