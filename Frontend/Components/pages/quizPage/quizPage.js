@@ -66,7 +66,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
     async submitScore() {
         // method for submitting bonus to a group
-        // submit scores, backend handles bonus creation and assignment
         try {
 
         } catch (error) {

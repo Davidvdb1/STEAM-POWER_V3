@@ -25,10 +25,14 @@ template.innerHTML = /*html*/`
 
         <div id="answer-input-container">
             <span id="actual-question">Hoeveel hebben we nodig?</span>
-            <label for="answer">
-                <input type="text">
-            </label>
-            <button id="submit-answer">Antwoord</button>
+
+            <div id="input-container">
+                
+                <label for="answer">
+                    <input type="text">
+                </label>
+                <button id="submit-answer">Antwoord</button>
+            </div>
         </div>
     </div>
 `;
