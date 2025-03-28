@@ -96,7 +96,6 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "microbitpage", label: "Micro:bit" },
                 { id: "groupoverviewpage", label: "Groepen" },
                 { id: "useroverviewpage", label: "Gebruikers" },
-                { id: "sign-up", label: "Nieuw account" },
                 { id: "questionadmin", label: "Vragen aanpassen" },
                 { id: "logout", label: "Logout" },
             ],
