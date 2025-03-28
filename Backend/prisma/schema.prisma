@@ -41,10 +41,10 @@ model Workshop {
 }
 
 model Group {
-    id         String       @id @default(uuid())
-    name       String       @unique
-    code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
-    energyData EnergyData[]
+  id         String       @id @default(uuid())
+  name       String       @unique
+  code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+  energyData EnergyData[]
 }
 
 model EnergyData {
@@ -69,11 +69,14 @@ enum EnergyType {
 }
 
 model Question {
-    id          String  @id @default(uuid())
-    title       String
-    description String
-    picture     String
-    wattage     Int
-    score       Int
-    active      Boolean @default(true)
+  id            String  @id @default(uuid())
+  title         String
+  description   String
+  windQuestion  String
+  waterQuestion String
+  solarQuestion String
+  picture       String
+  wattage       Int
+  score         Int
+  active        Boolean @default(true)
 }
