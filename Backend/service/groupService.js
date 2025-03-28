@@ -44,6 +44,13 @@ class GroupService {
         };
         return response;
     }
+
+    async deleteById(id) {
+        const group = await this.getById(id);
+        if (!group) throw new Error('Groep niet gevonden');
+        
+        return await groupRepository.deleteById(id);
+    }
 }
 
 module.exports = new GroupService();

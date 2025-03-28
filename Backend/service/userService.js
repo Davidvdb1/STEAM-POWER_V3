@@ -47,6 +47,55 @@ class UserService {
     async getById(id) {
         return await userRepository.findById(id);
     }
+
+    async getAll() {
+        return await userRepository.findAll();
+    }
+
+    async createUser(userData) {
+        const existingUser = await userRepository.findByEmail(userData.email);
+        if (existingUser) throw new Error('Gebruiker met dit emailadres bestaat al');
+
+        // Generate a random password if not provided
+        if (!userData.password) {
+            userData.password = Math.random().toString(36).slice(-8);
+        }
+        
+        userData.password = await bcrypt.hash(userData.password, 10);
+
+        const newUser = new User(userData);
+        const createdUser = await userRepository.create(newUser);
+        
+        return { user: createdUser };
+    }
+
+    async updateUser(userData) {
+        const existingUser = await userRepository.findById(userData.id);
+        if (!existingUser) throw new Error('Gebruiker niet gevonden');
+
+        // If updating email, check if it's already in use by another user
+        if (userData.email && userData.email !== existingUser.email) {
+            const userWithEmail = await userRepository.findByEmail(userData.email);
+            if (userWithEmail && userWithEmail.id !== userData.id) {
+                throw new Error('Email is al in gebruik');
+            }
+        }
+
+        // If password is provided, hash it
+        if (userData.password) {
+            userData.password = await bcrypt.hash(userData.password, 10);
+        }
+
+        const updatedUser = await userRepository.update(userData);
+        return { user: updatedUser };
+    }
+
+    async deleteUser(id) {
+        const existingUser = await userRepository.findById(id);
+        if (!existingUser) throw new Error('Gebruiker niet gevonden');
+        
+        return await userRepository.delete(id);
+    }
 }
 
 module.exports = new UserService();

@@ -86,6 +86,15 @@ window.customElements.define('workshopforum-れ', class extends HTMLElement {
 
 
     connectedCallback() {
+        // Check if user is admin
+        const user = JSON.parse(sessionStorage.getItem('loggedInUser')) || {};
+        const isAdmin = user.role === 'ADMIN';
+        
+        // Hide HTML editor button if not admin
+        if (!isAdmin) {
+            this.$htmlEditor.style.display = 'none';
+        }
+        
         this.$boldImage.addEventListener('click', this.toggleBold.bind(this));
         this.$underlineImage.addEventListener('click', this.toggleUnderline.bind(this));
         this.$italicImage.addEventListener('click', this.toggleItalic.bind(this));

@@ -85,16 +85,7 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
         this.$campList.innerHTML = "";
         campList.forEach(camp => {
             let campItem = document.createElement('campitem-れ');
-            campItem.setAttribute("id", camp.id);
-            campItem.setAttribute("title", camp.title);
-            campItem.setAttribute("startDate", camp.startDate);
-            campItem.setAttribute("endDate", camp.endDate);
-            campItem.setAttribute("startAge", camp.startAge);
-            campItem.setAttribute("endAge", camp.endAge);
-            campItem.setAttribute("startTime", camp.startTime);
-            campItem.setAttribute("endTime", camp.endTime);
-            campItem.setAttribute("location", camp.location);
-            campItem.setAttribute("image", camp.image);
+            campItem.placeCampInfo(camp);
             campItem.setAttribute("archived", camp.archived);
             this.$campList.appendChild(campItem);
         });
