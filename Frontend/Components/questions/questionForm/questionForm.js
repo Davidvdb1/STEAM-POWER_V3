@@ -17,6 +17,18 @@ template.innerHTML = /*html*/`
                 <textarea id="description" name="description" required></textarea>
                 <span class="error-message" id="description-error"></span>
 
+                <label for="wind-question">Vraag voor windmolens:</label>
+                <textarea id="wind-question" name="wind-question" required></textarea>
+                <span class="error-message" id="wind-question-error"></span>
+
+                <label for="water-question">Vraag voor waterturbines:</label>
+                <textarea id="water-question" name="water-question" required></textarea>
+                <span class="error-message" id="water-question-error"></span>
+
+                <label for="solar-question">Vraag voor zonnepanelen:</label>
+                <textarea id="solar-question" name="solar-question" required></textarea>
+                <span class="error-message" id="solar-question-error"></span>
+
                 <label for="wattage">Wattage:</label>
                 <input type="number" id="wattage" name="wattage" min="0" required>
                 <span class="error-message" id="wattage-error"></span>
@@ -57,6 +69,15 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
                 break;
             case 'data-description':
                 this._shadowRoot.querySelector('#description').value = newValue;
+                break;
+            case 'data-wind-question':
+                this._shadowRoot.querySelector('#wind-question').value = newValue;
+                break;
+            case 'data-water-question':
+                this._shadowRoot.querySelector('#water-question').value = newValue;
+                break;
+            case 'data-solar-question':
+                this._shadowRoot.querySelector('#solar-question').value = newValue;
                 break;
             case 'data-wattage':
                 this._shadowRoot.querySelector('#wattage').value = newValue;

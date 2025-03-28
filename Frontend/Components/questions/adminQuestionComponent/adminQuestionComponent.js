@@ -61,6 +61,15 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
             case 'data-description':
                 this._shadowRoot.querySelector('#description').innerText = newValue;
                 break;
+            case 'data-wind-question':
+                this._shadowRoot.querySelector('#wind-question').innerText = newValue;
+                break;
+            case 'data-water-question':
+                this._shadowRoot.querySelector('#water-question').innerText = newValue;
+                break;
+            case 'data-solar-question':
+                this._shadowRoot.querySelector('#solar-question').innerText = newValue;
+                break;
             case 'data-wattage':
                 this._shadowRoot.querySelector('#wattage').innerText = newValue;
                 break;
