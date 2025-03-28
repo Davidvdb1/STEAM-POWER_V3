@@ -50,7 +50,7 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
 
     // component attributes
     static get observedAttributes() {
-        return ['data-id', 'data-title', 'data-description', 'data-wattage', 'data-score', 'data-active', 'data-picture'];
+        return ['data-id', 'data-title', 'data-description', 'data-wind-question', 'data-water-question', 'data-solar-question', 'data-wattage', 'data-score', 'data-active', 'data-picture'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
