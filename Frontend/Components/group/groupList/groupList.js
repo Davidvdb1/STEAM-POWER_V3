@@ -11,7 +11,8 @@ template.innerHTML = /*html*/`
     <table id="group-list">
         <tr>
             <th>Naam</th>
-            <th>Beschrijving</th>
+            <th>Leden</th>
+            <th>Micro:bit id</th>
             <th>Code</th>
             <th>Verwijder</th>
             <th>Pas aan</th>
@@ -94,21 +95,37 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             }
             row.appendChild(nameCell);
             
-            // Description cell
-            const descriptionCell = document.createElement('td');
-            descriptionCell.className = 'description';
+            // Members cell
+            const membersCell = document.createElement('td');
+            membersCell.className = 'members';
             
             if (this.editing.includes(group.id)) {
-                // Input field for description when in edit mode
+                // Input field for members when in edit mode
                 const descInput = document.createElement('input');
                 descInput.type = 'text';
-                descInput.className = 'edit-description-input';
-                descInput.value = group.description || '';
-                descriptionCell.appendChild(descInput);
+                descInput.className = 'edit-members-input';
+                descInput.value = group.members || '';
+                membersCell.appendChild(descInput);
             } else {
-                descriptionCell.textContent = group.description;
+                membersCell.textContent = group.members;
             }
-            row.appendChild(descriptionCell);
+            row.appendChild(membersCell);
+
+            // MicrobitId cell
+            const microbitIdCell = document.createElement('td');
+            microbitIdCell.className = 'microbitId';
+            
+            if (this.editing.includes(group.id)) {
+                // Input field for microbitId when in edit mode
+                const descInput = document.createElement('input');
+                descInput.type = 'text';
+                descInput.className = 'edit-microbitId-input';
+                descInput.value = group.microbitId || '';
+                microbitIdCell.appendChild(descInput);
+            } else {
+                microbitIdCell.textContent = group.microbitId;
+            }
+            row.appendChild(microbitIdCell);
             
             // Code cell - not editable
             const codeCell = document.createElement('td');
@@ -170,7 +187,8 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             const row = this._shadowRoot.querySelector(`tr[data-group-id="${groupId}"]`);
             
             const newName = row.querySelector('.edit-name-input').value;
-            const newDescription = row.querySelector('.edit-description-input').value;
+            const newMembers = row.querySelector('.edit-members-input').value;
+            const newMicrobitId = row.querySelector('.edit-microbitId-input').value;
             
             this.editing = this.editing.filter(id => id !== groupId);
             
@@ -180,7 +198,8 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
                 detail: {
                     id: groupId,
                     name: newName,
-                    description: newDescription
+                    members: newMembers,
+                    microbitId: newMicrobitId
                 }
             }));
         } else {

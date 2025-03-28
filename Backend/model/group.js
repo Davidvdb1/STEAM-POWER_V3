@@ -1,8 +1,9 @@
 class Group {
-    constructor({id = undefined, name, description = "", code = undefined}, validate = true) {
+    constructor({id = undefined, name, members = "", microbitId = "", code = undefined}, validate = true) {
         this.id = id;
         this.name = name;
-        this.description = description;
+        this.members = members;
+        this.microbitId = microbitId;
         this.code = code;
         if (validate) {
             this.validate();
