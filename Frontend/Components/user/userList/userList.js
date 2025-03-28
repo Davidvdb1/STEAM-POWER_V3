@@ -17,6 +17,18 @@ template.innerHTML = /*html*/`
             <th>Pas aan</th>
         </tr>
     </table>
+    
+    <!-- Confirmation Popup -->
+    <div id="delete-confirmation" class="popup-overlay">
+        <div class="popup-content">
+            <h3>Bevestig verwijderen</h3>
+            <p>Weet u zeker dat u deze gebruiker wilt verwijderen?</p>
+            <div class="popup-buttons">
+                <button id="confirm-delete-btn">Ja, verwijderen</button>
+                <button id="cancel-delete-btn">Annuleren</button>
+            </div>
+        </div>
+    </div>
 `;
 //#endregion USERLIST
 
@@ -28,6 +40,11 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.users = [];
         this.editing = [];
+        this.userToDelete = null;
+        
+        // Set up event listeners for confirmation popup
+        this._shadowRoot.getElementById('confirm-delete-btn').addEventListener('click', () => this.confirmDelete());
+        this._shadowRoot.getElementById('cancel-delete-btn').addEventListener('click', () => this.hideDeleteConfirmation());
     }
 
     // component attributes
@@ -141,11 +158,30 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
     }
 
     handleDeleteClick(userId) {
-        this.dispatchEvent(new CustomEvent('delete-user', {
-            bubbles: true,
-            composed: true,
-            detail: { userId }
-        }));
+        this.userToDelete = userId;
+        this.showDeleteConfirmation();
+    }
+    
+    showDeleteConfirmation() {
+        const popup = this._shadowRoot.getElementById('delete-confirmation');
+        popup.style.display = 'flex';
+    }
+    
+    hideDeleteConfirmation() {
+        const popup = this._shadowRoot.getElementById('delete-confirmation');
+        popup.style.display = 'none';
+        this.userToDelete = null;
+    }
+    
+    confirmDelete() {
+        if (this.userToDelete) {
+            this.dispatchEvent(new CustomEvent('delete-user', {
+                bubbles: true,
+                composed: true,
+                detail: { userId: this.userToDelete }
+            }));
+            this.hideDeleteConfirmation();
+        }
     }
 
     handleEditClick(userId) {
