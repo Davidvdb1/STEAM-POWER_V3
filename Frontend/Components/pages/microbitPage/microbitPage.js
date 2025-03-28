@@ -1,6 +1,7 @@
 //#region IMPORTS
 import '../../microbit/microbitPinController/microbitPinController.js';
 import '../../microbit/microbitGraphs/microbitGraphs.js';
+import '../../energy/battery/battery.js';
 //#endregion IMPORTS
 
 //#region MICROBITPAGE
@@ -13,6 +14,10 @@ template.innerHTML = /*html*/`
         <button id="startButton">Start Bluetooth Connection</button>
         <button id="pauseButton">Pause Bluetooth Connection</button>
         <button id="endButton">End Bluetooth Connection</button>
+    </div>
+    
+    <div class="energy-status">
+        <battery-れ id="energyBattery" current-watt="0" required-watt="500"></battery-れ>
     </div>
     
     <label for="rangeSelect">tijdspanne selecteren:</label>
@@ -35,7 +40,10 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.liveTeamData = this._shadowRoot.querySelector('microbitgraphs-れ');
         this.$rangeSelect = this._shadowRoot.querySelector('#rangeSelect');
+        this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
         this.energyData = [];
+        this.timerInterval = null;
+        this.currentWattValue = 0;
     }
 
     // component attributes
@@ -54,14 +62,44 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         
         document.addEventListener('energydatareading', this.updateEnergyData.bind(this));
         
-        await this.getEnergyData()
+        await this.getEnergyData();
     
         this.$rangeSelect.addEventListener('change', async (event) => {
             this.liveTeamData.setAttribute('range', event.target.value);
         });
+
+        // Start the battery auto-increment timer
+        this.startBatteryTimer();
     }
     
+    disconnectedCallback() {
+        // Clean up the timer when component is removed
+        this.stopBatteryTimer();
+    }
 
+    startBatteryTimer() {
+        // Clear any existing timer
+        this.stopBatteryTimer();
+        
+        // Start a new timer that increments the battery every second
+        this.timerInterval = setInterval(() => {
+            this.currentWattValue++;
+            this.energyBattery.setAttribute('current-watt', this.currentWattValue.toString());
+            
+            // Reset to 0 if it exceeds the required watt (for demonstration purposes)
+            const requiredWatt = parseInt(this.energyBattery.getAttribute('required-watt') || '500');
+            if (this.currentWattValue > requiredWatt) {
+                this.currentWattValue = 0;
+            }
+        }, 1000); // 1000ms = 1 second
+    }
+    
+    stopBatteryTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
     startBluetoothConnection() {
         const event = new CustomEvent('startbluetoothconnection', { bubbles: true, composed: true });
         document.dispatchEvent(event);
@@ -81,6 +119,13 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const data = event.detail;
         this.energyData.push(data);
         this.liveTeamData.updateGraph(this.energyData, data);
+        
+        // If using real data, you might want to uncomment this and comment out the timer
+        // if (data && (data.watt !== undefined || data.power !== undefined)) {
+        //     const currentWatt = data.watt || data.power || 0;
+        //     this.currentWattValue = currentWatt;
+        //     this.energyBattery.setAttribute('current-watt', currentWatt.toString());
+        // }
     }
 
     initGraphs() {
