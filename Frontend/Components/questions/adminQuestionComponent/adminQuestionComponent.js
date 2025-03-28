@@ -14,6 +14,9 @@ template.innerHTML = /*html*/`
         <div class="text-content">
             <div class="title" id="title"></div>
             <div class="description" id="description"></div>
+            <div class="description"><b>Vraag voor windmolens:</b> <span id="wind -question">Lorem, ipsum dolor.</span></div>
+            <div class="description"><b>Vraag voor waterturbines:</b> <span id="water-question">Lorem, ipsum dolor.</span></div>
+            <div class="description"><b>Vraag voor zonnepanelen:</b> <span id="solar-question">Lorem, ipsum dolor.</span></div>
         </div>
         <div>
             <div>P = <span id="wattage"></span>W</div>
