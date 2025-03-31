@@ -86,8 +86,9 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
     }
 
     async requestDevice() {
+        const microbitId = sessionStorage.getItem('loggedInUser')?.microbitId;
         this.device = await navigator.bluetooth.requestDevice({
-            filters: [{ namePrefix: "BBC micro:bit" }],
+            filters: [{ namePrefix: microbitId ? `BBC micro:bit [${microbitId}]` : 'BBC micro:bit' }], // if microbitId is set, use it to filter the device name
             optionalServices: [IOPINSERVICE_SERVICE_UUID]
         });
     }
