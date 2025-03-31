@@ -131,3 +131,5 @@ dist
 
 # VSCode settings
 .vscode/
+
+requests.http

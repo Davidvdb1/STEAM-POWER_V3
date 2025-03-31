@@ -85,16 +85,8 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
         this.$campList.innerHTML = "";
         campList.forEach(camp => {
             let campItem = document.createElement('campitem-れ');
-            campItem.setAttribute("id", camp.id);
-            campItem.setAttribute("title", camp.title);
-            campItem.setAttribute("startDate", camp.startDate);
-            campItem.setAttribute("endDate", camp.endDate);
-            campItem.setAttribute("startAge", camp.startAge);
-            campItem.setAttribute("endAge", camp.endAge);
-            campItem.setAttribute("startTime", camp.startTime);
-            campItem.setAttribute("endTime", camp.endTime);
-            campItem.setAttribute("location", camp.location);
-            campItem.setAttribute("image", camp.image);
+            campItem.placeCampInfo(camp);
+            campItem.setAttribute("archived", camp.archived);
             this.$campList.appendChild(campItem);
         });
     }
@@ -141,12 +133,12 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
     //service
     async fetchCamps() {
         try {
-            const url = window.env.BACKEND_URL
-            const response = await fetch(url + '/camps')
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(url + '/camps');
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-
+    
             const data = await response.json();
             this.camps = data.map(camp => ({
                 id: camp.id,
@@ -158,13 +150,18 @@ window.customElements.define('campcontainer-れ', class extends HTMLElement {
                 startTime: camp.startTime,
                 endTime: camp.endTime,
                 location: camp.address,
-                image: camp.picture
+                image: camp.picture,
+                archived: camp.archived
             }));
-
+    
+            // **Sorteer de kampen op startDate vóór het renderen**
+            this.camps.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    
             this.renderCamps(this.camps);
         } catch (error) {
             console.error("Fout bij ophalen van kampen:", error);
         }
     }
+    
 });
 //#endregion CLASS

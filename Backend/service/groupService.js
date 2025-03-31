@@ -35,13 +35,23 @@ class GroupService {
         const group = await groupRepository.findByCode(code);
         if (!group) throw new Error('Geen groep met deze code gevonden');
 
-        const JWT = generateJWTtoken(group.name, 'GROUP');
+        const JWT = generateJWTtoken(group.id, group.name, 'GROUP');
         const response = {
+            groupId: group.id,
             token: JWT,
             name: group.name,
+            microbitId: group.microbitId,
+            members: group.members,
             role: 'GROUP',
         };
         return response;
+    }
+
+    async deleteById(id) {
+        const group = await this.getById(id);
+        if (!group) throw new Error('Groep niet gevonden');
+        
+        return await groupRepository.deleteById(id);
     }
 }
 

@@ -7,6 +7,8 @@ template.innerHTML = /*html*/`
     <style>
         @import './components/subdirectory/template/style.css';
     </style>
+
+    <h1>Hello World</h1>
 `;
 //#endregion TEMPLATE
 

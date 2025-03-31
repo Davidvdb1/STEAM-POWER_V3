@@ -39,4 +39,13 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.delete('/:id', async (req, res) => {
+    try {
+        await groupService.deleteById(req.params.id);
+        res.status(200).json({ message: 'Groep verwijderd' });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
 module.exports = router;

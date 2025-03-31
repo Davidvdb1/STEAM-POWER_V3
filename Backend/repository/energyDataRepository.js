@@ -11,10 +11,13 @@ class EnergyDataRepository {
     }
 
     async getAllByGroup(groupId) {
+        const whereCondition = { groupId };
+    
         const prismaEnergyData = await prisma.energyData.findMany({
-            where: { groupId },
+            where: whereCondition,
             orderBy: { time: 'asc' }
         });
+    
         return prismaEnergyData.map(EnergyData.from);
     }
 }

@@ -10,10 +10,10 @@ template.innerHTML = /*html*/`
     </style>
 
     <h1>Kamp forum</h1> 
-    <p id="statusmessage"></p>
     <form class="form">
         <img id="imagePreview" src="" alt="Afbeelding preview">
         <button>Kamp opslaan</button>
+        <p id="statusmessage"></p>
     </form>
 `;
 //#endregion FORM
@@ -136,10 +136,10 @@ window.customElements.define('form-れ', class extends HTMLElement {
             endTime: formData.endTime,
             address: formData.location,
             picture: formData.picture || "",  
-            archived: false
+            archived: false,
         };
     
-        if (campID) {
+        if (campID !== null) {
             this.updateCamp(fixedData);
         } else {
             this.createCamp(fixedData);

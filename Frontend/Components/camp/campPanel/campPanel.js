@@ -3,7 +3,7 @@ import "../../filterAndSort/sortPanel/sortPanel.js"
 import "../../filterAndSort/filterPanel/filterPanel.js"
 //#endregion IMPORTS
 
-//#region TEMPLATE
+//#region CAMPPANEL
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
@@ -20,7 +20,7 @@ template.innerHTML = /*html*/`
         <button id="addCamp" class="add">kamp toevoegen</button>
     </div>
 `;
-//#endregion TEMPLATE
+//#endregion CAMPPANEL
 
 //#region CLASS
 window.customElements.define('camppanel-れ', class extends HTMLElement {
@@ -34,6 +34,8 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
         this.$search = this._shadowRoot.querySelector('#search');
         this.$addCamp = this._shadowRoot.querySelector('#addCamp');
         this.$reset = this._shadowRoot.querySelector('#reset');
+        this.$buttonPanel = this._shadowRoot.querySelector('#buttonPanel');
+        this.loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
     }
 
     // component attributes
@@ -46,6 +48,11 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        console.log(this.loggedInUser);
+        if (!this.loggedInUser || this.loggedInUser.role !== "ADMIN") {
+            this.$buttonPanel.style.display = "none";
+        }
+        
         this.$search.addEventListener('input', () => {
             this.searchHandler(this.$search.value);
         });
@@ -81,7 +88,7 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
     
         const sortSelect = this.$sort.shadowRoot.querySelector("select");
         if (sortSelect) {
-            sortSelect.value = "none";
+            sortSelect.value = "date";
             sortSelect.dispatchEvent(new Event("change", { bubbles: true }));
         }
     

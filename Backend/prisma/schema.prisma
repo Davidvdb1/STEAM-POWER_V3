@@ -1,70 +1,81 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id          String  @id @default(uuid())
-    username    String  @unique
-    email       String  @unique
-    password    String
-    role        Role
-}
-
-enum Role {
-    ADMIN
-    TEACHER
+  id       String @id @default(uuid())
+  username String @unique
+  email    String @unique
+  password String
+  role     Role
 }
 
 model Camp {
-    id          String  @id @default(uuid())
-    workshops   Workshop[]
-    name        String
-    startDate   DateTime
-    endDate     DateTime
-    address     String
-    startTime   String
-    endTime     String
-    minAge      Int
-    maxAge      Int
-    picture     String
-    archived    Boolean
+  id        String     @id @default(uuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  startTime String
+  endTime   String
+  minAge    Int
+  maxAge    Int
+  picture   String
+  archived  Boolean    @default(false)
+  address   String
+  workshops Workshop[]
 }
 
 model Workshop {
-    id          String  @id @default(uuid())
-    camps       Camp[]
-    html        String
+  id       String  @id @default(uuid())
+  html     String
+  title    String
+  campId   String?
+  archived Boolean @default(false)
+  position Int
+  camp     Camp?   @relation(fields: [campId], references: [id])
 }
 
 model Group {
-    id          String  @id @default(uuid())
-    name        String  @unique
-    code        String  @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
-    energyData  EnergyData[]
+    id         String       @id @default(uuid())
+    name       String       @unique
+    members    String       @default("")
+    microbitId String       @default("")
+    code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+    energyData EnergyData[]
 }
 
 model EnergyData {
-    id          String  @id @default(uuid())
-    group       Group   @relation(fields: [groupId], references: [id])
-    groupId     String
-    date        DateTime    @default(now())
-    value       Int
-    type        EnergyType
+  id      String     @id @default(uuid())
+  groupId String
+  time    DateTime   @default(now())
+  type    EnergyType
+  value   Int
+  group   Group      @relation(fields: [groupId], references: [id])
+  pin     Int
+}
+
+enum Role {
+  ADMIN
+  TEACHER
 }
 
 enum EnergyType {
-    SOLAR
-    WATER
-    WIND
+  SOLAR
+  WATER
+  WIND
+}
+
+model Question {
+    id          String  @id @default(uuid())
+    title       String
+    description String
+    picture     String
+    wattage     Int
+    score       Int
+    active      Boolean @default(true)
 }

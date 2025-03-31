@@ -27,12 +27,16 @@ window.customElements.define('workshoppage-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ["workshop"];
+        return ["workshop", "camp"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "workshop") {
-            this.$form.setAttribute("id", newValue);
+            this.$form.setAttribute("workshop", newValue);
+        }
+
+        if (name === "camp") {
+            this.$form.setAttribute("camp", newValue);
         }
     }
 
@@ -40,9 +44,21 @@ window.customElements.define('workshoppage-れ', class extends HTMLElement {
         this.addEventListener("preview", this.previewHandler);
     
         setTimeout(() => {
-            const button = this.$preview?.shadowRoot?.querySelector("#edit");
-            if (button) {
-                button.remove();
+            const edit = this.$preview?.shadowRoot?.querySelector("#edit");
+            const visible = this.$preview?.shadowRoot?.querySelector("#visible");
+            const arrowUp = this.$preview?.shadowRoot?.querySelector("#arrowup");
+            const arrowDown = this.$preview?.shadowRoot?.querySelector("#arrowdown");
+            if (edit) {
+                edit.remove();
+            }
+            if (visible) {
+                visible.remove();
+            }
+            if (arrowUp) {
+                arrowUp.remove();
+            }
+            if (arrowDown) {
+                arrowDown.remove();
             }
         }, 0);
     }

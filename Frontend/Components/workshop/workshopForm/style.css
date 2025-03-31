@@ -111,4 +111,25 @@ button {
 }
 button:hover {
   border-color: #002757;
+}
+
+#title {
+  width: 100%;
+  padding: 15px;
+  font-size: 1.2rem;
+  margin-bottom: 50px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#html-editor {
+  display: none;
+  width: 100%;
+  height: 300px;
+  font-family: monospace;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  resize: vertical;
 }/*# sourceMappingURL=style.css.map */

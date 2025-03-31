@@ -26,9 +26,7 @@ class GroupRepository {
 
     async findByCode(code) {
         try {
-            console.log(code);
             const prismaGroup = await prisma.group.findUnique({ where: { code } });
-            console.log(prismaGroup);
             return Group.from(prismaGroup);
         } catch (error) {
             return null;
@@ -47,6 +45,15 @@ class GroupRepository {
     async findAll() {
         const prismaGroups = await prisma.group.findMany();
         return prismaGroups.map(Group.from);
+    }
+
+    async deleteById(id) {
+        try {
+            await prisma.group.delete({ where: { id } });
+            return true;
+        } catch (error) {
+            throw new Error('Kon groep niet verwijderen');
+        }
     }
 }
 

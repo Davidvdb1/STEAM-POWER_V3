@@ -1,8 +1,7 @@
 const express = require('express');
-const { EnergyDataService } = require('../service/energyDataService');
+const energyDataService = require('../service/energyDataService');
 
 const router = express.Router();
-const energyDataService = new EnergyDataService();
 
 router.post('/', async (req, res) => {
     try {
@@ -19,7 +18,9 @@ router.get('/:groupId', async (req, res) => {
         res.status(200).json(energyData);
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
+        console.log(error);
     }
 });
+
 
 module.exports = router;
