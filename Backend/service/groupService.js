@@ -40,6 +40,8 @@ class GroupService {
             groupId: group.id,
             token: JWT,
             name: group.name,
+            microbitId: group.microbitId,
+            members: group.members,
             role: 'GROUP',
         };
         return response;

@@ -11,12 +11,25 @@ template.innerHTML = /*html*/`
     <table id="group-list">
         <tr>
             <th>Naam</th>
-            <th>Beschrijving</th>
+            <th>Leden</th>
+            <th>Micro:bit id</th>
             <th>Code</th>
             <th>Verwijder</th>
             <th>Pas aan</th>
         </tr>
     </table>
+    
+    <!-- Confirmation Popup -->
+    <div id="delete-confirmation" class="popup-overlay">
+        <div class="popup-content">
+            <h3>Bevestig verwijderen</h3>
+            <p>Weet u zeker dat u deze groep wilt verwijderen?</p>
+            <div class="popup-buttons">
+                <button id="confirm-delete-btn">Ja, verwijderen</button>
+                <button id="cancel-delete-btn">Annuleren</button>
+            </div>
+        </div>
+    </div>
 `;
 //#endregion GROUPLIST
 
@@ -28,6 +41,11 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.groups = [];
         this.editing = [];
+        this.groupToDelete = null;
+        
+        // Set up event listeners for confirmation popup
+        this._shadowRoot.getElementById('confirm-delete-btn').addEventListener('click', () => this.confirmDelete());
+        this._shadowRoot.getElementById('cancel-delete-btn').addEventListener('click', () => this.hideDeleteConfirmation());
     }
 
     // component attributes
@@ -77,21 +95,37 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             }
             row.appendChild(nameCell);
             
-            // Description cell
-            const descriptionCell = document.createElement('td');
-            descriptionCell.className = 'description';
+            // Members cell
+            const membersCell = document.createElement('td');
+            membersCell.className = 'members';
             
             if (this.editing.includes(group.id)) {
-                // Input field for description when in edit mode
+                // Input field for members when in edit mode
                 const descInput = document.createElement('input');
                 descInput.type = 'text';
-                descInput.className = 'edit-description-input';
-                descInput.value = group.description || '';
-                descriptionCell.appendChild(descInput);
+                descInput.className = 'edit-members-input';
+                descInput.value = group.members || '';
+                membersCell.appendChild(descInput);
             } else {
-                descriptionCell.textContent = group.description;
+                membersCell.textContent = group.members;
             }
-            row.appendChild(descriptionCell);
+            row.appendChild(membersCell);
+
+            // MicrobitId cell
+            const microbitIdCell = document.createElement('td');
+            microbitIdCell.className = 'microbitId';
+            
+            if (this.editing.includes(group.id)) {
+                // Input field for microbitId when in edit mode
+                const descInput = document.createElement('input');
+                descInput.type = 'text';
+                descInput.className = 'edit-microbitId-input';
+                descInput.value = group.microbitId || '';
+                microbitIdCell.appendChild(descInput);
+            } else {
+                microbitIdCell.textContent = group.microbitId;
+            }
+            row.appendChild(microbitIdCell);
             
             // Code cell - not editable
             const codeCell = document.createElement('td');
@@ -122,11 +156,30 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
     }
 
     handleDeleteClick(groupId) {
-        this.dispatchEvent(new CustomEvent('delete-group', {
-            bubbles: true,
-            composed: true,
-            detail: { groupId }
-        }));
+        this.groupToDelete = groupId;
+        this.showDeleteConfirmation();
+    }
+    
+    showDeleteConfirmation() {
+        const popup = this._shadowRoot.getElementById('delete-confirmation');
+        popup.style.display = 'flex';
+    }
+    
+    hideDeleteConfirmation() {
+        const popup = this._shadowRoot.getElementById('delete-confirmation');
+        popup.style.display = 'none';
+        this.groupToDelete = null;
+    }
+    
+    confirmDelete() {
+        if (this.groupToDelete) {
+            this.dispatchEvent(new CustomEvent('delete-group', {
+                bubbles: true,
+                composed: true,
+                detail: { groupId: this.groupToDelete }
+            }));
+            this.hideDeleteConfirmation();
+        }
     }
 
     handleEditClick(groupId) {
@@ -134,7 +187,8 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             const row = this._shadowRoot.querySelector(`tr[data-group-id="${groupId}"]`);
             
             const newName = row.querySelector('.edit-name-input').value;
-            const newDescription = row.querySelector('.edit-description-input').value;
+            const newMembers = row.querySelector('.edit-members-input').value;
+            const newMicrobitId = row.querySelector('.edit-microbitId-input').value;
             
             this.editing = this.editing.filter(id => id !== groupId);
             
@@ -144,7 +198,8 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
                 detail: {
                     id: groupId,
                     name: newName,
-                    description: newDescription
+                    members: newMembers,
+                    microbitId: newMicrobitId
                 }
             }));
         } else {
