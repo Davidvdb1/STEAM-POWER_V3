@@ -11,6 +11,14 @@ template.innerHTML = /*html*/`
     </style>
 
     <div id="container">
+        <div>
+            <input type="radio" id="wind-radio" name="power-source" value="wind">
+            <label for="wind">Wind</label>
+            <input type="radio" id="water-radio" name="power-source" value="water">
+            <label for="water">Water</label>
+            <input type="radio" id="solar-radio" name="power-source" value="solar">
+            <label for="solar">Zon</label>
+        </div>
         <div id="information-panel">
             <div id="energy-source-panel">
                 <p>Huidig vermogen: <span id="energy"></span>W</p>
@@ -56,11 +64,15 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return [];
+        return ["data-energy-source-string"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-
+        switch (name) {
+            case "data-energy-source-string":
+                this.powerSource = newValue;
+                break;
+        }
     }
 
     connectedCallback() {
@@ -68,7 +80,27 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
         this.$feedbackText = this.shadowRoot.querySelector("#score-feedback-text");
         this.$currentPowerGeneratedText = this.shadowRoot.querySelector("#energy");
         this.$answerFeedback = this.shadowRoot.querySelector("answer-feedback-component-れ");
-        setTimeout(this.updateCurrentPower.bind(this), 500);
+
+        this.$windRadio = this.shadowRoot.querySelector("#wind-radio");
+        this.$waterRadio = this.shadowRoot.querySelector("#water-radio");
+        this.$solarRadio = this.shadowRoot.querySelector("#solar-radio");
+        switch (this.powerSource) {
+            case "wind":
+                this.$windRadio.checked = true;
+                break;
+            case "water":
+                this.$waterRadio.checked = true;
+                break;
+            case "solar":
+                this.$solarRadio.checked = true;
+                break;
+        }
+
+        this.$windRadio.addEventListener("change", this.handlePowerSourceChange.bind(this));
+        this.$waterRadio.addEventListener("change", this.handlePowerSourceChange.bind(this));
+        this.$solarRadio.addEventListener("change", this.handlePowerSourceChange.bind(this));
+
+        setInterval(this.updateCurrentPower.bind(this), 500);
         this.currentQuizQuestion = null;
 
         this.currentQuestionIndex = 0;
@@ -76,10 +108,15 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
         this.showQuestion();
     }
 
+    handlePowerSourceChange(e) {
+        this.powerSource = e.target.value;
+
+        this.showQuestion();
+    }
+
 
     updateCurrentPower() {
         this.currentPowerGenerated = Math.floor(Math.random() * (750 - 700)) + 700;
-        setTimeout(this.updateCurrentPower.bind(this), 500);
     }
 
     showQuestion() {
@@ -90,31 +127,28 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
         this.currentQuizQuestion.setAttribute("data-id", question.id);
         this.currentQuizQuestion.setAttribute("data-title", question.title);
         this.currentQuizQuestion.setAttribute("data-description", question.description);
+        this.currentQuizQuestion.setAttribute("data-wind-question", question.windQuestion);
+        this.currentQuizQuestion.setAttribute("data-water-question", question.waterQuestion);
+        this.currentQuizQuestion.setAttribute("data-solar-question", question.solarQuestion);
+        this.currentQuizQuestion.setAttribute("data-max-tries", question.maxTries);
         this.currentQuizQuestion.setAttribute("data-wattage", question.wattage);
         this.currentQuizQuestion.setAttribute("data-picture", question.picture);
-        this.currentQuizQuestion.setAttribute("data-actual-question", this.generateQuestion());
+        this.currentQuizQuestion.setAttribute("data-actual-question", this.generateQuestion(question))
 
         this.currentQuizQuestion.addEventListener("submit-answer", this.handleAnswer.bind(this));
 
         this.$questionContainer.appendChild(this.currentQuizQuestion);
     }
 
-    generateQuestion() {
-        let powerSupplyText = '';
-
+    generateQuestion(question) {
         switch (this.powerSource) {
-            case "water":
-                powerSupplyText = "waterturbines"
-                break;
             case "wind":
-                powerSupplyText = "windmolens"
-                break;
+                return question.windQuestion;
+            case "water":
+                return question.waterQuestion;
             case "solar":
-                powerSupplyText = "zonnepanelen"
-                break;
+                return question.solarQuestion;
         }
-
-        return `Hoeveel ${powerSupplyText} hebben we nodig om dit aan te sturen?`
     }
 
     handleAnswer(event) {
@@ -123,15 +157,18 @@ window.customElements.define('quizgame-れ', class extends HTMLElement {
 
         const { isCorrect, error } = this.validateAnswer(userAnswer, correctAnswer, this.errorMargin);
 
+
         if (isCorrect) {
             this.$feedbackText.style.color = "green";
             this.$feedbackText.innerText = "Correct!";
             this.$answerFeedback.error = error;
             this.scores[this.currentQuestionIndex] = this.questions[this.currentQuestionIndex].score;
+
             this.moveToNextQuestion();
+
         } else {
             this.currentQuizQuestion.currentAttempts++;
-            if (this.currentQuizQuestion.currentAttempts >= this.currentQuizQuestion.maxAttempts) {
+            if (this.currentQuizQuestion.maxAttempts > 0 && this.currentQuizQuestion.currentAttempts >= this.currentQuizQuestion.maxAttempts) {
                 //this.$feedbackPanel.innerText = `Incorrect! The correct answer was: ${correctAnswer}`; 
                 this.$answerFeedback.error = error;
                 this.scores[this.currentQuestionIndex] = 0;

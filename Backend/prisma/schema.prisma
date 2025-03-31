@@ -76,6 +76,7 @@ model Question {
   waterQuestion String
   solarQuestion String
   picture       String
+  maxTries      Int @default(0)
   wattage       Int
   score         Int
   active        Boolean @default(true)

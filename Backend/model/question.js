@@ -1,5 +1,5 @@
 class Question {
-    constructor({ id = undefined, title, description, windQuestion, waterQuestion, solarQuestion, picture, wattage, score, active = true }, validate = true) {
+    constructor({ id = undefined, title, description, windQuestion, waterQuestion, solarQuestion, picture, wattage, score, maxTries, active = true }, validate = true) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -9,6 +9,7 @@ class Question {
         this.picture = typeof picture === 'string' ? picture : '';
         this.wattage = parseInt(wattage);
         this.score = parseInt(score);
+        this.maxTries = parseInt(maxTries);
         this.active = active;
 
         if (validate) {
@@ -44,6 +45,9 @@ class Question {
         }
         if (typeof this.picture !== 'string' || this.picture.trim() === "") {
             error += "Picture must be a non-empty string\n";
+        }
+        if (typeof this.maxTries !== 'number' || this.maxTries < 0) {
+            error += "Max tries must be a non-negative number\n";
         }
 
         if (error.length > 0) {

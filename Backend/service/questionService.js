@@ -8,7 +8,10 @@ class QuestionService {
 
     async createQuestion(data) {
         try {
+            console.log("Incoming data before processing (service):", data);
             const question = new Question(data);
+            // Debugging
+            console.log("Processed data:", question); // Debugging
             return await this.qRepo.create(question);
         } catch (error) {
             throw error;

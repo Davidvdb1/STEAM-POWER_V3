@@ -68,6 +68,10 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
             questionElement.setAttribute('data-id', question.id);
             questionElement.setAttribute('data-title', question.title);
             questionElement.setAttribute('data-description', question.description);
+            questionElement.setAttribute('data-wind-question', question.windQuestion);
+            questionElement.setAttribute('data-water-question', question.waterQuestion);
+            questionElement.setAttribute('data-solar-question', question.solarQuestion);
+            questionElement.setAttribute('data-max-tries', question.maxTries);
             questionElement.setAttribute('data-wattage', question.wattage);
             questionElement.setAttribute('data-score', question.score);
             questionElement.setAttribute('data-active', question.active);
@@ -119,6 +123,10 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
             questionForm.setAttribute('data-id', question.id);
             questionForm.setAttribute('data-title', question.title);
             questionForm.setAttribute('data-description', question.description);
+            questionForm.setAttribute('data-wind-question', question.windQuestion);
+            questionForm.setAttribute('data-water-question', question.waterQuestion);
+            questionForm.setAttribute('data-solar-question', question.solarQuestion);
+            questionForm.setAttribute('data-max-tries', question.maxTries);
             questionForm.setAttribute('data-wattage', question.wattage);
             questionForm.setAttribute('data-score', question.score);
             questionForm.setAttribute('data-active', question.active);
@@ -137,6 +145,10 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         editQuestionModal.setAttribute('data-id', question.id);
         editQuestionModal.setAttribute('data-title', question.title);
         editQuestionModal.setAttribute('data-description', question.description);
+        editQuestionModal.setAttribute('data-wind-question', question.windQuestion);
+        editQuestionModal.setAttribute('data-water-question', question.waterQuestion);
+        editQuestionModal.setAttribute('data-solar-question', question.solarQuestion);
+        editQuestionModal.setAttribute('data-max-tries', question.maxTries);
         editQuestionModal.setAttribute('data-wattage', question.wattage);
         editQuestionModal.setAttribute('data-score', question.score);
         editQuestionModal.setAttribute('data-active', question.active);

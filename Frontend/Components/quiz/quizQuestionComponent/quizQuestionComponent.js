@@ -9,6 +9,7 @@ template.innerHTML = /*html*/`
     </style>
 
     <div class="container">
+        <span id="attempts-counter"></span>
         <div class="description-container">
             <div class="image-box">
                 <img id="picture" src="" alt="Question Image" />
@@ -48,7 +49,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ['data-id', 'data-title', 'data-description', 'data-wattage', 'data-picture', 'data-actual-question'];
+        return ['data-id', 'data-title', 'data-max-tries', 'data-description', 'data-wattage', 'data-max-tries', 'data-picture', 'data-actual-question'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -80,8 +81,11 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this.$submitAnswerButton = this._shadowRoot.querySelector("#submit-answer");
         this.$answerInput = this._shadowRoot.querySelector("input[type='text']");
 
-        this._maxAttempts = 3; // Set the maximum number of attempts
+        // Convert attribute value to a number
+        this._maxAttempts = parseInt(this.getAttribute("data-max-tries"));
         this._currentAttempts = 0;
+
+        this.updateAttemptsCounter();
 
         this.$submitAnswerButton.addEventListener("click", () => {
             const answer = this.$answerInput.value;
@@ -94,11 +98,16 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
     }
 
     set currentAttempts(value) {
-        this._currentAttempts = value;
+        if (this._maxAttempts > 0) {
+            this._currentAttempts = value;
 
-        if (this._currentAttempts >= this._maxAttempts) {
-            this.disableInput();
+            this.updateAttemptsCounter();
+
+            if (this._currentAttempts >= this._maxAttempts) {
+                this.disableInput();
+            }
         }
+
     }
 
     get currentAttempts() {
@@ -111,6 +120,14 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
     get maxAttempts() {
         return this._maxAttempts;
+    }
+
+    updateAttemptsCounter() {
+        if (this._maxAttempts > 0) {
+            this._shadowRoot.querySelector("#attempts-counter").innerText = `${this._maxAttempts - this._currentAttempts}/${this._maxAttempts}`;
+        } else {
+            this._shadowRoot.querySelector("#attempts-counter").innerText = "Onbeperkt aantal pogingen";
+        }
     }
 
     disableInput() {

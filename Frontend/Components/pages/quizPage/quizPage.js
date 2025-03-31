@@ -83,7 +83,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
     async startQuiz() {
         const quizGameElement = document.createElement("quizgame-れ");
-        quizGameElement.powerSource = this.powerSource;
+        quizGameElement.setAttribute("data-energy-source-string", this.powerSource);
 
         quizGameElement.questions = await this.fetchQuestions();
 

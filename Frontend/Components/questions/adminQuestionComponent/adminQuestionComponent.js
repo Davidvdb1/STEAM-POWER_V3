@@ -14,13 +14,14 @@ template.innerHTML = /*html*/`
         <div class="text-content">
             <div class="title" id="title"></div>
             <div class="description" id="description"></div>
-            <div class="description"><b>Vraag voor windmolens:</b> <span id="wind -question">Lorem, ipsum dolor.</span></div>
+            <div class="description"><b>Vraag voor windmolens:</b> <span id="wind-question">Lorem, ipsum dolor.</span></div>
             <div class="description"><b>Vraag voor waterturbines:</b> <span id="water-question">Lorem, ipsum dolor.</span></div>
             <div class="description"><b>Vraag voor zonnepanelen:</b> <span id="solar-question">Lorem, ipsum dolor.</span></div>
         </div>
         <div>
             <div>P = <span id="wattage"></span>W</div>
             <div>Score = <span id="score"></span></div>
+            <div>Beurten (0=geen limiet) = <span id="max-tries"></span></div>
         </div>
 
         <div class="button-container">
@@ -50,7 +51,7 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
 
     // component attributes
     static get observedAttributes() {
-        return ['data-id', 'data-title', 'data-description', 'data-wind-question', 'data-water-question', 'data-solar-question', 'data-wattage', 'data-score', 'data-active', 'data-picture'];
+        return ['data-id', 'data-title', 'data-description', 'data-wind-question', 'data-water-question', 'data-solar-question', 'data-wattage', 'data-score', 'data-max-tries', 'data-active', 'data-picture'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -75,6 +76,9 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
                 break;
             case 'data-score':
                 this._shadowRoot.querySelector('#score').innerText = newValue;
+                break;
+            case 'data-max-tries':
+                this._shadowRoot.querySelector('#max-tries').innerText = newValue;
                 break;
             case 'data-active':
                 this.$toggleActive.checked = newValue === "false" ? false : true;
