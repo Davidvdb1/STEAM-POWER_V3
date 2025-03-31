@@ -8,7 +8,7 @@ template.innerHTML = /*html*/`
         @import './components/authentication/userLoginForm/style.css';
     </style>
     <form class="user-login-form">
-        <input type="text" name="username" placeholder="Gebruikersnaam" required>
+        <input type="text" name="email" placeholder="Email" required>
         <input type="password" name="password" placeholder="Wachtwoord" required>
         <button type="submit">Aanmelden</button>
         <p class="error-message" style="display: none; color: red;"></p>
@@ -45,11 +45,11 @@ window.customElements.define('userloginform-れ', class extends HTMLElement {
 
         const form = event.target;
         const data = new FormData(form);
-        const username = data.get('username');
+        const email = data.get('email');
         const password = data.get('password');
         
         try {
-            const response = await this.login(username, password);
+            const response = await this.login(email, password);
     
             if (response.ok) {
                 const data = await response.json();
@@ -74,14 +74,14 @@ window.customElements.define('userloginform-れ', class extends HTMLElement {
     }
     
     //service
-    async login(username, password) {
+    async login(email, password) {
         return await fetch(window.env.BACKEND_URL + '/users/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                username,
+                email,
                 password
             })
         });
