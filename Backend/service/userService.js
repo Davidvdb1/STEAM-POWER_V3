@@ -18,6 +18,7 @@ class UserService {
             userId: createdUser.id,
             token: JWT,
             username: createdUser.username,
+            email: createdUser.email,
             role: createdUser.role,
         };
         return response;
@@ -36,6 +37,7 @@ class UserService {
                 userId: user.id,
                 token: JWT,
                 username: user.username,
+                email: user.email,
                 role: user.role,
             };
             return response;
