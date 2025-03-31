@@ -13,11 +13,12 @@ class UserService {
         const newUser = new User(userData);
         const createdUser = await userRepository.create(newUser);
 
-        const JWT = generateJWTtoken(createdUser.id, createdUser.username, createdUser.role);
+        const JWT = generateJWTtoken(createdUser.id, createdUser.username, createdUser.email, createdUser.role);
         const response = {
             userId: createdUser.id,
             token: JWT,
             username: createdUser.username,
+            email: createdUser.email,
             role: createdUser.role,
         };
         return response;
@@ -25,17 +26,18 @@ class UserService {
 
     async login(userData) {
         try {
-            const user = await userRepository.findByUsername(userData.username);
+            const user = await userRepository.findByEmail(userData.email);
             if (!user) throw new Error('Gebruiker niet gevonden');
 
             const isPasswordValid = await bcrypt.compare(userData.password, user.password);
             if (!isPasswordValid) throw new Error('Onjuist wachtwoord');
 
-            const JWT = generateJWTtoken(user.id, user.username, user.role);
+            const JWT = generateJWTtoken(user.id, user.username, user.email, user.role);
             const response = {
                 userId: user.id,
                 token: JWT,
                 username: user.username,
+                email: user.email,
                 role: user.role,
             };
             return response;
