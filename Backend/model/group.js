@@ -14,6 +14,20 @@ class Group {
         if (!this.name || typeof this.name !== 'string') {
             throw new Error('Ongeldige naam');
         }
+
+        if (this.microbitId) {
+            if (this.microbitId.length !== 5) {
+                throw new Error('Ongeldige microbitId');
+            }
+            const constonants = ["t","p","g","v","z"]
+            const vowels = ["a","e","i","o","u"]
+            for (let i = 0; i < 5; i++) {
+                const char = this.microbitId[i].toLowerCase();
+                if (i%2 ? !vowels.includes(char) : !constonants.includes(char)) {
+                    throw new Error('Ongeldige microbitId');
+                }
+            }
+        }
     }
 
     static from(prismaGroup) {
