@@ -35,6 +35,38 @@ class UserRepository {
             return null;
         }
     }
+
+    async findAll() {
+        try {
+            const prismaUsers = await prisma.user.findMany();
+            return prismaUsers.map(user => User.from(user));
+        } catch (error) {
+            return [];
+        }
+    }
+
+    async update(userData) {
+        try {
+            const updatedPrismaUser = await prisma.user.update({
+                where: { id: userData.id },
+                data: userData
+            });
+            return User.from(updatedPrismaUser);
+        } catch (error) {
+            throw new Error(`Failed to update user: ${error.message}`);
+        }
+    }
+
+    async delete(id) {
+        try {
+            await prisma.user.delete({
+                where: { id }
+            });
+            return true;
+        } catch (error) {
+            throw new Error(`Failed to delete user: ${error.message}`);
+        }
+    }
 }
 
 module.exports = new UserRepository();

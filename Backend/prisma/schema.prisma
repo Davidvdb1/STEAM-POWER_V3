@@ -9,7 +9,7 @@ datasource db {
 
 model User {
   id       String @id @default(uuid())
-  username String @unique
+  username String
   email    String @unique
   password String
   role     Role
@@ -41,10 +41,12 @@ model Workshop {
 }
 
 model Group {
-  id         String       @id @default(uuid())
-  name       String       @unique
-  code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
-  energyData EnergyData[]
+    id         String       @id @default(uuid())
+    name       String       @unique
+    members    String       @default("")
+    microbitId String       @default("")
+    code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+    energyData EnergyData[]
 }
 
 model EnergyData {

@@ -6,16 +6,18 @@ class EnergyDataRepository {
     async create(data) {
         const energyData = new EnergyData(data);
         energyData.validate();
-        console.log("Incoming data before processing (repository):", data); // Debugging
         const prismaEnergyData = await prisma.energyData.create({ data: energyData });
         return EnergyData.from(prismaEnergyData);
     }
 
     async getAllByGroup(groupId) {
+        const whereCondition = { groupId };
+    
         const prismaEnergyData = await prisma.energyData.findMany({
-            where: { groupId },
+            where: whereCondition,
             orderBy: { time: 'asc' }
         });
+    
         return prismaEnergyData.map(EnergyData.from);
     }
 }

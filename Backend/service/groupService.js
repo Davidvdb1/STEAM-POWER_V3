@@ -40,9 +40,18 @@ class GroupService {
             groupId: group.id,
             token: JWT,
             name: group.name,
+            microbitId: group.microbitId,
+            members: group.members,
             role: 'GROUP',
         };
         return response;
+    }
+
+    async deleteById(id) {
+        const group = await this.getById(id);
+        if (!group) throw new Error('Groep niet gevonden');
+        
+        return await groupRepository.deleteById(id);
     }
 }
 
