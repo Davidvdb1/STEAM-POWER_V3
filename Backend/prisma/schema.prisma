@@ -41,12 +41,13 @@ model Workshop {
 }
 
 model Group {
-    id         String       @id @default(uuid())
-    name       String       @unique
-    members    String       @default("")
-    microbitId String       @default("")
-    code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
-    energyData EnergyData[]
+  id         String       @id @default(uuid())
+  name       String       @unique
+  members    String       @default("")
+  microbitId String       @default("")
+  code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+  energyData EnergyData[]
+  bonusScore Int          @default(0)
 }
 
 model EnergyData {
@@ -78,7 +79,7 @@ model Question {
   waterQuestion String
   solarQuestion String
   picture       String
-  maxTries      Int @default(0)
+  maxTries      Int     @default(0)
   wattage       Int
   score         Int
   active        Boolean @default(true)

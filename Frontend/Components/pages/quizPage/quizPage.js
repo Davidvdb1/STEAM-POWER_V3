@@ -28,9 +28,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.$container = this.shadowRoot.querySelector("#container");
 
         this.powerSource = "";
-        this.loggedInGroupId = "";
-
-
+        this.questions = [];
     }
 
     // component attributes
@@ -42,13 +40,15 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
     }
 
-    connectedCallback() {
+    async connectedCallback() {
+        this.questions = await this.fetchQuestions();
+        if (this.questions.length === 0) {
+            this.shadowRoot.querySelector("#container").innerHTML = "<p>Geen vragen gevonden</p>";
+        } else {
+            this.addEventListener("quizmenu:startquiz", this.handleQuizStart.bind(this));
+            this.addEventListener("quizgame:endquiz", this.handleQuizEnd.bind(this));
+        }
 
-        this.loggedInGroupId = JSON.parse(sessionStorage.getItem('loggedInUser')).groupId;
-        console.log(this.loggedInGroupId);
-
-        this.addEventListener("quizmenu:startquiz", this.handleQuizStart.bind(this));
-        this.addEventListener("quizgame:endquiz", this.handleQuizEnd.bind(this));
     }
 
     handleQuizStart(e) {
@@ -57,26 +57,21 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.startQuiz();
     }
 
-    handleQuizEnd(e) {
-        this.endScores = e.detail.scores;
+    async handleQuizEnd(e) {
+        this.endScore = Object.keys(e.detail.scores).reduce((acc, key) => {
+            return acc + e.detail.scores[key];
+        }, 0);
 
-        this.submitScore();
-        this.endQuiz();
+        const totalGroupScore = await this.submitScore();
+        console.log("Total group score:", totalGroupScore);
+
+        this.endQuiz(totalGroupScore);
     }
 
-    async submitScore() {
-        // method for submitting bonus to a group
-        try {
-
-        } catch (error) {
-
-        }
-    }
-
-    async endQuiz() {
+    async endQuiz(totalGroupScore) {
         const quizEndElement = document.createElement("quiz-end-れ");
-        quizEndElement.setAttribute("data-end-score", JSON.stringify({ ...this.endScores }));
-
+        quizEndElement.setAttribute("data-end-score", this.endScore);
+        quizEndElement.setAttribute("data-total-score", totalGroupScore);
         this.$container.innerHTML = "";
         this.$container.appendChild(quizEndElement);
     }
@@ -85,7 +80,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         const quizGameElement = document.createElement("quizgame-れ");
         quizGameElement.setAttribute("data-energy-source-string", this.powerSource);
 
-        quizGameElement.questions = await this.fetchQuestions();
+        quizGameElement.questions = this.questions;
 
         this.$container.innerHTML = "";
         this.$container.appendChild(quizGameElement);
@@ -103,6 +98,34 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             return filteredQuestions;
         } catch (error) {
             alert("could not fetch data from backend");
+            return [];
+        }
+    }
+
+    async submitScore() {
+        try {
+            if (!this.endScore) throw new Error("Geen eindscore gevonden!");
+            const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
+            if (!groupId) throw new Error("Geen geldig groupId gevonden!");
+
+            const data = {
+                bonusScore: this.endScore
+            };
+
+            const response = await fetch(`${window.env.BACKEND_URL}/groups/${groupId}/score`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
+            const body = await response.json();
+            console.log("Score updated:", body);
+            return body.group.bonusScore;
+        } catch (error) {
+            console.error(error);
         }
     }
 
