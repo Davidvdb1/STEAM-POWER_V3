@@ -8,7 +8,7 @@ import '../locationFilter/locationFilter.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/filterAndSort/filterPanel/style.css';
+        @import './Components/filterAndSort/filterPanel/style.css';
     </style>
 
     <img src="./Assets/SVGs/filter.png" alt="search" style="width: 35px; height: 35px;">

@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/questions/adminQuestionComponent/style.css';
+        @import './Components/questions/adminQuestionComponent/style.css';
     </style>
     <div class="container">
         <div class="image-box">

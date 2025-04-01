@@ -6,7 +6,7 @@ import "../../../Components/navigation/navigationItem/navigationItem.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`  
     <style>
-        @import './components/navigation/navigationList/style.css';
+        @import './Components/navigation/navigationList/style.css';
     </style>
 
     <ul class="navigationList"></ul>

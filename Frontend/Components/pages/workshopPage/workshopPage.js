@@ -7,7 +7,7 @@ import '../../workshop/workshopPreview/workshopPreview.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/workshopPage/style.css';
+        @import './Components/pages/workshopPage/style.css';
     </style>
 
     <workshopforum-れ></workshopforum-れ>

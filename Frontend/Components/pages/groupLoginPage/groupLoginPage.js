@@ -6,7 +6,7 @@ import "../../../Components/authentication/groupLoginForm/groupLoginForm.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/groupLoginPage/style.css';
+        @import './Components/pages/groupLoginPage/style.css';
     </style>
     <grouploginform-れ></grouploginform-れ>
 `;

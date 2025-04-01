@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/workshopInfo/style.css';
+        @import './Components/pages/workshopInfo/style.css';
     </style>
 
     <h1 id="camptitle"></h1>
