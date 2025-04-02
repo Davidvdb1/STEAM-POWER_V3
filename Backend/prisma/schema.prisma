@@ -48,6 +48,7 @@ model Group {
   code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
   energyData EnergyData[]
   bonusScore Int          @default(0)
+  answers    Answer[]
 }
 
 model EnergyData {
@@ -72,15 +73,27 @@ enum EnergyType {
 }
 
 model Question {
-  id            String  @id @default(uuid())
+  id            String   @id @default(uuid())
   title         String
   description   String
   windQuestion  String
   waterQuestion String
   solarQuestion String
   picture       String
-  maxTries      Int     @default(0)
+  maxTries      Int      @default(0)
   wattage       Int
   score         Int
-  active        Boolean @default(true)
+  active        Boolean  @default(true)
+  answers       Answer[]
+}
+
+model Answer {
+  id            String   @id @default(uuid())
+  groupId       String
+  questionId    String
+  isCorrect     Boolean
+  answerValue   Int
+  energyReading Int
+  group         Group    @relation(fields: [groupId], references: [id])
+  question      Question @relation(fields: [questionId], references: [id])
 }
