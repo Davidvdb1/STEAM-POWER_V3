@@ -8,7 +8,9 @@ router.post('/', async (req, res) => {
         const camp = await campService.create(req.body);
         res.status(200).json({ message: 'Kamp gemaakt', camp });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error('Error creating camp:', error);
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ error: error.message });
     }
 })
 
@@ -17,7 +19,9 @@ router.put('/', async (req, res) => {
         const camp = await campService.update(req.body);
         res.status(200).json({ message: 'Kamp aangepast', camp });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error(`Error updating camp ${req.body.id}:`, error);
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ error: error.message });
     }
 })
 
@@ -28,7 +32,9 @@ router.get('/:id', async (req, res) => {
         if (!camp) return res.status(400).json({ error: 'Kamp niet gevonden' });
         res.status(200).json(camp);
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        console.error(`Error fetching camp ${req.params.id}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 })
 
@@ -38,7 +44,9 @@ router.get('/', async (req, res) => {
         const camps = await campService.getAll(includeWorkshops);
         res.status(200).json(camps);
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error fetching all camps:', error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 })
 
@@ -56,7 +64,9 @@ router.put('/:id', async (req, res) => {
         }
         res.status(200).json({ message: "Kamp aangepast", camp: updatedCamp });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error", details: error.message });
+        console.error(`Error updating camp ${req.params.id}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
 
@@ -74,7 +84,9 @@ router.put('/:id/workshop/:workshopId', async (req, res) => {
         }
         res.status(200).json({ message: "Workshop toegevoegd aan kamp", camp: updatedCamp });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error", details: error.message });
+        console.error(`Error adding workshop ${req.params.workshopId} to camp ${req.params.id}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
 
@@ -94,7 +106,9 @@ router.delete('/:id', async (req, res) => {
         res.status(200).json({ message: "Kamp succesvol verwijderd" });
 
     } catch (error) {
-        res.status(500).json({ error: "Internal server error", details: error.message });
+        console.error(`Error deleting camp ${req.params.id}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
 
@@ -110,8 +124,9 @@ router.get('/unlinked-workshops/:campId', async (req, res) => {
 
         res.status(200).json(workshops);
     } catch (error) {
-        console.error("❌ Fout bij ophalen van niet-gekoppelde workshops:", error);
-        res.status(500).json({ error: "Internal server error", details: error.message });
+        console.error(`Error fetching unlinked workshops for camp ${req.params.campId}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
 
