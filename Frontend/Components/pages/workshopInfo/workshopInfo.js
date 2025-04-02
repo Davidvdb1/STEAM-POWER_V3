@@ -67,8 +67,7 @@ window.customElements.define('workshopinfo-れ', class extends HTMLElement {
         this.$workshopInfo.innerHTML = "";
 
         let workshopPreview = document.createElement('workshoppreview-れ');
-        workshopPreview.setAttribute("html", this.$workshop.html);
-        workshopPreview.setAttribute("workshop", this.$workshop.id);
+        workshopPreview.updateWorkshopPreview(this.$workshop.html);
         this.$workshopInfo.appendChild(workshopPreview);
     }
 
