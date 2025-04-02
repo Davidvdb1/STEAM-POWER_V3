@@ -21,14 +21,14 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
-app.use(
-    expressjwt({
-        secret: process.env.JWT_SECRET || 'default_secret',
-        algorithms: ['HS256'],
-    }).unless({
-        path: ['/users/login', '/users/register', '/status', /^\/.*/], // last regex matches all routes
-    })
-);
+// app.use(
+//     expressjwt({
+//         secret: process.env.JWT_SECRET || 'default_secret',
+//         algorithms: ['HS256'],
+//     }).unless({
+//         path: ['/users/login', '/users/register', '/status'],
+//     })
+// );
 
 
 app.use(cors({
