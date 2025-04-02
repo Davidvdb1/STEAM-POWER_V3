@@ -1,6 +1,7 @@
 const express = require('express');
 const userService = require('../service/userService');
-const utility = require('../util/utility');
+const middleware = require('../util/middleware');
+
 
 const router = express.Router();
 
@@ -37,7 +38,7 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.get('/', async (req, res) => {
+router.get('/', middleware.requireRole("ADMIN"), async (req, res) => {
     try {
         const users = await userService.getAll();
         res.status(200).json(users);

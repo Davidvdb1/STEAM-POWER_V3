@@ -1,5 +1,6 @@
 const express = require('express');
 const campService = require('../service/campService');
+const middleware = require('../util/middleware');
 
 const router = express.Router();
 

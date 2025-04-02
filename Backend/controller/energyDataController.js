@@ -1,5 +1,7 @@
 const express = require('express');
 const energyDataService = require('../service/energyDataService');
+const middleware = require('../util/middleware');
+
 
 const router = express.Router();
 

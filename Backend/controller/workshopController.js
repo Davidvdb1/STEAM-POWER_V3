@@ -1,5 +1,6 @@
 const express = require('express');
 const workshopService = require('../service/workshopService');
+const middleware = require('../util/middleware');
 
 const router = express.Router();
 
