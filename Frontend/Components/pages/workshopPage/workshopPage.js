@@ -66,7 +66,7 @@ window.customElements.define('workshoppage-れ', class extends HTMLElement {
     
 
     previewHandler(e) {
-        this.$preview.setAttribute("html", e.detail);
+        this.$preview.updateWorkshopPreview(e.detail);
     }
 
 });
