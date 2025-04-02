@@ -1,11 +1,11 @@
-//#region MICROBITGRAPHS
+//#region LIVELINEGRAPH
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
         :host {
             display: block;
             width: 100%;
-            max-width: 600px;
+            max-width: 700px;
         }
         h1 {
             font-size: 1.5rem;
@@ -13,18 +13,19 @@ template.innerHTML = /*html*/`
         }
         #energylive {
             width: 100%;
-            height: 400px;
+            height: 420px;
             border: 1px solid #ddd;
             background-color: #fafafa;
+            border-radius: 10px;
         }
     </style>
 
     <div id="energylive"></div>
 `;
-//#endregion MICROBITGRAPHS
+//#endregion LIVELINEGRAPH
 
 //#region CLASS
-window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
+window.customElements.define('livelinegraph-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ mode: 'open' });
@@ -52,8 +53,8 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
         let minTime, interval, formatter;
     
         switch (range) {
-            case 'halfMinute':
-                minTime = new Date(now.getTime() - 30 * 1000); // 30 seconden geleden
+            case 'minute':
+                minTime = new Date(now.getTime() - 60 * 1000); // 30 seconden geleden
                 formatter = (value) => {
                     let date = new Date(value);
                     let hours = date.getHours();
@@ -110,7 +111,8 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.initChart();
-    
+        const canvas = this.$liveEnergy.querySelector('canvas');
+        canvas.style.borderRadius = '10px';
         // Start een interval dat de X-as elke seconde bijwerkt
         this.xAxisInterval = setInterval(() => {
             this.updateXAxis(this.getAttribute("range") || "oneDay");
@@ -135,8 +137,28 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
                 tooltip: { trigger: 'axis' },
                 color: ['#f39c12', '#BAB9B6', '#3EA4F0'],
                 legend: {
-                    data: ['SOLAR', 'WIND', 'WATER'],
-                    top: '5%'
+                    data: [
+                      {
+                        name: 'SOLAR',
+                        icon: 'image://Assets/SVGs/solar.png'
+                      },
+                      {
+                        name: 'WIND',
+                        icon: 'image://Assets/SVGs/wind.png'
+                      },
+                      {
+                        name: 'WATER',
+                        icon: 'image://Assets/SVGs/water.png'
+                      }
+                    ],
+                    top: '5%',
+                    itemWidth: 24,    // breedte van het icoon
+                    itemHeight: 24,   // hoogte van het icoon
+                    textStyle: {
+                      fontWeight: 'bold',
+                      fontSize: 14,
+                      color: '#333'
+                    }
                 },
                 xAxis: {
                     type: 'time',
@@ -156,15 +178,42 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
                         data: [],
                         smooth: true,
                         showSymbol: false,
-                        lineStyle: { width: 2 }
-                    },
+                        lineStyle: { width: 2 },
+                        label: {
+                            show: true,
+                            position: 'right',
+                            formatter: function (params) {
+                                return params.value[1]; // toon de y-waarde
+                            }
+                        },
+                        endLabel: {
+                            show: true,
+                            formatter: (params) => `${params.value[1]}`,
+                            color: '#f39c12',
+                            fontWeight: 'bold'
+                        }
+                    }
+                    ,
                     {
                         name: 'WIND',
                         type: 'line',
                         data: [],
                         smooth: true,
                         showSymbol: false,
-                        lineStyle: { width: 2 }
+                        lineStyle: { width: 2 },
+                        label: {
+                            show: true,
+                            position: 'right',
+                            formatter: function (params) {
+                                return params.value[1]; // toon de y-waarde
+                            }
+                        },
+                        endLabel: {
+                            show: true,
+                            formatter: (params) => `${params.value[1]}`,
+                            color: '#BAB9B6',
+                            fontWeight: 'bold'
+                        }
                     },
                     {
                         name: 'WATER',
@@ -172,10 +221,25 @@ window.customElements.define('microbitgraphs-れ', class extends HTMLElement {
                         data: [],
                         smooth: true,
                         showSymbol: false,
-                        lineStyle: { width: 2 }
+                        lineStyle: { width: 2 },
+                        label: {
+                            show: true,
+                            position: 'right',
+                            formatter: function (params) {
+                                return params.value[1]; // toon de y-waarde
+                            }
+                        },
+                        endLabel: {
+                            show: true,
+                            formatter: (params) => `${params.value[1]}`,
+                            color: '#3EA4F0',
+                            fontWeight: 'bold'
+                        }
                     }
                 ]
             });
+
+            this.chart.resize();
 
         } catch (error) {
             console.error("Failed to initialize ECharts:", error);
