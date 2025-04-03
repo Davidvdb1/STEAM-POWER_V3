@@ -10,7 +10,6 @@ const energyDataRoutes = require('./controller/energyDataController');
 const questionsRoutes = require('./controller/questionController');
 
 
-
 const app = express();
 const cors = require('cors');
 dotenv.config();
@@ -32,7 +31,7 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 
 app.use(cors({
-    origin: 'http://127.0.0.1:5500', // Zet dit op de URL van je frontend
+    origin: '*', // Allow all origins
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization'
 }));

@@ -6,10 +6,10 @@ import "../../../Components/navigation/navigationList/navigationList.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/navigation/header/style.css';
+        @import './Components/navigation/header/style.css';
     </style>
 
-    <img src="./assets/images/logo.jpg" alt="Logo" class="nav-logo">
+    <img src="./Assets/images/logo.jpg" alt="Logo" class="nav-logo">
     <navigationList-れ></navigationList-れ>
 `;
 //#endregion Header

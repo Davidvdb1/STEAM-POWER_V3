@@ -7,7 +7,7 @@ import '../../workshop/workshopPreview/workshopPreview.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/campInfoPage/style.css';
+        @import './Components/pages/campInfoPage/style.css';
     </style>
 
     <h1 id="camptitle"></h1>
