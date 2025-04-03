@@ -176,7 +176,7 @@ async function main() {
 
     // Questions
 
-    const questionPicture = fs.readFileSync('./Backend/util/lightbulb.jpg', { encoding: 'base64' });
+    const questionPicture = fs.readFileSync('./util/lightbulb.jpg', { encoding: 'base64' });
     const fullQuestionPicture = `data:image/webp;base64,${questionPicture}`; // Convert to base64 string
 
     const createQuestions = async (questionImage) => {
