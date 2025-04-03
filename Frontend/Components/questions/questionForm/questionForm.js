@@ -8,7 +8,6 @@ template.innerHTML = /*html*/`
         @import './Components/questions/questionForm/style.css';
     </style>
             <form id="new-question-form">
-
                 <label for="title">Titel:</label>
                 <input type="text" id="title" name="title" required>
                 <span class="error-message" id="title-error"></span>
@@ -17,6 +16,18 @@ template.innerHTML = /*html*/`
                 <textarea id="description" name="description" required></textarea>
                 <span class="error-message" id="description-error"></span>
 
+                <label for="wind-question">Vraag voor windmolens:</label>
+                <textarea id="wind-question" name="windQuestion" required></textarea>
+                <span class="error-message" id="wind-question-error"></span>
+
+                <label for="water-question">Vraag voor waterturbines:</label>
+                <textarea id="water-question" name="waterQuestion" required></textarea>
+                <span class="error-message" id="water-question-error"></span>
+
+                <label for="solar-question">Vraag voor zonnepanelen:</label>
+                <textarea id="solar-question" name="solarQuestion" required></textarea>
+                <span class="error-message" id="solar-question-error"></span>
+
                 <label for="wattage">Wattage:</label>
                 <input type="number" id="wattage" name="wattage" min="0" required>
                 <span class="error-message" id="wattage-error"></span>
@@ -24,6 +35,10 @@ template.innerHTML = /*html*/`
                 <label for="score">Score:</label>
                 <input type="number" id="score" name="score" min="0" required>
                 <span class="error-message" id="score-error"></span>
+
+                <label for="no-tries">Aantal beurten (0=geen limiet):</label>
+                <input type="number" id="no-tries" name="maxTries" min="0" required>
+                <span class="error-message" id="no-tries-error"></span>
 
                 <div class="picture-box">
                     <img id="picture-preview" src="" alt="Question Picture" />
@@ -47,7 +62,7 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ['data-id', 'data-title', 'data-description', 'data-wattage', 'data-picture', 'data-score'];
+        return ['data-id', 'data-title', 'data-description', 'data-wind-question', 'data-water-question', 'data-solar-question', 'data-wattage', 'data-max-tries', 'data-picture', 'data-score'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -58,11 +73,23 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
             case 'data-description':
                 this._shadowRoot.querySelector('#description').value = newValue;
                 break;
+            case 'data-wind-question':
+                this._shadowRoot.querySelector('#wind-question').value = newValue;
+                break;
+            case 'data-water-question':
+                this._shadowRoot.querySelector('#water-question').value = newValue;
+                break;
+            case 'data-solar-question':
+                this._shadowRoot.querySelector('#solar-question').value = newValue;
+                break;
             case 'data-wattage':
                 this._shadowRoot.querySelector('#wattage').value = newValue;
                 break;
             case 'data-picture':
                 this._shadowRoot.querySelector('#picture-preview').src = newValue;
+                break;
+            case 'data-max-tries':
+                this._shadowRoot.querySelector('#no-tries').value = newValue;
                 break;
             case 'data-score':
                 this._shadowRoot.querySelector('#score').value = newValue;
@@ -102,7 +129,7 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
 
     validateForm() {
         let isValid = true;
-        const fields = ['title', 'description', 'wattage', 'score'];
+        const fields = ['title', 'description', 'wind-question', 'water-question', 'solar-question', 'wattage', 'score'];
         fields.forEach(field => {
             const input = this._shadowRoot.querySelector(`#${field}`);
             const errorMessage = this._shadowRoot.querySelector(`#${field}-error`);

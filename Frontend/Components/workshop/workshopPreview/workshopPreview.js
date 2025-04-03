@@ -31,7 +31,7 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ['html', "workshop", "archived"];
+        return ['html', "archived"];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -48,6 +48,10 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
                 this.style.opacity = "1";
             }
         }
+    }
+
+    updateWorkshopPreview(html) {
+        this.$previewContent.innerHTML = html;
     }
     
     connectedCallback() {   
