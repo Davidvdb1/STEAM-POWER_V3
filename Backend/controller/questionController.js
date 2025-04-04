@@ -54,4 +54,35 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.post('/:id/answer', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { groupId, answerValue, energyReading } = req.body;
+
+        if (!groupId || !answerValue || !energyReading) {
+            return res.status(400).json({ error: "Group ID, answer value and energy reading are required" });
+        }
+
+        const answer = await qService.submitAnswer({questionId: id, groupId, answerValue, energyReading});
+        res.status(201).json(answer);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+router.get('/group/:groupId', async (req, res) => {
+    try {
+        const { groupId } = req.params;
+
+        if (!groupId) {
+            return res.status(400).json({ error: "Group ID is required" });
+        }
+
+        const groupQuestions = await qService.getGroupQuestions(groupId);
+        res.status(200).json(groupQuestions);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 module.exports = router;
