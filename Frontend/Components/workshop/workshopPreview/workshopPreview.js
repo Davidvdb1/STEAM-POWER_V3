@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/workshop/workshopPreview/style.css';
+        @import './Components/workshop/workshopPreview/style.css';
     </style>
 
     <img id="edit" src="./Assets/SVGs/edit.png" class="buttons" alt="settings" style="top: 8px; width: 26px; height: 25px;">

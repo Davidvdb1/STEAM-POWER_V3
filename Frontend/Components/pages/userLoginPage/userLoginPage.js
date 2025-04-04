@@ -6,7 +6,7 @@ import "../../../Components/authentication/userLoginForm/userLoginForm.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/userLoginPage/style.css';
+        @import './Components/pages/userLoginPage/style.css';
     </style>
     <userloginform-れ></userloginform-れ>
 

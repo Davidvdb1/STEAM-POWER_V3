@@ -20,7 +20,7 @@ import "../../pages/quizPage/quizPage.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/navigation/tabHandler/style.css';
+        @import './Components/navigation/tabHandler/style.css';
     </style>
 
     <header-れ></header-れ>

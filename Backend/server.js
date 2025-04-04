@@ -10,7 +10,6 @@ const energyDataRoutes = require('./controller/energyDataController');
 const questionsRoutes = require('./controller/questionController');
 
 
-
 const app = express();
 const cors = require('cors');
 dotenv.config();
@@ -21,18 +20,18 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
-app.use(
-    expressjwt({
-        secret: process.env.JWT_SECRET || 'default_secret',
-        algorithms: ['HS256'],
-    }).unless({
-        path: ['/users/login', '/users/register', '/status', /^\/.*/], // last regex matches all routes
-    })
-);
+// app.use(
+//     expressjwt({
+//         secret: process.env.JWT_SECRET || 'default_secret',
+//         algorithms: ['HS256'],
+//     }).unless({
+//         path: ['/users/login', '/users/register', '/status'],
+//     })
+// );
 
 
 app.use(cors({
-    origin: 'http://127.0.0.1:5500', // Zet dit op de URL van je frontend
+    origin: '*', // Allow all origins
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization'
 }));
