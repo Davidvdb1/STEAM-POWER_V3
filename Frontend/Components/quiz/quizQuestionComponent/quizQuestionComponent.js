@@ -25,7 +25,7 @@ template.innerHTML = /*html*/`
         
 
         <div id="answer-input-container">
-            <span id="actual-question">Hoeveel hebben we nodig?</span>
+            <span id="actual-question"></span>
 
             <div id="input-container">
                 
@@ -45,47 +45,28 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+
+        this.questions = {}
+        this._energyContext = null;
+    }
+
+    set energyContext(value) {
+        this._energyContext = value;
+
+        this.shadowRoot.querySelector("#actual-question").textContent = this.questions[this._energyContext];
     }
 
     // component attributes
     static get observedAttributes() {
-        return ['data-id', 'data-title', 'data-max-tries', 'data-description', 'data-wattage', 'data-max-tries', 'data-picture', 'data-actual-question'];
+        return []
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
-        switch (name) {
-            case 'data-title':
-                this._shadowRoot.querySelector('#title').innerText = newValue;
-                break;
-            case 'data-description':
-                this._shadowRoot.querySelector('#description').innerText = newValue;
-                break;
-            case 'data-wattage':
-                this._shadowRoot.querySelector('#wattage').innerText = newValue;
-                break;
-            case 'data-score':
-                this._shadowRoot.querySelector('#score').innerText = newValue;
-                break;
-            case 'data-active':
-                this.$toggleActive.checked = newValue === "false" ? false : true;
-                break;
-            case 'data-picture':
-                this._shadowRoot.querySelector('#picture').src = newValue;
-                break;
-            case 'data-actual-question':
-                this._shadowRoot.querySelector('#actual-question').innerText = newValue;
-                break;
-        }
+
     }
     connectedCallback() {
         this.$submitAnswerButton = this._shadowRoot.querySelector("#submit-answer");
         this.$answerInput = this._shadowRoot.querySelector("input[type='text']");
-
-        // Convert attribute value to a number
-        this._maxAttempts = parseInt(this.getAttribute("data-max-tries"));
-        this._currentAttempts = 0;
-
-        this.updateAttemptsCounter();
 
         this.$submitAnswerButton.addEventListener("click", () => {
             const answer = this.$answerInput.value;
@@ -101,7 +82,6 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         if (this._maxAttempts > 0) {
             this._currentAttempts = value;
 
-            this.updateAttemptsCounter();
 
             if (this._currentAttempts >= this._maxAttempts) {
                 this.disableInput();
@@ -122,21 +102,52 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         return this._maxAttempts;
     }
 
-    updateAttemptsCounter() {
-        if (this._maxAttempts > 0) {
-            this._shadowRoot.querySelector("#attempts-counter").innerText = `${this._maxAttempts - this._currentAttempts}/${this._maxAttempts}`;
-        } else {
-            this._shadowRoot.querySelector("#attempts-counter").innerText = "Onbeperkt aantal pogingen";
-        }
-    }
-
     disableInput() {
         console.log("Input disabled");
         this.$answerInput.disabled = true;
         this.$submitAnswerButton.disabled = true;
     }
 
+    initQuestion(data) {
+        if (data.isSolved) {
+            this.disableInput();
+            this.shadowRoot.querySelector(".container").classList.add("solved");
+        }
 
+        if (data.answerCount > data.maxTries) {
+            this.disableInput();
+            this.shadowRoot.querySelector(".container").classList.add("incorrect");
+        }
+
+
+
+
+        this.shadowRoot.querySelector("#wattage").innerText = data.wattage;
+        this.shadowRoot.querySelector("#title").innerText = data.title;
+        this.shadowRoot.querySelector("#description").innerText = data.description;
+        this.shadowRoot.querySelector("#picture").src = data.picture;
+        this.shadowRoot.querySelector("#attempts-counter").innerText = `Pogingen: ${data.answerCount}/${data.maxTries}`;
+
+        this.questions = {
+            "wind": data.windQuestion,
+            "solar": data.solarQuestion,
+            "water": data.waterQuestion
+        }
+
+        this.shadowRoot.querySelector("#actual-question").innerText = this.questions[this._energyContext];
+
+    }
+
+    selectQuestion(data) {
+        switch (this._energyContext) {
+            case wind:
+                return data.windQuestion;
+            case solar:
+                return data.solarQuestion;
+            case water:
+                return data.waterQuestion;
+        }
+    }
 
 });
 //#endregion CLASS

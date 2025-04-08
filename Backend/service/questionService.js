@@ -95,7 +95,7 @@ class QuestionService {
                         ...question,
                         answerCount,
                         isSolved
-                        
+
                     };
                 })
             );
@@ -109,4 +109,4 @@ class QuestionService {
     }
 }
 
-module.exports = QuestionService;
+module.exports = new QuestionService();

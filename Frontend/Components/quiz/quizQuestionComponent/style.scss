@@ -5,16 +5,37 @@
 
 
 :host {
+    display: block;
     box-sizing: border-box;
+    margin: 10px 0;
+    border: 2px dashed lightgray;
+    border-radius: 2px;
+    transition: border 0.1s linear;
+}
+
+:host(:hover) {
+    border: 2px dashed #787878;
 }
 
 .container {
     width: 100%;
     box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 50px; /* Rounded edges */
+    border-radius: 5px; /* Rounded edges */
     padding: 15px;
 
     transition: box-shadow 0.1s linear;
+}
+
+.container.solved {
+    background: lightgreen;
+}
+
+.container.incorrect {
+    background: lightcoral;
+}
+
+.container:hover {
+    box-shadow: 5px 15px 10px rgba(0, 0, 0, 0.1);
 }
 
 .description-container {
@@ -22,10 +43,6 @@
     align-items: center;
     justify-content: space-between;
     
-}
-
-.container:hover {
-    box-shadow: 5px 15px 10px rgba(0, 0, 0, 0.1);
 }
 
 .image-box {
