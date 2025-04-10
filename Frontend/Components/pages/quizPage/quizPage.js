@@ -35,10 +35,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.energyContext = "wind";
     }
 
-    setArrow(value) {
-        this.shadowRoot.querySelector("answer-feedback-component-れ").setAttribute("error", value);
-    }
-
     // component attributes
     static get observedAttributes() {
         return [];
@@ -75,6 +71,12 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
         customElements.whenDefined('question-list-れ').then(() => {
             this.$questionList.energyContext = this.energyContext;
+        });
+
+        this.addEventListener("update-error-indicator", (e) => {
+            const error = e.detail.error;
+            const $answerFeedbackComponent = this.shadowRoot.querySelector("answer-feedback-component-れ");
+            $answerFeedbackComponent.setAttribute("error", error);
         });
     }
 

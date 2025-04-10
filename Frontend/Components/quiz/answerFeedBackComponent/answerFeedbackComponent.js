@@ -31,7 +31,7 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
         this.$circleSectionContainer = this.shadowRoot.querySelector('svg #background-container')
         this.$arrowContainer = this.shadowRoot.querySelector('svg #arrow-container')
 
-        this._error = 0;
+        this._angle = 0;
 
         this.originX = 0;
         this.originY = 0;
@@ -45,9 +45,8 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "error") {
             console.log("changed error", newValue);
-            this._error = parseInt(newValue);
-            console.log("error", this._error);
-            this.setArrow(this._error);
+            this._angle = this.calculateAngle(parseInt(newValue));
+            this.setArrow(this._angle);
         }
 
         const svgElement = this._shadowRoot.querySelector('svg');
@@ -68,14 +67,20 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
 
         this.$circleSectionContainer.innerHTML = this.getSVG();
         this.$arrowContainer.innerHTML = this.getArrowSVG();
-        this.setArrow(this._error);
+        this.setArrow(this._angle);
     }
 
     connectedCallback() { }
 
+    calculateAngle(error) {
+        return error * 18 / (7 * 4) + 1800 / (7 * 4) + 180 / 7;
+
+
+    }
+
     setArrow(angle = 0) {
-        if (angle < 180 / 8) angle = 180 / 8;
-        if (angle > 7 * 180 / 8) angle = 7 * 180 / 8;
+        if (angle < 180 / 7) angle = 180 / 7;
+        if (angle > 6 * 180 / 7) angle = 6 * 180 / 7;
 
         console.log("angle", angle);
         this.$arrowContainer.setAttribute("transform", `rotate(${angle}, ${this.originX}, ${this.originY})`);
@@ -88,12 +93,11 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
             "#98FBB0", // lighter green
             "#90EE90", // light green
             "#00D000", // green
-            "#FFFF00", // yellow
             "#FFA500", // orange
             "#FF0000"  // red
         ];
-        for (let i = 1; i < 7; i++) {
-            const angle = (180 / 8);
+        for (let i = 1; i < 6; i++) {
+            const angle = (180 / 7);
             let circleSectionString = this.getCircleSection(i * angle - 90, (i + 1) * angle - 90, sectionColors[i - 1]);
             combinedCircleSectionsPaths += circleSectionString;
         }

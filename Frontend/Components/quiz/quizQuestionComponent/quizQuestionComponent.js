@@ -22,8 +22,6 @@ template.innerHTML = /*html*/`
                 <div>P = <span id="wattage"></span>W</div>
             </div>
         </div>
-        
-
         <div id="answer-input-container">
             <span id="actual-question"></span>
 
@@ -73,11 +71,6 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
         this.$submitAnswerButton.addEventListener("click", async () => {
             const answer = this.$answerInput.value;
-            this.dispatchEvent(new CustomEvent("submit-answer", {
-                detail: { answer },
-                bubbles: true,
-                composed: true
-            }));
 
             await this.handleSubmitAnswer(answer);
         });
@@ -108,6 +101,14 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
             const data = await response.json();
             console.log("data", data);
+
+            const error = data.errorMargin;
+
+            this.dispatchEvent(new CustomEvent("update-error-indicator", {
+                detail: { error },
+                bubbles: true,
+                composed: true
+            }));
 
             this.initQuestion(data);
         } catch (error) {
