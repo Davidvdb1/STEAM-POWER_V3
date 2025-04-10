@@ -1,5 +1,5 @@
 class Answer {
-    constructor({ id = undefined, questionId, groupId, answerValue = 0, energyReading = 0, isCorrect = undefined }, validate = true) {
+    constructor({ id = undefined, questionId, groupId, answerValue = 0, energyReading = 0, isCorrect = undefined, errorMargin = undefined }, validate = true) {
         this.id = id;
         this.questionId = questionId;
         this.groupId = groupId;
@@ -15,7 +15,8 @@ class Answer {
     checkAnswerValue(energyRequired) {
         const lowerBound = energyRequired - (energyRequired * 0.05);
         const upperBound = energyRequired + (energyRequired * 0.05);
-        this.isCorrect = this.answerValue >= lowerBound && this.answerValue <= upperBound;
+        this.isCorrect = this.answerValue * this.energyReading >= lowerBound && this.answerValue * this.energyReading <= upperBound;
+        this.errorMargin = (this.answerValue * this.energyReading - energyRequired) / energyRequired * 100;
     }
 
     validate() {

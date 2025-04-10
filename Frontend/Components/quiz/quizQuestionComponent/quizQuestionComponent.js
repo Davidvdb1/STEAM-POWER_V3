@@ -46,14 +46,16 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
 
-        this.questions = {}
+        this._questions = {}
         this._energyContext = null;
+        this.$actualQuestion = this.shadowRoot.querySelector("#actual-question")
+        this._id = null;
     }
 
     set energyContext(value) {
         this._energyContext = value;
 
-        this.shadowRoot.querySelector("#actual-question").textContent = this.questions[this._energyContext];
+        this.$actualQuestion.innerText = this._questions[this._energyContext];
     }
 
     // component attributes
@@ -68,26 +70,59 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this.$submitAnswerButton = this._shadowRoot.querySelector("#submit-answer");
         this.$answerInput = this._shadowRoot.querySelector("input[type='text']");
 
-        this.$submitAnswerButton.addEventListener("click", () => {
+
+        this.$submitAnswerButton.addEventListener("click", async () => {
             const answer = this.$answerInput.value;
             this.dispatchEvent(new CustomEvent("submit-answer", {
                 detail: { answer },
                 bubbles: true,
                 composed: true
             }));
+
+            await this.handleSubmitAnswer(answer);
         });
+    }
+
+    async handleSubmitAnswer(answer) {
+        const mockEnergyReading = 50; // Mock energy reading value
+
+        console.log(answer === "" ? 0 : answer);
+
+        try {
+            const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
+            const response = await fetch(`${window.env.BACKEND_URL}/questions/${this._id}/answer`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    groupId,
+                    answerValue: answer === "" ? 0 : answer,
+                    energyReading: mockEnergyReading
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("data", data);
+
+            this.initQuestion(data);
+        } catch (error) {
+            console.error("Error submitting answer:", error);
+        }
     }
 
     set currentAttempts(value) {
         if (this._maxAttempts > 0) {
             this._currentAttempts = value;
 
-
             if (this._currentAttempts >= this._maxAttempts) {
                 this.disableInput();
             }
         }
-
     }
 
     get currentAttempts() {
@@ -108,45 +143,36 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this.$submitAnswerButton.disabled = true;
     }
 
-    initQuestion(data) {
-        if (data.isSolved) {
+    initQuestion({ id, isSolved, answerCount, maxTries, wattage, title, description, picture, windQuestion, solarQuestion, waterQuestion }) {
+        this._id = id;
+
+        if (isSolved) {
             this.disableInput();
             this.shadowRoot.querySelector(".container").classList.add("solved");
         }
 
-        if (data.answerCount > data.maxTries) {
+        if (answerCount >= maxTries && !isSolved) {
             this.disableInput();
             this.shadowRoot.querySelector(".container").classList.add("incorrect");
         }
 
+        this.shadowRoot.querySelector("#wattage").innerText = wattage;
+        this.shadowRoot.querySelector("#title").innerText = title;
+        this.shadowRoot.querySelector("#description").innerText = description;
+        this.shadowRoot.querySelector("#picture").src = picture;
+        this.currentAttempts = answerCount;
+        this.maxAttempts = maxTries;
 
+        this.shadowRoot.querySelector("#attempts-counter").innerText = `Pogingen: ${answerCount}/${maxTries}`;
 
-
-        this.shadowRoot.querySelector("#wattage").innerText = data.wattage;
-        this.shadowRoot.querySelector("#title").innerText = data.title;
-        this.shadowRoot.querySelector("#description").innerText = data.description;
-        this.shadowRoot.querySelector("#picture").src = data.picture;
-        this.shadowRoot.querySelector("#attempts-counter").innerText = `Pogingen: ${data.answerCount}/${data.maxTries}`;
-
-        this.questions = {
-            "wind": data.windQuestion,
-            "solar": data.solarQuestion,
-            "water": data.waterQuestion
+        this._questions = {
+            "wind": windQuestion,
+            "solar": solarQuestion,
+            "water": waterQuestion
         }
 
-        this.shadowRoot.querySelector("#actual-question").innerText = this.questions[this._energyContext];
+        this.$actualQuestion.innerText = this._questions[this._energyContext];
 
-    }
-
-    selectQuestion(data) {
-        switch (this._energyContext) {
-            case wind:
-                return data.windQuestion;
-            case solar:
-                return data.solarQuestion;
-            case water:
-                return data.waterQuestion;
-        }
     }
 
 });

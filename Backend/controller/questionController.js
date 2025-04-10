@@ -71,7 +71,7 @@ router.post('/:id/answer', async (req, res) => {
         const { id } = req.params;
         const { groupId, answerValue, energyReading } = req.body;
 
-        if (!groupId || !answerValue || !energyReading) {
+        if (!groupId || answerValue === "" || !energyReading) {
             return res.status(400).json({ error: "Group ID, answer value and energy reading are required" });
         }
 

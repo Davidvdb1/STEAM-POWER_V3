@@ -75,7 +75,16 @@ class QuestionService {
             const answer = new Answer({ questionId, groupId, answerValue, energyReading });
             answer.checkAnswerValue(question.wattage);
 
-            return await this.answerRepo.create(answer);
+            const res = await this.answerRepo.create(answer);
+
+            const response = await this.answerRepo.findByGroupIdAndQuestionId(groupId, questionId);
+
+            return {
+                ...question,
+                answerCount: response.length,
+                isSolved: response.some(answer => answer.isCorrect),
+                errorMargin: answer.errorMargin
+            }
         } catch (error) {
             throw error;
         }

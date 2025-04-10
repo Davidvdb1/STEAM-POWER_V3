@@ -1,6 +1,7 @@
 //#region IMPORTS
 import '../../quiz/questionList/questionList.js';
 import '../../quiz/quizQuestionComponent/quizQuestionComponent.js';
+import '../../quiz/answerFeedBackComponent/answerFeedbackComponent.js';
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -11,13 +12,11 @@ template.innerHTML = /*html*/`
     </style>
 
     <div id="container">
+        <answer-feedback-component-れ width="800" height="200"></answer-feedback-component-れ>
         <div id="energy-context-select-container">
-            <input type="radio" id="wind-radio" name="power-source" value="wind">
-            <label for="wind">Wind</label>
-            <input type="radio" id="water-radio" name="power-source" value="water">
-            <label for="water">Water</label>
-            <input type="radio" id="solar-radio" name="power-source" value="solar">
-            <label for="solar">Zon</label>
+            <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
+            <label for="water"><input type="radio" id="water-radio" name="power-source" value="water">Water</label>
+            <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar">Zon</label>
         </div>
         <question-list-れ></question-list-れ>
     </div>
@@ -34,6 +33,10 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
 
         this.energyContext = "wind";
+    }
+
+    setArrow(value) {
+        this.shadowRoot.querySelector("answer-feedback-component-れ").setAttribute("error", value);
     }
 
     // component attributes
@@ -69,7 +72,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.$waterRadio.addEventListener("change", this.handlePowerSourceChange.bind(this));
         this.$solarRadio.addEventListener("change", this.handlePowerSourceChange.bind(this));
 
-        
+
         customElements.whenDefined('question-list-れ').then(() => {
             this.$questionList.energyContext = this.energyContext;
         });
