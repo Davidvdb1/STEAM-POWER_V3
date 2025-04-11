@@ -1,18 +1,40 @@
 name: Docker Image CI
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-
-  build:
-
+  build-and-push:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      packages: write
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Log in to GitHub Container Registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+    - name: Set up environment variables
+      run: echo "TIMESTAMP=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+
+    - name: Build and tag backend image
+      run: |
+        docker build -t ghcr.io/${{ github.repository_owner }}/twa-backend:latest -t ghcr.io/${{ github.repository_owner }}/twa-backend:${{ env.TIMESTAMP }} -f Backend/dockerfile .
+
+    - name: Build and tag frontend image
+      run: |
+        docker build -t ghcr.io/${{ github.repository_owner }}/twa-frontend:latest -t ghcr.io/${{ github.repository_owner }}/twa-frontend:${{ env.TIMESTAMP }} -f Frontend/dockerfile .
+
+    - name: Push backend image to GHCR
+      run: |
+        docker push ghcr.io/${{ github.repository_owner }}/twa-backend:latest
+        docker push ghcr.io/${{ github.repository_owner }}/twa-backend:${{ env.TIMESTAMP }}
+
+    - name: Push frontend image to GHCR
+      run: |
+        docker push ghcr.io/${{ github.repository_owner }}/twa-frontend:latest
+        docker push ghcr.io/${{ github.repository_owner }}/twa-frontend:${{ env.TIMESTAMP }}
