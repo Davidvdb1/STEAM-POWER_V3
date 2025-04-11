@@ -10,7 +10,7 @@ import "../../questions/confirmDeleteForm/confirmDeleteForm.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/pages/questionAdminPage/style.css';
+        @import './components/pages/questionAdminPage/style.css';
     </style>
     <h1>Vragenlijst aanpassen</h1>
     <button id="add-question">Vraag toevoegen</button>

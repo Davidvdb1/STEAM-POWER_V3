@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/pages/workshopInfo/style.css';
+        @import './components/pages/workshopInfo/style.css';
     </style>
 
     <h1 id="camptitle"></h1>
@@ -43,7 +43,7 @@ window.customElements.define('workshopinfo-れ', class extends HTMLElement {
         }
     }
 
-    connectedCallback() {    
+    connectedCallback() {
         const observer = new MutationObserver(() => {
             const edit = this.$workshopInfo?.querySelector("workshoppreview-れ")?.shadowRoot?.querySelector("#edit");
             const visible = this.$workshopInfo?.querySelector("workshoppreview-れ")?.shadowRoot?.querySelector("#visible");
@@ -54,7 +54,7 @@ window.customElements.define('workshopinfo-れ', class extends HTMLElement {
             if (arrowUp) arrowUp.remove();
             if (arrowDown) arrowDown.remove();
         });
-    
+
         observer.observe(this.$workshopInfo, { childList: true, subtree: true });
     }
 
@@ -76,14 +76,14 @@ window.customElements.define('workshopinfo-れ', class extends HTMLElement {
         try {
             const url = window.env.BACKEND_URL;
             const response = await fetch(`${url}/workshops/${id}`);
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-    
+
             this.$workshop = await response.json();
             this.updateContent();
-    
+
         } catch (error) {
             console.error("Fout bij ophalen van workshop:", error);
             return null;

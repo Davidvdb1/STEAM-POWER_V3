@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/questions/questionForm/style.css';
+        @import './components/questions/questionForm/style.css';
     </style>
             <form id="new-question-form">
                 <label for="title">Titel:</label>

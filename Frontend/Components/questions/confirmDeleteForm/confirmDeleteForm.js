@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/questions/confirmDeleteForm/style.css';
+        @import './components/questions/confirmDeleteForm/style.css';
     </style>
 
     <div id="button-container">

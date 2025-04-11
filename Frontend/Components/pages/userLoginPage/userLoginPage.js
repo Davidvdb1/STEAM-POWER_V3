@@ -1,12 +1,12 @@
 //#region IMPORTS
-import "../../../Components/authentication/userLoginForm/userLoginForm.js"
+import "../../../components/authentication/userLoginForm/userLoginForm.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/pages/userLoginPage/style.css';
+        @import './components/pages/userLoginPage/style.css';
     </style>
     <userloginform-れ></userloginform-れ>
 

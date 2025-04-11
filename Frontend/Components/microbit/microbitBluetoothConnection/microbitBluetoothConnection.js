@@ -10,7 +10,7 @@ const PINIOCONFIGURATION_CHARACTERISTIC_UUID = "e95db9fe-251d-470a-a062-fa1922df
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/microbit/microbitBluetoothConnection/style.css';
+        @import './components/microbit/microbitBluetoothConnection/style.css';
     </style>
 `;
 //#endregion MICROBITBLUETOOTHCONNECTION

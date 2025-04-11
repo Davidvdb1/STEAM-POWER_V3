@@ -7,7 +7,7 @@ import '../microbitBasicPinController/microbitBasicPinController.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/microbit/microbitPinController/style.css';
+        @import './components/microbit/microbitPinController/style.css';
     </style>
     <button id="toggleViewButton">Switch to Advanced</button>
     <div id="pinControllerContainer">

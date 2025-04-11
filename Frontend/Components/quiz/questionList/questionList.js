@@ -1,12 +1,12 @@
 //#region IMPORTS
-import '../../quiz/quizQuestionComponent/quizQuestionComponent.js';
+import '../quizQuestionComponent/quizQuestionComponent.js';
 //#endregion IMPORTS
 
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/quiz/questionList/style.css';
+        @import './components/quiz/questionList/style.css';
     </style>
 
     <div id="container">

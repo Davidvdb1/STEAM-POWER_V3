@@ -1,12 +1,12 @@
 //#region IMPORTS
-import "../../../Components/navigation/navigationItem/navigationItem.js"
+import "../../../components/navigation/navigationItem/navigationItem.js"
 //#endregion IMPORTS
 
 //#region NAVIGATIONLIST
 let template = document.createElement('template');
 template.innerHTML = /*html*/`  
     <style>
-        @import './Components/navigation/navigationList/style.css';
+        @import './components/navigation/navigationList/style.css';
     </style>
 
     <ul class="navigationList"></ul>

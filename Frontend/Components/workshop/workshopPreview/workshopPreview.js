@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/workshop/workshopPreview/style.css';
+        @import './components/workshop/workshopPreview/style.css';
     </style>
 
     <img id="edit" src="./Assets/SVGs/edit.png" class="buttons" alt="settings" style="top: 8px; width: 26px; height: 25px;">
@@ -53,14 +53,14 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
     updateWorkshopPreview(html) {
         this.$previewContent.innerHTML = html;
     }
-    
-    connectedCallback() {   
+
+    connectedCallback() {
         this.$edit.addEventListener('click', () => {
-            this.tabWithWorkshopHandler("workshoppage", "workshop", this.getAttribute("workshop")); 
+            this.tabWithWorkshopHandler("workshoppage", "workshop", this.getAttribute("workshop"));
         })
 
         this.$visible.addEventListener("click", (event) => {
-            event.stopPropagation(); 
+            event.stopPropagation();
             this.toggleVisibility();
         });
 
@@ -69,29 +69,29 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
             await this.changeWorkshopPosition(this.getAttribute("workshop"), "up");
             this.updateCampInfoPage();
         });
-        
+
         this.$arrowDown.addEventListener("click", async (event) => {
             event.stopPropagation();
             await this.changeWorkshopPosition(this.getAttribute("workshop"), "down");
             this.updateCampInfoPage();
         });
-        
+
     }
 
     tabWithWorkshopHandler(tabId, componentName, componentId) {
         this.dispatchEvent(new CustomEvent('tabID', {
             bubbles: true,
             composed: true,
-            detail: {tabId, componentName, componentId}
-        })); 
+            detail: { tabId, componentName, componentId }
+        }));
     }
 
     toggleVisibility() {
         if (this.getAttribute("archived") === "true") {
-            this.updateWorkshop({archived: false});
+            this.updateWorkshop({ archived: false });
             this.setAttribute("archived", "false");
         } else {
-            this.updateWorkshop({archived: true});
+            this.updateWorkshop({ archived: true });
             this.setAttribute("archived", "true");
         }
     }
@@ -100,7 +100,7 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
         this.dispatchEvent(new CustomEvent('updateCampInfoPage', {
             bubbles: true,
             composed: true,
-        })); 
+        }));
     }
 
     //services
@@ -115,8 +115,8 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
                 },
                 body: JSON.stringify(data)
             });
-    
-            const result = await response.json(); 
+
+            const result = await response.json();
         } catch (error) {
             console.error('Error:', error);
         }
@@ -130,7 +130,7 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({direction})
+                body: JSON.stringify({ direction })
             });
 
             const result = await response.json();

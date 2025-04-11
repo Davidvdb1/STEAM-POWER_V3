@@ -7,7 +7,7 @@ import '../../group/groupList/groupList.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/pages/groupOverviewPage/style.css';
+        @import './components/pages/groupOverviewPage/style.css';
     </style>
     <addgroup-れ></addgroup-れ>
     <grouplist-れ></grouplist-れ>
@@ -35,10 +35,10 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
 
     connectedCallback() {
         this.fetchGroups();
-        
+
         // Replace the 'group-added' event listener with 'create-group'
         this.addGroup.addEventListener('create-group', this.handleCreateGroup.bind(this));
-        
+
         // Event listeners for group operations from groupList
         this.groupList.addEventListener('delete-group', this.handleDeleteGroup.bind(this));
         this.groupList.addEventListener('edit-group', this.handleEditGroup.bind(this));
@@ -62,7 +62,7 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
             const nameB = b.name.toLowerCase();
             return nameA.localeCompare(nameB);
         });
-        
+
         const groupList = this._shadowRoot.querySelector('grouplist-れ');
         groupList.setAttribute('groups', JSON.stringify(this.groups));
     }

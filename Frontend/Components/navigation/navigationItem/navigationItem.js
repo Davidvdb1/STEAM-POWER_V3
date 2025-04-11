@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/navigation/navigationItem/style.css';
+        @import './components/navigation/navigationItem/style.css';
     </style>
 
     <li class="navigationItem">

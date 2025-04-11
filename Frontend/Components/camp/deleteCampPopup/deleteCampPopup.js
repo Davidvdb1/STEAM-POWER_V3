@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/camp/deleteCampPopup/style.css';
+        @import './components/camp/deleteCampPopup/style.css';
     </style>
 
     <div class="popup-overlay">
@@ -57,7 +57,7 @@ window.customElements.define('deletecamppopup-れ', class extends HTMLElement {
             bubbles: true,
             composed: true,
             detail: campId
-        })); 
+        }));
     }
 
     //service

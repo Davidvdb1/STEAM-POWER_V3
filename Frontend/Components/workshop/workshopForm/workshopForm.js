@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/workshop/workshopForm/style.css';
+        @import './components/workshop/workshopForm/style.css';
     </style>
 
     <h1>Workshop Editor</h1>

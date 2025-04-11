@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/questions/newQuestionModal/style.css';
+        @import './components/questions/newQuestionModal/style.css';
     </style>
     <div class="modal">
         <div class="modal-content">

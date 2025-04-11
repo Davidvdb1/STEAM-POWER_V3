@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../../Components/navigation/header/header.js"
+import "../../../components/navigation/header/header.js"
 import "../../pages/content/content.js"
 import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
@@ -20,7 +20,7 @@ import "../../pages/quizPage/quizPage.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/navigation/tabHandler/style.css';
+        @import './components/navigation/tabHandler/style.css';
     </style>
 
     <header-れ></header-れ>

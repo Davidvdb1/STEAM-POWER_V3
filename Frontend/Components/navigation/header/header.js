@@ -1,12 +1,12 @@
 //#region IMPORTS
-import "../../../Components/navigation/navigationList/navigationList.js"
+import "../../../components/navigation/navigationList/navigationList.js"
 //#endregion IMPORTS
 
 //#region Header
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/navigation/header/style.css';
+        @import './components/navigation/header/style.css';
     </style>
 
     <img src="./Assets/images/logo.jpg" alt="Logo" class="nav-logo">
