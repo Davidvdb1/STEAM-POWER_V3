@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../../Components/navigation/navigationItem/navigationItem.js"
+import "../../../components/navigation/navigationItem/navigationItem.js"
 //#endregion IMPORTS
 
 //#region NAVIGATIONLIST

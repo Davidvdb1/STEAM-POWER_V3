@@ -52,7 +52,7 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
         if (!this.loggedInUser || this.loggedInUser.role !== "ADMIN") {
             this.$buttonPanel.style.display = "none";
         }
-        
+
         this.$search.addEventListener('input', () => {
             this.searchHandler(this.$search.value);
         });
@@ -72,7 +72,7 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
             bubbles: true,
             composed: true,
             detail: text
-        })); 
+        }));
     }
 
     tabHandler(id) {
@@ -80,29 +80,29 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
             bubbles: true,
             composed: true,
             detail: id
-        })); 
+        }));
     }
 
     resetHandler() {
         this.$search.value = "";
-    
+
         const sortSelect = this.$sort.shadowRoot.querySelector("select");
         if (sortSelect) {
             sortSelect.value = "date";
             sortSelect.dispatchEvent(new Event("change", { bubbles: true }));
         }
-    
+
         const filterSelect = this.$filter.shadowRoot.querySelector("select");
         if (filterSelect) {
             filterSelect.value = "none";
             filterSelect.dispatchEvent(new Event("change", { bubbles: true }));
         }
-    
+
         this.dispatchEvent(new CustomEvent('reset', {
             bubbles: true,
             composed: true
         }));
     }
-    
+
 });
 //#endregion CLASS

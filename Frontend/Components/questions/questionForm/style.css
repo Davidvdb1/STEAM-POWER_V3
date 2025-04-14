@@ -50,4 +50,9 @@ img {
 .error-message {
   color: red;
   font-size: 0.8rem;
+}
+
+textarea {
+  resize: none;
+  font-family: inherit;
 }/*# sourceMappingURL=style.css.map */

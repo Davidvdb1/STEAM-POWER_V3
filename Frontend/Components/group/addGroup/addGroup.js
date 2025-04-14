@@ -38,20 +38,20 @@ window.customElements.define('addgroup-れ', class extends HTMLElement {
     connectedCallback() {
         this._shadowRoot.querySelector('form').addEventListener('submit', this.handleSubmit.bind(this));
     }
-    
+
     handleSubmit(e) {
         e.preventDefault();
-        
+
         const name = this._shadowRoot.querySelector('#groupname').value;
         const members = this._shadowRoot.querySelector('#members').value;
         const microbitId = this._shadowRoot.querySelector('#microbitId').value;
-        
+
         this.dispatchEvent(new CustomEvent('create-group', {
             bubbles: true,
             composed: true,
             detail: { name, members, microbitId }
         }));
-        
+
         e.target.reset();
     }
 });

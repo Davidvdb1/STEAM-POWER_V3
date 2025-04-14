@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../../Components/navigation/navigationList/navigationList.js"
+import "../../../components/navigation/navigationList/navigationList.js"
 //#endregion IMPORTS
 
 //#region Header
@@ -9,7 +9,7 @@ template.innerHTML = /*html*/`
         @import './components/navigation/header/style.css';
     </style>
 
-    <img src="./assets/images/logo.jpg" alt="Logo" class="nav-logo">
+    <img src="./Assets/images/logo.jpg" alt="Logo" class="nav-logo">
     <navigationList-れ></navigationList-れ>
 `;
 //#endregion Header

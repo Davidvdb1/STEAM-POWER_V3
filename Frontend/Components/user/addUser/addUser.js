@@ -43,21 +43,21 @@ window.customElements.define('adduser-れ', class extends HTMLElement {
     connectedCallback() {
         this._shadowRoot.querySelector('form').addEventListener('submit', this.handleSubmit.bind(this));
     }
-    
+
     handleSubmit(e) {
         e.preventDefault();
-        
+
         const username = this._shadowRoot.querySelector('#username').value;
         const email = this._shadowRoot.querySelector('#email').value;
         const password = this._shadowRoot.querySelector('#password').value;
         const role = this._shadowRoot.querySelector('#role').value;
-        
+
         this.dispatchEvent(new CustomEvent('create-user', {
             bubbles: true,
             composed: true,
             detail: { username, email, password, role }
         }));
-        
+
         e.target.reset();
     }
 });

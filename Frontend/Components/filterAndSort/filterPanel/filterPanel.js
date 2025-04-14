@@ -60,10 +60,10 @@ window.customElements.define('filterpanel-れ', class extends HTMLElement {
         this.dispatchEvent(new CustomEvent('resetFilter', {
             bubbles: true,
             composed: true,
-        })); 
+        }));
     }
 
-    
+
 
 });
 //#endregion CLASS
