@@ -41,7 +41,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
-    }
+    }    
 
     async init() {
         if (!navigator.bluetooth) return; // TODO: Show error message "Bluetooth not supported on this browser"
