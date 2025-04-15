@@ -47,41 +47,45 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
         this.$icon = 'https://img.icons8.com/?size=100&id=648&format=png&color=000000'
         this.$data = [];
         this.$allData = []; // <--- bewaar alle data
+        this.$isChartReady = false;
 
     }
 
     static get observedAttributes() {
-        return ["range"];
+        return ["range", "mode"];
     }
+    
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "range") {
             this.updateRange(newValue);
         }
+        if (name === "mode") {
+            this.updateRange(this.getAttribute("range") || "oneDay");
+        }
     }
-
+    
     connectedCallback() {
         setTimeout(() => {
             this.initChart();
             const canvas = this.$liveEnergy.querySelector('canvas');
-            if (this.id === 'solar') {
-                canvas.style.backgroundColor = '#f39c12';
-            }
-            if (this.id === 'wind') {
-                canvas.style.backgroundColor = '#BAB9B6';
-            }
-            if (this.id === 'water') {
-                canvas.style.backgroundColor = '#3EA4F0';
-            }
-            this.updateRange('oneDay') 
+            this.showNoDataMessage('geen verbinding met de microbit');
         }, 50); 
     }
 
     setFullData(data) {
         this.$allData = data;
-        this.updateRange(this.getAttribute('range') || 'oneDay');
-    }
     
+        const tryUpdate = () => {
+            if (this._isChartReady) {
+                this.updateRange(this.getAttribute('range') || 'oneDay');
+            } else {
+                setTimeout(tryUpdate, 50); // wacht tot chart klaar is
+            }
+        };
+    
+        tryUpdate();
+    }    
 
     initChart() {
 
@@ -89,6 +93,7 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
             this.chart.dispose();
         }
         this.chart = echarts.init(this.$liveEnergy);        
+        this.$isChartReady = true;
 
         const min = 137.22;
         const max = 141.36;
@@ -132,20 +137,44 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
             });
 
             this.chart.resize();
-            this.updateRange("oneDay")
 
         } catch (error) {
             console.error("Failed to initialize ECharts:", error);
         }
     }
 
+    getDataForCurrentRange() {
+        const now = new Date();
+        let minTime;
+    
+        switch (this.getAttribute('range')) {
+            case 'minute':
+                minTime = new Date(now.getTime() - 60 * 1000); break;
+            case 'tenMinutes':
+                minTime = new Date(now.getTime() - 10 * 60 * 1000); break;
+            case 'oneHour':
+                minTime = new Date(now.getTime() - 60 * 60 * 1000); break;
+            case 'sixHour':
+                minTime = new Date(now.getTime() - 6 * 60 * 60 * 1000); break;
+            case 'oneDay':
+            default:
+                minTime = new Date(now.getTime() - 24 * 60 * 60 * 1000); break;
+        }
+    
+        return this.$allData.filter(d => new Date(d.time) >= minTime && d.value > 0);
+    }
+    
+
     updateBar(dataList = null, newData = null) {
         let dataToUse;
     
         if (newData) {
             this.$allData.push(newData);
-            console.log(`nieuwe waarde toegevoegd aan bar ${this.id}:`, newData);
-            dataToUse = this.$allData;
+            dataToUse = this.getDataForCurrentRange();
+            if (newData.value === 0) {
+                this.showNoDataMessage(`Geen ${this.id} bron verbonden.`);
+                return;
+            }
         } else if (dataList) {
             dataToUse = dataList;
             console.log(`data geladen voor bar ${this.id}`, dataToUse);
@@ -153,17 +182,18 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
             console.warn('Geen geldige data ontvangen');
             return;
         }
-    
+
         const validData = dataToUse.filter(d => d.value > 0);
         if (validData.length === 0) {
             console.warn(`Geen geldige meetwaarden voor ${this.id}`);
             return;
         }
     
-        const min = Math.min(...validData.map(d => d.value));
-        const max = Math.max(...validData.map(d => d.value));
+        const min = Math.min(...validData.map(d => this.convertValue(d.value)));
+        const max = Math.max(...validData.map(d => this.convertValue(d.value)));
         const latest = validData.reduce((a, b) => new Date(a.time) > new Date(b.time) ? a : b);
-        const current = latest.value;
+        const current = this.convertValue(latest.value);
+        
     
         if (!this.chart) {
             this.initChart();
@@ -203,7 +233,10 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
                                 yAxis: 'Day Range',
                                 label: {
                                     show: true,
-                                    formatter: `${min}`,
+                                    formatter: () => {
+                                        const mode = this.getAttribute('mode');
+                                        return mode === 'voltage' ? `${min} V` : `${min}`;
+                                    },
                                     position: 'left',
                                     fontWeight: 'bold',
                                     color: '#000'
@@ -217,7 +250,10 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
                                 yAxis: 'Day Range',
                                 label: {
                                     show: true,
-                                    formatter: `${max}`,
+                                    formatter: () => {
+                                        const mode = this.getAttribute('mode');
+                                        return mode === 'voltage' ? `${max} V` : `${max}`;
+                                    },
                                     position: 'right',
                                     fontWeight: 'bold',
                                     color: '#000'
@@ -232,13 +268,16 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
                                 yAxis: 'Day Range',
                                 label: {
                                     show: true,
-                                    formatter: `${current}`,
+                                    formatter: () => {
+                                        const mode = this.getAttribute('mode');
+                                        return mode === 'voltage' ? `${current} V` : `${current}`;
+                                    },
                                     position: 'top'
                                 },
                                 symbolOffset: [0, '-30px'],
                             }
                         ]
-                    }
+                    }                    
                 }
             ]
         });
@@ -271,7 +310,6 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
                 return;
         }
     
-        // Filter data binnen de tijdsrange en met waarde > 0
         const filtered = this.$allData.filter(d =>
             new Date(d.time) >= minTime && d.value > 0
         );
@@ -282,7 +320,7 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
             return;
         }
         
-        const values = filtered.map(d => d.value);
+        const values = filtered.map(d => this.convertValue(d.value));
         const min = Math.min(...values);
         const max = Math.max(...values);
         
@@ -313,5 +351,11 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
         }
         this.$liveEnergy.innerHTML = '';
     }
+
+    convertValue(value) {
+        const mode = this.getAttribute('mode');
+        return mode === 'voltage' ? parseFloat((value / 341).toFixed(3)) : value;
+    }
+    
 });
 //#endregion CLASS

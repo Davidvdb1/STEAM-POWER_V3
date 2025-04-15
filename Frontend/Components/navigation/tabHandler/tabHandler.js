@@ -22,6 +22,7 @@ template.innerHTML = /*html*/`
         @import './components/navigation/tabHandler/style.css';
     </style>
 
+    <div class="background-layer"></div>
     <header-れ></header-れ>
     <content-れ></content-れ> 
 `;
