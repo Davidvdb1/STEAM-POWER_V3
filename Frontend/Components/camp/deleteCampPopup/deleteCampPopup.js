@@ -57,7 +57,7 @@ window.customElements.define('deletecamppopup-れ', class extends HTMLElement {
             bubbles: true,
             composed: true,
             detail: campId
-        })); 
+        }));
     }
 
     //service

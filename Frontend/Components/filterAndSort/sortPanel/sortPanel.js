@@ -46,7 +46,7 @@ window.customElements.define('sortpanel-れ', class extends HTMLElement {
             bubbles: true,
             composed: true,
             detail: attribute
-        })); 
+        }));
     }
 });
 //#endregion CLASS

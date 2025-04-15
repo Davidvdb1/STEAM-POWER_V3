@@ -85,7 +85,7 @@ window.customElements.define('microbitadvancedpincontroller-れ', class extends 
         const pinSelect = this._shadowRoot.getElementById('pinSelect');
         const selectedPin = pinSelect.value;
         if (selectedPin !== '') {
-            const event = new CustomEvent('setpinconfiguration', { detail: { pin: selectedPin, configuration: {ad: 'analog', io: 'input', type: 'SOLAR', active: false} }, bubbles: true, composed: true });
+            const event = new CustomEvent('setpinconfiguration', { detail: { pin: selectedPin, configuration: { ad: 'analog', io: 'input', type: 'SOLAR', active: false } }, bubbles: true, composed: true });
             document.dispatchEvent(event);
         }
         this.render();

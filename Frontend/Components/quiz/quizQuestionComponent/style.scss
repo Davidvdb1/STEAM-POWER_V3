@@ -1,0 +1,128 @@
+* {
+    
+    box-sizing: border-box;
+}
+
+
+:host {
+    display: block;
+    box-sizing: border-box;
+    margin: 10px 0;
+    border: 2px dashed lightgray;
+    border-radius: 2px;
+    transition: border 0.1s linear;
+}
+
+:host(:hover) {
+    border: 2px dashed #787878;
+}
+
+.container {
+    width: 100%;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px; /* Rounded edges */
+    padding: 15px;
+
+    transition: box-shadow 0.1s linear;
+}
+
+.container.solved {
+    background: lightgreen;
+}
+
+.container.incorrect {
+    background: lightcoral;
+}
+
+.container:hover {
+    box-shadow: 5px 15px 10px rgba(0, 0, 0, 0.1);
+}
+
+.description-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+}
+
+.image-box {
+    width: 80px;
+    height: 80px;
+    border: 2px solid black;
+    margin-left: 15px;
+}
+
+.text-content {
+    flex-grow: 1;
+    padding: 0 20px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.description {
+    font-size: 12px;
+    color: #444;
+    line-height: 1.4;
+}
+
+.power {
+    font-size: 32px;
+    font-weight: bold;
+    margin-right: 20px;
+}
+
+
+
+button {
+    background-color: #9FDAF9;
+    margin: 10px;
+    white-space: nowrap;
+    font-size: 1.1rem;
+    color: #002757;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    font-weight: bold;
+    border-style: solid;
+    border-color: #9FDAF9;
+
+    &:hover {
+        border-color: #002757
+    }
+
+    &:disabled {
+        background-color: #D3D3D3;
+        color: #A9A9A9;
+        border-color: #D3D3D3;
+        cursor: not-allowed;
+    }
+}
+
+#answer-input-container {
+    margin-top: 20px;
+
+    input {
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+}
+
+img {
+    width: 100%;
+    height: auto;
+}
+
+#attempts-counter {
+    display: block;
+    margin: 4px;
+    text-align: right;
+    font-size: 14px;
+    color: #aaa;
+}

@@ -17,6 +17,18 @@ template.innerHTML = /*html*/`
             <th>Pas aan</th>
         </tr>
     </table>
+    
+    <!-- Confirmation Popup -->
+    <div id="delete-confirmation" class="popup-overlay">
+        <div class="popup-content">
+            <h3>Bevestig verwijderen</h3>
+            <p>Weet u zeker dat u deze gebruiker wilt verwijderen?</p>
+            <div class="popup-buttons">
+                <button id="confirm-delete-btn">Ja, verwijderen</button>
+                <button id="cancel-delete-btn">Annuleren</button>
+            </div>
+        </div>
+    </div>
 `;
 //#endregion USERLIST
 
@@ -28,6 +40,11 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.users = [];
         this.editing = [];
+        this.userToDelete = null;
+
+        // Set up event listeners for confirmation popup
+        this._shadowRoot.getElementById('confirm-delete-btn').addEventListener('click', () => this.confirmDelete());
+        this._shadowRoot.getElementById('cancel-delete-btn').addEventListener('click', () => this.hideDeleteConfirmation());
     }
 
     // component attributes
@@ -51,20 +68,20 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
 
     renderUsers() {
         const table = this._shadowRoot.querySelector('#user-list');
-        
+
         // Preserve the header row
         const headerRow = table.querySelector('tr');
         table.innerHTML = '';
         table.appendChild(headerRow);
-        
+
         this.users.forEach(user => {
             const row = document.createElement('tr');
             row.dataset.userId = user.id;
-            
+
             // Username cell
             const usernameCell = document.createElement('td');
             usernameCell.className = 'username';
-            
+
             if (this.editing.includes(user.id)) {
                 // Input field for username when in edit mode
                 const usernameInput = document.createElement('input');
@@ -76,11 +93,11 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
                 usernameCell.textContent = user.username || user.name;
             }
             row.appendChild(usernameCell);
-            
+
             // Email cell
             const emailCell = document.createElement('td');
             emailCell.className = 'email';
-            
+
             if (this.editing.includes(user.id)) {
                 // Input field for email when in edit mode
                 const emailInput = document.createElement('input');
@@ -92,16 +109,16 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
                 emailCell.textContent = user.email || '';
             }
             row.appendChild(emailCell);
-            
+
             // Role cell
             const roleCell = document.createElement('td');
             roleCell.className = 'role';
-            
+
             if (this.editing.includes(user.id)) {
                 // Select dropdown for role when in edit mode
                 const roleSelect = document.createElement('select');
                 roleSelect.className = 'edit-role-select';
-                
+
                 const roles = ['ADMIN', 'TEACHER'];
                 roles.forEach(role => {
                     const option = document.createElement('option');
@@ -110,14 +127,14 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
                     option.selected = user.role === role;
                     roleSelect.appendChild(option);
                 });
-                
+
                 roleCell.appendChild(roleSelect);
             } else {
                 const roleName = user.role || '';
                 roleCell.textContent = roleName;
             }
             row.appendChild(roleCell);
-            
+
             // Delete button cell
             const deleteCell = document.createElement('td');
             const deleteBtn = document.createElement('button');
@@ -126,7 +143,7 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
             deleteBtn.addEventListener('click', () => this.handleDeleteClick(user.id));
             deleteCell.appendChild(deleteBtn);
             row.appendChild(deleteCell);
-            
+
             // Edit button cell
             const editCell = document.createElement('td');
             const editBtn = document.createElement('button');
@@ -135,29 +152,48 @@ window.customElements.define('userlist-れ', class extends HTMLElement {
             editBtn.addEventListener('click', () => this.handleEditClick(user.id));
             editCell.appendChild(editBtn);
             row.appendChild(editCell);
-            
+
             table.appendChild(row);
         });
     }
 
     handleDeleteClick(userId) {
-        this.dispatchEvent(new CustomEvent('delete-user', {
-            bubbles: true,
-            composed: true,
-            detail: { userId }
-        }));
+        this.userToDelete = userId;
+        this.showDeleteConfirmation();
+    }
+
+    showDeleteConfirmation() {
+        const popup = this._shadowRoot.getElementById('delete-confirmation');
+        popup.style.display = 'flex';
+    }
+
+    hideDeleteConfirmation() {
+        const popup = this._shadowRoot.getElementById('delete-confirmation');
+        popup.style.display = 'none';
+        this.userToDelete = null;
+    }
+
+    confirmDelete() {
+        if (this.userToDelete) {
+            this.dispatchEvent(new CustomEvent('delete-user', {
+                bubbles: true,
+                composed: true,
+                detail: { userId: this.userToDelete }
+            }));
+            this.hideDeleteConfirmation();
+        }
     }
 
     handleEditClick(userId) {
         if (this.editing.includes(userId)) {
             const row = this._shadowRoot.querySelector(`tr[data-user-id="${userId}"]`);
-            
+
             const newUsername = row.querySelector('.edit-username-input').value;
             const newEmail = row.querySelector('.edit-email-input').value;
             const newRole = row.querySelector('.edit-role-select').value;
-            
+
             this.editing = this.editing.filter(id => id !== userId);
-            
+
             this.dispatchEvent(new CustomEvent('edit-user', {
                 bubbles: true,
                 composed: true,

@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import '/Frontend/Components/camp/formItem/style.css';
+        @import '/Frontend/components/camp/formItem/style.css';
     </style>
 
     <label for=""></label>
@@ -44,7 +44,7 @@ window.customElements.define('formitem-れ', class extends HTMLElement {
             this.$input.id = newValue;
             this.$label.id = newValue + "Label";
             this.$label.setAttribute("for", newValue);
-        }   
+        }
 
         if (name === 'type') {
             this.$input.type = newValue;
@@ -58,7 +58,7 @@ window.customElements.define('formitem-れ', class extends HTMLElement {
             console.log(file);
             if (file && file.type.startsWith("image/")) {
                 const reader = new FileReader();
-                
+
                 reader.onload = (event) => {
                     this.imagePreviewHandler(event.target.result);
                 };

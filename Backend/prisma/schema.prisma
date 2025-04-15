@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -9,7 +10,7 @@ datasource db {
 
 model User {
   id       String @id @default(uuid())
-  username String @unique
+  username String
   email    String @unique
   password String
   role     Role
@@ -41,11 +42,14 @@ model Workshop {
 }
 
 model Group {
-    id         String       @id @default(uuid())
-    name       String       @unique
-    description String
-    code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
-    energyData EnergyData[]
+  id         String       @id @default(uuid())
+  name       String       @unique
+  members    String       @default("")
+  microbitId String       @default("")
+  code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+  energyData EnergyData[]
+  bonusScore Int          @default(0)
+  answers    Answer[]
 }
 
 model EnergyData {
@@ -70,11 +74,28 @@ enum EnergyType {
 }
 
 model Question {
-    id          String  @id @default(uuid())
-    title       String
-    description String
-    picture     String
-    wattage     Int
-    score       Int
-    active      Boolean @default(true)
+  id            String   @id @default(uuid())
+  title         String
+  description   String
+  windQuestion  String
+  waterQuestion String
+  solarQuestion String
+  picture       String
+  maxTries      Int      @default(0)
+  wattage       Int
+  score         Int
+  active        Boolean  @default(true)
+  answers       Answer[]
+}
+
+model Answer {
+  id            String   @id @default(uuid())
+  groupId       String
+  questionId    String
+  isCorrect     Boolean
+  answerValue   Int
+  energyReading Int
+  group         Group    @relation(fields: [groupId], references: [id])
+  question      Question @relation(fields: [questionId], references: [id])
+  errorMargin   Float @default(0)
 }

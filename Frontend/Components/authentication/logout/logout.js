@@ -34,6 +34,6 @@ window.customElements.define('logout-れ', class extends HTMLElement {
             composed: true,
             detail: "campoverviewpage"
         }));
-    }    
+    }
 });
 //#endregion CLASS

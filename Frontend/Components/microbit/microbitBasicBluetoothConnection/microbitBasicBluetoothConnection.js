@@ -41,7 +41,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
-    }
+    }    
 
     async init() {
         if (!navigator.bluetooth) return; // TODO: Show error message "Bluetooth not supported on this browser"
@@ -86,8 +86,11 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
     }
 
     async requestDevice() {
+        const microbitId = await JSON.parse(sessionStorage.getItem('loggedInUser'))?.microbitId;
+        console.log(sessionStorage.getItem('loggedInUser'));
+        console.log('MicrobitId:', microbitId);
         this.device = await navigator.bluetooth.requestDevice({
-            filters: [{ namePrefix: "BBC micro:bit" }],
+            filters: [{ namePrefix: microbitId ? `BBC micro:bit [${microbitId}]` : 'BBC micro:bit' }], // if microbitId is set, use it to filter the device name
             optionalServices: [IOPINSERVICE_SERVICE_UUID]
         });
     }

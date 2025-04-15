@@ -35,10 +35,10 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
 
     connectedCallback() {
         this.fetchGroups();
-        
+
         // Replace the 'group-added' event listener with 'create-group'
         this.addGroup.addEventListener('create-group', this.handleCreateGroup.bind(this));
-        
+
         // Event listeners for group operations from groupList
         this.groupList.addEventListener('delete-group', this.handleDeleteGroup.bind(this));
         this.groupList.addEventListener('edit-group', this.handleEditGroup.bind(this));
@@ -62,7 +62,7 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
             const nameB = b.name.toLowerCase();
             return nameA.localeCompare(nameB);
         });
-        
+
         const groupList = this._shadowRoot.querySelector('grouplist-れ');
         groupList.setAttribute('groups', JSON.stringify(this.groups));
     }
@@ -79,8 +79,8 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
     }
 
     async handleEditGroup(event) {
-        const { id, name, description } = event.detail;
-        const response = await this.editGroup({ id, name, description });
+        const { id, name, members, microbitId } = event.detail;
+        const response = await this.editGroup({ id, name, members, microbitId });
         if (response.ok) {
             // Update the group in the list
             const updatedGroup = await response.json().then(data => data.group);
@@ -95,8 +95,8 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
     }
 
     async handleCreateGroup(event) {
-        const { name, description } = event.detail;
-        const response = await this.createGroup(name, description);
+        const { name, members, microbitId } = event.detail;
+        const response = await this.createGroup(name, members, microbitId);
         const newGroup = await response.json().then(data => data.group);
         this.groups.push(newGroup);
         this.updateGroupList();
@@ -131,7 +131,7 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
         }
     }
 
-    async editGroup({ id, name, description }) {
+    async editGroup({ id, name, members, microbitId }) {
         try {
             const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
             return await fetch(window.env.BACKEND_URL + '/groups', {
@@ -140,14 +140,14 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${jwt}`
                 },
-                body: JSON.stringify({ id, name, description })
+                body: JSON.stringify({ id, name, members, microbitId })
             });
         } catch (error) {
             console.error(error);
         }
     }
 
-    async createGroup(name, description) {
+    async createGroup(name, members, microbitId) {
         try {
             const jwt = JSON.parse(sessionStorage.getItem('loggedInUser')).token;
             return await fetch(window.env.BACKEND_URL + '/groups', {
@@ -156,7 +156,7 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${jwt}`
                 },
-                body: JSON.stringify({ name, description })
+                body: JSON.stringify({ name, members, microbitId })
             });
         } catch (error) {
             console.error('Error creating group:', error);

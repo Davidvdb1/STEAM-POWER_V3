@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../../Components/authentication/userLoginForm/userLoginForm.js"
+import "../../../components/authentication/userLoginForm/userLoginForm.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE

@@ -35,7 +35,7 @@ window.customElements.define('useroverviewpage-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.fetchUsers();
-        
+
         this.addUser.addEventListener('create-user', this.handleCreateUser.bind(this));
         this.userList.addEventListener('delete-user', this.handleDeleteUser.bind(this));
         this.userList.addEventListener('edit-user', this.handleEditUser.bind(this));
@@ -59,7 +59,7 @@ window.customElements.define('useroverviewpage-れ', class extends HTMLElement {
             const usernameB = b.username.toLowerCase();
             return usernameA.localeCompare(usernameB);
         });
-        
+
         const userList = this._shadowRoot.querySelector('userlist-れ');
         userList.setAttribute('users', JSON.stringify(this.users));
     }

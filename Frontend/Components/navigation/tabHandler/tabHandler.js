@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../../Components/navigation/header/header.js"
+import "../../../components/navigation/header/header.js"
 import "../../pages/content/content.js"
 import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
@@ -13,6 +13,7 @@ import "../../pages/groupLoginPage/groupLoginPage.js"
 import "../../pages/workshopInfo/workshopInfo.js"   
 import "../../authentication/logout/logout.js"
 import "../../pages/questionAdminPage/questionAdminPage.js"
+import "../../pages/quizPage/quizPage.js"
 //#endregion IMPORTS
 
 //#region TABHANDLER
@@ -22,6 +23,7 @@ template.innerHTML = /*html*/`
         @import './components/navigation/tabHandler/style.css';
     </style>
 
+    <div class="background-layer"></div>
     <header-れ></header-れ>
     <content-れ></content-れ> 
 `;
@@ -96,7 +98,6 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "microbitpage", label: "Micro:bit" },
                 { id: "groupoverviewpage", label: "Groepen" },
                 { id: "useroverviewpage", label: "Gebruikers" },
-                { id: "sign-up", label: "Nieuw account" },
                 { id: "questionadmin", label: "Vragen aanpassen" },
                 { id: "logout", label: "Logout" },
             ],
