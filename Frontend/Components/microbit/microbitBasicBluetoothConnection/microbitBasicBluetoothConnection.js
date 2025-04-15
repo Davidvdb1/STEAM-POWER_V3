@@ -124,6 +124,8 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         const ioFlagsBuffer = new Uint8Array([Number(ioFlags)]).buffer;
         await this.pinIoConfigurationCharacteristic.writeValue(adFlagsBuffer);
         await this.pinAdConfigurationCharacteristic.writeValue(ioFlagsBuffer);
+        const pinconfig = await this.pinIoConfigurationCharacteristic.readValue();
+        console.log(pinconfig);
     }
 
     async readPinValues() {

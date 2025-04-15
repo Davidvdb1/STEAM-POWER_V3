@@ -3,6 +3,8 @@ import '../../microbit/microbitPinController/microbitPinController.js';
 import '../../microbit/rangeIndicatorBar/rangeIndicatorBar.js';
 import '../../microbit/liveLineGraph/liveLineGraph.js';
 import '../../microbit/pinAssignmentCards/pinAssignmentCards.js';
+import '../../microbit/microbitGraphs/microbitGraphs.js';
+import '../../energy/battery/battery.js';
 //#endregion IMPORTS
 
 //#region MICROBITPAGE
@@ -49,7 +51,10 @@ template.innerHTML = /*html*/`
             </div>
         </div>
     </div>
-`;  
+    <div class="energy-status">
+        <battery-れ id="energyBattery" current-watt="0" required-watt="500"></battery-れ>
+    </div>
+`;
 //#endregion MICROBITPAGE
 
 //#region CLASS
@@ -64,7 +69,10 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.waterBar = this._shadowRoot.querySelector('#water');
         this.fullscreenContainer = this._shadowRoot.querySelector('#fullscreenContainer');
         this.fullscreen = this._shadowRoot.querySelector('.fullscreen');
+        this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
         this.energyData = [];
+        this.timerInterval = null;
+        this.currentWattValue = 0;
     }
 
     // component attributes
@@ -142,6 +150,38 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
                 button.classList.add('active');
             });
         });
+
+        // Start the battery auto-increment timer
+        this.startBatteryTimer();
+    }
+    
+    disconnectedCallback() {
+        // Clean up the timer when component is removed
+        this.stopBatteryTimer();
+    }
+
+    startBatteryTimer() {
+        // Clear any existing timer
+        this.stopBatteryTimer();
+        
+        // Start a new timer that increments the battery every second
+        this.timerInterval = setInterval(() => {
+            this.currentWattValue++;
+            this.energyBattery.setAttribute('current-watt', this.currentWattValue.toString());
+            
+            // Reset to 0 if it exceeds the required watt (for demonstration purposes)
+            const requiredWatt = parseInt(this.energyBattery.getAttribute('required-watt') || '500');
+            if (this.currentWattValue > requiredWatt) {
+                this.currentWattValue = 0;
+            }
+        }, 1000); // 1000ms = 1 second
+    }
+    
+    stopBatteryTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
     }
     
     startBluetoothConnection() {
