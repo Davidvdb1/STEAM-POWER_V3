@@ -18,6 +18,11 @@ template.innerHTML = /*html*/`
             background-color: #fafafa;
             border-radius: 10px;
         }
+
+        #energylive > div {
+            width: 100% !important;
+            height: 100% !important;
+        }
     </style>
 
     <div id="energylive"></div>
@@ -37,14 +42,64 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ["range"];
+        return ["range", "mode"];
     }
+    
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "range") {
             this.updateXAxis(newValue);
         }
+        if (name === "mode") {
+            const isVoltage = newValue === 'voltage';
+            this.chart.setOption({
+                yAxis: {
+                    max: isVoltage ? 3 : 1200,
+                    axisLabel: {
+                        formatter: isVoltage ? (val) => `${val} V` : '{value}'
+                    }
+                }
+            });
+        
+            this.updateGraph(this.$data);
+        }              
     }
+    
+
+    connectedCallback() {
+        this.resizeObserver = new ResizeObserver(() => {
+            if (this.$liveEnergy.offsetWidth > 0 && !this.chart) {
+                this.initChart();
+                // Start je interval ná init
+                this.xAxisInterval = setInterval(() => {
+                    this.updateXAxis(this.getAttribute("range") || "oneDay");
+                }, 1000);
+            }
+        });
+    
+        this.resizeObserver.observe(this.$liveEnergy);
+        this.chartObserver = new ResizeObserver(() => {
+            if (this.chart) {
+                this.chart.resize();
+            }
+        });
+        this.chartObserver.observe(this.$liveEnergy);
+        
+    }    
+
+    disconnectedCallback() {
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
+
+        if (this.chartObserver) {
+            this.chartObserver.disconnect();
+        }
+        
+        if (this.xAxisInterval) {
+            clearInterval(this.xAxisInterval);
+        }
+    }    
     
     updateXAxis(range) {
         if (!this.chart) return;
@@ -105,20 +160,6 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
             }
         });
     }
-    
-    
-    
-
-    connectedCallback() {
-        this.initChart();
-        const canvas = this.$liveEnergy.querySelector('canvas');
-        canvas.style.borderRadius = '10px';
-        // Start een interval dat de X-as elke seconde bijwerkt
-        this.xAxisInterval = setInterval(() => {
-            this.updateXAxis(this.getAttribute("range") || "oneDay");
-        }, 1000); // Elke seconde bijwerken
-    }
-    
 
     initChart() {
         if (!this.$liveEnergy) {
@@ -134,7 +175,51 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
         try {
             this.chart = echarts.init(this.$liveEnergy);
             this.chart.setOption({
-                tooltip: { trigger: 'axis' },
+                tooltip: {
+                    trigger: 'axis',
+                    confine: true,
+                    backgroundColor: '#fff',
+                    borderColor: '#ccc',
+                    borderWidth: 1,
+                    padding: 10,
+                    textStyle: {
+                        color: '#333',
+                        fontSize: 13
+                    },
+                    extraCssText: `
+                        width: auto !important;
+                        height: auto !important;
+                        max-width: 100%;
+                        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                        white-space: nowrap;
+                        border-radius: 8px;
+                    `,
+                    formatter: function (params) {
+                        const time = echarts.format.formatTime('yyyy-MM-dd hh:mm:ss', params[0].value[0]);
+                        const mode = this.getAttribute('mode'); // ⬅️ Hier gebruik je je componentcontext
+                    
+                        const seen = new Set();
+                        const uniqueParams = params.filter(p => {
+                            const key = p.seriesName + p.value[0];
+                            if (seen.has(key)) return false;
+                            seen.add(key);
+                            return true;
+                        });
+                    
+                        let content = `<strong>${time}</strong><br/>`;
+                        uniqueParams.forEach(p => {
+                            let value = p.value[1];
+                            if (mode === 'voltage') {
+                                value = `${parseFloat(value).toFixed(2)} V`;
+                            }
+                            content += `
+                                <span style="color:${p.color}; font-weight:bold;">●</span> 
+                                ${p.seriesName}: ${value}<br/>
+                            `;
+                        });
+                        return content;
+                    }.bind(this)  
+                },
                 color: ['#f39c12', '#BAB9B6', '#3EA4F0'],
                 legend: {
                     data: [
@@ -169,8 +254,13 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
                 yAxis: {
                     type: 'value',
                     min: 0,
-                    max: 1200 // Max zoals gevraagd
-                },
+                    max: this.getAttribute('mode') === 'voltage' ? 3 : 1200,
+                    axisLabel: {
+                        formatter: this.getAttribute('mode') === 'voltage'
+                            ? (val) => `${val} V`
+                            : '{value}'
+                    }
+                },                
                 series: [
                     {
                         name: 'SOLAR',
@@ -188,7 +278,12 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
                         },
                         endLabel: {
                             show: true,
-                            formatter: (params) => `${params.value[1]}`,
+                            formatter: (params) => {
+                                const mode = this.getAttribute('mode');
+                                return mode === 'voltage'
+                                    ? `${params.value[1]} V`
+                                    : `${params.value[1]}`;
+                            },
                             color: '#f39c12',
                             fontWeight: 'bold'
                         }
@@ -210,7 +305,12 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
                         },
                         endLabel: {
                             show: true,
-                            formatter: (params) => `${params.value[1]}`,
+                            formatter: (params) => {
+                                const mode = this.getAttribute('mode');
+                                return mode === 'voltage'
+                                    ? `${params.value[1]} V`
+                                    : `${params.value[1]}`;
+                            },
                             color: '#BAB9B6',
                             fontWeight: 'bold'
                         }
@@ -231,7 +331,12 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
                         },
                         endLabel: {
                             show: true,
-                            formatter: (params) => `${params.value[1]}`,
+                            formatter: (params) => {
+                                const mode = this.getAttribute('mode');
+                                return mode === 'voltage'
+                                    ? `${params.value[1]} V`
+                                    : `${params.value[1]}`;
+                            },                            
                             color: '#3EA4F0',
                             fontWeight: 'bold'
                         }
@@ -264,7 +369,10 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
             let previous = this.$data[i - 1];
     
             let time = new Date(current.time).getTime();
-            let value = current.value;
+            let value = this.getAttribute('mode') === 'voltage'
+                ? (current.value / 341).toFixed(3)
+                : current.value;
+
     
             if (previous) {
                 let prevTime = new Date(previous.time).getTime();

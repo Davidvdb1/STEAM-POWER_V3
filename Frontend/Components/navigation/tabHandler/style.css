@@ -2,6 +2,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background-color: #f2fafe;
-  height: 100%;
+}
+
+.background-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background-image: url("../../../Assets/images/background.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }/*# sourceMappingURL=style.css.map */
