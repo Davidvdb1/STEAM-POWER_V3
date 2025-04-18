@@ -20,7 +20,7 @@
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
   border-radius: 5px; /* Rounded edges */
   padding: 15px;
-  transition: box-shadow 0.1s linear;
+  transition: box-shadow 0.1s linear, background 0.2s linear;
 }
 
 .container.solved {
