@@ -3,7 +3,6 @@ import '../../microbit/microbitPinController/microbitPinController.js';
 import '../../microbit/rangeIndicatorBar/rangeIndicatorBar.js';
 import '../../microbit/liveLineGraph/liveLineGraph.js';
 import '../../microbit/pinAssignmentCards/pinAssignmentCards.js';
-import '../../microbit/microbitGraphs/microbitGraphs.js';
 import '../../energy/battery/battery.js';
 //#endregion IMPORTS
 
