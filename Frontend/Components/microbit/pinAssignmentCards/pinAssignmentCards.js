@@ -9,7 +9,7 @@ template.innerHTML = /*html*/`
     </style>
 
     <div id="solar" class="card">
-        <h2>Solar</h2>
+        <h2>Zon</h2>
         <p>Pin 0</p>
     </div>
     <div id="wind" class="card">

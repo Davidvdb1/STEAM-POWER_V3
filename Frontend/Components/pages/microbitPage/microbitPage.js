@@ -2,6 +2,8 @@
 import '../../microbit/microbitPinController/microbitPinController.js';
 import '../../microbit/rangeIndicatorBar/rangeIndicatorBar.js';
 import '../../microbit/liveLineGraph/liveLineGraph.js';
+import '../../microbit/totalEnergyGroupsBar/totalEnergyGroupsBar.js';
+import '../../microbit/averageValueGroupsBar/averageValueGroupsBar.js';
 import '../../microbit/pinAssignmentCards/pinAssignmentCards.js';
 import '../../energy/battery/battery.js';
 //#endregion IMPORTS
@@ -48,6 +50,8 @@ template.innerHTML = /*html*/`
                 <rangeindicatorbar-れ id="wind"></rangeindicatorbar-れ>
                 <rangeindicatorbar-れ id="water"></rangeindicatorbar-れ>
             </div>
+            <totalenergygroupsbar-れ></totalenergygroupsbar-れ>	
+            <averageValueGroupsBar-れ range="oneDay"></averageValueGroupsBar-れ>
         </div>
     </div>
     <div class="energy-status">
@@ -66,6 +70,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.solarBar = this._shadowRoot.querySelector('#solar');
         this.windBar = this._shadowRoot.querySelector('#wind');
         this.waterBar = this._shadowRoot.querySelector('#water');
+        this.averageValue = this._shadowRoot.querySelector('averageValueGroupsBar-れ');
         this.fullscreenContainer = this._shadowRoot.querySelector('#fullscreenContainer');
         this.fullscreen = this._shadowRoot.querySelector('.fullscreen');
         this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
@@ -98,6 +103,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.solarBar.setAttribute('mode', 'voltage');
         this.windBar.setAttribute('mode', 'voltage');
         this.waterBar.setAttribute('mode', 'voltage');
+        this.averageValue.setAttribute('mode', 'voltage');
 
         const bluetoothToggle = this._shadowRoot.getElementById('bluetoothToggle');
         const dataTypeToggle = this._shadowRoot.getElementById('dataTypeToggle');
@@ -130,6 +136,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             this.solarBar.setAttribute('mode', mode);
             this.windBar.setAttribute('mode', mode);
             this.waterBar.setAttribute('mode', mode);
+            this.averageValue.setAttribute('mode', mode);
         });
            
     
@@ -144,6 +151,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
                 this.solarBar.setAttribute('range', range);
                 this.windBar.setAttribute('range', range);
                 this.waterBar.setAttribute('range', range);
+                this.averageValue.setAttribute('range', range);
     
                 this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(b => b.classList.remove('active'));
                 button.classList.add('active');
