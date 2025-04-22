@@ -37,15 +37,16 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
 
     }
 
-    connectedCallback() {
+    async connectedCallback() {
+        await this.startMockMonitoring();
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
-    }    
+    }
 
     async init() {
         if (!navigator.bluetooth) return; // TODO: Show error message "Bluetooth not supported on this browser"
-        
+
         console.log('Searching for devices...');
         this.paused = false;
         await this.requestDevice();
@@ -76,7 +77,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         this.pinDataCharacteristic = null;
         this.pinAdConfigurationCharacteristic = null;
         this.pinIoConfigurationCharacteristic = null;
-        
+
         this.device.removeEventListener('gattserverdisconnected', this.disconnect.bind(this));
         this.device.gatt.disconnect();
 
@@ -97,7 +98,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
 
     async connectToDevice() {
         this.server = await this.device.gatt.connect();
-        
+
         this.ioPinService = await this.server.getPrimaryService(IOPINSERVICE_SERVICE_UUID);
 
         this.pinDataCharacteristic = await this.ioPinService.getCharacteristic(PINDATA_CHARACTERISTIC_UUID);
@@ -109,6 +110,14 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         this.monitoringInterval = setInterval(async () => {
             if (!this.paused) {
                 await this.readPinValues();
+            }
+        }, MONITOR_INTERVAL || 2000);
+    }
+
+    async startMockMonitoring() {
+        this.monitoringInterval = setInterval(async () => {
+            if (!this.paused) {
+                await this.readMockPinValues();
             }
         }, MONITOR_INTERVAL || 2000);
     }
@@ -141,18 +150,45 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         };
 
         const pinValues = [];
-        pinValues.push({pin: 0, groupId, value: extract10BitValue(view.getUint8(1)), type: 'SOLAR', time});
-        pinValues.push({pin: 1, groupId, value: extract10BitValue(view.getUint8(3)), type: 'WIND', time});
-        pinValues.push({pin: 2, groupId, value: extract10BitValue(view.getUint8(5)), type: 'WATER', time});
+        pinValues.push({ pin: 0, groupId, value: extract10BitValue(view.getUint8(1)), type: 'SOLAR', time });
+        pinValues.push({ pin: 1, groupId, value: extract10BitValue(view.getUint8(3)), type: 'WIND', time });
+        pinValues.push({ pin: 2, groupId, value: extract10BitValue(view.getUint8(5)), type: 'WATER', time });
         pinValues.forEach(async (data) => {
             const response = await this.postEnergyData(data);
             const body = await response.json();
             const datapoint = body.energyData;
-            
+
             const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
             document.dispatchEvent(event);
         });
     }
+
+    async readMockPinValues() {
+        const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
+
+        const nextRandomValue = (val, spread) => Math.floor(Math.random() * spread) + val;
+
+        const solarValue = nextRandomValue(750, 80);
+        const windValue = nextRandomValue(300, 50);
+        const waterValue = nextRandomValue(450, 35);
+
+        const time = new Date().toISOString();
+
+        const pinValues = [];
+        pinValues.push({ pin: 0, groupId, value: solarValue, type: 'SOLAR', time });
+        pinValues.push({ pin: 1, groupId, value: windValue, type: 'WIND', time });
+        pinValues.push({ pin: 2, groupId, value: waterValue, type: 'WATER', time });
+        pinValues.forEach(async (data) => {
+            const response = await this.postEnergyData(data);
+            const body = await response.json();
+            const datapoint = body.energyData;
+
+            const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
+            document.dispatchEvent(event);
+        });
+        console.log(pinValues);
+    }
+
 
     // service
     async postEnergyData(data = { groupId, value, time, type, pin }) {

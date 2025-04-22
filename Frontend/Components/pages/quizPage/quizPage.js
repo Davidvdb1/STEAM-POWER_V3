@@ -31,7 +31,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
 
-
         this.energyContext = "wind";
     }
 
@@ -45,6 +44,8 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     }
 
     async connectedCallback() {
+        
+        
 
         this.$container = this.shadowRoot.querySelector("#container");
         this.$questionList = this.shadowRoot.querySelector("question-list-れ");

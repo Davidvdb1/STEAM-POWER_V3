@@ -46,13 +46,13 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        this.group_id = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
+        this.groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
         this.fetchQuestions();
     }
 
     async fetchQuestions() {
         try {
-            const response = await fetch(`${window.env.BACKEND_URL}/questions/group/${this.group_id}`);
+            const response = await fetch(`${window.env.BACKEND_URL}/questions/group/${this.groupId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
