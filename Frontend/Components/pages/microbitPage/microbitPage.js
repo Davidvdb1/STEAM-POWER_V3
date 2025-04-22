@@ -54,9 +54,6 @@ template.innerHTML = /*html*/`
             <averageValueGroupsBar-れ range="oneDay"></averageValueGroupsBar-れ>
         </div>
     </div>
-    <div class="energy-status">
-        <battery-れ id="energyBattery" current-watt="0" required-watt="500"></battery-れ>
-    </div>
 `;
 //#endregion MICROBITPAGE
 
