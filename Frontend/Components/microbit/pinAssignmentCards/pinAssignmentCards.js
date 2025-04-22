@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/microbit/pinAssignmentCards/style.css';
+        @import './Components/microbit/pinAssignmentCards/style.css';
     </style>
 
     <div id="solar" class="card">

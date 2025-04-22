@@ -6,7 +6,7 @@ import "../../camp/deleteCampPopup/deleteCampPopup.js";
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/camp/campItem/style.css';
+        @import './Components/camp/campItem/style.css';
     </style>
 
 

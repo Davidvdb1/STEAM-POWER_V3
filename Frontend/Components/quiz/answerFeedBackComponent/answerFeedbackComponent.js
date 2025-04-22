@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/quiz/answerFeedBackComponent/style.css';
+        @import './Components/quiz/answerFeedBackComponent/style.css';
     </style>
 
     <div class="container">

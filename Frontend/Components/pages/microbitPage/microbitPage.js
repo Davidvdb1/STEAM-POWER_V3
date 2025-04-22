@@ -10,7 +10,7 @@ import '../../energy/battery/battery.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/microbitPage/style.css';
+        @import './Components/pages/microbitPage/style.css';
     </style>
     <div id="microbitPanel">
         <div id="switches">

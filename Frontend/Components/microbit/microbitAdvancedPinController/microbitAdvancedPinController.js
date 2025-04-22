@@ -6,7 +6,7 @@ import '../microbitAdvancedPinControllerForm/microbitAdvancedPinControllerForm.j
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/microbit/microbitAdvancedPinController/style.css';
+        @import './Components/microbit/microbitAdvancedPinController/style.css';
     </style>
     <div id="pinAdderContainer">
         <select id="pinSelect">
