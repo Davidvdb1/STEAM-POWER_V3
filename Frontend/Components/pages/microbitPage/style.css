@@ -182,7 +182,8 @@
   display: flex;
   flex-direction: row;
   gap: 20px;
-  
+}
+
 .energy-status {
   width: 100px;
   height: 200px;

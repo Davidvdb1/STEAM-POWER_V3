@@ -47,6 +47,7 @@ model Group {
   members    String       @default("")
   microbitId String       @default("")
   code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+  energy     Int          @default(0)
   energyData EnergyData[]
   bonusScore Int          @default(0)
   answers    Answer[]

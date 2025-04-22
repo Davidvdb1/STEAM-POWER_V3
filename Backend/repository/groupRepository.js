@@ -24,6 +24,18 @@ class GroupRepository {
         }
     }
 
+    async addEnergyToGroup(groupId, energy) {
+        try {
+            const prismaGroup = await prisma.group.update({
+                where: { id: groupId },
+                data: { energy: { increment: energy } }
+            });
+            return Group.from(prismaGroup);
+        } catch (error) {
+            throw new Error('Kon energie niet toevoegen aan groep');
+        }
+    }
+
     async findByCode(code) {
         try {
             const prismaGroup = await prisma.group.findUnique({ where: { code } });
