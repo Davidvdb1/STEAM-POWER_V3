@@ -8,7 +8,7 @@ import '../../quiz/answerFeedBackComponent/answerFeedbackComponent.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/quizPage/style.css';
+        @import './Components/pages/quizPage/style.css';
     </style>
 
     <div id="container">

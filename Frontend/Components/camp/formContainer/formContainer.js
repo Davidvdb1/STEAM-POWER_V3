@@ -6,7 +6,7 @@ import "../formItem/formItem.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/camp/formContainer/style.css';
+        @import './Components/camp/formContainer/style.css';
     </style>
 
     <h1>Kamp forum</h1> 

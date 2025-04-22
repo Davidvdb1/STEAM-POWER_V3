@@ -3,7 +3,6 @@ import '../../microbit/microbitPinController/microbitPinController.js';
 import '../../microbit/rangeIndicatorBar/rangeIndicatorBar.js';
 import '../../microbit/liveLineGraph/liveLineGraph.js';
 import '../../microbit/pinAssignmentCards/pinAssignmentCards.js';
-import '../../microbit/microbitGraphs/microbitGraphs.js';
 import '../../energy/battery/battery.js';
 //#endregion IMPORTS
 
@@ -11,7 +10,7 @@ import '../../energy/battery/battery.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/microbitPage/style.css';
+        @import './Components/pages/microbitPage/style.css';
     </style>
     <div id="microbitPanel">
         <div id="switches">
