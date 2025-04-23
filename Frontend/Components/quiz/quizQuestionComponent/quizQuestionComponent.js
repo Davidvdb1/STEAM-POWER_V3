@@ -59,7 +59,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
         this._questions = {}
         this._actualQuestion = "";
-
+    
     }
 
     set energyContext(value) {
@@ -138,7 +138,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
 
         try {
-            const data = await this._fetchWrapper(`${window.env.BACKEND_URL}/groups/${groupId}/score`, {
+            const res = await fetch(`${window.env.BACKEND_URL}/groups/${groupId}/score`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -147,6 +147,11 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
                     bonusScore: score
                 })
             });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+            const data = await res.json();
             console.log("Group score updated:", data);
         } catch (error) {
             console.error("Error updating group score:", error);
