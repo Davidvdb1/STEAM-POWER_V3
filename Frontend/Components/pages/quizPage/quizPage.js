@@ -12,6 +12,9 @@ template.innerHTML = /*html*/`
     </style>
 
     <div id="container">
+        <div id="error-container">
+            <p id="error-message-text"></p>
+        </div>
         <answer-feedback-component-れ width="800" height="200"></answer-feedback-component-れ>
         <div id="energy-context-select-container">
             <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
@@ -39,6 +42,8 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$container = null;
+        this.$errorMessage = null;
+        this.$errorMessageText = null;
 
         this.energyContext = "wind";
         this.groupId = null;
@@ -49,101 +54,121 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         return [];
     }
 
+    // Removed unused attributeChangedCallback implementation
     attributeChangedCallback(name, oldValue, newValue) {
+        // No implementation needed
+    }
 
+    // New helper method to check login and role
+    async checkLogin() {
+        // Check if the user is logged in
+        const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+        if (!loggedInUser) {
+            this.showErrorMessage("You are not logged in. Please log in to access this page.");
+            return null;
+        }
+
+        // Set up quiz page based on user role
+        const role = loggedInUser.role;
+        if (role === "ADMIN" || role === "TEACHER") {
+            await this.setUpAdminQuizPage();
+        } else if (role === "GROUP" && loggedInUser.groupId) {
+            await this.setUpGroupQuizPage(loggedInUser.groupId);
+        }
+        return loggedInUser;
     }
 
     async connectedCallback() {
         this.$container = this.shadowRoot.querySelector("#container");
-
-        const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
-        if (!loggedInUser) {
-            this.$container.innerHTML = `
-                <div class="error-message"> 
-                    <p>You are not logged in. Please log in to use this feature.</p>
-                </div>`
-            return;
-        }
-
-        const role = loggedInUser.role;
-        if (role === "ADMIN" || role === "TEACHER") {
-            await this.setUpAdminQuizPage();
-        } else if (role === "GROUP") {
-            this.groupId = loggedInUser.groupId;
-        }
-
-        // const bluetoothEnabled = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
-        // if (!bluetoothEnabled) {
-        //     this.shadowRoot.querySelector("#container").innerHTML = `
-        //         <div class="error-message">
-        //             <p>Bluetooth is not enabled. Please enable Bluetooth to use this feature.</p>
-        //         </div>`
-        //     return;
-        // }
-
         this.$questionList = this.shadowRoot.querySelector("question-list-れ");
+        this.$errorMessage = this.shadowRoot.querySelector("#error-container");
+        this.$errorMessageText = this.shadowRoot.querySelector("#error-message-text");
+        this.$errorMessage.style.display = "none";
 
-        this.$windRadio = this.shadowRoot.querySelector("#wind-radio");
-        this.$waterRadio = this.shadowRoot.querySelector("#water-radio");
-        this.$solarRadio = this.shadowRoot.querySelector("#solar-radio");
-        switch (this.energyContext) {
-            case "wind":
-                this.$windRadio.checked = true;
-                break;
-            case "water":
-                this.$waterRadio.checked = true;
-                break;
-            case "solar":
-                this.$solarRadio.checked = true;
-                break;
-        }
+        if (!(await this.checkLogin())) return;
 
-        this.$windRadio.addEventListener("change", this.handlePowerSourceChange.bind(this));
-        this.$waterRadio.addEventListener("change", this.handlePowerSourceChange.bind(this));
-        this.$solarRadio.addEventListener("change", this.handlePowerSourceChange.bind(this));
-
+        this.setupEnergySourceSelect();
 
         customElements.whenDefined('question-list-れ').then(() => {
-            this.$questionList.groupId = this.groupId;
-            this.$questionList.energyContext = this.energyContext;
+            this.$questionList && (this.$questionList.groupId = this.groupId);
+            this.$questionList && (this.$questionList.energyContext = this.energyContext);
         });
 
         this.addEventListener("update-error-indicator", (e) => {
             const error = e.detail.error;
-            const $answerFeedbackComponent = this.shadowRoot.querySelector("answer-feedback-component-れ");
-            $answerFeedbackComponent.setAttribute("error", error);
+            this.shadowRoot.querySelector("answer-feedback-component-れ")?.setAttribute("error", error);
         });
     }
 
-    handlePowerSourceChange(e) {
-        this.energyContext = e.target.value;
-        this.$questionList.energyContext = this.energyContext;
+    // Refactored: Replace individual radio setups with an array loop
+    setupEnergySourceSelect() {
+        const radios = [
+            { selector: "#wind-radio", value: "wind" },
+            { selector: "#water-radio", value: "water" },
+            { selector: "#solar-radio", value: "solar" }
+        ];
+        radios.forEach(radio => {
+            const radioEl = this.shadowRoot.querySelector(radio.selector);
+            radioEl.checked = (this.energyContext === radio.value);
+            radioEl.addEventListener("change", (e) => {
+                this.energyContext = e.target.value;
+                this.$questionList && (this.$questionList.energyContext = this.energyContext);
+            });
+        });
+    }
+
+    showErrorMessage(message) {
+        this.$container.childNodes.forEach((child) => {
+            if (child.nodeType === Node.ELEMENT_NODE) {
+                child.style.display = "none";
+            }
+        });
+        this.$errorMessage.style.display = "block";
+        this.$errorMessageText.innerText = message;
     }
 
     async setUpAdminQuizPage() {
-        const response = await fetch(`${window.env.BACKEND_URL}/groups`);
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        try {
+            const response = await fetch(`${window.env.BACKEND_URL}/groups`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const groups = await response.json();
+            const groupSelect = this.shadowRoot.querySelector("#group");
+            groupSelect.innerHTML = ""; // Clear existing options
+
+            groups.forEach(group => {
+                const option = document.createElement("option");
+                option.value = group.id;
+                option.textContent = `Group ${group.name}`;
+                groupSelect.appendChild(option);
+            });
+
+            // Use an arrow function for cleaner binding
+            groupSelect.addEventListener("change", (e) => {
+                this.groupId = e.target.value;
+                this.$questionList && (this.$questionList.groupId = this.groupId);
+            });
+
+            this.groupId = groupSelect.value;
+            this.$questionList && (this.$questionList.groupId = this.groupId);
+        } catch (error) {
+            console.error("Failed to fetch groups:", error);
+            this.showErrorMessage("Failed to fetch groups. Please try again later.");
         }
+    }
 
-        const data = await response.json();
-        const groups = data;;
+    async setUpGroupQuizPage(id) {
+        this.groupId = id;
 
-        const groupSelect = this.shadowRoot.querySelector("#group");
-        groupSelect.innerHTML = ""; // Clear existing options
+        this.shadowRoot.querySelector("#group-select").style.display = "none";
 
-        groups.forEach(group => {
-            const option = document.createElement("option");
-            option.value = group.id;
-            option.textContent = `Group ${group.name}`;
-            groupSelect.appendChild(option);
-        });
-
-        groupSelect.addEventListener("change", (e) => {
-            this.groupId = e.target.value;
-            this.$questionList.groupId = this.groupId;
-        });
-
+        const bluetoothEnabled = true; //JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
+        if (!bluetoothEnabled) {
+            this.showErrorMessage("Bluetooth is not enabled. Please enable Bluetooth to access this page.");
+            return;
+        }
 
     }
 

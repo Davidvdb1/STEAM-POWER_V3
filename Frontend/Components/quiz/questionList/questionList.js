@@ -33,8 +33,8 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
 
     set energyContext(value) {
         this._energyContext = value;
-
-        this.shadowRoot.querySelectorAll("quiz-question-れ").forEach((question) => {
+        const container = this.shadowRoot.querySelector("#container");
+        container.querySelectorAll("quiz-question-れ").forEach(question => {
             question.energyContext = value;
         });
     }
@@ -53,8 +53,6 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        this.groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
-        this.fetchQuestions();
     }
 
     async fetchQuestions() {
@@ -77,14 +75,16 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     initQuestions(questionData) {
-        for (let key in questionData) {
+        const container = this.shadowRoot.querySelector("#container");
+        container.innerHTML = ""; // Clear previous questions
+        Object.values(questionData).forEach(content => {
             const question = document.createElement('quiz-question-れ');
-            this.shadowRoot.querySelector("#container").appendChild(question);
+            container.appendChild(question);
 
             question.energyContext = this._energyContext;
             question.groupId = this._groupId;
-            question.initQuestion(questionData[key]);
-        }
+            question.initQuestion(content);
+        });
     }
 
 });

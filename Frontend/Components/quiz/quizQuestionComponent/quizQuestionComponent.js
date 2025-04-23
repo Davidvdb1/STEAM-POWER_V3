@@ -46,9 +46,6 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
         this._energyContext = null;
         this._groupId = null;
-        this.$actualQuestion = this.shadowRoot.querySelector("#actual-question")
-
-
 
         this._id = null;
         this._score = 0;
@@ -67,8 +64,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
     set energyContext(value) {
         this._energyContext = value;
-
-        this.$actualQuestion.innerText = this._questions[this._energyContext];
+        this.updateQuestion();
     }
 
     set groupId(value) {
@@ -84,9 +80,10 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
     }
     connectedCallback() {
-        this.$submitAnswerButton = this._shadowRoot.querySelector("#submit-answer");
-        this.$answerInput = this._shadowRoot.querySelector("input[type='text']");
 
+        this.$actualQuestion = this.shadowRoot.querySelector("#actual-question");
+        this.$submitAnswerButton = this.shadowRoot.querySelector("#submit-answer");
+        this.$answerInput = this.shadowRoot.querySelector("input[type='text']");
 
         this.$submitAnswerButton.addEventListener("click", async () => {
             const answer = this.$answerInput.value;
@@ -99,7 +96,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         const mockEnergyReading = 50; // Mock energy reading value
 
         try {
-            //const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
+            //            const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
 
             const response = await fetch(`${window.env.BACKEND_URL}/questions/${this._id}/answer`, {
                 method: "POST",
@@ -141,7 +138,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
 
         try {
-            const response = await fetch(`${window.env.BACKEND_URL}/groups/${groupId}/score`, {
+            const data = await this._fetchWrapper(`${window.env.BACKEND_URL}/groups/${groupId}/score`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -150,10 +147,6 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
                     bonusScore: score
                 })
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
             console.log("Group score updated:", data);
         } catch (error) {
             console.error("Error updating group score:", error);
@@ -224,7 +217,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
     }
     set actualQuestion(value) {
         this._actualQuestion = value;
-        this.$actualQuestion.innerText = value;
+        this.updateQuestion();
     }
 
     set score(value) {
@@ -237,6 +230,12 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this.$submitAnswerButton.disabled = true;
     }
 
+    updateQuestion() {
+        if (this.$actualQuestion) {
+            this.$actualQuestion.innerText = this._questions[this._energyContext] || this._actualQuestion;
+        }
+    }
+
     initQuestion({ id, score, isSolved, answerCount, maxTries, wattage, title, description, picture, windQuestion, solarQuestion, waterQuestion }) {
         this.id = id;
         this.score = score;
@@ -247,18 +246,16 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
         this.wattage = wattage;
         this.title = title;
-        this.title = description;
+        this.description = description;
         this.picture = picture;
-
 
         this.questions = {
             "wind": windQuestion,
             "solar": solarQuestion,
             "water": waterQuestion
-        }
+        };
 
-        this.actualQuestion = this._questions[this._energyContext];
+        this.updateQuestion();
     }
-
 });
 //#endregion CLASS

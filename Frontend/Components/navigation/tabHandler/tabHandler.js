@@ -115,7 +115,6 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
     }
 
     tabHandler(e) {
-        console.log("tabHandler" + e.detail);
         if (this.loggedInUser?.role != JSON.parse(sessionStorage.getItem('loggedInUser'))?.role) {
             this.loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
             this.renderHeader();
