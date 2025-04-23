@@ -5,11 +5,11 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/microbit/pinAssignmentCards/style.css';
+        @import './Components/microbit/pinAssignmentCards/style.css';
     </style>
 
     <div id="solar" class="card">
-        <h2>Solar</h2>
+        <h2>Zon</h2>
         <p>Pin 0</p>
     </div>
     <div id="wind" class="card">

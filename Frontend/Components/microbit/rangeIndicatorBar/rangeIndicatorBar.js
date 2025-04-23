@@ -69,7 +69,7 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
         setTimeout(() => {
             this.initChart();
             const canvas = this.$liveEnergy.querySelector('canvas');
-            this.showNoDataMessage('geen verbinding met de microbit');
+            this.showNoDataMessage(`Niet genoeg ${this.id} data beschikbaar in deze tijdsrange.`);
         }, 50); 
     }
 
@@ -172,7 +172,7 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
             this.$allData.push(newData);
             dataToUse = this.getDataForCurrentRange();
             if (newData.value === 0) {
-                this.showNoDataMessage(`Geen ${this.id} bron verbonden.`);
+                this.showNoDataMessage(`Niet genoeg ${this.id} data beschikbaar in deze tijdsrange.`);
                 return;
             }
         } else if (dataList) {
@@ -325,7 +325,7 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
         const max = Math.max(...values);
         
         if (min === max) {
-            this.showNoDataMessage(`Geen variatie in de ${this.id} data binnen deze tijdsrange.`);
+            this.showNoDataMessage(`Niet genoeg ${this.id} data beschikbaar in deze tijdsrange.`);
             return;
         }        
     

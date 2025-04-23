@@ -7,7 +7,7 @@ import "../../questions/questionForm/questionForm.js"
 let modalTemplate = document.createElement('template');
 modalTemplate.innerHTML = /*html*/`
     <style>
-        @import './components/questions/modal/style.css';
+        @import './Components/questions/modal/style.css';
     </style>
     <div class="modal">
         <div class="modal-content">

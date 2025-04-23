@@ -20,13 +20,18 @@ class EnergyDataRepository {
 
     async getAllByGroup(groupId) {
         try {
-            const whereCondition = { groupId };
-        
+            const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    
             const prismaEnergyData = await prisma.energyData.findMany({
-                where: whereCondition,
+                where: {
+                    groupId,
+                    time: {
+                        gte: twentyFourHoursAgo
+                    }
+                },
                 orderBy: { time: 'asc' }
             });
-        
+    
             return prismaEnergyData.map(EnergyData.from);
         } catch (error) {
             throw new utility.DatabaseError(`Error fetching energy data: ${error.message}`);

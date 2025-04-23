@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/energy/battery/style.css';
+        @import './Components/energy/battery/style.css';
     </style>
     <div class="battery-container">
         <div class="battery-head"></div>

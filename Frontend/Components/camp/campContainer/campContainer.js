@@ -6,7 +6,7 @@ import "../campItem/campItem.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/camp/campContainer/style.css';
+        @import './Components/camp/campContainer/style.css';
     </style>
     <div id="camp-list"></div>
 `;

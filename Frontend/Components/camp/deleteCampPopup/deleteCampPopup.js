@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/camp/deleteCampPopup/style.css';
+        @import './Components/camp/deleteCampPopup/style.css';
     </style>
 
     <div class="popup-overlay">

@@ -1,7 +1,7 @@
 //#region IMPORTS
-import "../../components/navigation/tabHandler/tabHandler.js"
-import "../../components/microbit/microbitBluetoothConnection/microbitBluetoothConnection.js"
-import "../../components/microbit/microbitBasicBluetoothConnection/microbitBasicBluetoothConnection.js"
+import "../../Components/navigation/tabHandler/tabHandler.js"
+import "../../Components/microbit/microbitBluetoothConnection/microbitBluetoothConnection.js"
+import "../../Components/microbit/microbitBasicBluetoothConnection/microbitBasicBluetoothConnection.js"
 //#endregion IMPORTS
 
 //#region HOME

@@ -156,6 +156,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         pinValues.forEach(async (data) => {
             const response = await this.postEnergyData(data);
             const body = await response.json();
+            console.log(body);
             const datapoint = body.energyData;
 
             const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });

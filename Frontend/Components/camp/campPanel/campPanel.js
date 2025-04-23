@@ -7,7 +7,7 @@ import "../../filterAndSort/filterPanel/filterPanel.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/camp/campPanel/style.css';
+        @import './Components/camp/campPanel/style.css';
     </style>
 
     <div id="searchPanel">

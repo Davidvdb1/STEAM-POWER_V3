@@ -2,6 +2,8 @@
 import '../../microbit/microbitPinController/microbitPinController.js';
 import '../../microbit/rangeIndicatorBar/rangeIndicatorBar.js';
 import '../../microbit/liveLineGraph/liveLineGraph.js';
+import '../../microbit/totalEnergyGroupsBar/totalEnergyGroupsBar.js';
+import '../../microbit/averageValueGroupsBar/averageValueGroupsBar.js';
 import '../../microbit/pinAssignmentCards/pinAssignmentCards.js';
 import '../../energy/battery/battery.js';
 //#endregion IMPORTS
@@ -10,7 +12,7 @@ import '../../energy/battery/battery.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/microbitPage/style.css';
+        @import './Components/pages/microbitPage/style.css';
     </style>
     <div id="microbitPanel">
         <div id="switches">
@@ -31,6 +33,12 @@ template.innerHTML = /*html*/`
             </div>
         </div>
         <pinAssignmentCards-れ></pinAssignmentCards-れ>
+        <div id="groupSelectorContainer">
+            <label for="groupSelector">Selecteer groep:</label>
+            <select id="groupSelector">
+                <option value="">Laden...</option>
+            </select>
+        </div>
     </div>
     <div id= "fullscreenContainer">
         <div id="graphs">
@@ -48,10 +56,9 @@ template.innerHTML = /*html*/`
                 <rangeindicatorbar-れ id="wind"></rangeindicatorbar-れ>
                 <rangeindicatorbar-れ id="water"></rangeindicatorbar-れ>
             </div>
+            <totalenergygroupsbar-れ></totalenergygroupsbar-れ>	
+            <averageValueGroupsBar-れ range="oneDay"></averageValueGroupsBar-れ>
         </div>
-    </div>
-    <div class="energy-status">
-        <battery-れ id="energyBattery" current-watt="0" required-watt="500"></battery-れ>
     </div>
 `;
 //#endregion MICROBITPAGE
@@ -66,12 +73,16 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.solarBar = this._shadowRoot.querySelector('#solar');
         this.windBar = this._shadowRoot.querySelector('#wind');
         this.waterBar = this._shadowRoot.querySelector('#water');
+        this.averageValue = this._shadowRoot.querySelector('averageValueGroupsBar-れ');
+        this.totalEnergyBar = this._shadowRoot.querySelector('totalenergygroupsbar-れ');
         this.fullscreenContainer = this._shadowRoot.querySelector('#fullscreenContainer');
         this.fullscreen = this._shadowRoot.querySelector('.fullscreen');
         this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
+        this.groupSelectorContainer = this._shadowRoot.getElementById('groupSelectorContainer');
         this.energyData = [];
         this.timerInterval = null;
         this.currentWattValue = 0;
+        this.groupPollInterval = null;
     }
 
     // component attributes
@@ -98,6 +109,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.solarBar.setAttribute('mode', 'voltage');
         this.windBar.setAttribute('mode', 'voltage');
         this.waterBar.setAttribute('mode', 'voltage');
+        this.averageValue.setAttribute('mode', 'voltage');
 
         const bluetoothToggle = this._shadowRoot.getElementById('bluetoothToggle');
         const dataTypeToggle = this._shadowRoot.getElementById('dataTypeToggle');
@@ -130,11 +142,60 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             this.solarBar.setAttribute('mode', mode);
             this.windBar.setAttribute('mode', mode);
             this.waterBar.setAttribute('mode', mode);
+            this.averageValue.setAttribute('mode', mode);
         });
            
     
         document.addEventListener('energydatareading', this.updateEnergyData.bind(this));
         await this.getEnergyData();
+
+        const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
+        const isAdmin = user.role === "ADMIN";
+        const isTeacher = user.role === "TEACHER";
+
+        if (!isAdmin && !isTeacher) {
+            this.groupSelectorContainer.style.display = 'none';
+        } else {
+            this.groupSelectorContainer.style.display = 'block';
+        }
+
+        const groupSelector = this._shadowRoot.getElementById('groupSelector');
+        const groups = await this.getAllGroups();
+
+        groupSelector.innerHTML = ''; // Clear loading option
+
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = 'Selecteer groep';
+        placeholderOption.disabled = true;
+        placeholderOption.selected = true;
+        groupSelector.appendChild(placeholderOption);
+
+        groups.forEach(group => {
+            const option = document.createElement('option');
+            option.value = group.id;
+            option.textContent = group.name || `Groep ${group.id}`;
+            groupSelector.appendChild(option);
+        });
+
+        groupSelector.addEventListener('change', () => {
+            const selectedGroupId = groupSelector.value;
+            if (!selectedGroupId) return;
+        
+            // Stop eventueel oude interval
+            clearInterval(this.groupPollInterval);
+        
+            // Voer eerste keer meteen uit
+            this.fetchAndRenderGroupData(selectedGroupId);
+
+            this.averageValue.setAttribute('groupId', selectedGroupId);
+            this.totalEnergyBar.setAttribute('groupId', selectedGroupId);
+        
+            // Stel interval in om om de 2 seconden te updaten
+            this.groupPollInterval = setInterval(() => {
+                this.fetchAndRenderGroupData(selectedGroupId);
+            }, 2000);
+        });        
     
         // Range buttons...
         this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(button => {
@@ -144,6 +205,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
                 this.solarBar.setAttribute('range', range);
                 this.windBar.setAttribute('range', range);
                 this.waterBar.setAttribute('range', range);
+                this.averageValue.setAttribute('range', range);
     
                 this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(b => b.classList.remove('active'));
                 button.classList.add('active');
@@ -199,6 +261,12 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
 
     updateEnergyData(event) {
         const data = event.detail;
+
+        const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
+        const selectedGroupId = this._shadowRoot.getElementById('groupSelector')?.value || user.groupId;
+        
+        if (data.groupId?.toString() !== selectedGroupId?.toString()) return;
+        
         this.energyData.push(data);
         this.liveTeamData.updateGraph(this.energyData, data);
     
@@ -218,6 +286,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         }
     }
 
+    //services
     async getEnergyData() {
         try {
             const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
@@ -237,12 +306,55 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             this.windBar.setFullData(windPoints);
             this.waterBar.setFullData(waterPoints);
 
-            this.liveTeamData.updateGraph(this.energyData);
+            this.liveTeamData.updateGraph(this.energyData, null); // of gewoon weglaten
+
 
         } catch (error) {
             console.error("Fout bij ophalen van energyData:", error);
             return [];
         }
     }
+
+    async getAllGroups() {
+        try {
+            const response = await fetch(`${window.env.BACKEND_URL}/groups/`);
+            const groups = await response.json();
+            return groups;
+        } catch (error) {
+            console.error("Fout bij ophalen van groepen:", error);
+            return [];
+        }
+    }
+
+    async fetchAndRenderGroupData(groupId) {
+        try {
+            const response = await fetch(`${window.env.BACKEND_URL}/energydata/${groupId}`);
+            if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
+    
+            this.energyData = await response.json();
+    
+            const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
+            const windPoints = this.energyData.filter(d => d.type === 'WIND');
+            const waterPoints = this.energyData.filter(d => d.type === 'WATER');
+    
+            this.solarBar.setFullData(solarPoints);
+            this.windBar.setFullData(windPoints);
+            this.waterBar.setFullData(waterPoints);
+    
+            const lastSolar = solarPoints.at(-1);
+            const lastWind = windPoints.at(-1);
+            const lastWater = waterPoints.at(-1);
+    
+            this.solarBar.updateBar(solarPoints, lastSolar);
+            this.windBar.updateBar(windPoints, lastWind);
+            this.waterBar.updateBar(waterPoints, lastWater);
+    
+            this.liveTeamData.updateGraph(this.energyData, null);
+            this.averageValue.setAttribute('range', this.averageValue.getAttribute('range'));
+    
+        } catch (error) {
+            console.error("Fout bij ophalen van energyData voor groep", groupId, ":", error);
+        }
+    }    
 });
 //#endregion CLASS
