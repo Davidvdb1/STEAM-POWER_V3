@@ -64,6 +64,14 @@ class GroupService {
 
         return await groupRepository.deleteById(id);
     }
+
+    async changeBatteryCapacityForAllGroups(batteryCapacity) {
+        return await groupRepository.changeBatteryCapacity(batteryCapacity);
+    }
+
+    async getBatteryCapacity() {
+        return await groupRepository.getBatteryCapacity();
+    }
 }
 
 module.exports = new GroupService();

@@ -67,6 +67,27 @@ class GroupRepository {
             throw new Error('Kon groep niet verwijderen');
         }
     }
+
+    async changeBatteryCapacity(batteryCapacity) {
+        try {
+            const result = await prisma.group.updateMany({
+                data: { batteryCapacity: parseFloat(batteryCapacity) }
+            });
+            return result;
+        } catch (error) {
+            throw new Error('Kon batterijcapaciteit niet wijzigen');
+        }
+    }
+
+    async getBatteryCapacity() {
+        try {
+            const group = await prisma.group.findFirst();            
+            return group ? group.batteryCapacity : null;
+        } catch (error) {
+            console.error('Error fetching battery capacity:', error);
+            throw new Error('Kon batterijcapaciteit niet ophalen');
+        }
+    }
 }
 
 module.exports = new GroupRepository();

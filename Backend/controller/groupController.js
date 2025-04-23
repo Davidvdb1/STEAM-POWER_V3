@@ -37,6 +37,8 @@ router.put('/:id/score', async (req, res) => {
 });
 
 
+
+
 router.post('/login', async (req, res) => {
     try {
         const JWT = await groupService.login(req.body.code);
@@ -59,6 +61,17 @@ router.get('/', async (req, res) => {
     }
 })
 
+router.get('/battery', async (req, res) => {
+    try {
+        const batteryCapacity = await groupService.getBatteryCapacity();
+        res.status(200).json(batteryCapacity);
+    } catch (error) {
+        console.error('Error fetching battery capacity:', error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
+    }
+})
+
 router.delete('/:id', async (req, res) => {
     try {
         await groupService.deleteById(req.params.id);
@@ -66,6 +79,23 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error(`Error deleting group ${req.params.id}:`, error);
         const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ error: error.message });
+    }
+});
+
+router.put('/battery', async (req, res) => {
+    try {
+        const { batteryCapacity } = req.body;
+
+        if (typeof batteryCapacity !== 'number') {
+            return res.status(400).json({ error: 'batteryCapacity moet een getal zijn' });
+        }
+
+        const result = await groupService.changeBatteryCapacityForAllGroups(batteryCapacity);
+        res.status(200).json({ message: 'Batterijcapaciteit aangepast voor alle groepen', result });
+    } catch (error) {
+        console.error('Error updating battery capacity for all groups:', error);
+        const statusCode = error.statusCode || 500;
         res.status(statusCode).json({ error: error.message });
     }
 });
