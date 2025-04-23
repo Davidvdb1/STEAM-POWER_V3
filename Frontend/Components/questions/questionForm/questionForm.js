@@ -7,48 +7,59 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/questions/questionForm/style.css';
     </style>
-            <form id="new-question-form">
-                <label for="title">Titel:</label>
-                <input type="text" id="title" name="title" required>
-                <span class="error-message" id="title-error"></span>
+    <form id="new-question-form">
+        <label for="title">Titel:</label>
+        <input type="text" id="title" name="title" required>
+        <span class="error-message" id="title-error"></span>
 
-                <label for="description">Beschrijving:</label>
-                <textarea id="description" name="description" required></textarea>
-                <span class="error-message" id="description-error"></span>
+        <label for="description">Beschrijving:</label>
+        <textarea id="description" name="description" required></textarea>
+        <span class="error-message" id="description-error"></span>
 
-                <label for="wind-question">Vraag voor windmolens:</label>
-                <textarea id="wind-question" name="windQuestion" required></textarea>
-                <span class="error-message" id="wind-question-error"></span>
+        <!-- Added general question field -->
+        <label for="general-question">Algemene vraag:</label>
+        <textarea id="general-question" name="generalQuestion"></textarea>
+        <span class="error-message" id="general-question-error"></span>
+        
+        <!-- Toggle button for specific questions -->
+        <button type="button" id="toggle-specific-questions">Edit specifieke vragen</button>
 
-                <label for="water-question">Vraag voor waterturbines:</label>
-                <textarea id="water-question" name="waterQuestion" required></textarea>
-                <span class="error-message" id="water-question-error"></span>
+        <!-- Specific questions container, hidden by default -->
+        <div id="specific-questions-container" style="display: none;">
+            <label for="wind-question">Vraag voor windmolens:</label>
+            <textarea id="wind-question" name="windQuestion" required></textarea>
+            <span class="error-message" id="wind-question-error"></span>
 
-                <label for="solar-question">Vraag voor zonnepanelen:</label>
-                <textarea id="solar-question" name="solarQuestion" required></textarea>
-                <span class="error-message" id="solar-question-error"></span>
+            <label for="water-question">Vraag voor waterturbines:</label>
+            <textarea id="water-question" name="waterQuestion" required></textarea>
+            <span class="error-message" id="water-question-error"></span>
 
-                <label for="wattage">Wattage:</label>
-                <input type="number" id="wattage" name="wattage" min="0" required>
-                <span class="error-message" id="wattage-error"></span>
+            <label for="solar-question">Vraag voor zonnepanelen:</label>
+            <textarea id="solar-question" name="solarQuestion" required></textarea>
+            <span class="error-message" id="solar-question-error"></span>
+        </div>
 
-                <label for="score">Score:</label>
-                <input type="number" id="score" name="score" min="0" required>
-                <span class="error-message" id="score-error"></span>
+        <label for="wattage">Wattage:</label>
+        <input type="number" id="wattage" name="wattage" min="0" required>
+        <span class="error-message" id="wattage-error"></span>
 
-                <label for="no-tries">Aantal beurten (0=geen limiet):</label>
-                <input type="number" id="no-tries" name="maxTries" min="0" required>
-                <span class="error-message" id="no-tries-error"></span>
+        <label for="score">Score:</label>
+        <input type="number" id="score" name="score" min="0" required>
+        <span class="error-message" id="score-error"></span>
 
-                <div class="picture-box">
-                    <img id="picture-preview" src="" alt="Question Picture" />
-                </div>
-                <label for="picture">Afbeelding:</label>
-                <input type="file" id="picture" name="picture">
-                <span class="error-message" id="picture-error"></span>
+        <label for="no-tries">Aantal beurten (0=geen limiet):</label>
+        <input type="number" id="no-tries" name="maxTries" min="0" required>
+        <span class="error-message" id="no-tries-error"></span>
 
-                <button id="submit-button">Save Question</button>
-            </form>
+        <div class="picture-box">
+            <img id="picture-preview" src="" alt="Question Picture" />
+        </div>
+        <label for="picture">Afbeelding:</label>
+        <input type="file" id="picture" name="picture">
+        <span class="error-message" id="picture-error"></span>
+
+        <button id="submit-button">Save Question</button>
+    </form>
 `;
 //#endregion TEMPLATE
 
@@ -108,11 +119,31 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
 
         this.$pictureInput.addEventListener('change', this.handlePicturePreview.bind(this));
 
+        // Added general question listener
+        this.$generalQuestion = this._shadowRoot.querySelector('#general-question');
+        this.$generalQuestion.addEventListener('input', this.handleGeneralQuestion.bind(this));
+
+        // Added toggle for specific questions container
+        this.$toggleSpecific = this._shadowRoot.querySelector('#toggle-specific-questions');
+        this.$specificContainer = this._shadowRoot.querySelector('#specific-questions-container');
+        this.$toggleSpecific.addEventListener('click', () => {
+            this.$specificContainer.style.display = this.$specificContainer.style.display === 'none' ? 'block' : 'none';
+        });
+
         // Make picture input required only if data-id is not set
         if (!this.hasAttribute('data-id')) {
             this.$pictureInput.setAttribute('required', 'required');
         } else {
             this.$pictureInput.removeAttribute('required');
+        }
+    }
+
+    handleGeneralQuestion(event) {
+        const value = event.target.value;
+        if (value.trim() !== '') {
+            this._shadowRoot.querySelector('#wind-question').value = value;
+            this._shadowRoot.querySelector('#water-question').value = value;
+            this._shadowRoot.querySelector('#solar-question').value = value;
         }
     }
 

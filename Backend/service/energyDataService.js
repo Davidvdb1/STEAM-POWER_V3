@@ -1,12 +1,16 @@
 const energyDataRepository = require('../repository/energyDataRepository');
 const EnergyData = require('../model/energyData');
 const utility = require('../util/utility');
+const groupRepository = require('../repository/groupRepository');
 
 class EnergyDataService {
     async create(data) {
         try {
             data.time = new Date(data.time);
             const energyData = new EnergyData(data);
+            const Energy = data.value /1024 * 3 * 0.5 * 2;
+            console.log(Energy);
+            await groupRepository.addEnergyToGroup(data.groupId, Energy);
             return await energyDataRepository.create(energyData);
         } catch (error) {
             if (error instanceof utility.ValidationError) throw error;

@@ -148,6 +148,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
             if (data.value == 0) return;
             const response = await this.postEnergyData(data);
             const body = await response.json();
+            console.log(body);
             const datapoint = body.energyData;
             
             const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
