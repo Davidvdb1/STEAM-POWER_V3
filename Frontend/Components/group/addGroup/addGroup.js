@@ -7,13 +7,13 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/group/addGroup/style.css';
     </style>
-    <form>
+    <form autocomplete="off">
         <label for="groupname">Groepsnaam:</label><br>
-        <input type="text" id="groupname" name="groupname" required><br>
+        <input type="text" id="groupname" name="groupname" required autocomplete="off"><br>
         <label for="members">Leden:</label><br>
-        <input type="text" id="members" name="members"><br>
+        <input type="text" id="members" name="members" autocomplete="off"><br>
         <label for="microbitId">Micro:bit Id:</label><br>
-        <input type="text" id="microbitId" name="microbitId"><br>
+        <input type="text" id="microbitId" name="microbitId" autocomplete="off"><br>
         <input type="submit" value="Maak groep aan">
     </form>
 `;

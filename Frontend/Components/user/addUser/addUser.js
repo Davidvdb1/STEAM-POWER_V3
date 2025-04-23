@@ -7,13 +7,13 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/user/addUser/style.css';
     </style>
-    <form>
+    <form autocomplete="off">
         <label for="username">Gebruikersnaam:</label><br>
-        <input type="text" id="username" name="username" required><br>
+        <input type="text" id="username" name="username" required autocomplete="off"><br>
         <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br>
+        <input type="email" id="email" name="email" required autocomplete="off"><br>
         <label for="password">Wachtwoord:</label><br>
-        <input type="password" id="password" name="password" required><br>
+        <input type="password" id="password" name="password" required autocomplete="off"><br>
         <label for="role">Rol:</label><br>
         <select id="role" name="role" required>
             <option value="TEACHER">TEACHER</option>
