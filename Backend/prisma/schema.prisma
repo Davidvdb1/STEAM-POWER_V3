@@ -49,6 +49,7 @@ model Group {
   code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
   energy     Float          @default(0)
   energyMultiplier Float @default(1)
+  batteryLevel Float @default(0)
   batteryCapacity Float @default(500)
   energyData EnergyData[]
   bonusScore Int          @default(0)

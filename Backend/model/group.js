@@ -1,5 +1,5 @@
 class Group {
-    constructor({ id = undefined, name, members = "", microbitId = "", code = undefined, bonusScore = 0, energy = 0, energyMultiplier = 1, batteryCapacity =  500}, validate = true) {
+    constructor({ id = undefined, name, members = "", microbitId = "", code = undefined, bonusScore = 0, energy = 0, energyMultiplier = 1, batteryCapacity =  500, batteryLevel = 0}, validate = true) {
         this.id = id;
         this.name = name;
         this.members = members;
@@ -9,6 +9,7 @@ class Group {
         this.energy = energy;
         this.energyMultiplier = energyMultiplier
         this.batteryCapacity = batteryCapacity
+        this.batteryLevel = batteryLevel > batteryCapacity ? batteryCapacity : batteryLevel
         if (validate) {
             this.validate();
         }

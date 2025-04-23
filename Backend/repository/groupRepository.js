@@ -79,6 +79,17 @@ class GroupRepository {
         }
     }
 
+    async changeEnergyMultiplier(energyMultiplier) {
+        try {
+            const result = await prisma.group.updateMany({
+                data: { energyMultiplier: parseFloat(energyMultiplier) }
+            });
+            return result;
+        } catch (error) {
+            throw new Error('Kon energievermenigvuldiger niet wijzigen');
+        }
+    }
+
     async getBatteryCapacity() {
         try {
             const group = await prisma.group.findFirst();            
@@ -86,6 +97,16 @@ class GroupRepository {
         } catch (error) {
             console.error('Error fetching battery capacity:', error);
             throw new Error('Kon batterijcapaciteit niet ophalen');
+        }
+    }
+
+    async getEnergyMultiplier() {
+        try {
+            const group = await prisma.group.findFirst();            
+            return group ? group.energyMultiplier : null;
+        } catch (error) {
+            console.error('Error fetching energy multiplier:', error);
+            throw new Error('Kon energievermenigvuldiger niet ophalen');
         }
     }
 }

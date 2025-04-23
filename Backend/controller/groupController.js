@@ -72,6 +72,17 @@ router.get('/battery', async (req, res) => {
     }
 })
 
+router.get('/multiplier', async (req, res) => {
+    try {
+        const energyMultiplier = await groupService.getEnergyMultiplier();
+        res.status(200).json(energyMultiplier);
+    } catch (error) {
+        console.error('Error fetching energy multiplier:', error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
+    }
+})
+
 router.delete('/:id', async (req, res) => {
     try {
         await groupService.deleteById(req.params.id);
@@ -99,5 +110,22 @@ router.put('/battery', async (req, res) => {
         res.status(statusCode).json({ error: error.message });
     }
 });
+
+router.put('/multiplier', async (req, res) => {
+    try {
+        const { energyMultiplier } = req.body;
+
+        if (typeof energyMultiplier !== 'number') {
+            return res.status(400).json({ error: 'energyMultiplier moet een getal zijn' });
+        }
+
+        const result = await groupService.changeEnergyMultiplierForAllGroups(energyMultiplier);
+        res.status(200).json({ message: 'Energievermenigvuldiger aangepast voor alle groepen', result });
+    } catch (error) {
+        console.error('Error updating energy multiplier for all groups:', error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
+    }
+}); 
 
 module.exports = router;

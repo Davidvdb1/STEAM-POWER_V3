@@ -72,6 +72,14 @@ class GroupService {
     async getBatteryCapacity() {
         return await groupRepository.getBatteryCapacity();
     }
+
+    async changeEnergyMultiplierForAllGroups(energyMultiplier) {
+        return await groupRepository.changeEnergyMultiplier(energyMultiplier);
+    }
+
+    async getEnergyMultiplier() {
+        return await groupRepository.getEnergyMultiplier();
+    }
 }
 
 module.exports = new GroupService();
