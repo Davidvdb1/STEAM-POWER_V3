@@ -25,12 +25,22 @@ router.put('/', async (req, res) => {
         const statusCode = error.statusCode || 400;
         res.status(statusCode).json({ error: error.message });
     }
-})
+});
+
+router.put('/:id/score', async (req, res) => {
+    try {
+        const group = await groupService.addScore(req.params.id, req.body);
+        res.status(200).json({ message: 'Score toegevoegd', group });
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
 
 router.post('/login', async (req, res) => {
     try {
         const JWT = await groupService.login(req.body.code);
-        res.status(200).json({ message: 'Succesvol ingelogd', JWT})
+        res.status(200).json({ message: 'Succesvol ingelogd', JWT })
     } catch (error) {
         console.error(`Error logging in group with code ${req.body.code}:`, error);
         const statusCode = error.statusCode || 400;

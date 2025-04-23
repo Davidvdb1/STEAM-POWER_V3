@@ -5,19 +5,19 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/workshop/workshopForm/style.css';
+        @import './Components/workshop/workshopForm/style.css';
     </style>
 
     <h1>Workshop Editor</h1>
     <input type="text" id="title" placeholder="Titel">
     <div id="toolbar">
-        <img id="bold-image" src="../Frontend/Assets/SVGs/textIcons/Bold_Idle.svg" alt="Bold Icon" class='toolbar-button'>
-        <img id="underline-image" src="../Frontend/Assets/SVGs/textIcons/Underline_Idle.svg" alt="Underline Icon" class='toolbar-button'>
-        <img id="italic-image" src="../Frontend/Assets/SVGs/textIcons/Italic_Idle.svg" alt="Italics Icon" class='toolbar-button'>
-        <img id="link-image" src="../Frontend/Assets/SVGs/textIcons/Link_Idle.svg" alt="Link Icon" class='toolbar-button'>
-        <img id="list-image" src="../Frontend/Assets/SVGs/textIcons/List_Idle.svg" alt="Bullet List Icon" class='toolbar-button'>
-        <img id="image-image" src="../Frontend/Assets/SVGs/textIcons/Image_Idle.svg" alt="Link Icon" class='toolbar-button'>
-        <img id="html-image" src="../Frontend/Assets/SVGs/textIcons/Modal_Idle.svg" alt="html Icon" class='toolbar-button'>
+        <img id="bold-image" src="Assets/SVGs/textIcons/Bold_Idle.svg" alt="Bold Icon" class='toolbar-button'>
+        <img id="underline-image" src="Assets/SVGs/textIcons/Underline_Idle.svg" alt="Underline Icon" class='toolbar-button'>
+        <img id="italic-image" src="Assets/SVGs/textIcons/Italic_Idle.svg" alt="Italics Icon" class='toolbar-button'>
+        <img id="link-image" src="Assets/SVGs/textIcons/Link_Idle.svg" alt="Link Icon" class='toolbar-button'>
+        <img id="list-image" src="Assets/SVGs/textIcons/List_Idle.svg" alt="Bullet List Icon" class='toolbar-button'>
+        <img id="image-image" src="Assets/SVGs/textIcons/Image_Idle.svg" alt="Link Icon" class='toolbar-button'>
+        <img id="html-image" src="Assets/SVGs/textIcons/Modal_Idle.svg" alt="html Icon" class='toolbar-button'>
         <input type="file" id="image-input" class="image-input">
         <select id="heading-select">
             <option value="P">P</option>

@@ -12,7 +12,6 @@ class QuestionRepository {
         } catch (err) {
             throw err;
         }
-
     }
 
     async update(id, data) {
