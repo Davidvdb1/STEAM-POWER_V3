@@ -23,7 +23,7 @@ class GroupService {
         return await groupRepository.findByCode(code);
     }
 
-    async getByCode(name) {
+    async getByName(name) {
         return await groupRepository.findByName(name);
     }
 
@@ -32,6 +32,7 @@ class GroupService {
     }
 
     async login(code) {
+        code = code.toLowerCase();
         const group = await groupRepository.findByCode(code);
         if (!group) throw new Error('Geen groep met deze code gevonden');
 
