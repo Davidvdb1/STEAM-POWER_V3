@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/filterAndSort/sortPanel/style.css';
+        @import './Components/filterAndSort/sortPanel/style.css';
     </style>
 
     <img src="./Assets/SVGs/sort.png" alt="search" style="width: 35px; height: 35px;">
@@ -46,7 +46,7 @@ window.customElements.define('sortpanel-れ', class extends HTMLElement {
             bubbles: true,
             composed: true,
             detail: attribute
-        })); 
+        }));
     }
 });
 //#endregion CLASS

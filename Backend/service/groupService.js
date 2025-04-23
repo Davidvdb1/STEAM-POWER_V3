@@ -10,8 +10,18 @@ class GroupService {
 
     async update(groupData) {
         const groupToUpdate = await groupRepository.findById(groupData.id);
-        
+
         const newGroup = new Group({ ...groupToUpdate, ...groupData, id: groupToUpdate.id });
+        return await groupRepository.update(newGroup);
+    }
+
+    async addScore(id, groupData) {
+        const groupToUpdate = await groupRepository.findById(id);
+        if (!groupToUpdate) throw new Error('Groep niet gevonden');
+
+        const bonusScore = groupToUpdate.bonusScore + parseInt(groupData.bonusScore);
+
+        const newGroup = new Group({ ...groupToUpdate, bonusScore, id });
         return await groupRepository.update(newGroup);
     }
 
@@ -23,7 +33,7 @@ class GroupService {
         return await groupRepository.findByCode(code);
     }
 
-    async getByCode(name) {
+    async getByName(name) {
         return await groupRepository.findByName(name);
     }
 
@@ -32,6 +42,7 @@ class GroupService {
     }
 
     async login(code) {
+        code = code.toLowerCase();
         const group = await groupRepository.findByCode(code);
         if (!group) throw new Error('Geen groep met deze code gevonden');
 
@@ -50,7 +61,7 @@ class GroupService {
     async deleteById(id) {
         const group = await this.getById(id);
         if (!group) throw new Error('Groep niet gevonden');
-        
+
         return await groupRepository.deleteById(id);
     }
 }

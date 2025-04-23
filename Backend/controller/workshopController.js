@@ -1,5 +1,6 @@
 const express = require('express');
 const workshopService = require('../service/workshopService');
+const middleware = require('../util/middleware');
 
 const router = express.Router();
 
@@ -8,7 +9,9 @@ router.post('/', async (req, res) => {
         const workshop = await workshopService.create(req.body);
         res.status(200).json({ message: 'Workshop gemaakt', workshop });
     } catch (error) {
-        res.status(400).json({ error: error.message });
+        console.error('Error creating workshop:', error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 })
 
@@ -21,22 +24,22 @@ router.put('/:id', async (req, res) => {
             return res.status(400).json({ error: "Workshop ID is vereist" });
         }
         const updatedWorkshop = await workshopService.update(workshopId, updatedData);
-        if (!updatedWorkshop) {
-            return res.status(404).json({ error: "Workshop niet gevonden" });
-        }
         res.status(200).json({ message: "Workshop aangepast", workshop: updatedWorkshop });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error", details: error.message });
+        console.error(`Error updating workshop ${req.params.id}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
 
 router.get('/:id', async (req, res) => {
     try {
         const workshop = await workshopService.getById(req.params.id);
-        if (!workshop) return res.status(400).json({ error: 'Workshop niet gevonden' });
         res.status(200).json(workshop);
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        console.error(`Error fetching workshop ${req.params.id}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 })
 
@@ -45,21 +48,20 @@ router.get('/', async (req, res) => {
         const workshops = await workshopService.getAll();
         res.status(200).json(workshops);
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error fetching all workshops:', error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 })
 
 router.get('/title/:title', async (req, res) => {
     try {
         const workshop = await workshopService.getByTitle(req.params.title);
-        if (!workshop) {
-            console.log("❌ Workshop niet gevonden:", req.params.title);
-            return res.status(400).json({ error: 'Workshop niet gevonden' });
-        }
         res.status(200).json(workshop);
     } catch (error) {
-        console.error("❌ Fout in GET /title/:title:", error);
-        res.status(500).json({ error: 'Internal server error', details: error.message });
+        console.error(`Error fetching workshop with title ${req.params.title}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
 
@@ -75,9 +77,10 @@ router.put('/:id/move', async (req, res) => {
         const result = await workshopService.moveWorkshop(id, direction);
         res.status(200).json(result);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error(`Error moving workshop ${req.params.id} ${req.body.direction}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
     }
 });
-
 
 module.exports = router;

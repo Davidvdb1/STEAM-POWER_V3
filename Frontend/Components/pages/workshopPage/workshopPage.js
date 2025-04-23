@@ -7,7 +7,7 @@ import '../../workshop/workshopPreview/workshopPreview.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/workshopPage/style.css';
+        @import './Components/pages/workshopPage/style.css';
     </style>
 
     <workshopforum-れ></workshopforum-れ>
@@ -42,7 +42,7 @@ window.customElements.define('workshoppage-れ', class extends HTMLElement {
 
     connectedCallback() {
         this.addEventListener("preview", this.previewHandler);
-    
+
         setTimeout(() => {
             const edit = this.$preview?.shadowRoot?.querySelector("#edit");
             const visible = this.$preview?.shadowRoot?.querySelector("#visible");
@@ -62,11 +62,11 @@ window.customElements.define('workshoppage-れ', class extends HTMLElement {
             }
         }, 0);
     }
-    
-    
+
+
 
     previewHandler(e) {
-        this.$preview.setAttribute("html", e.detail);
+        this.$preview.updateWorkshopPreview(e.detail);
     }
 
 });

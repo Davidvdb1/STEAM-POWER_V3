@@ -6,7 +6,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/group/groupList/style.css';
+        @import './Components/group/groupList/style.css';
     </style>
     <table id="group-list">
         <tr>
@@ -42,7 +42,7 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
         this.groups = [];
         this.editing = [];
         this.groupToDelete = null;
-        
+
         // Set up event listeners for confirmation popup
         this._shadowRoot.getElementById('confirm-delete-btn').addEventListener('click', () => this.confirmDelete());
         this._shadowRoot.getElementById('cancel-delete-btn').addEventListener('click', () => this.hideDeleteConfirmation());
@@ -69,20 +69,20 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
 
     renderGroups() {
         const table = this._shadowRoot.querySelector('#group-list');
-        
+
         // Preserve the header row
         const headerRow = table.querySelector('tr');
         table.innerHTML = '';
         table.appendChild(headerRow);
-        
+
         this.groups.forEach(group => {
             const row = document.createElement('tr');
             row.dataset.groupId = group.id;
-            
+
             // Name cell
             const nameCell = document.createElement('td');
             nameCell.className = 'name';
-            
+
             if (this.editing.includes(group.id)) {
                 // Input field for name when in edit mode
                 const nameInput = document.createElement('input');
@@ -94,11 +94,11 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
                 nameCell.textContent = group.name;
             }
             row.appendChild(nameCell);
-            
+
             // Members cell
             const membersCell = document.createElement('td');
             membersCell.className = 'members';
-            
+
             if (this.editing.includes(group.id)) {
                 // Input field for members when in edit mode
                 const descInput = document.createElement('input');
@@ -114,7 +114,7 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             // MicrobitId cell
             const microbitIdCell = document.createElement('td');
             microbitIdCell.className = 'microbitId';
-            
+
             if (this.editing.includes(group.id)) {
                 // Input field for microbitId when in edit mode
                 const descInput = document.createElement('input');
@@ -126,13 +126,13 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
                 microbitIdCell.textContent = group.microbitId;
             }
             row.appendChild(microbitIdCell);
-            
+
             // Code cell - not editable
             const codeCell = document.createElement('td');
             codeCell.className = 'code';
             codeCell.textContent = group.code;
             row.appendChild(codeCell);
-            
+
             // Delete button cell
             const deleteCell = document.createElement('td');
             const deleteBtn = document.createElement('button');
@@ -141,7 +141,7 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             deleteBtn.addEventListener('click', () => this.handleDeleteClick(group.id));
             deleteCell.appendChild(deleteBtn);
             row.appendChild(deleteCell);
-            
+
             // Edit button cell
             const editCell = document.createElement('td');
             const editBtn = document.createElement('button');
@@ -150,7 +150,7 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
             editBtn.addEventListener('click', () => this.handleEditClick(group.id));
             editCell.appendChild(editBtn);
             row.appendChild(editCell);
-            
+
             table.appendChild(row);
         });
     }
@@ -159,18 +159,18 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
         this.groupToDelete = groupId;
         this.showDeleteConfirmation();
     }
-    
+
     showDeleteConfirmation() {
         const popup = this._shadowRoot.getElementById('delete-confirmation');
         popup.style.display = 'flex';
     }
-    
+
     hideDeleteConfirmation() {
         const popup = this._shadowRoot.getElementById('delete-confirmation');
         popup.style.display = 'none';
         this.groupToDelete = null;
     }
-    
+
     confirmDelete() {
         if (this.groupToDelete) {
             this.dispatchEvent(new CustomEvent('delete-group', {
@@ -185,13 +185,13 @@ window.customElements.define('grouplist-れ', class extends HTMLElement {
     handleEditClick(groupId) {
         if (this.editing.includes(groupId)) {
             const row = this._shadowRoot.querySelector(`tr[data-group-id="${groupId}"]`);
-            
+
             const newName = row.querySelector('.edit-name-input').value;
             const newMembers = row.querySelector('.edit-members-input').value;
             const newMicrobitId = row.querySelector('.edit-microbitId-input').value;
-            
+
             this.editing = this.editing.filter(id => id !== groupId);
-            
+
             this.dispatchEvent(new CustomEvent('edit-group', {
                 bubbles: true,
                 composed: true,

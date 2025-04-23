@@ -8,7 +8,7 @@ import '../../filterAndSort/filterPanel/filterPanel.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/campOverviewPage/style.css';
+        @import './Components/pages/campOverviewPage/style.css';
     </style>
     <camppanel-れ></camppanel-れ>
     <campcontainer-れ></campcontainer-れ>
