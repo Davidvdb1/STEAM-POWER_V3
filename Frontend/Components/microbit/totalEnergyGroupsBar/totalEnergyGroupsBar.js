@@ -65,7 +65,7 @@ window.customElements.define('totalenergygroupsbar-れ', class extends HTMLEleme
     async loadAndRenderData() {
         try {
             const session = JSON.parse(sessionStorage.getItem('loggedInUser'));
-            const currentGroupId = session?.groupId;
+            const currentGroupId = session?.groupId || this.getAttribute('groupId');
             
             const response = await fetch(`${window.env.BACKEND_URL}/groups/`);
             const groups = await response.json();

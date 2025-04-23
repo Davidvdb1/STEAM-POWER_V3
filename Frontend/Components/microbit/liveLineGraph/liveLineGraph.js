@@ -263,7 +263,7 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
                 },                
                 series: [
                     {
-                        name: 'SOLAR',
+                        name: 'ZON',
                         type: 'line',
                         data: [],
                         smooth: true,
