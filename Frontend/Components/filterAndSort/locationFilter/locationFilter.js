@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/filterAndSort/locationFilter/style.css';
+        @import './Components/filterAndSort/locationFilter/style.css';
     </style>
      
     <div>

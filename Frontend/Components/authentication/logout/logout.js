@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/authentication/userLoginForm/style.css';
+        @import './Components/authentication/userLoginForm/style.css';
     </style>
 `;
 //#endregion LOGOUT
@@ -34,6 +34,6 @@ window.customElements.define('logout-れ', class extends HTMLElement {
             composed: true,
             detail: "campoverviewpage"
         }));
-    }    
+    }
 });
 //#endregion CLASS

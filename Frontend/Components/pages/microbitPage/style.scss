@@ -1,0 +1,176 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    width: 80%;
+    gap: 20px;
+    max-width: 1500px;
+}
+
+#rangeButtons button.active {
+    background-color: #333;
+    color: white;
+}
+
+#rangeButtons {
+    position: absolute;
+    top: 10px;
+    left: 30px;
+}
+
+#bars {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#bluetoothToggleContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.icon {
+    font-size: 1.5rem;
+    color: #fff;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider.bluetooth {
+    background-color: #e76f51; /* orangered switch */
+}
+
+.slider.datatype {
+    background-color: #ffb703; /* teal switch */
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 4px;
+    bottom: 4px;
+    background-color: black;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+:host([bluetooth-enabled]) .slider.bluetooth {
+    background-color: #2a9d8f;
+}
+
+:host([bluetooth-enabled]) .slider.bluetooth:before {
+    transform: translateX(22px);
+}
+
+#switches {
+    background-color: white;
+    border-radius: 10px;
+    width: fit-content;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+#dataTypeToggleContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+:host([data-type-mode="microbit"]) .slider.datatype {
+    background-color: #2a9d8f;
+}
+
+:host([data-type-mode="microbit"]) .slider.datatype:before {
+    transform: translateX(22px);
+}
+
+.fullscreen {
+    position: absolute;
+    top: 15px;
+    right: 13px;
+    cursor: pointer;
+}
+
+#fullscreenContainer:fullscreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f2fafe; /* zelfde als buiten fullscreen */
+}
+
+#fullscreenContainer:fullscreen #graphs {
+    width: 90vw;
+    height: fit-content;
+    max-width: 1500px;
+    max-height: 900px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    padding: 30px;
+    padding-top: 43px;
+    border-radius: 10px;
+    background-color: #f2fafe;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+#graphs {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 30px;
+    padding-top: 43px;
+    gap: 25px;
+    background-color: #f2fafe;
+    border-radius: 10px;
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1); 
+    max-width: 1440px;
+}
+
+#microbitPanel {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.energy-status {
+  width: 100px;
+  height: 200px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#energyBattery {
+  width: 100%;
+  height: 100%;
+}

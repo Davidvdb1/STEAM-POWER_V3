@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/filterAndSort/dateFilter/style.css';
+        @import './Components/filterAndSort/dateFilter/style.css';
     </style>
      
     <div>

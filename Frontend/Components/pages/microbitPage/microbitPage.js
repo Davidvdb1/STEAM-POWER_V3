@@ -1,29 +1,59 @@
 //#region IMPORTS
 import '../../microbit/microbitPinController/microbitPinController.js';
-import '../../microbit/microbitGraphs/microbitGraphs.js';
+import '../../microbit/rangeIndicatorBar/rangeIndicatorBar.js';
+import '../../microbit/liveLineGraph/liveLineGraph.js';
+import '../../microbit/totalEnergyGroupsBar/totalEnergyGroupsBar.js';
+import '../../microbit/averageValueGroupsBar/averageValueGroupsBar.js';
+import '../../microbit/pinAssignmentCards/pinAssignmentCards.js';
+import '../../energy/battery/battery.js';
 //#endregion IMPORTS
 
 //#region MICROBITPAGE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/microbitPage/style.css';
+        @import './Components/pages/microbitPage/style.css';
     </style>
-    <div id="bluetoothButtonsContainer">
-        <button id="startButton">Start Bluetooth Connection</button>
-        <button id="pauseButton">Pause Bluetooth Connection</button>
-        <button id="endButton">End Bluetooth Connection</button>
+    <div id="microbitPanel">
+        <div id="switches">
+            <div id="bluetoothToggleContainer">
+                <img src="Assets/SVGs/bluetooth.svg" alt="Bluetooth" class="icon" style="height: 20px;"/>
+                <label class="switch">
+                    <input type="checkbox" id="bluetoothToggle">
+                    <span class="slider bluetooth"></span>
+                </label>
+            </div>
+            <div id="dataTypeToggleContainer">
+                <img src="Assets/SVGs/voltage.svg" alt="microbit" class="icon" style="height: 20px;"/>
+                <label class="switch">
+                    <input type="checkbox" id="dataTypeToggle">
+                    <span class="slider datatype"></span>
+                </label>
+                <img src="Assets/SVGs/microbit.png" alt="microbit" class="icon" style="height: 18px;"/>
+            </div>
+        </div>
+        <pinAssignmentCards-れ></pinAssignmentCards-れ>
     </div>
-    
-    <label for="rangeSelect">tijdspanne selecteren:</label>
-    <select id="rangeSelect">
-        <option value="halfMinute">30 seconden</option>
-        <option value="tenMinutes">10 minuten</option>
-        <option value="oneHour">1 uur</option>
-        <option value="sixHour">6 uur</option>
-        <option value="oneDay" selected>24 uur</option>
-    </select>
-    <microbitgraphs-れ></microbitgraphs-れ>
+    <div id= "fullscreenContainer">
+        <div id="graphs">
+            <div id="rangeButtons">
+                <button data-range="minute">1m</button>
+                <button data-range="tenMinutes">10m</button>
+                <button data-range="oneHour">1u</button>
+                <button data-range="sixHour">6u</button>
+                <button data-range="oneDay" class="active">24u</button>
+            </div>
+            <img src="Assets/SVGs/fullscreen.png" alt="fullscreen" class="fullscreen" style="height: 25px;"/>
+            <livelinegraph-れ></livelinegraph-れ>
+            <div id="bars">
+                <rangeindicatorbar-れ id="solar"></rangeindicatorbar-れ>
+                <rangeindicatorbar-れ id="wind"></rangeindicatorbar-れ>
+                <rangeindicatorbar-れ id="water"></rangeindicatorbar-れ>
+            </div>
+            <totalenergygroupsbar-れ></totalenergygroupsbar-れ>	
+            <averageValueGroupsBar-れ range="oneDay"></averageValueGroupsBar-れ>
+        </div>
+    </div>
 `;
 //#endregion MICROBITPAGE
 
@@ -33,9 +63,17 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.liveTeamData = this._shadowRoot.querySelector('microbitgraphs-れ');
-        this.$rangeSelect = this._shadowRoot.querySelector('#rangeSelect');
+        this.liveTeamData = this._shadowRoot.querySelector('livelinegraph-れ');
+        this.solarBar = this._shadowRoot.querySelector('#solar');
+        this.windBar = this._shadowRoot.querySelector('#wind');
+        this.waterBar = this._shadowRoot.querySelector('#water');
+        this.averageValue = this._shadowRoot.querySelector('averageValueGroupsBar-れ');
+        this.fullscreenContainer = this._shadowRoot.querySelector('#fullscreenContainer');
+        this.fullscreen = this._shadowRoot.querySelector('.fullscreen');
+        this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
         this.energyData = [];
+        this.timerInterval = null;
+        this.currentWattValue = 0;
     }
 
     // component attributes
@@ -48,31 +86,118 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
     }
 
     async connectedCallback() {
-        this._shadowRoot.getElementById('startButton').addEventListener('click', () => this.startBluetoothConnection());
-        this._shadowRoot.getElementById('pauseButton').addEventListener('click', () => this.pauseBluetoothConnection());
-        this._shadowRoot.getElementById('endButton').addEventListener('click', () => this.endBluetoothConnection());
-        
-        document.addEventListener('energydatareading', this.updateEnergyData.bind(this));
-        
-        await this.getEnergyData()
-    
-        this.$rangeSelect.addEventListener('change', async (event) => {
-            this.liveTeamData.setAttribute('range', event.target.value);
+        this.fullscreen.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                this.fullscreenContainer.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
         });
+
+        this.liveTeamData.setAttribute('mode', 'voltage');
+        this.solarBar.setAttribute('mode', 'voltage');
+        this.windBar.setAttribute('mode', 'voltage');
+        this.waterBar.setAttribute('mode', 'voltage');
+        this.averageValue.setAttribute('mode', 'voltage');
+
+        const bluetoothToggle = this._shadowRoot.getElementById('bluetoothToggle');
+        const dataTypeToggle = this._shadowRoot.getElementById('dataTypeToggle');
+    
+        // Houd visuele toggle in sync met sessionStorage
+        const bluetoothWasOn = sessionStorage.getItem('bluetoothEnabled') === 'true';
+        bluetoothToggle.checked = bluetoothWasOn;
+    
+        if (bluetoothWasOn) {
+            this.setAttribute('bluetooth-enabled', '');
+        } else {
+            this.removeAttribute('bluetooth-enabled');
+        }
+    
+        // Toggle event
+        bluetoothToggle.addEventListener('change', () => {
+            if (bluetoothToggle.checked) {
+                this.startBluetoothConnection();
+            } else {
+                this.endBluetoothConnection();
+            }
+        });
+
+        dataTypeToggle.addEventListener('change', () => {
+            const mode = dataTypeToggle.checked ? 'microbit' : 'voltage';
+            this.setAttribute('data-type-mode', mode);
+        
+            // doorgeven aan de kinderen
+            this.liveTeamData.setAttribute('mode', mode);
+            this.solarBar.setAttribute('mode', mode);
+            this.windBar.setAttribute('mode', mode);
+            this.waterBar.setAttribute('mode', mode);
+            this.averageValue.setAttribute('mode', mode);
+        });
+           
+    
+        document.addEventListener('energydatareading', this.updateEnergyData.bind(this));
+        await this.getEnergyData();
+    
+        // Range buttons...
+        this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(button => {
+            button.addEventListener('click', () => {
+                const range = button.getAttribute('data-range');
+                this.liveTeamData.setAttribute('range', range);
+                this.solarBar.setAttribute('range', range);
+                this.windBar.setAttribute('range', range);
+                this.waterBar.setAttribute('range', range);
+                this.averageValue.setAttribute('range', range);
+    
+                this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+
+        // Start the battery auto-increment timer
+        this.startBatteryTimer();
     }
     
+    disconnectedCallback() {
+        // Clean up the timer when component is removed
+        this.stopBatteryTimer();
+    }
 
+    startBatteryTimer() {
+        // Clear any existing timer
+        this.stopBatteryTimer();
+        
+        // Start a new timer that increments the battery every second
+        this.timerInterval = setInterval(() => {
+            this.currentWattValue++;
+            this.energyBattery.setAttribute('current-watt', this.currentWattValue.toString());
+            
+            // Reset to 0 if it exceeds the required watt (for demonstration purposes)
+            const requiredWatt = parseInt(this.energyBattery.getAttribute('required-watt') || '500');
+            if (this.currentWattValue > requiredWatt) {
+                this.currentWattValue = 0;
+            }
+        }, 1000); // 1000ms = 1 second
+    }
+    
+    stopBatteryTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+    
     startBluetoothConnection() {
+        sessionStorage.setItem('bluetoothEnabled', 'true');
+        this.setAttribute('bluetooth-enabled', 'true');
         const event = new CustomEvent('startbluetoothconnection', { bubbles: true, composed: true });
         document.dispatchEvent(event);
     }
 
-    pauseBluetoothConnection() {
-        const event = new CustomEvent('pausebluetoothconnection', { bubbles: true, composed: true });
-        document.dispatchEvent(event);
-    }
-
     endBluetoothConnection() {
+        sessionStorage.setItem('bluetoothEnabled', 'false');
+        this.removeAttribute('bluetooth-enabled');
         const event = new CustomEvent('stopbluetoothconnection', { bubbles: true, composed: true });
         document.dispatchEvent(event);
     }
@@ -81,14 +206,23 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const data = event.detail;
         this.energyData.push(data);
         this.liveTeamData.updateGraph(this.energyData, data);
-    }
-
-    initGraphs() {
-        this.liveTeamData.updateGraph(this.energyData);
-    }
-
     
-    // 🔹 Functie die alleen de fetch uitvoert en data teruggeeft
+        if (data.type === 'SOLAR') {
+            const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
+            this.solarBar.updateBar(solarPoints, data);
+        }
+    
+        if (data.type === 'WIND') {
+            const windPoints = this.energyData.filter(d => d.type === 'WIND');
+            this.windBar.updateBar(windPoints, data);
+        }
+    
+        if (data.type === 'WATER') {
+            const waterPoints = this.energyData.filter(d => d.type === 'WATER');
+            this.waterBar.updateBar(waterPoints, data);
+        }
+    }
+
     async getEnergyData() {
         try {
             const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
@@ -99,7 +233,17 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
         
             this.energyData = await response.json();
-            this.initGraphs();
+
+            const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
+            const windPoints = this.energyData.filter(d => d.type === 'WIND');
+            const waterPoints = this.energyData.filter(d => d.type === 'WATER');
+
+            this.solarBar.setFullData(solarPoints);
+            this.windBar.setFullData(windPoints);
+            this.waterBar.setFullData(waterPoints);
+
+            this.liveTeamData.updateGraph(this.energyData);
+
         } catch (error) {
             console.error("Fout bij ophalen van energyData:", error);
             return [];
