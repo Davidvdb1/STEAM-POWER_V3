@@ -22,6 +22,13 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this._energyContext = null;
+
+        this._groupId = null;
+    }
+
+    set groupId(value) {
+        this._groupId = value;
+        this.fetchQuestions();
     }
 
     set energyContext(value) {
@@ -32,7 +39,7 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
         });
     }
 
-    get energyContext() {  
+    get energyContext() {
         return this._energyContext;
     }
 
@@ -52,7 +59,7 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
 
     async fetchQuestions() {
         try {
-            const response = await fetch(`${window.env.BACKEND_URL}/questions/group/${this.groupId}`);
+            const response = await fetch(`${window.env.BACKEND_URL}/questions/group/${this._groupId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -75,6 +82,7 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
             this.shadowRoot.querySelector("#container").appendChild(question);
 
             question.energyContext = this._energyContext;
+            question.groupId = this._groupId;
             question.initQuestion(questionData[key]);
         }
     }

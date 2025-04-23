@@ -18,6 +18,14 @@ template.innerHTML = /*html*/`
             <label for="water"><input type="radio" id="water-radio" name="power-source" value="water">Water</label>
             <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar">Zon</label>
         </div>
+        <div id="group-select">
+            <label for="group">Groep:</label>
+            <select id="group" name="group">
+                <option value="1">Groep 1</option>
+                <option value="2">Groep 2</option>
+                <option value="3">Groep 3</option>
+            </select>
+        </div>
         <question-list-れ></question-list-れ>
     </div>
     
@@ -30,8 +38,10 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+        this.$container = null;
 
         this.energyContext = "wind";
+        this.groupId = null;
     }
 
     // component attributes
@@ -44,10 +54,33 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     }
 
     async connectedCallback() {
-        
-        
-
         this.$container = this.shadowRoot.querySelector("#container");
+
+        const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+        if (!loggedInUser) {
+            this.$container.innerHTML = `
+                <div class="error-message"> 
+                    <p>You are not logged in. Please log in to use this feature.</p>
+                </div>`
+            return;
+        }
+
+        const role = loggedInUser.role;
+        if (role === "ADMIN" || role === "TEACHER") {
+            await this.setUpAdminQuizPage();
+        } else if (role === "GROUP") {
+            this.groupId = loggedInUser.groupId;
+        }
+
+        // const bluetoothEnabled = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
+        // if (!bluetoothEnabled) {
+        //     this.shadowRoot.querySelector("#container").innerHTML = `
+        //         <div class="error-message">
+        //             <p>Bluetooth is not enabled. Please enable Bluetooth to use this feature.</p>
+        //         </div>`
+        //     return;
+        // }
+
         this.$questionList = this.shadowRoot.querySelector("question-list-れ");
 
         this.$windRadio = this.shadowRoot.querySelector("#wind-radio");
@@ -71,6 +104,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
 
         customElements.whenDefined('question-list-れ').then(() => {
+            this.$questionList.groupId = this.groupId;
             this.$questionList.energyContext = this.energyContext;
         });
 
@@ -85,5 +119,33 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.energyContext = e.target.value;
         this.$questionList.energyContext = this.energyContext;
     }
+
+    async setUpAdminQuizPage() {
+        const response = await fetch(`${window.env.BACKEND_URL}/groups`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const groups = data;;
+
+        const groupSelect = this.shadowRoot.querySelector("#group");
+        groupSelect.innerHTML = ""; // Clear existing options
+
+        groups.forEach(group => {
+            const option = document.createElement("option");
+            option.value = group.id;
+            option.textContent = `Group ${group.name}`;
+            groupSelect.appendChild(option);
+        });
+
+        groupSelect.addEventListener("change", (e) => {
+            this.groupId = e.target.value;
+            this.$questionList.groupId = this.groupId;
+        });
+
+
+    }
+
 });
 //#endregion CLASS
