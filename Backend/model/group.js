@@ -1,5 +1,5 @@
 class Group {
-    constructor({ id = undefined, name, members = "", microbitId = "", code = undefined, bonusScore = 0, energy = 0, energyMultiplier = 1, batteryCapacity =  500, batteryLevel = 0}, validate = true) {
+    constructor({ id = undefined, name, members = "", microbitId = "", code = undefined, bonusScore = 0, energy = 0, energyMultiplier = 1, batteryCapacity = 500, batteryLevel}, validate = true) {
         this.id = id;
         this.name = name;
         this.members = members;
