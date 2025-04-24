@@ -58,15 +58,17 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
 
         const user = JSON.parse(sessionStorage.getItem('loggedInUser')) || {};
         const isAdmin = user.role === 'ADMIN';
+        const isTeacher = user.role === 'TEACHER'
         
         // Hide settings and visible icons if not admin
-        if (!isAdmin) {
-            this.$edit.style.display = 'none';
-            this.$visible.style.display = 'none';
-            this.$arrowUp.style.display = 'none';
-            this.$arrowDown.style.display = 'none';
+        if (!isAdmin && !isTeacher) {
+            this.$edit?.remove();
+            this.$visible?.remove();
+            this.$arrowUp?.remove();
+            this.$arrowDown?.remove();
+            
             if (this.getAttribute("archived") === "true") {
-                this.style.display = "none";
+                this.remove()
             }
         }
 

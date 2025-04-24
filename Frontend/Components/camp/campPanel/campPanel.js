@@ -48,9 +48,8 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log(this.loggedInUser);
         if (!this.loggedInUser || this.loggedInUser.role !== "ADMIN") {
-            this.$buttonPanel.style.display = "none";
+            this.$buttonPanel.remove();
         }
 
         this.$search.addEventListener('input', () => {
