@@ -103,13 +103,16 @@ window.customElements.define('campitem-れ', class extends HTMLElement {
 
     connectedCallback() {
         // Check if user is admin
-        const user = JSON.parse(sessionStorage.getItem('user')) || {};
+        const user = JSON.parse(sessionStorage.getItem('loggedInUser')) || {};
         const isAdmin = user.role === 'ADMIN';
         
         // Hide settings and visible icons if not admin
         if (!isAdmin) {
             this.$settings.style.display = 'none';
             this.$visible.style.display = 'none';
+            if (this.getAttribute("archived") === "true") {
+                this.style.display = "none";
+            }
         }
         
         this.$button.addEventListener('click', () => {

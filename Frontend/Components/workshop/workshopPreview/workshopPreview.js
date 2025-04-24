@@ -55,6 +55,21 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+
+        const user = JSON.parse(sessionStorage.getItem('loggedInUser')) || {};
+        const isAdmin = user.role === 'ADMIN';
+        
+        // Hide settings and visible icons if not admin
+        if (!isAdmin) {
+            this.$edit.style.display = 'none';
+            this.$visible.style.display = 'none';
+            this.$arrowUp.style.display = 'none';
+            this.$arrowDown.style.display = 'none';
+            if (this.getAttribute("archived") === "true") {
+                this.style.display = "none";
+            }
+        }
+
         this.$edit.addEventListener('click', () => {
             this.tabWithWorkshopHandler("workshoppage", "workshop", this.getAttribute("workshop"));
         })
