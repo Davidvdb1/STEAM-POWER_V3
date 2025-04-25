@@ -7,9 +7,6 @@ class EnergyDataService {
     async create(data) {
         try {
             data.time = new Date(data.time);
-
-            console.log("EnergyDataService.create", data);
-
             const energyData = new EnergyData(data);
             const Energy = data.value /1024 * 3 * 0.5 * 2 /3600; // /1024 * 3 voorde voltagewaarde, * 0.5 Ampère voor het vermogen, * 2/3600  voor de energie te verkrijgen in Wh.
             await groupRepository.addEnergyToGroup(data.groupId, Energy);

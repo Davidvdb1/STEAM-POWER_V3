@@ -23,14 +23,13 @@ template.innerHTML = /*html*/`
                 <label for="water"><input type="radio" id="water-radio" name="power-source" value="water">Water</label>
                 <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar">Zon</label>
             </div>
-            <div>Opgewekte waarde:<span id="energy-data-value">loading...</span></div>
+            <div id="energy-data-container">Opgewekte waarde:<span id="energy-data-value">loading...</span></div>
         </div>
+
         <div id="group-select">
             <label for="group">Groep:</label>
             <select id="group" name="group">
-                <option value="1">Groep 1</option>
-                <option value="2">Groep 2</option>
-                <option value="3">Groep 3</option>
+                <option value="" disabled selected>Loading...</option>
             </select>
         </div>
         <question-list-れ></question-list-れ>
@@ -44,9 +43,12 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$container = null;
-        this.$errorMessage = null;
-        this.$errorMessageText = null;
+        this.$container = this.shadowRoot.querySelector("#container");
+        this.$questionList = this.shadowRoot.querySelector("question-list-れ");
+        this.$errorMessage = this.shadowRoot.querySelector("#error-container");
+        this.$errorMessageText = this.shadowRoot.querySelector("#error-message-text");
+        this.$errorMessage.style.display = "none";
+        this.$energyDataValue = this.shadowRoot.querySelector("#energy-data-value");
 
         this.energyContext = "wind";
         this.groupId = null;
@@ -55,7 +57,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this._testEventCount = 0;
         this._testCompleted = false;
 
-        // event <handlers></handlers>
+        // event handler binding
         this.boundHandleEnergyDataReading = this.handleEnergyDataReading.bind(this);
     }
 
@@ -81,6 +83,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         // Set up quiz page based on user role
         const role = loggedInUser.role;
         if (role === "ADMIN" || role === "TEACHER") {
+            this.shadowRoot.querySelector("#energy-data-container").style.display = "none";
             await this.initGroupSelect();
         } else if (role === "GROUP" && loggedInUser.groupId) {
             this.groupId = loggedInUser.groupId;
@@ -90,13 +93,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     }
 
     async connectedCallback() {
-        this.$container = this.shadowRoot.querySelector("#container");
-        this.$questionList = this.shadowRoot.querySelector("question-list-れ");
-        this.$errorMessage = this.shadowRoot.querySelector("#error-container");
-        this.$errorMessageText = this.shadowRoot.querySelector("#error-message-text");
-        this.$errorMessage.style.display = "none";
-        this.$energyDataValue = this.shadowRoot.querySelector("#energy-data-value");
-
         if (!(await this.checkLogin())) return;
 
         this.setupEnergyReadingDisplay();
@@ -137,7 +133,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     setupEnergyReadingDisplay() {
         this.setupEnergySourceSelect();
         window.addEventListener("energydatareading", this.boundHandleEnergyDataReading);
-
     };
 
     handleEnergyDataReading(e) {
@@ -175,7 +170,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
                 }
                 this._testCompleted = true;
                 console.log("Test completed. Energy context set to:", this.energyContext);
-                this.$questionList && (this.$questionList.testCompleted = true);
+                this.$questionList && (this.$questionList.fetchQuestions());
 
                 // Logic to replace the event handler after the test phase
                 // Might be useful to handle loading states
@@ -223,6 +218,13 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             const groupSelect = this.shadowRoot.querySelector("#group");
             groupSelect.innerHTML = ""; // Clear existing options
 
+            const defaultOption = document.createElement("option");
+            defaultOption.selected = true;
+            defaultOption.disabled = true;
+            defaultOption.value = "";
+            defaultOption.textContent = "Select a group";
+            groupSelect.appendChild(defaultOption);
+
             groups.forEach(group => {
                 const option = document.createElement("option");
                 option.value = group.id;
@@ -237,6 +239,8 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
             this.groupId = groupSelect.value;
             this.$questionList && (this.$questionList.groupId = this.groupId);
+            
+            this.$questionList.fetchQuestions()
         } catch (error) {
             this.showErrorMessage("Failed to fetch groups. Please try again later.");
         }

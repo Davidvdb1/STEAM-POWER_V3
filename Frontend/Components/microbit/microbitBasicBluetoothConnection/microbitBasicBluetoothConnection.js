@@ -166,6 +166,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
 
     async readMockPinValues() {
         const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
+        if (!groupId) return; // TODO: Show error message "Group ID not found"
 
         const nextRandomValue = (val, spread) => Math.floor(Math.random() * spread) + val;
 

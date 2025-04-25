@@ -30,6 +30,7 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
 
     set groupId(value) {
         this._groupId = value;
+        this.fetchQuestions();
     }
 
     set energyContext(value) {
@@ -38,13 +39,6 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
         container.querySelectorAll("quiz-question-れ").forEach(question => {
             question.energyContext = value;
         });
-    }
-
-    set testCompleted(value) {
-        this._testCompleted = value;
-        if (value) {
-            this.fetchQuestions();
-        }
     }
 
     set energyReading(value) {
