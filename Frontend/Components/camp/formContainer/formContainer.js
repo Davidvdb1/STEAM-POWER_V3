@@ -100,25 +100,31 @@ window.customElements.define('form-れ', class extends HTMLElement {
         const formData = {};
         const fileReaders = [];
     
-        this.items.forEach(({ id }) => {
+        for (const { id } of this.items) {
             const input = this.shadowRoot.querySelector(`formitem-れ[id="${id}"]`);
-            if (!input) return;
-    
+            if (!input) continue;
+        
             const realInput = input.shadowRoot.querySelector("input");
-    
+            const value = realInput?.value;
+        
+            if (value === "" || value === null) {
+                this.updateStatusMessage(`❌ veld ${id} mag niet leeg zijn`, "error");
+                return; // ⛔️ deze return verlaat WEL de hele functie
+            }
+        
             if (realInput?.type === "file" && realInput.files.length > 0) {
                 const reader = new FileReader();
                 fileReaders.push(new Promise((resolve) => {
                     reader.onload = (e) => {
-                        formData["picture"] = e.target.result; 
+                        formData["picture"] = e.target.result;
                         resolve();
                     };
                     reader.readAsDataURL(realInput.files[0]);
                 }));
             } else {
-                formData[id] = realInput?.value || "";
+                formData[id] = value || "";
             }
-        });
+        }
     
         await Promise.all(fileReaders);
     
@@ -138,12 +144,25 @@ window.customElements.define('form-れ', class extends HTMLElement {
             picture: formData.picture || "",  
             archived: false,
         };
-    
-        if (campID !== null) {
-            this.updateCamp(fixedData);
-        } else {
-            this.createCamp(fixedData);
+
+        if (fixedData.startDate > fixedData.endDate) {
+            this.updateStatusMessage("❌ De startdatum kan niet later zijn dan de einddatum.", "error");
+            return
         }
+
+        if (fixedData.minAge > fixedData.maxAge) {
+            this.updateStatusMessage("❌ De startleeftijd kan niet hoger zijn dan de eindleeftijd.", "error");
+            return;
+        }
+    
+        if (!campID || campID === "null" || campID.length < 5) {
+            console.log("campID", campID);
+            this.createCamp(fixedData);
+        } else {
+            console.log("campID", campID);
+            this.updateCamp(fixedData);
+        }
+        
     }
     
     
@@ -199,6 +218,9 @@ window.customElements.define('form-れ', class extends HTMLElement {
 
     //service
     async createCamp(data) {
+        const label = this._shadowRoot.querySelector("formitem-れ[id='title']")._shadowRoot.querySelector("input");
+            console.log("kaas");
+
         try {
             const url = window.env.BACKEND_URL;
             const response = await fetch(url + '/camps', {
@@ -208,7 +230,7 @@ window.customElements.define('form-れ', class extends HTMLElement {
                 },
                 body: JSON.stringify(data)
             });
-    
+
             if (response.ok) {
                 const result = await response.json();
                 this.updateStatusMessage("✅ Kamp succesvol toegevoegd!", "success");

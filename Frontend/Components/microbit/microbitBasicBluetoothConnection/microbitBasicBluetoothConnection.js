@@ -154,6 +154,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         pinValues.push({ pin: 1, groupId, value: extract10BitValue(view.getUint8(3)), type: 'WIND', time });
         pinValues.push({ pin: 2, groupId, value: extract10BitValue(view.getUint8(5)), type: 'WATER', time });
         pinValues.forEach(async (data) => {
+            if (data.value == 0) return;
             const response = await this.postEnergyData(data);
             const body = await response.json();
             console.log(body);

@@ -14,6 +14,7 @@ import "../../pages/workshopInfo/workshopInfo.js"
 import "../../authentication/logout/logout.js"
 import "../../pages/questionAdminPage/questionAdminPage.js"
 import "../../pages/quizPage/quizPage.js"
+import "../../pages/gamePage/gamePage.js"
 //#endregion IMPORTS
 
 //#region TABHANDLER
@@ -94,7 +95,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "campoverviewpage", label: "Home" },
                 { id: "leaderboard", label: "Leaderboard" },
                 { id: "quiz", label: "Quiz" },
-                { id: "spel", label: "Spel" },
+                { id: "gamepage", label: "Spel" },
                 { id: "microbitpage", label: "Micro:bit" },
                 { id: "groupoverviewpage", label: "Groepen" },
                 { id: "useroverviewpage", label: "Gebruikers" },
@@ -105,7 +106,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "campoverviewpage", label: "Home" },
                 { id: "leaderboard", label: "Leaderboard" },
                 { id: "quiz", label: "Quiz" },
-                { id: "spel", label: "Spel" },
+                { id: "gamepage", label: "Spel" },
                 { id: "microbitpage", label: "Micro:bit" },
                 { id: "logout", label: "Logout" },
             ]
