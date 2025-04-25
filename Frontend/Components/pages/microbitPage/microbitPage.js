@@ -83,7 +83,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
         this.groupSelectorContainer = this._shadowRoot.getElementById('groupSelectorContainer');
         this.energyData = [];
-        this.currentWattValue = 0;
         this.groupPollInterval = null;
     }
 
@@ -213,6 +212,10 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
                 button.classList.add('active');
             });
         });
+
+        this.getGroupEnergy(user.groupId)
+        this.getBatteryCapacity(user.groupId)
+        this.getEnergyMultiplier(user.groupId)
     }
     
     disconnectedCallback() {
@@ -258,13 +261,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             const waterPoints = this.energyData.filter(d => d.type === 'WATER');
             this.waterBar.updateBar(waterPoints, data);
         }
-
-        if (data.value !== undefined) {
-            this.currentWattValue += Math.abs(parseInt(data.value));
-            const requiredWatt = 500;
-            this.currentWattValue = Math.min(this.currentWattValue, requiredWatt);
-            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
-        }
     }
 
     //services
@@ -278,15 +274,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
         
             this.energyData = await response.json();
-
-            let totalEnergy = 0;
-            this.energyData.forEach(data => {
-                if (data.value !== undefined) {
-                    totalEnergy += Math.abs(parseInt(data.value));
-                }
-            });
-            this.currentWattValue = Math.min(totalEnergy, 500);
-            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
 
             const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
             const windPoints = this.energyData.filter(d => d.type === 'WIND');
@@ -345,6 +332,12 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         } catch (error) {
             console.error("Fout bij ophalen van energyData voor groep", groupId, ":", error);
         }
-    }    
+    }
+
+    async getGroupEnergy(groupId) {}
+
+    async getBatteryCapacity() {}
+
+    async getEnergyMultiplier() {}
 });
 //#endregion CLASS
