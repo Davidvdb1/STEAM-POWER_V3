@@ -1,30 +1,20 @@
 //#region IMPORTS
+import "../../game/gameControlPanel/gameControlPanel.js"
 //#endregion IMPORTS
 
-//#region PINASSIGNMENTCARDS
+//#region GAMEPAGE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/microbit/pinAssignmentCards/style.css';
+        @import './Components/pages/gamePage/style.css';
     </style>
 
-    <div id="solar" class="card">
-        <h2>Zon</h2>
-        <p>Pin 0</p>
-    </div>
-    <div id="wind" class="card">
-        <h2>Wind</h2>
-        <p>Pin 1</p>
-    </div>
-    <div id="water" class="card">
-        <h2>Water</h2>
-        <p>Pin 2</p>
-    </div>
+    <gamecontrolpanel-れ></gamecontrolpanel-れ>
 `;
-//#endregion PINASSIGNMENTCARDS
+//#endregion GAMEPAGE
 
 //#region CLASS
-window.customElements.define('pinassignmentcards-れ', class extends HTMLElement {
+window.customElements.define('gamepage-れ', class extends HTMLElement {
     constructor() {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });

@@ -224,7 +224,7 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
                 legend: {
                     data: [
                       {
-                        name: 'SOLAR',
+                        name: 'ZON',
                         icon: 'image://Assets/SVGs/solar.png'
                       },
                       {
@@ -263,7 +263,7 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
                 },                
                 series: [
                     {
-                        name: 'SOLAR',
+                        name: 'ZON',
                         type: 'line',
                         data: [],
                         smooth: true,
@@ -391,7 +391,7 @@ window.customElements.define('livelinegraph-れ', class extends HTMLElement {
     
         this.chart.setOption({
             series: [
-                { name: 'SOLAR', data: solarData },
+                { name: 'ZON', data: solarData },
                 { name: 'WIND', data: windData },
                 { name: 'WATER', data: waterData }
             ]
