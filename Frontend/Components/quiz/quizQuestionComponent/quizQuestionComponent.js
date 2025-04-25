@@ -45,6 +45,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
 
         this._energyContext = null;
+        this._energyReading = null;
         this._groupId = null;
 
         this._id = null;
@@ -59,12 +60,17 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
         this._questions = {}
         this._actualQuestion = "";
-    
+
     }
 
     set energyContext(value) {
         this._energyContext = value;
         this.updateQuestion();
+    }
+
+    set energyReading(value) {
+        this._energyReading = value;
+        console.log("Energy reading set to:", value);
     }
 
     set groupId(value) {
@@ -93,7 +99,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
     }
 
     async handleSubmitAnswer(answer) {
-        const mockEnergyReading = 50; // Mock energy reading value
+        const mockEnergyReading = this._energyReading; // Mock energy reading value
 
         try {
             //            const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;

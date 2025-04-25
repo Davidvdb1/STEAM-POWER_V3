@@ -38,7 +38,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
     }
 
     async connectedCallback() {
-        //await this.startMockMonitoring();
+        await this.startMockMonitoring();
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
@@ -170,7 +170,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         const nextRandomValue = (val, spread) => Math.floor(Math.random() * spread) + val;
 
         const solarValue = nextRandomValue(750, 80);
-        const windValue = nextRandomValue(300, 50);
+        const windValue = 0 //nextRandomValue(300, 50);
         const waterValue = nextRandomValue(450, 35);
 
         const time = new Date().toISOString();
@@ -187,7 +187,6 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
             const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
             document.dispatchEvent(event);
         });
-        console.log(pinValues);
     }
 
 

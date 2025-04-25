@@ -15,11 +15,15 @@ template.innerHTML = /*html*/`
         <div id="error-container">
             <p id="error-message-text"></p>
         </div>
+
         <answer-feedback-component-れ width="800" height="200"></answer-feedback-component-れ>
         <div id="energy-context-select-container">
-            <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
-            <label for="water"><input type="radio" id="water-radio" name="power-source" value="water">Water</label>
-            <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar">Zon</label>
+            <div id="energy-context-select">
+                <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
+                <label for="water"><input type="radio" id="water-radio" name="power-source" value="water">Water</label>
+                <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar">Zon</label>
+            </div>
+            <div>Opgewekte waarde:<span id="energy-data-value">loading...</span></div>
         </div>
         <div id="group-select">
             <label for="group">Groep:</label>
@@ -31,7 +35,6 @@ template.innerHTML = /*html*/`
         </div>
         <question-list-れ></question-list-れ>
     </div>
-    
 `;
 //#endregion TEMPLATE
 
@@ -47,6 +50,13 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
         this.energyContext = "wind";
         this.groupId = null;
+
+        // Initialize test counters for first three sensor events
+        this._testEventCount = 0;
+        this._testCompleted = false;
+
+        // event <handlers></handlers>
+        this.boundHandleEnergyDataReading = this.handleEnergyDataReading.bind(this);
     }
 
     // component attributes
@@ -71,9 +81,10 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         // Set up quiz page based on user role
         const role = loggedInUser.role;
         if (role === "ADMIN" || role === "TEACHER") {
-            await this.setUpAdminQuizPage();
+            await this.initGroupSelect();
         } else if (role === "GROUP" && loggedInUser.groupId) {
-            await this.setUpGroupQuizPage(loggedInUser.groupId);
+            this.groupId = loggedInUser.groupId;
+            await this.setUpGroupQuizPage();
         }
         return loggedInUser;
     }
@@ -84,10 +95,11 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.$errorMessage = this.shadowRoot.querySelector("#error-container");
         this.$errorMessageText = this.shadowRoot.querySelector("#error-message-text");
         this.$errorMessage.style.display = "none";
+        this.$energyDataValue = this.shadowRoot.querySelector("#energy-data-value");
 
         if (!(await this.checkLogin())) return;
 
-        this.setupEnergySourceSelect();
+        this.setupEnergyReadingDisplay();
 
         customElements.whenDefined('question-list-れ').then(() => {
             this.$questionList && (this.$questionList.groupId = this.groupId);
@@ -98,6 +110,10 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             const error = e.detail.error;
             this.shadowRoot.querySelector("answer-feedback-component-れ")?.setAttribute("error", error);
         });
+    }
+
+    disconnectedCallback() {
+        window.removeEventListener("energydatareading", this.boundHandleEnergyDataReading);
     }
 
     // Refactored: Replace individual radio setups with an array loop
@@ -112,10 +128,79 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             radioEl.checked = (this.energyContext === radio.value);
             radioEl.addEventListener("change", (e) => {
                 this.energyContext = e.target.value;
+                this.$energyDataValue.innerText = "loading...";
                 this.$questionList && (this.$questionList.energyContext = this.energyContext);
             });
         });
     }
+
+    setupEnergyReadingDisplay() {
+        this.setupEnergySourceSelect();
+        window.addEventListener("energydatareading", this.boundHandleEnergyDataReading);
+
+    };
+
+    handleEnergyDataReading(e) {
+        const data = e.detail;
+        const energyType = data.type.toLowerCase();
+        console.log("Energy data reading:", data);
+        // Update the corresponding radio element's disabled state and label color
+        const radioEl = this.shadowRoot.querySelector(`#${energyType}-radio`);
+        if (radioEl) {
+            const disabled = (data.value === 0 || data.value == null);
+            radioEl.disabled = disabled;
+            const labelEl = radioEl.closest('label');
+            if (labelEl) {
+                labelEl.style.color = disabled ? 'grey' : '';
+            }
+        }
+
+        // For first three events (test phase), do not update questionList energy reading
+        if (!this._testCompleted) {
+            this._testEventCount++;
+            if (this._testEventCount === 3) {
+                // Test complete: check if the currently selected radio is disabled; then select the first available sensor.
+                const currentRadio = this.shadowRoot.querySelector(`#${this.energyContext}-radio`);
+                if (currentRadio && currentRadio.disabled) {
+                    const radioTypes = ["wind", "water", "solar"];
+                    for (const type of radioTypes) {
+                        const radio = this.shadowRoot.querySelector(`#${type}-radio`);
+                        if (radio && !radio.disabled) {
+                            this.energyContext = type;
+                            radio.checked = true;
+                            this.$questionList && (this.$questionList.energyContext = type);
+                            break;
+                        }
+                    }
+                }
+                this._testCompleted = true;
+                console.log("Test completed. Energy context set to:", this.energyContext);
+                this.$questionList && (this.$questionList.testCompleted = true);
+
+                // Logic to replace the event handler after the test phase
+                // Might be useful to handle loading states
+                // window.removeEventListener("energydatareading", this.boundHandleEnergyDataReading);
+                // this.boundHandleEnergyDataReading = null;
+                // this.boundHandleEnergyDataReading = this.handleSomeEvent.bind(this);
+                // window.addEventListener("energydatareading", this.boundHandleEnergyDataReading);
+            }
+            return;
+        }
+
+
+        // Actual processing and displaying of energy data
+        if (energyType === this.energyContext) {
+            let voltage = data.value / 341; // Convert to volts
+            let power = voltage * 0.5; // Convert to watts (assuming 0.5A current)
+            this.$questionList && (this.$questionList.energyReading = power);
+            this.$energyDataValue.innerText = `${power} W`;
+        }
+    }
+
+    handleSomeEvent(data) {
+        console.log("Event data:", data);
+    }
+
 
     showErrorMessage(message) {
         this.$container.childNodes.forEach((child) => {
@@ -127,7 +212,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.$errorMessageText.innerText = message;
     }
 
-    async setUpAdminQuizPage() {
+    async initGroupSelect() {
         try {
             const response = await fetch(`${window.env.BACKEND_URL}/groups`);
             if (!response.ok) {
@@ -145,7 +230,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
                 groupSelect.appendChild(option);
             });
 
-            // Use an arrow function for cleaner binding
             groupSelect.addEventListener("change", (e) => {
                 this.groupId = e.target.value;
                 this.$questionList && (this.$questionList.groupId = this.groupId);
@@ -154,22 +238,19 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             this.groupId = groupSelect.value;
             this.$questionList && (this.$questionList.groupId = this.groupId);
         } catch (error) {
-            console.error("Failed to fetch groups:", error);
             this.showErrorMessage("Failed to fetch groups. Please try again later.");
         }
     }
 
-    async setUpGroupQuizPage(id) {
-        this.groupId = id;
-
+    async setUpGroupQuizPage() {
+        //remove group select from the page
         this.shadowRoot.querySelector("#group-select").style.display = "none";
 
-        const bluetoothEnabled = true; //JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
+        const bluetoothEnabled = true //JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
         if (!bluetoothEnabled) {
             this.showErrorMessage("Bluetooth is not enabled. Please enable Bluetooth to access this page.");
             return;
         }
-
     }
 
 });

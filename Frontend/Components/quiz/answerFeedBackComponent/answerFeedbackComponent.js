@@ -44,7 +44,6 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (name === "error") {
-            console.log("changed error", newValue);
             this._angle = this.calculateAngle(parseInt(newValue));
             this.setArrow(this._angle);
         }
@@ -82,7 +81,6 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
         if (angle < 180 / 7) angle = 180 / 7;
         if (angle > 6 * 180 / 7) angle = 6 * 180 / 7;
 
-        console.log("angle", angle);
         this.$arrowContainer.setAttribute("transform", `rotate(${angle}, ${this.originX}, ${this.originY})`);
 
     }

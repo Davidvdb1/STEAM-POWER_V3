@@ -10,7 +10,7 @@ template.innerHTML = /*html*/`
     </style>
 
     <div id="container">
-    
+        Loading...
     </div>
 `;
 //#endregion TEMPLATE
@@ -22,13 +22,14 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this._energyContext = null;
+        this._energyReading = null;
 
         this._groupId = null;
+
     }
 
     set groupId(value) {
         this._groupId = value;
-        this.fetchQuestions();
     }
 
     set energyContext(value) {
@@ -36,6 +37,21 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
         const container = this.shadowRoot.querySelector("#container");
         container.querySelectorAll("quiz-question-れ").forEach(question => {
             question.energyContext = value;
+        });
+    }
+
+    set testCompleted(value) {
+        this._testCompleted = value;
+        if (value) {
+            this.fetchQuestions();
+        }
+    }
+
+    set energyReading(value) {
+        this._energyReading = value;
+        const container = this.shadowRoot.querySelector("#container");
+        container.querySelectorAll("quiz-question-れ").forEach(question => {
+            question.energyReading = value;
         });
     }
 
@@ -63,8 +79,6 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
             }
 
             const data = await response.json();
-
-            console.log("data", data);
 
             this.initQuestions(data);
 
