@@ -22,6 +22,15 @@ async function main() {
             role: 'ADMIN',
         },
     });
+    
+    const olivier = await prisma.user.create({
+        data: {
+            username: 'Olivier',
+            email: 'olivier.breugelmans@ucll.be',
+            password: await bcrypt.hash('olivierTWAadmin', 10),
+            role: 'ADMIN',
+        },
+    });
 
     const teacher = await prisma.user.create({
         data: {
