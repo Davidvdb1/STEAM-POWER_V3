@@ -97,8 +97,8 @@ model Answer {
   groupId       String
   questionId    String
   isCorrect     Boolean
-  answerValue   Int
-  energyReading Int
+  answerValue   Float
+  energyReading Float
   group         Group    @relation(fields: [groupId], references: [id])
   question      Question @relation(fields: [questionId], references: [id])
   errorMargin   Float @default(0)
