@@ -3,8 +3,8 @@ class Answer {
         this.id = id;
         this.questionId = questionId;
         this.groupId = groupId;
-        this.answerValue = parseInt(answerValue);
-        this.energyReading = parseInt(energyReading);
+        this.answerValue = parseFloat(answerValue);
+        this.energyReading = parseFloat(energyReading);
 
         this.isCorrect = isCorrect;
         if (validate) {
