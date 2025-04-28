@@ -79,6 +79,7 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
 
     async fetchQuestions() {
         try {
+            if (!this._groupId) throw new Error("Group ID is not set.");
             const response = await fetch(`${window.env.BACKEND_URL}/questions/group/${this._groupId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -86,7 +87,9 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
 
             const data = await response.json();
 
-            this.initQuestions(data);
+            const activeQuestions = data.filter(question => { console.log(question.active); return question.active === true });
+
+            this.initQuestions(activeQuestions);
 
         } catch (error) {
             //TODO: Handle error in the fronted
