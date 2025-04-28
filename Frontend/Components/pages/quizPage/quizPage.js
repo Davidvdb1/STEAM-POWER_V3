@@ -188,6 +188,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         if (energyType === this.energyContext) {
             let voltage = data.value / 341; // Convert to volts
             let power = voltage * 0.5; // Convert to watts (assuming 0.5A current)
+            power = parseFloat(power.toFixed(3));
             this.$questionList && (this.$questionList.energyReading = power);
             this.$energyDataValue.innerText = `${power} W`;
         }
