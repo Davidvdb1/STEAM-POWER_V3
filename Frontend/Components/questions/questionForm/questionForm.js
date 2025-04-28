@@ -16,28 +16,32 @@ template.innerHTML = /*html*/`
         <textarea id="description" name="description" required></textarea>
         <span class="error-message" id="description-error"></span>
 
+        <h3>Vragen:</h3>
+
         <!-- Added general question field -->
-        <label for="general-question">Algemene vraag:</label>
-        <textarea id="general-question" name="generalQuestion"></textarea>
-        <span class="error-message" id="general-question-error"></span>
-        
-        <!-- Toggle button for specific questions -->
-        <button type="button" id="toggle-specific-questions">Edit specifieke vragen</button>
+        <div id="general-question-container">
+            <label for="general-question">Algemene vraag:</label>
+            <textarea id="general-question" name="generalQuestion"></textarea>
+            <span class="error-message" id="general-question-error"></span>    
+        </div>
 
         <!-- Specific questions container, hidden by default -->
         <div id="specific-questions-container" style="display: none;">
             <label for="wind-question">Vraag voor windmolens:</label>
             <textarea id="wind-question" name="windQuestion" required></textarea>
             <span class="error-message" id="wind-question-error"></span>
-
+            <br>
             <label for="water-question">Vraag voor waterturbines:</label>
             <textarea id="water-question" name="waterQuestion" required></textarea>
             <span class="error-message" id="water-question-error"></span>
-
+            <br>
             <label for="solar-question">Vraag voor zonnepanelen:</label>
             <textarea id="solar-question" name="solarQuestion" required></textarea>
             <span class="error-message" id="solar-question-error"></span>
         </div>
+
+        <!-- Toggle button for specific questions -->
+        <button type="button" id="toggle-specific-questions">Edit specifieke vragen</button>
 
         <label for="wattage">Wattage:</label>
         <input type="number" id="wattage" name="wattage" min="0" required>
@@ -120,6 +124,7 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
         this.$pictureInput.addEventListener('change', this.handlePicturePreview.bind(this));
 
         // Added general question listener
+        this.$generalQuestionContainer = this._shadowRoot.querySelector("#general-question-container");
         this.$generalQuestion = this._shadowRoot.querySelector('#general-question');
         this.$generalQuestion.addEventListener('input', this.handleGeneralQuestion.bind(this));
 
@@ -128,6 +133,15 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
         this.$specificContainer = this._shadowRoot.querySelector('#specific-questions-container');
         this.$toggleSpecific.addEventListener('click', () => {
             this.$specificContainer.style.display = this.$specificContainer.style.display === 'none' ? 'block' : 'none';
+            if (this.$generalQuestionContainer.style.display === 'none') {
+                this.$generalQuestionContainer.style.display = 'block';
+                this.$specificContainer.style.display = 'none';
+                this.$toggleSpecific.textContent = "Pas specifieke vragen aan"
+            } else {
+                this.$generalQuestionContainer.style.display = 'none';
+                this.$specificContainer.style.display = 'block';
+                this.$toggleSpecific.textContent = "Pas algemene vraag aan"
+            }
         });
 
         // Make picture input required only if data-id is not set
