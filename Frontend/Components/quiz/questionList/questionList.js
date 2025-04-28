@@ -28,13 +28,17 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
         this._energyContext = null;
         this._energyReading = null;
 
+        this._groupView = true;
+
         this._groupId = null;
 
     }
 
     set groupId(value) {
         this._groupId = value;
-        this.fetchQuestions();
+        if (!this._groupView) {
+            this.fetchQuestions();
+        }
     }
 
     set energyContext(value) {
@@ -67,6 +71,10 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+        const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+        if (loggedInUser && (loggedInUser.role === "ADMIN" || loggedInUser.role === "TEACHER")) {
+            this._groupView = false;
+        }
     }
 
     async fetchQuestions() {

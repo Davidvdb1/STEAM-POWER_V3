@@ -60,7 +60,6 @@ answer-feedback-component-れ {
   position: relative;
   display: grid;
   grid-template-columns: 2fr 1fr;
-  height: 300vh;
 }
 #question-list-container > .answer-feedback-container {
   position: sticky;
