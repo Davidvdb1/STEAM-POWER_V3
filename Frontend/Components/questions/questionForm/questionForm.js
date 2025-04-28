@@ -19,29 +19,29 @@ template.innerHTML = /*html*/`
         <h3>Vragen:</h3>
 
         <!-- Added general question field -->
-        <div id="general-question-container">
+        <div id="general-question-container" style="display: block">
             <label for="general-question">Algemene vraag:</label>
-            <textarea id="general-question" name="generalQuestion"></textarea>
+            <textarea id="general-question" name="generalQuestion" required></textarea>
             <span class="error-message" id="general-question-error"></span>    
         </div>
 
         <!-- Specific questions container, hidden by default -->
         <div id="specific-questions-container" style="display: none;">
             <label for="wind-question">Vraag voor windmolens:</label>
-            <textarea id="wind-question" name="windQuestion" required></textarea>
+            <textarea id="wind-question" name="windQuestion"></textarea>
             <span class="error-message" id="wind-question-error"></span>
             <br>
             <label for="water-question">Vraag voor waterturbines:</label>
-            <textarea id="water-question" name="waterQuestion" required></textarea>
+            <textarea id="water-question" name="waterQuestion"></textarea>
             <span class="error-message" id="water-question-error"></span>
             <br>
             <label for="solar-question">Vraag voor zonnepanelen:</label>
-            <textarea id="solar-question" name="solarQuestion" required></textarea>
+            <textarea id="solar-question" name="solarQuestion"></textarea>
             <span class="error-message" id="solar-question-error"></span>
         </div>
 
         <!-- Toggle button for specific questions -->
-        <button type="button" id="toggle-specific-questions">Edit specifieke vragen</button>
+        <button type="button" id="toggle-specific-questions">Pas specifieke vragen aan</button>
 
         <label for="wattage">Wattage:</label>
         <input type="number" id="wattage" name="wattage" min="0" required>
@@ -51,9 +51,9 @@ template.innerHTML = /*html*/`
         <input type="number" id="score" name="score" min="0" required>
         <span class="error-message" id="score-error"></span>
 
-        <label for="no-tries">Aantal beurten (0=geen limiet):</label>
-        <input type="number" id="no-tries" name="maxTries" min="0" required>
-        <span class="error-message" id="no-tries-error"></span>
+        <label for="max-tries">Aantal beurten (0=geen limiet):</label>
+        <input type="number" id="max-tries" name="maxTries" min="0" required>
+        <span class="error-message" id="max-tries-error"></span>
 
         <div class="picture-box">
             <img id="picture-preview" src="" alt="Question Picture" />
@@ -104,7 +104,7 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
                 this._shadowRoot.querySelector('#picture-preview').src = newValue;
                 break;
             case 'data-max-tries':
-                this._shadowRoot.querySelector('#no-tries').value = newValue;
+                this._shadowRoot.querySelector('#max-tries').value = newValue;
                 break;
             case 'data-score':
                 this._shadowRoot.querySelector('#score').value = newValue;
@@ -131,17 +131,30 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
         // Added toggle for specific questions container
         this.$toggleSpecific = this._shadowRoot.querySelector('#toggle-specific-questions');
         this.$specificContainer = this._shadowRoot.querySelector('#specific-questions-container');
+
+        const isDisplayed = (el) => el.style.display === 'block';
+
         this.$toggleSpecific.addEventListener('click', () => {
-            this.$specificContainer.style.display = this.$specificContainer.style.display === 'none' ? 'block' : 'none';
-            if (this.$generalQuestionContainer.style.display === 'none') {
+            const specificQuestionEls = this.$specificContainer.querySelectorAll("textarea");
+            if (!isDisplayed(this.$generalQuestionContainer)) {
                 this.$generalQuestionContainer.style.display = 'block';
+                this.$generalQuestion.setAttribute("required", "");
+                specificQuestionEls.forEach((el) => {
+                    el.removeAttribute("required");
+                });
                 this.$specificContainer.style.display = 'none';
                 this.$toggleSpecific.textContent = "Pas specifieke vragen aan"
             } else {
                 this.$generalQuestionContainer.style.display = 'none';
+                this.$generalQuestion.removeAttribute("required");
+                specificQuestionEls.forEach((el) => {
+                    el.setAttribute("required", "");
+                });
                 this.$specificContainer.style.display = 'block';
                 this.$toggleSpecific.textContent = "Pas algemene vraag aan"
             }
+
+
         });
 
         // Make picture input required only if data-id is not set
@@ -174,7 +187,13 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
 
     validateForm() {
         let isValid = true;
-        const fields = ['title', 'description', 'wind-question', 'water-question', 'solar-question', 'wattage', 'score'];
+        let fields = ['title', 'description', 'wattage', 'score', 'max-tries'];
+        if (this.$generalQuestionContainer.style.display === 'none') {
+            fields = [...fields, 'wind-question', 'water-question', 'solar-question']
+        } else {
+            fields = [...fields, 'general-question']
+        }
+        console.log(fields);
         fields.forEach(field => {
             const input = this._shadowRoot.querySelector(`#${field}`);
             const errorMessage = this._shadowRoot.querySelector(`#${field}-error`);
