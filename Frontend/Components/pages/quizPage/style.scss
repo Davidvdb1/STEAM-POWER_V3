@@ -58,3 +58,18 @@ answer-feedback-component-れ {
     font-weight: bold;
     font-size: 1.2rem;
 }
+
+#question-list-container {
+    position: relative;
+    display:grid;
+    grid-template-columns: 2fr 1fr;
+    height: 300vh;
+
+    & > .answer-feedback-container {
+        position: sticky;
+        top: 1rem;
+        justify-self: center;
+        align-self: start;
+        padding: 10px;
+    }
+}

@@ -9,8 +9,12 @@ template.innerHTML = /*html*/`
         @import './Components/quiz/questionList/style.css';
     </style>
 
+
     <div id="container">
-        Loading...
+        <div class="question-list-container">
+            Loading...
+        </div>
+       
     </div>
 `;
 //#endregion TEMPLATE
@@ -83,11 +87,11 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     initQuestions(questionData) {
-        const container = this.shadowRoot.querySelector("#container");
-        container.innerHTML = ""; // Clear previous questions
+        const questionContainer = this.shadowRoot.querySelector(".question-list-container");
+        questionContainer.innerHTML = ""; // Clear previous questions
         Object.values(questionData).forEach(content => {
             const question = document.createElement('quiz-question-れ');
-            container.appendChild(question);
+            questionContainer.appendChild(question);
 
             question.energyContext = this._energyContext;
             question.groupId = this._groupId;

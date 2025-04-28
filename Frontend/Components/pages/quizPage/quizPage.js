@@ -1,7 +1,7 @@
 //#region IMPORTS
 import '../../quiz/questionList/questionList.js';
 import '../../quiz/quizQuestionComponent/quizQuestionComponent.js';
-import '../../quiz/answerFeedBackComponent/answerFeedbackComponent.js';
+import '../../quiz/answerFeedbackComponent/answerFeedbackComponent.js';
 //#endregion IMPORTS
 
 //#region TEMPLATE
@@ -16,7 +16,6 @@ template.innerHTML = /*html*/`
             <p id="error-message-text"></p>
         </div>
 
-        <answer-feedback-component-れ width="800" height="200"></answer-feedback-component-れ>
         <div id="energy-context-select-container">
             <div id="energy-context-select">
                 <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
@@ -32,7 +31,13 @@ template.innerHTML = /*html*/`
                 <option value="" disabled selected>Loading...</option>
             </select>
         </div>
-        <question-list-れ></question-list-れ>
+        
+        <div id="question-list-container">
+            <question-list-れ></question-list-れ>
+            <div class="answer-feedback-container">
+                <answer-feedback-component-れ width="400" height="200"></answer-feedback-component-れ>
+            </div>
+        </div>
     </div>
 `;
 //#endregion TEMPLATE
