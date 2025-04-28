@@ -103,6 +103,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         });
 
         this.addEventListener("update-error-indicator", (e) => {
+            console.log("Update error indicator event:", e.detail.error);
             const error = e.detail.error;
             this.shadowRoot.querySelector("answer-feedback-component-れ")?.setAttribute("error", error);
         });
@@ -239,7 +240,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
             this.groupId = groupSelect.value;
             this.$questionList && (this.$questionList.groupId = this.groupId);
-            
+
             this.$questionList.fetchQuestions()
         } catch (error) {
             this.showErrorMessage("Failed to fetch groups. Please try again later.");

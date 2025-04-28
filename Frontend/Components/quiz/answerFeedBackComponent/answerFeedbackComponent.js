@@ -6,6 +6,19 @@ let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
         @import './Components/quiz/answerFeedBackComponent/style.css';
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 
     <div class="container">

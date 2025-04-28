@@ -111,7 +111,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         const mockEnergyReading = this._energyReading; // Mock energy reading value
 
         try {
-            //            const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
+            //const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
 
             const response = await fetch(`${window.env.BACKEND_URL}/questions/${this._id}/answer`, {
                 method: "POST",
