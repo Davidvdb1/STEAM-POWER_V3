@@ -17,6 +17,7 @@ template.innerHTML = /*html*/`
         </div>
 
         <div id="energy-context-select-container">
+            <h2 id="energy-context-select-label">Energie bron:</h2>
             <div id="energy-context-select">
                 <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
                 <label for="water"><input type="radio" id="water-radio" name="power-source" value="water">Water</label>
@@ -31,7 +32,7 @@ template.innerHTML = /*html*/`
                 <option value="" disabled selected>Loading...</option>
             </select>
         </div>
-        
+
         <div id="question-list-container">
             <question-list-れ></question-list-れ>
             <div class="answer-feedback-container">
@@ -89,6 +90,8 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         const role = loggedInUser.role;
         if (role === "ADMIN" || role === "TEACHER") {
             this.shadowRoot.querySelector("#energy-data-container").style.display = "none";
+            this.shadowRoot.querySelector(".answer-feedback-container").style.display = "none";
+            this.shadowRoot.querySelector("#question-list-container").classList.add("admin-teacher-view");
             await this.initGroupSelect();
         } else if (role === "GROUP" && loggedInUser.groupId) {
             this.groupId = loggedInUser.groupId;

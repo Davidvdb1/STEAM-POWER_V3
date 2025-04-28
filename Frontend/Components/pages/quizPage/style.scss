@@ -71,4 +71,8 @@ answer-feedback-component-れ {
         align-self: start;
         padding: 10px;
     }
+
+    &.admin-teacher-view {
+        grid-template-columns: 1fr;
+    }
 }

@@ -67,4 +67,7 @@ answer-feedback-component-れ {
   justify-self: center;
   align-self: start;
   padding: 10px;
+}
+#question-list-container.admin-teacher-view {
+  grid-template-columns: 1fr;
 }/*# sourceMappingURL=style.css.map */
