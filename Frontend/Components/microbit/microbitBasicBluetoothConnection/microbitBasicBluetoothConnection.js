@@ -42,13 +42,13 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
     }
-    
+
     async init() {
         if (!navigator.bluetooth) return;
-    
+
         console.log('Searching for devices...');
         this.paused = false;
-    
+
         try {
             await this.requestDevice();
             console.log('Connecting to device...');
@@ -59,7 +59,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
             await this.startMonitoring();
         } catch (error) {
             console.error('Bluetooth connection failed or was cancelled:', error);
-    
+
             // Dispatch global event via window
             const failEvent = new CustomEvent('bluetoothconnectionfailed', {
                 detail: { message: error.message },
@@ -181,6 +181,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         pinValues.push({ pin: 1, groupId, value: windValue, type: 'WIND', time });
         pinValues.push({ pin: 2, groupId, value: waterValue, type: 'WATER', time });
         pinValues.forEach(async (data) => {
+            if (data.value == 0) return;
             const response = await this.postEnergyData(data);
             const body = await response.json();
             const datapoint = body.energyData;

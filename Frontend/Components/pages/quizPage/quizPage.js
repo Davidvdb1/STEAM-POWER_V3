@@ -19,9 +19,9 @@ template.innerHTML = /*html*/`
         <div id="energy-context-select-container">
             <h2 id="energy-context-select-label">Energie bron:</h2>
             <div id="energy-context-select">
-                <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
-                <label for="water"><input type="radio" id="water-radio" name="power-source" value="water">Water</label>
-                <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar">Zon</label>
+                <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind" disabled>Wind</label>
+                <label for="water"><input type="radio" id="water-radio" name="power-source" value="water" disabled>Water</label>
+                <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar" disabled>Zon</label>
             </div>
             <div id="energy-data-container">Opgewekte waarde:<span id="energy-data-value">loading...</span></div>
         </div>
@@ -56,15 +56,18 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.$errorMessage.style.display = "none";
         this.$energyDataValue = this.shadowRoot.querySelector("#energy-data-value");
 
+        this.$radioEls = this.shadowRoot.querySelectorAll("input[name='power-source']");
+
         this.energyContext = "wind";
         this.groupId = null;
 
-        // Initialize test counters for first three sensor events
-        this._testEventCount = 0;
+        // Replace test counters with detected sensors array
+        this._detectedSensors = new Set();
         this._testCompleted = false;
 
         // event handler binding
-        this.boundHandleEnergyDataReading = this.handleEnergyDataReading.bind(this);
+        this.boundHandleEnergyDataReadingQuizPhase = this.handleEnergyDataReadingQuizPhase.bind(this);
+        this.boundHandleEnergyDataReadingTestPhase = this.handleEnergyDataReadingTestPhase.bind(this);
     }
 
     // component attributes
@@ -121,79 +124,66 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         window.removeEventListener("energydatareading", this.boundHandleEnergyDataReading);
     }
 
-    // Refactored: Replace individual radio setups with an array loop
-    setupEnergySourceSelect() {
-        const radios = [
-            { selector: "#wind-radio", value: "wind" },
-            { selector: "#water-radio", value: "water" },
-            { selector: "#solar-radio", value: "solar" }
-        ];
-        radios.forEach(radio => {
-            const radioEl = this.shadowRoot.querySelector(radio.selector);
-            radioEl.checked = (this.energyContext === radio.value);
-            radioEl.addEventListener("change", (e) => {
-                this.energyContext = e.target.value;
-                this.$energyDataValue.innerText = "loading...";
-                this.$questionList && (this.$questionList.energyContext = this.energyContext);
-            });
-        });
-    }
-
     setupEnergyReadingDisplay() {
-        this.setupEnergySourceSelect();
-        window.addEventListener("energydatareading", this.boundHandleEnergyDataReading);
+        window.addEventListener("energydatareading", this.boundHandleEnergyDataReadingTestPhase);
     };
 
-    handleEnergyDataReading(e) {
+    handleEnergyDataReadingTestPhase(e) {
         const data = e.detail;
         const energyType = data.type.toLowerCase();
-        console.log("Energy data reading:", data);
-        // Update the corresponding radio element's disabled state and label color
-        const radioEl = this.shadowRoot.querySelector(`#${energyType}-radio`);
-        if (radioEl) {
-            const disabled = (data.value === 0 || data.value == null);
-            radioEl.disabled = disabled;
-            const labelEl = radioEl.closest('label');
-            if (labelEl) {
-                labelEl.style.color = disabled ? 'grey' : '';
-            }
-        }
 
-        // For first three events (test phase), do not update questionList energy reading
+        console.log("testing ", energyType);
+
+        // For test phase, track which sensors have been detected
         if (!this._testCompleted) {
-            this._testEventCount++;
-            if (this._testEventCount === 3) {
-                // Test complete: check if the currently selected radio is disabled; then select the first available sensor.
-                const currentRadio = this.shadowRoot.querySelector(`#${this.energyContext}-radio`);
-                if (currentRadio && currentRadio.disabled) {
-                    const radioTypes = ["wind", "water", "solar"];
-                    for (const type of radioTypes) {
-                        const radio = this.shadowRoot.querySelector(`#${type}-radio`);
-                        if (radio && !radio.disabled) {
-                            this.energyContext = type;
-                            radio.checked = true;
-                            this.$questionList && (this.$questionList.energyContext = type);
-                            break;
-                        }
+            // If an energy type already has been detected, this would mean all active sensors should have been detected
+            if (!this._detectedSensors.has(energyType)) {
+                this._detectedSensors.add(energyType);
+
+                const radioEl = this.shadowRoot.querySelector(`#${energyType}-radio`);
+                if (radioEl) {
+                    radioEl.disabled = false;
+                    const labelEl = radioEl.closest('label');
+                    if (labelEl) {
+                        // reset label color to default
+                        labelEl.style.color = 'inherit';
                     }
+                    radioEl.addEventListener("change", (e) => {
+                        this.energyContext = e.target.value;
+                        this.$energyDataValue.innerText = "loading...";
+                        this.$questionList && (this.$questionList.energyContext = this.energyContext);
+                    });
                 }
+            } else {
+                // then select the first available sensor.
+                const firstAvailableRadio = Array.from(this.$radioEls).find(radio => !radio.disabled);
+                if (firstAvailableRadio) {
+                    firstAvailableRadio.checked = true;
+                    this.energyContext = firstAvailableRadio.value;
+                    this.$questionList && (this.$questionList.energyContext = this.energyContext);
+                }
+
+                // swap out test phase event handler for quiz phase
+                window.removeEventListener("energydatareading", this.boundHandleEnergyDataReadingTestPhase);
+                window.addEventListener("energydatareading", this.boundHandleEnergyDataReadingQuizPhase);
                 this._testCompleted = true;
+
                 console.log("Test completed. Energy context set to:", this.energyContext);
+                console.log("Detected sensors:", Array.from(this._detectedSensors));
                 this.$questionList && (this.$questionList.fetchQuestions());
-
-                // Logic to replace the event handler after the test phase
-                // Might be useful to handle loading states
-                // window.removeEventListener("energydatareading", this.boundHandleEnergyDataReading);
-                // this.boundHandleEnergyDataReading = null;
-                // this.boundHandleEnergyDataReading = this.handleSomeEvent.bind(this);
-                // window.addEventListener("energydatareading", this.boundHandleEnergyDataReading);
             }
-            return;
         }
+    }
 
+    handleEnergyDataReadingQuizPhase(e) {
+        const data = e.detail;
+        const energyType = data.type.toLowerCase();
+
+        console.log("Energy data reading:", energyType, data.value);
 
         // Actual processing and displaying of energy data
         if (energyType === this.energyContext) {
+            console.log("Energy data reading for context:");
             let voltage = data.value / 341; // Convert to volts
             let power = voltage * 0.5; // Convert to watts (assuming 0.5A current)
             power = parseFloat(power.toFixed(3));
@@ -205,7 +195,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     handleSomeEvent(data) {
         console.log("Event data:", data);
     }
-
 
     showErrorMessage(message) {
         this.$container.childNodes.forEach((child) => {

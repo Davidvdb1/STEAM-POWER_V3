@@ -35,12 +35,17 @@ answer-feedback-component-れ {
 }
 
 #energy-context-select {
+
     display: flex;
     justify-content: space-evenly;
     align-items: center;
 
     margin-bottom: 1rem;
     width: 100%;
+
+    & label {
+        color: grey;
+    }
 }
 
 #error-container {
