@@ -49,7 +49,7 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
 
     connectedCallback() {
         if (!this.loggedInUser || this.loggedInUser.role !== "ADMIN") {
-            this.$buttonPanel.remove();
+            this.$addCamp.remove();
         }
 
         this.$search.addEventListener('input', () => {

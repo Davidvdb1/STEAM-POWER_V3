@@ -25,20 +25,21 @@ template.innerHTML = /*html*/`
             </div>
             <div id="energy-data-container">Opgewekte waarde:<span id="energy-data-value">loading...</span></div>
         </div>
-
-        <div id="group-select">
-            <label for="group">Groep:</label>
-            <select id="group" name="group">
-                <option value="" disabled selected>Loading...</option>
+        
+        <div id="groupSelectorContainer">
+            <label for="groupSelector">Selecteer groep:</label>
+            <select id="groupSelector">
+                <option value="">Laden...</option>
             </select>
         </div>
-
+        
         <div id="question-list-container">
             <question-list-れ></question-list-れ>
             <div class="answer-feedback-container">
                 <answer-feedback-component-れ width="400" height="200"></answer-feedback-component-れ>
             </div>
         </div>
+        
     </div>
 `;
 //#endregion TEMPLATE
@@ -49,6 +50,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+
         this.$container = this.shadowRoot.querySelector("#container");
         this.$questionList = this.shadowRoot.querySelector("question-list-れ");
         this.$errorMessage = this.shadowRoot.querySelector("#error-container");
@@ -57,6 +59,10 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.$energyDataValue = this.shadowRoot.querySelector("#energy-data-value");
 
         this.$radioEls = this.shadowRoot.querySelectorAll("input[name='power-source']");
+        this.groupSelectorContainer = this._shadowRoot.getElementById('groupSelectorContainer');
+        this.$windRadio = this.shadowRoot.querySelector("#wind-radio");
+        this.$waterRadio = this.shadowRoot.querySelector("#water-radio");
+        this.$solarRadio = this.shadowRoot.querySelector("#solar-radio");
 
         this.energyContext = "wind";
         this.groupId = null;
@@ -98,7 +104,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             await this.initGroupSelect();
         } else if (role === "GROUP" && loggedInUser.groupId) {
             this.groupId = loggedInUser.groupId;
-            await this.setUpGroupQuizPage();
+            this.setUpGroupQuizPage();
         }
         return loggedInUser;
     }
@@ -118,6 +124,8 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             const error = e.detail.error;
             this.shadowRoot.querySelector("answer-feedback-component-れ")?.setAttribute("error", error);
         });
+
+        const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
     }
 
     disconnectedCallback() {
@@ -202,47 +210,41 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
     async initGroupSelect() {
         try {
-            const response = await fetch(`${window.env.BACKEND_URL}/groups`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            const groupSelector = this._shadowRoot.getElementById('groupSelector');
+            const groups = await this.getAllGroups();
 
-            const groups = await response.json();
-            const groupSelect = this.shadowRoot.querySelector("#group");
-            groupSelect.innerHTML = ""; // Clear existing options
+            groupSelector.innerHTML = ''; // Clear loading option
 
-            const defaultOption = document.createElement("option");
-            defaultOption.selected = true;
-            defaultOption.disabled = true;
-            defaultOption.value = "";
-            defaultOption.textContent = "Select a group";
-            groupSelect.appendChild(defaultOption);
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = 'Selecteer groep';
+            placeholderOption.disabled = true;
+            placeholderOption.selected = true;
+            groupSelector.appendChild(placeholderOption);
 
             groups.forEach(group => {
-                const option = document.createElement("option");
+                const option = document.createElement('option');
                 option.value = group.id;
-                option.textContent = `Group ${group.name}`;
-                groupSelect.appendChild(option);
+                option.textContent = group.name || `Groep ${group.id}`;
+                groupSelector.appendChild(option);
             });
 
-            groupSelect.addEventListener("change", (e) => {
-                this.groupId = e.target.value;
-                this.$questionList && (this.$questionList.groupId = this.groupId);
-            });
-
-            this.groupId = groupSelect.value;
-            this.$questionList && (this.$questionList.groupId = this.groupId);
-
-            this.$questionList.fetchQuestions()
+            groupSelector.addEventListener('change', (e) => {
+                console.log('Geselecteerde groep veranderd naar:', e.target.value);
+                const selectedGroupId = e.target.value;
+                this.$questionList.groupId = selectedGroupId;
+                this.$questionList.fetchQuestions();
+            })
         } catch (error) {
             this.showErrorMessage("Failed to fetch groups. Please try again later.");
         }
     }
 
-    async setUpGroupQuizPage() {
-        //remove group select from the page
-        this.shadowRoot.querySelector("#group-select").style.display = "none";
+    setUpGroupQuizPage() {
 
+        this.groupSelectorContainer.remove();
+
+        //remove group select from the page
         const bluetoothEnabled = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
         if (!bluetoothEnabled) {
             this.showErrorMessage("Bluetooth is not enabled. Please enable Bluetooth to access this page.");
@@ -250,5 +252,16 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         }
     }
 
+    //services
+    async getAllGroups() {
+        try {
+            const response = await fetch(`${window.env.BACKEND_URL}/groups/`);
+            const groups = await response.json();
+            return groups;
+        } catch (error) {
+            console.error("Fout bij ophalen van groepen:", error);
+            return [];
+        }
+    }
 });
 //#endregion CLASS

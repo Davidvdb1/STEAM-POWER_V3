@@ -107,6 +107,14 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             }
         });
 
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                this.fullscreen.src = 'Assets/SVGs/exit-fullscreen.svg'; 
+            } else {
+                this.fullscreen.src = 'Assets/SVGs/fullscreen.png'; 
+            }
+        });
+
         this.liveTeamData.setAttribute('mode', 'voltage');
         this.solarBar.setAttribute('mode', 'voltage');
         this.windBar.setAttribute('mode', 'voltage');
@@ -165,10 +173,8 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const isTeacher = user.role === "TEACHER";
 
         if (!isAdmin && !isTeacher) {
-            this.groupSelectorContainer.style.display = 'none';
-        } else {
-            this.groupSelectorContainer.style.display = 'block';
-        }
+            this.groupSelectorContainer.remove();   
+        } 
 
         const groupSelector = this._shadowRoot.getElementById('groupSelector');
         const groups = await this.getAllGroups();
