@@ -70,14 +70,18 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     initQuestions(questionData) {
+        const container = this.shadowRoot.querySelector("#container");
+        container.innerHTML = '';
+
         for (let key in questionData) {
             const question = document.createElement('quiz-question-れ');
-            this.shadowRoot.querySelector("#container").appendChild(question);
-
+            container.appendChild(question);
+    
             question.energyContext = this._energyContext;
             question.initQuestion(questionData[key]);
         }
     }
+    
 
 });
 //#endregion CLASS

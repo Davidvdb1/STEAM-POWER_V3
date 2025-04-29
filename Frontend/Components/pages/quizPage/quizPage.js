@@ -12,6 +12,12 @@ template.innerHTML = /*html*/`
     </style>
 
     <div id="container">
+        <div id="groupSelectorContainer">
+            <label for="groupSelector">Selecteer groep:</label>
+            <select id="groupSelector">
+                <option value="">Laden...</option>
+            </select>
+        </div>
         <answer-feedback-component-れ width="800" height="200"></answer-feedback-component-れ>
         <div id="energy-context-select-container">
             <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
@@ -30,7 +36,12 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-
+        this.groupSelectorContainer = this._shadowRoot.getElementById('groupSelectorContainer');
+        this.$container = this.shadowRoot.querySelector("#container");
+        this.$questionList = this.shadowRoot.querySelector("question-list-れ");
+        this.$windRadio = this.shadowRoot.querySelector("#wind-radio");
+        this.$waterRadio = this.shadowRoot.querySelector("#water-radio");
+        this.$solarRadio = this.shadowRoot.querySelector("#solar-radio");
 
         this.energyContext = "wind";
     }
@@ -45,13 +56,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     }
 
     async connectedCallback() {
-
-        this.$container = this.shadowRoot.querySelector("#container");
-        this.$questionList = this.shadowRoot.querySelector("question-list-れ");
-
-        this.$windRadio = this.shadowRoot.querySelector("#wind-radio");
-        this.$waterRadio = this.shadowRoot.querySelector("#water-radio");
-        this.$solarRadio = this.shadowRoot.querySelector("#solar-radio");
         switch (this.energyContext) {
             case "wind":
                 this.$windRadio.checked = true;
@@ -78,11 +82,57 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             const $answerFeedbackComponent = this.shadowRoot.querySelector("answer-feedback-component-れ");
             $answerFeedbackComponent.setAttribute("error", error);
         });
+
+        const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
+        const isAdmin = user.role === "ADMIN";
+        const isTeacher = user.role === "TEACHER";
+
+        if (!isAdmin && !isTeacher) {
+            this.groupSelectorContainer.remove();   
+        } 
+
+        const groupSelector = this._shadowRoot.getElementById('groupSelector');
+        const groups = await this.getAllGroups();
+
+        groupSelector.innerHTML = ''; // Clear loading option
+
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = 'Selecteer groep';
+        placeholderOption.disabled = true;
+        placeholderOption.selected = true;
+        groupSelector.appendChild(placeholderOption);
+
+        groups.forEach(group => {
+            const option = document.createElement('option');
+            option.value = group.id;
+            option.textContent = group.name || `Groep ${group.id}`;
+            groupSelector.appendChild(option);
+        });
+
+        groupSelector.addEventListener('change', (e) => {
+            console.log('Geselecteerde groep veranderd naar:', e.target.value);
+            const selectedGroupId = e.target.value;
+            this.$questionList.group_id = selectedGroupId;
+            this.$questionList.fetchQuestions();
+        })
     }
 
     handlePowerSourceChange(e) {
         this.energyContext = e.target.value;
         this.$questionList.energyContext = this.energyContext;
+    }
+
+    //services
+    async getAllGroups() {
+        try {
+            const response = await fetch(`${window.env.BACKEND_URL}/groups/`);
+            const groups = await response.json();
+            return groups;
+        } catch (error) {
+            console.error("Fout bij ophalen van groepen:", error);
+            return [];
+        }
     }
 });
 //#endregion CLASS
