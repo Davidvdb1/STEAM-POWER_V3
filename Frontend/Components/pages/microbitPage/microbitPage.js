@@ -135,6 +135,15 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             }
         });
 
+        window.addEventListener('bluetoothconnectionfailed', () => {
+            const bluetoothToggle = this._shadowRoot.getElementById('bluetoothToggle');
+            if (bluetoothToggle) {
+                bluetoothToggle.checked = false;
+            }
+            sessionStorage.setItem('bluetoothEnabled', 'false');
+            this.removeAttribute('bluetooth-enabled');
+        });
+
         dataTypeToggle.addEventListener('change', () => {
             const mode = dataTypeToggle.checked ? 'microbit' : 'voltage';
             this.setAttribute('data-type-mode', mode);
