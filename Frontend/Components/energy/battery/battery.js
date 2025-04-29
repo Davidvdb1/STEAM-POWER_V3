@@ -8,13 +8,13 @@ template.innerHTML = /*html*/`
         @import './Components/energy/battery/style.css';
     </style>
     <div class="battery-container">
-        <div class="battery-head"></div>
         <div class="battery-body">
             <div class="battery-fill"></div>
+            <div class="battery-info">
+                <span class="current-watt-hour">0</span>/<span class="required-watt-hour">0</span> Wh
+            </div>
         </div>
-        <div class="battery-info">
-            <span class="current-watt">0</span>/<span class="required-watt">0</span> W
-        </div>
+        <div class="battery-head"></div>
     </div>
 `;
 //#endregion BATTERY
@@ -27,25 +27,25 @@ window.customElements.define('battery-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         
         this.batteryFill = this._shadowRoot.querySelector('.battery-fill');
-        this.currentWattElement = this._shadowRoot.querySelector('.current-watt');
-        this.requiredWattElement = this._shadowRoot.querySelector('.required-watt');
+        this.currentWattHourElement = this._shadowRoot.querySelector('.current-watt-hour');
+        this.requiredWattHourElement = this._shadowRoot.querySelector('.required-watt-hour');
     }
 
     // component attributes
     static get observedAttributes() {
-        return ['current-watt', 'required-watt'];
+        return ['current-watt-hour', 'required-watt-hour'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (oldValue === newValue) return;
         
         switch (name) {
-            case 'current-watt':
-                this.currentWattElement.textContent = newValue;
+            case 'current-watt-hour':
+                this.currentWattHourElement.textContent = newValue;
                 this.updateBatteryFill();
                 break;
-            case 'required-watt':
-                this.requiredWattElement.textContent = newValue;
+            case 'required-watt-hour':
+                this.requiredWattHourElement.textContent = newValue;
                 this.updateBatteryFill();
                 break;
         }
@@ -53,25 +53,26 @@ window.customElements.define('battery-れ', class extends HTMLElement {
 
     connectedCallback() {
         // Initialize with default values if attributes aren't set
-        if (!this.hasAttribute('current-watt')) {
-            this.setAttribute('current-watt', '0');
+        if (!this.hasAttribute('current-watt-hour')) {
+            this.setAttribute('current-watt-hour', '0');
         }
-        if (!this.hasAttribute('required-watt')) {
-            this.setAttribute('required-watt', '100');
+        if (!this.hasAttribute('required-watt-hour')) {
+            this.setAttribute('required-watt-hour', '100');
         }
         
         this.updateBatteryFill();
     }
     
     updateBatteryFill() {
-        const currentWatt = parseInt(this.getAttribute('current-watt') || '0');
-        const requiredWatt = parseInt(this.getAttribute('required-watt') || '100');
+        // Ensure we're always parsing string values to integers
+        const currentWattHour = parseInt(this.getAttribute('current-watt-hour') || '0', 10);
+        const requiredWatthour = parseInt(this.getAttribute('required-watt-hour') || '100', 10);
         
         // Calculate fill percentage (capped at 100%)
-        let fillPercentage = Math.min((currentWatt / requiredWatt) * 100, 100);
+        let fillPercentage = Math.min((currentWattHour / requiredWatthour) * 100, 100);
         
-        // Update the fill height
-        this.batteryFill.style.height = `${fillPercentage}%`;
+        // Update the fill width instead of height
+        this.batteryFill.style.width = `${fillPercentage}%`;
         
         // Update fill color based on percentage
         if (fillPercentage >= 90) {

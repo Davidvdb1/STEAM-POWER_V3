@@ -39,6 +39,9 @@ template.innerHTML = /*html*/`
                 <option value="">Laden...</option>
             </select>
         </div>
+        <div class="energy-status">
+            <battery-れ id="energyBattery" current-watt-hour="0" required-watt-hour="500"></battery-れ>
+        </div>
     </div>
     <div id= "fullscreenContainer">
         <div id="graphs">
@@ -80,7 +83,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
         this.groupSelectorContainer = this._shadowRoot.getElementById('groupSelectorContainer');
         this.energyData = [];
-        this.timerInterval = null;
         this.currentWattValue = 0;
         this.groupPollInterval = null;
     }
@@ -220,40 +222,12 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
                 button.classList.add('active');
             });
         });
-
-        // Start the battery auto-increment timer
-        this.startBatteryTimer();
     }
     
     disconnectedCallback() {
-        // Clean up the timer when component is removed
-        this.stopBatteryTimer();
+        document.removeEventListener('energydatareading', this.updateEnergyData.bind(this));
     }
 
-    startBatteryTimer() {
-        // Clear any existing timer
-        this.stopBatteryTimer();
-        
-        // Start a new timer that increments the battery every second
-        this.timerInterval = setInterval(() => {
-            this.currentWattValue++;
-            this.energyBattery.setAttribute('current-watt', this.currentWattValue.toString());
-            
-            // Reset to 0 if it exceeds the required watt (for demonstration purposes)
-            const requiredWatt = parseInt(this.energyBattery.getAttribute('required-watt') || '500');
-            if (this.currentWattValue > requiredWatt) {
-                this.currentWattValue = 0;
-            }
-        }, 1000); // 1000ms = 1 second
-    }
-    
-    stopBatteryTimer() {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
-        }
-    }
-    
     startBluetoothConnection() {
         sessionStorage.setItem('bluetoothEnabled', 'true');
         this.setAttribute('bluetooth-enabled', 'true');
@@ -293,6 +267,13 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             const waterPoints = this.energyData.filter(d => d.type === 'WATER');
             this.waterBar.updateBar(waterPoints, data);
         }
+
+        if (data.value !== undefined) {
+            this.currentWattValue += Math.abs(parseInt(data.value));
+            const requiredWatt = 500;
+            this.currentWattValue = Math.min(this.currentWattValue, requiredWatt);
+            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
+        }
     }
 
     //services
@@ -306,6 +287,15 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
         
             this.energyData = await response.json();
+
+            let totalEnergy = 0;
+            this.energyData.forEach(data => {
+                if (data.value !== undefined) {
+                    totalEnergy += Math.abs(parseInt(data.value));
+                }
+            });
+            this.currentWattValue = Math.min(totalEnergy, 500);
+            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
 
             const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
             const windPoints = this.energyData.filter(d => d.type === 'WIND');
