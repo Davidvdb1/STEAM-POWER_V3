@@ -83,8 +83,8 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
         this.groupSelectorContainer = this._shadowRoot.getElementById('groupSelectorContainer');
         this.energyData = [];
-        this.currentWattValue = 0;
         this.groupPollInterval = null;
+        this.energyPollInterval = null;
     }
 
     // component attributes
@@ -228,10 +228,25 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
                 button.classList.add('active');
             });
         });
+
+        this.getGroupEnergy(user.groupId);
+        this.getBatteryCapacity();
+        this.getEnergyMultiplier();
+        
+        // Start polling for energy updates
+        this.energyPollInterval = setInterval(() => {
+            const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
+            const selectedGroupId = this._shadowRoot.getElementById('groupSelector')?.value || user.groupId;
+            if (selectedGroupId) {
+                this.getGroupEnergy(selectedGroupId);
+            }
+        }, 2000);
     }
     
     disconnectedCallback() {
         document.removeEventListener('energydatareading', this.updateEnergyData.bind(this));
+        clearInterval(this.groupPollInterval);
+        clearInterval(this.energyPollInterval);
     }
 
     startBluetoothConnection() {
@@ -273,13 +288,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             const waterPoints = this.energyData.filter(d => d.type === 'WATER');
             this.waterBar.updateBar(waterPoints, data);
         }
-
-        if (data.value !== undefined) {
-            this.currentWattValue += Math.abs(parseInt(data.value));
-            const requiredWatt = 500;
-            this.currentWattValue = Math.min(this.currentWattValue, requiredWatt);
-            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
-        }
     }
 
     //services
@@ -293,15 +301,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
         
             this.energyData = await response.json();
-
-            let totalEnergy = 0;
-            this.energyData.forEach(data => {
-                if (data.value !== undefined) {
-                    totalEnergy += Math.abs(parseInt(data.value));
-                }
-            });
-            this.currentWattValue = Math.min(totalEnergy, 500);
-            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
 
             const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
             const windPoints = this.energyData.filter(d => d.type === 'WIND');
@@ -360,6 +359,66 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         } catch (error) {
             console.error("Fout bij ophalen van energyData voor groep", groupId, ":", error);
         }
-    }    
+    }
+
+    async getGroupEnergy(groupId) {
+        if (!groupId) return;
+        
+        try {
+            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser'))?.token;
+            const response = await fetch(`${window.env.BACKEND_URL}/groups/${groupId}/energy`, {
+                headers: jwt ? { 'Authorization': `Bearer ${jwt}` } : {}
+            });
+            
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            
+            const data = await response.json();
+            
+            // Update battery component
+            if (this.energyBattery) {
+                this.energyBattery.setAttribute('current-watt-hour', data.batteryLevel || 0);
+                this.energyBattery.setAttribute('required-watt-hour', data.batteryCapacity || 500);
+            }
+            
+            return data;
+        } catch (error) {
+            console.error("Error fetching group energy:", error);
+            return null;
+        }
+    }
+
+    async getBatteryCapacity() {
+        try {
+            const response = await fetch(`${window.env.BACKEND_URL}/groups/battery`);
+            
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            
+            const batteryCapacity = await response.json();
+            
+            // Update battery component's required-watt-hour
+            if (this.energyBattery && batteryCapacity) {
+                this.energyBattery.setAttribute('required-watt-hour', batteryCapacity);
+            }
+            
+            return batteryCapacity;
+        } catch (error) {
+            console.error("Error fetching battery capacity:", error);
+            return null;
+        }
+    }
+
+    async getEnergyMultiplier() {
+        try {
+            const response = await fetch(`${window.env.BACKEND_URL}/groups/multiplier`);
+            
+            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+            
+            const multiplier = await response.json();
+            return multiplier;
+        } catch (error) {
+            console.error("Error fetching energy multiplier:", error);
+            return null;
+        }
+    }
 });
 //#endregion CLASS

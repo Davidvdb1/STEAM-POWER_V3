@@ -36,8 +36,23 @@ router.put('/:id/score', async (req, res) => {
     }
 });
 
-
-
+router.get('/:id/energy', async (req, res) => {
+    try {
+        const group = await groupService.getById(req.params.id);
+        if (!group) {
+            return res.status(404).json({ error: 'Groep niet gevonden' });
+        }
+        res.status(200).json({ 
+            energy: group.energy,
+            batteryLevel: group.batteryLevel,
+            batteryCapacity: group.batteryCapacity
+        });
+    } catch (error) {
+        console.error(`Error fetching energy data for group ${req.params.id}:`, error);
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ error: error.message });
+    }
+});
 
 router.post('/login', async (req, res) => {
     try {
