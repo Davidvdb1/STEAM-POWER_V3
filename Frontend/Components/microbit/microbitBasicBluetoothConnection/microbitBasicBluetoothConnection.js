@@ -39,32 +39,31 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
 
     connectedCallback() {
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
-        document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
-    }    
-
+    }
+    
     async init() {
-        if (!navigator.bluetooth) return; // TODO: Show error message "Bluetooth not supported on this browser"
-        
+        if (!navigator.bluetooth) return;
+    
         console.log('Searching for devices...');
         this.paused = false;
-        await this.requestDevice();
-        console.log('Connecting to device...');
-        await this.connectToDevice();
-        console.log('Configuring device...');
-        await this.configurePins();
-        console.log('Starting monitoring...');
-        await this.startMonitoring();
-    }
-
-    async pause() {
-        this.paused = !this.paused;
-        if (this.paused) {
-            console.log('Pausing connection...');
-            await this.stopMonitoring();
-        } else {
-            console.log('Unpausing connection...');
+    
+        try {
+            await this.requestDevice();
+            console.log('Connecting to device...');
+            await this.connectToDevice();
+            console.log('Configuring device...');
+            await this.configurePins();
+            console.log('Starting monitoring...');
             await this.startMonitoring();
+        } catch (error) {
+            console.error('Bluetooth connection failed or was cancelled:', error);
+    
+            // Dispatch global event via window
+            const failEvent = new CustomEvent('bluetoothconnectionfailed', {
+                detail: { message: error.message },
+            });
+            window.dispatchEvent(failEvent);
         }
     }
 
