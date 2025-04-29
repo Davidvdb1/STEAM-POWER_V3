@@ -16,7 +16,7 @@ class EnergyDataService {
             throw new utility.DatabaseError(`Error creating energy data: ${error.message}`);
         }
     }
-    
+
     async getAllByGroup(groupId) {
         try {
             if (!groupId) {
