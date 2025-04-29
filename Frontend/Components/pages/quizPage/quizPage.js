@@ -132,8 +132,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         const data = e.detail;
         const energyType = data.type.toLowerCase();
 
-        console.log("testing ", energyType);
-
         // For test phase, track which sensors have been detected
         if (!this._testCompleted) {
             // If an energy type already has been detected, this would mean all active sensors should have been detected
@@ -192,10 +190,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         }
     }
 
-    handleSomeEvent(data) {
-        console.log("Event data:", data);
-    }
-
     showErrorMessage(message) {
         this.$container.childNodes.forEach((child) => {
             if (child.nodeType === Node.ELEMENT_NODE) {
@@ -249,7 +243,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         //remove group select from the page
         this.shadowRoot.querySelector("#group-select").style.display = "none";
 
-        const bluetoothEnabled = true //JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
+        const bluetoothEnabled = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
         if (!bluetoothEnabled) {
             this.showErrorMessage("Bluetooth is not enabled. Please enable Bluetooth to access this page.");
             return;
