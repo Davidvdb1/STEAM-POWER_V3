@@ -124,7 +124,20 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const bluetoothToggle = this._shadowRoot.getElementById('bluetoothToggle');
         const dataTypeToggle = this._shadowRoot.getElementById('dataTypeToggle');
     
-        // Houd visuele toggle in sync met sessionStorage
+        this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(button => {
+            button.addEventListener('click', () => {
+                const range = button.getAttribute('data-range');
+                this.liveTeamData.setAttribute('range', range);
+                this.solarBar.setAttribute('range', range);
+                this.windBar.setAttribute('range', range);
+                this.waterBar.setAttribute('range', range);
+                this.averageValue.setAttribute('range', range);
+    
+                this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    
         const bluetoothWasOn = sessionStorage.getItem('bluetoothEnabled') === 'true';
         bluetoothToggle.checked = bluetoothWasOn;
     
@@ -134,7 +147,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             this.removeAttribute('bluetooth-enabled');
         }
     
-        // Toggle event
         bluetoothToggle.addEventListener('change', () => {
             if (bluetoothToggle.checked) {
                 this.startBluetoothConnection();
@@ -156,7 +168,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             const mode = dataTypeToggle.checked ? 'microbit' : 'voltage';
             this.setAttribute('data-type-mode', mode);
         
-            // doorgeven aan de kinderen
             this.liveTeamData.setAttribute('mode', mode);
             this.solarBar.setAttribute('mode', mode);
             this.windBar.setAttribute('mode', mode);
@@ -179,7 +190,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const groupSelector = this._shadowRoot.getElementById('groupSelector');
         const groups = await this.getAllGroups();
 
-        groupSelector.innerHTML = ''; // Clear loading option
+        groupSelector.innerHTML = ''; 
 
         const placeholderOption = document.createElement('option');
         placeholderOption.value = '';
@@ -198,36 +209,18 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         groupSelector.addEventListener('change', () => {
             const selectedGroupId = groupSelector.value;
             if (!selectedGroupId) return;
-        
-            // Stop eventueel oude interval
+
             clearInterval(this.groupPollInterval);
         
-            // Voer eerste keer meteen uit
             this.fetchAndRenderGroupData(selectedGroupId);
 
             this.averageValue.setAttribute('groupId', selectedGroupId);
             this.totalEnergyBar.setAttribute('groupId', selectedGroupId);
         
-            // Stel interval in om om de 2 seconden te updaten
             this.groupPollInterval = setInterval(() => {
                 this.fetchAndRenderGroupData(selectedGroupId);
             }, 2000);
         });        
-    
-        // Range buttons...
-        this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(button => {
-            button.addEventListener('click', () => {
-                const range = button.getAttribute('data-range');
-                this.liveTeamData.setAttribute('range', range);
-                this.solarBar.setAttribute('range', range);
-                this.windBar.setAttribute('range', range);
-                this.waterBar.setAttribute('range', range);
-                this.averageValue.setAttribute('range', range);
-    
-                this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(b => b.classList.remove('active'));
-                button.classList.add('active');
-            });
-        });
     }
     
     disconnectedCallback() {
