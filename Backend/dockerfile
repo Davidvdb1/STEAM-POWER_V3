@@ -1,18 +1,16 @@
-# Use Node.js as base image
-FROM node:18
-
-# Set working directory
+# 1) Builder: install deps (and run any lint/build if you add one)
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Copy package.json and install dependencies
-COPY package.json package-lock.json ./
-RUN npm install
-
-# Copy source code
+COPY package*.json ./
+RUN npm ci
 COPY . .
-
-# Expose the backend port
+ 
+# 2) Runtime: only prod deps + source
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app/package*.json ./
+RUN npm ci --omit=dev
+COPY --from=builder /app/src ./src
+ 
 EXPOSE 3000
-
-# Start the application
-CMD ["npm", "start"]
+CMD ["node", "src/server.js"]
