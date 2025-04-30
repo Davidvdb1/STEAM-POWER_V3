@@ -42,7 +42,7 @@ class Question {
         if (typeof this.maxTries !== 'number' || this.maxTries < 0) {
             error += "Max tries must be a non-negative number\n";
         }
-        if (this.type !== 'SOLAR' && this.type !== 'WIND' && this.type !== 'WATER') {
+        if (this.energyType !== 'SOLAR' && this.energyType !== 'WIND' && this.energyType !== 'WATER') {
             error += 'Invalid energy type';
         }
 
