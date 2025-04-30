@@ -1,5 +1,3 @@
-// Correctie voor het probleem waarbij filtering door 'range' geen data meer toont
-
 //#region RANGEINDICATORBAR
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
@@ -74,12 +72,10 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
 
         let filteredData = [...this.$data];
         const rangeAttr = this.getAttribute('range');
-        console.log('[RANGE BAR]', this.id, '| rangeAttr:', rangeAttr);
         if (rangeAttr) {
             const rangeMinutes = rangeMappings[rangeAttr] || 1440;
             const rangeMs = rangeMinutes * 60 * 1000;
             const cutoff = Date.now() - rangeMs;
-            console.log('[DEBUG]', this.id, '| voorbeeld timestamp:', filteredData[0]?.timestamp, '| typeof:', typeof filteredData[0]?.timestamp);
             filteredData = filteredData.filter(d => {
                 const rawTs = d.time;
                 const ts = (rawTs instanceof Date)
@@ -89,14 +85,7 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
                         : rawTs;                
                 return typeof ts === 'number' && !isNaN(ts) && ts >= cutoff;
             });
-
-        console.log('[RANGE BAR]', this.id, '| cutoff:', new Date(cutoff).toISOString());
-        
         }
-
-        console.log('[RANGE BAR]', this.id, '| originele data:', this.$data);
-        console.log('[RANGE BAR]', this.id, '| gefilterde data:', filteredData);
-
 
         const validData = filteredData.filter(d => d.value > 0);
         let min = 0;
@@ -107,12 +96,20 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
             max = this.convertValue(validData[0].value);
             current = max;
         } else if (validData.length >= 2) {
-            min = Math.min(...validData.map(d => this.convertValue(d.value)));
-            max = Math.max(...validData.map(d => this.convertValue(d.value)));
-            current = this.convertValue(validData[validData.length - 1].value);
+            const convertedValues = validData.map(d => this.convertValue(d.value));
+            const allSame = convertedValues.every(v => v === convertedValues[0]);
+        
+            if (allSame) {
+                // Behandel als één datapunt: links waarde, rechts 0
+                max = convertedValues[0];
+                current = max;
+                min = 0;
+            } else {
+                min = Math.min(...convertedValues);
+                max = Math.max(...convertedValues);
+                current = convertedValues[convertedValues.length - 1];
+            }
         }
-
-        console.log('[RANGE BAR]', this.id, '| min:', min, '| max:', max, '| current:', current);
 
         if (!this.chart) {
             this.initChart();

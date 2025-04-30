@@ -17,14 +17,15 @@ template.innerHTML = /*html*/`
     <div id="microbitPanel">
         <div id="switches">
             <div id="bluetoothToggleContainer">
-                <img src="Assets/SVGs/bluetooth.svg" alt="Bluetooth" class="icon" style="height: 20px;"/>
+                <img src="Assets/SVGs/bluetooth-off.svg" alt="Bluetooth" class="icon" style="height: 23px;"/>
                 <label class="switch">
                     <input type="checkbox" id="bluetoothToggle">
                     <span class="slider bluetooth"></span>
                 </label>
+                <img src="Assets/SVGs/bluetooth.svg" alt="Bluetooth" class="icon" style="height: 23px;"/>
             </div>
             <div id="dataTypeToggleContainer">
-                <img src="Assets/SVGs/voltage.svg" alt="microbit" class="icon" style="height: 20px;"/>
+                <img src="Assets/SVGs/voltage.svg" alt="microbit" class="icon" style="height: 20px; margin-right: 2px; margin-left: 2px;"/>
                 <label class="switch">
                     <input type="checkbox" id="dataTypeToggle">
                     <span class="slider datatype"></span>
@@ -251,22 +252,19 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         
         this.energyData.push(data);
         this.liveTeamData.updateGraph(this.energyData, data);
-    
+
         if (data.type === 'SOLAR') {
-            const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
-            this.solarBar.updateBar(solarPoints, data);
-        }
-    
-        if (data.type === 'WIND') {
-            const windPoints = this.energyData.filter(d => d.type === 'WIND');
-            this.windBar.updateBar(windPoints, data);
-        }
-    
-        if (data.type === 'WATER') {
-            const waterPoints = this.energyData.filter(d => d.type === 'WATER');
-            this.waterBar.updateBar(waterPoints, data);
+            this.solarBar.updateBar(data);
         }
 
+        if (data.type === 'WIND') {
+            this.windBar.updateBar(data);
+        }
+
+        if (data.type === 'WATER') {
+            this.waterBar.updateBar(data);
+        }
+    
         if (data.value !== undefined) {
             this.currentWattValue += Math.abs(parseInt(data.value));
             const requiredWatt = 500;
