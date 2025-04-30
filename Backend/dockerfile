@@ -1,16 +1,25 @@
-# 1) Builder: install deps (and run any lint/build if you add one)
-FROM node:18-alpine AS builder
+# Backend/Dockerfile
+ 
+# 1) Install production-only modules
+FROM node:18-alpine AS deps
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
+ 
+# Copy only package manifests to leverage Docker layer caching
+COPY package.json package-lock.json ./
+# Install runtime deps only
+RUN npm ci --omit=dev
+ 
+# 2) Copy source in
+FROM node:18-alpine AS runtime
+WORKDIR /app
+ 
+# Pull in installed deps
+COPY --from=deps /app/node_modules ./node_modules
+# Pull in your app code (controllers, models, etc.)
 COPY . .
  
-# 2) Runtime: only prod deps + source
-FROM node:18-alpine
-WORKDIR /app
-COPY --from=builder /app/package*.json ./
-RUN npm ci --omit=dev
-COPY --from=builder /app/src ./src
- 
+# Expose your app port
 EXPOSE 3000
-CMD ["node", "src/server.js"]
+ 
+# Launch your JS server
+CMD ["node", "server.js"]
