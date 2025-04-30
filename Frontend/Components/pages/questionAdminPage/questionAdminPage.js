@@ -66,9 +66,8 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
             questionElement.setAttribute('data-id', question.id);
             questionElement.setAttribute('data-title', question.title);
             questionElement.setAttribute('data-description', question.description);
-            questionElement.setAttribute('data-wind-question', question.windQuestion);
-            questionElement.setAttribute('data-water-question', question.waterQuestion);
-            questionElement.setAttribute('data-solar-question', question.solarQuestion);
+            questionElement.setAttribute('data-question-statement', question.questionStatement);
+            questionElement.setAttribute('data-energy-type', question.energyType);
             questionElement.setAttribute('data-max-tries', question.maxTries);
             questionElement.setAttribute('data-wattage', question.wattage);
             questionElement.setAttribute('data-score', question.score);
@@ -121,9 +120,7 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
             questionForm.setAttribute('data-id', question.id);
             questionForm.setAttribute('data-title', question.title);
             questionForm.setAttribute('data-description', question.description);
-            questionForm.setAttribute('data-wind-question', question.windQuestion);
-            questionForm.setAttribute('data-water-question', question.waterQuestion);
-            questionForm.setAttribute('data-solar-question', question.solarQuestion);
+            questionForm.setAttribute('data-question-statement', question.questionStatement);
             questionForm.setAttribute('data-max-tries', question.maxTries);
             questionForm.setAttribute('data-wattage', question.wattage);
             questionForm.setAttribute('data-score', question.score);
