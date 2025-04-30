@@ -41,14 +41,20 @@ window.customElements.define('battery-れ', class extends HTMLElement {
         
         switch (name) {
             case 'current-watt-hour':
-                this.currentWattHourElement.textContent = newValue;
+                this.currentWattHourElement.textContent = this.formatWattHour(newValue);
                 this.updateBatteryFill();
                 break;
             case 'required-watt-hour':
-                this.requiredWattHourElement.textContent = newValue;
+                // Display maximum capacity without rounding
+                this.requiredWattHourElement.textContent = parseFloat(newValue);
                 this.updateBatteryFill();
                 break;
         }
+    }
+
+    formatWattHour(value) {
+        // Parse to float and round to 3 decimal places - only for current value
+        return parseFloat(value).toFixed(3);
     }
 
     connectedCallback() {
@@ -64,9 +70,9 @@ window.customElements.define('battery-れ', class extends HTMLElement {
     }
     
     updateBatteryFill() {
-        // Ensure we're always parsing string values to integers
-        const currentWattHour = parseInt(this.getAttribute('current-watt-hour') || '0', 10);
-        const requiredWatthour = parseInt(this.getAttribute('required-watt-hour') || '100', 10);
+        // Ensure we're always parsing string values to floats for precise calculation
+        const currentWattHour = parseFloat(this.getAttribute('current-watt-hour') || '0');
+        const requiredWatthour = parseFloat(this.getAttribute('required-watt-hour') || '100');
         
         // Calculate fill percentage (capped at 100%)
         let fillPercentage = Math.min((currentWattHour / requiredWatthour) * 100, 100);

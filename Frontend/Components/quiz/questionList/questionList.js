@@ -9,8 +9,12 @@ template.innerHTML = /*html*/`
         @import './Components/quiz/questionList/style.css';
     </style>
 
+
     <div id="container">
-    
+        <div class="question-list-container">
+            Loading...
+        </div>
+       
     </div>
 `;
 //#endregion TEMPLATE
@@ -22,17 +26,34 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this._energyContext = null;
+        this._energyReading = null;
+
+        this._groupId = null;
+
+    }
+
+    set groupId(value) {
+        this._groupId = value;
+
     }
 
     set energyContext(value) {
         this._energyContext = value;
-
-        this.shadowRoot.querySelectorAll("quiz-question-れ").forEach((question) => {
+        const container = this.shadowRoot.querySelector("#container");
+        container.querySelectorAll("quiz-question-れ").forEach(question => {
             question.energyContext = value;
         });
     }
 
-    get energyContext() {  
+    set energyReading(value) {
+        this._energyReading = value;
+        const container = this.shadowRoot.querySelector("#container");
+        container.querySelectorAll("quiz-question-れ").forEach(question => {
+            question.energyReading = value;
+        });
+    }
+
+    get energyContext() {
         return this._energyContext;
     }
 
@@ -46,22 +67,22 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        this.group_id = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
-        this.fetchQuestions();
+
     }
 
     async fetchQuestions() {
         try {
-            const response = await fetch(`${window.env.BACKEND_URL}/questions/group/${this.group_id}`);
+            if (!this._groupId) throw new Error("Group ID is not set.");
+            const response = await fetch(`${window.env.BACKEND_URL}/questions/group/${this._groupId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
 
-            console.log("data", data);
+            const activeQuestions = data.filter(question => { console.log(question.active); return question.active === true });
 
-            this.initQuestions(data);
+            this.initQuestions(activeQuestions);
 
         } catch (error) {
             //TODO: Handle error in the fronted
@@ -70,18 +91,18 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     initQuestions(questionData) {
-        const container = this.shadowRoot.querySelector("#container");
-        container.innerHTML = '';
-
-        for (let key in questionData) {
+        const questionContainer = this.shadowRoot.querySelector(".question-list-container");
+        questionContainer.innerHTML = ""; // Clear previous questions
+        Object.values(questionData).forEach(content => {
             const question = document.createElement('quiz-question-れ');
-            container.appendChild(question);
-    
+            questionContainer.appendChild(question);
+
             question.energyContext = this._energyContext;
-            question.initQuestion(questionData[key]);
-        }
+            question.groupId = this._groupId;
+            question.initQuestion(content);
+        });
     }
-    
+
 
 });
 //#endregion CLASS

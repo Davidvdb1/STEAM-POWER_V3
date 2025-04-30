@@ -1,6 +1,5 @@
 //#region IMPORTS
 import "../../questions/adminQuestionComponent/adminQuestionComponent.js"
-import "../../questions/newQuestionModal/newQuestionModal.js"
 import "../../questions/modal/genericModal.js"
 import "../../questions/questionForm/questionForm.js"
 import "../../questions/confirmDeleteForm/confirmDeleteForm.js"
@@ -44,7 +43,6 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         this.addEventListener("confirm-delete", (e) => this.deleteQuestion(e.detail.id))
 
         this.addEventListener("question-form:succes", async () => {
-
             await this.fetchQuestions();
         })
 
@@ -136,34 +134,7 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         questionModal.setBody(questionForm);
 
         questionModal.addEventListener("question-form:succes", async () => {
-            setTimeout(() => questionModal.close(), 1000);
-        });
-    }
-
-    editQuestion(question) {
-        const editQuestionModal = document.createElement("newquestionmodal-れ");
-        editQuestionModal.setAttribute('data-id', question.id);
-        editQuestionModal.setAttribute('data-title', question.title);
-        editQuestionModal.setAttribute('data-description', question.description);
-        editQuestionModal.setAttribute('data-wind-question', question.windQuestion);
-        editQuestionModal.setAttribute('data-water-question', question.waterQuestion);
-        editQuestionModal.setAttribute('data-solar-question', question.solarQuestion);
-        editQuestionModal.setAttribute('data-max-tries', question.maxTries);
-        editQuestionModal.setAttribute('data-wattage', question.wattage);
-        editQuestionModal.setAttribute('data-score', question.score);
-        editQuestionModal.setAttribute('data-active', question.active);
-        editQuestionModal.setAttribute('data-picture', question.picture); // Add this line
-        this._shadowRoot.appendChild(editQuestionModal);
-    }
-
-    addQuestion() {
-        const newQuestionModal = document.createElement("generic-modal-れ");
-        const newQuestionForm = document.createElement("newquestionform-れ");
-        this._shadowRoot.appendChild(newQuestionModal);
-        newQuestionModal.setTitle("Voeg vraag toe");
-        newQuestionModal.setBody(newQuestionForm);
-        newQuestionModal.addEventListener("question-form:succes", async () => {
-            newQuestionModal.close();
+            questionModal.close();
         });
     }
 });

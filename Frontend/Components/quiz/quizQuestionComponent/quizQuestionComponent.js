@@ -45,9 +45,8 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
 
         this._energyContext = null;
-        this.$actualQuestion = this.shadowRoot.querySelector("#actual-question")
-
-
+        this._energyReading = null;
+        this._groupId = null;
 
         this._id = null;
         this._score = 0;
@@ -66,8 +65,16 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
     set energyContext(value) {
         this._energyContext = value;
+        this.updateQuestion();
+    }
 
-        this.$actualQuestion.innerText = this._questions[this._energyContext];
+    set energyReading(value) {
+        this._energyReading = value;
+        console.log("Energy reading set to:", value);
+    }
+
+    set groupId(value) {
+        this._groupId = value;
     }
 
     // component attributes
@@ -79,22 +86,32 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
     }
     connectedCallback() {
-        this.$submitAnswerButton = this._shadowRoot.querySelector("#submit-answer");
-        this.$answerInput = this._shadowRoot.querySelector("input[type='text']");
 
+        this.$answerInputContainer = this.shadowRoot.querySelector("#answer-input-container");
 
-        this.$submitAnswerButton.addEventListener("click", async () => {
-            const answer = this.$answerInput.value;
+        const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+        if (loggedInUser && (loggedInUser.role === "ADMIN" || loggedInUser.role === "TEACHER")) {
+            this.$answerInputContainer.remove();
+            this.$answerInputContainer = null;
+        } else {
 
-            await this.handleSubmitAnswer(answer);
-        });
+            this.$actualQuestion = this.shadowRoot.querySelector("#actual-question");
+            this.$submitAnswerButton = this.shadowRoot.querySelector("#submit-answer");
+            this.$answerInput = this.shadowRoot.querySelector("input[type='text']");
+
+            this.$submitAnswerButton.addEventListener("click", async () => {
+                const answer = this.$answerInput.value;
+
+                await this.handleSubmitAnswer(answer);
+            });
+        }
     }
 
     async handleSubmitAnswer(answer) {
-        const mockEnergyReading = 50; // Mock energy reading value
+        const mockEnergyReading = this._energyReading; // Mock energy reading value
 
         try {
-            const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
+            //const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
 
             const response = await fetch(`${window.env.BACKEND_URL}/questions/${this._id}/answer`, {
                 method: "POST",
@@ -102,7 +119,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    groupId,
+                    groupId: this._groupId,
                     answerValue: answer === "" ? 0 : answer,
                     energyReading: mockEnergyReading
                 })
@@ -136,7 +153,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         const groupId = JSON.parse(sessionStorage.getItem("loggedInUser")).groupId;
 
         try {
-            const response = await fetch(`${window.env.BACKEND_URL}/groups/${groupId}/score`, {
+            const res = await fetch(`${window.env.BACKEND_URL}/groups/${groupId}/score`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -145,10 +162,11 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
                     bonusScore: score
                 })
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
             }
-            const data = await response.json();
+            const data = await res.json();
             console.log("Group score updated:", data);
         } catch (error) {
             console.error("Error updating group score:", error);
@@ -219,7 +237,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
     }
     set actualQuestion(value) {
         this._actualQuestion = value;
-        this.$actualQuestion.innerText = value;
+        this.updateQuestion();
     }
 
     set score(value) {
@@ -227,9 +245,15 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
     }
 
     disableInput() {
-        console.log("Input disabled");
+        if (!this.$answerInputContainer) return;
         this.$answerInput.disabled = true;
         this.$submitAnswerButton.disabled = true;
+    }
+
+    updateQuestion() {
+        if (this.$actualQuestion) {
+            this.$actualQuestion.innerText = this._questions[this._energyContext] || this._actualQuestion;
+        }
     }
 
     initQuestion({ id, score, isSolved, answerCount, maxTries, wattage, title, description, picture, windQuestion, solarQuestion, waterQuestion }) {
@@ -242,18 +266,16 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
         this.wattage = wattage;
         this.title = title;
-        this.title = description;
+        this.description = description;
         this.picture = picture;
-
 
         this.questions = {
             "wind": windQuestion,
             "solar": solarQuestion,
             "water": waterQuestion
-        }
+        };
 
-        this.actualQuestion = this._questions[this._energyContext];
+        this.updateQuestion();
     }
-
 });
 //#endregion CLASS

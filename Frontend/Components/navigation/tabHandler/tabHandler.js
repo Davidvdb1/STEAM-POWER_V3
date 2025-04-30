@@ -10,7 +10,7 @@ import "../../pages/microbitPage/microbitPage.js"
 import "../../camp/formContainer/formContainer.js"
 import "../../pages/userLoginPage/userLoginPage.js"
 import "../../pages/groupLoginPage/groupLoginPage.js"
-import "../../pages/workshopInfo/workshopInfo.js"   
+import "../../pages/workshopInfo/workshopInfo.js"
 import "../../authentication/logout/logout.js"
 import "../../pages/questionAdminPage/questionAdminPage.js"
 import "../../pages/quizPage/quizPage.js"
@@ -56,7 +56,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         const tabFromUrl = urlParams.get("tab");
         const campIDFromUrl = urlParams.get("camp");
         const workshopIDFromUrl = urlParams.get("workshop");
-    
+
         this.landingPage = tabFromUrl || "campoverviewpage";
         this.campID = campIDFromUrl
         this.workshopID = workshopIDFromUrl
@@ -65,8 +65,8 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this.$content.setAttribute("camp", this.campID);
         this.$content.setAttribute("workshop", this.workshopID);
 
-        this.addEventListener("tab", this.tabHandler);
-        this.addEventListener("tabID", this.tabIdHandler);
+        this.addEventListener("tab", this.tabHandler.bind(this));
+        this.addEventListener("tabID", this.tabIdHandler.bind(this));
 
         this.renderHeader();
 
