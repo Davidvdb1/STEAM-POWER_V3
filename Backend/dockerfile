@@ -1,25 +1,18 @@
-# Backend/Dockerfile
- 
-# 1) Install production-only modules
-FROM node:18-alpine AS deps
+# Use Node.js as base image
+FROM node:18
+
+# Set working directory
 WORKDIR /app
- 
-# Copy only package manifests to leverage Docker layer caching
+
+# Copy package.json and install dependencies
 COPY package.json package-lock.json ./
-# Install runtime deps only
-RUN npm ci --omit=dev
- 
-# 2) Copy source in
-FROM node:18-alpine AS runtime
-WORKDIR /app
- 
-# Pull in installed deps
-COPY --from=deps /app/node_modules ./node_modules
-# Pull in your app code (controllers, models, etc.)
-COPY . .
- 
-# Expose your app port
+RUN npm install
+
+# Copy source code
+COPY ./Backend .
+
+# Expose the backend port
 EXPOSE 3000
- 
-# Launch your JS server
-CMD ["node", "server.js"]
+
+# Start the application
+CMD ["npm", "start"]

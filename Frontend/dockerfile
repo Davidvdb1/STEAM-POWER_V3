@@ -1,8 +1,14 @@
-FROM nginx:alpine
-RUN apk add --no-cache gettext
-WORKDIR /usr/share/nginx/html
-COPY . /usr/share/nginx/html
-# Only rename if config.template.js is not present
-RUN if [ ! -f config.template.js ]; then mv config.js config.template.js; fi
+# Use the official Nginx image
+FROM nginx:latest
+
+# Remove the default nginx static assets (optional)
+RUN rm -rf /usr/share/nginx/html/*
+
+# Copy your static files to the Nginx html directory
+COPY ./Frontend /usr/share/nginx/html
+
+# Expose port 80 to the outside world
 EXPOSE 80
-CMD envsubst < config.template.js > config.js && nginx -g 'daemon off;'
+
+# Start Nginx in the foreground
+CMD ["nginx", "-g", "daemon off;"]
