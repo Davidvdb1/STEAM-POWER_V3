@@ -4,11 +4,13 @@ FROM node:18
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY package.json package-lock.json ./
+# Copy Backend folder (including package.json and lock file) first
+COPY ./Backend/package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy source code
+# Copy the rest of the backend source code
 COPY ./Backend .
 
 # Expose the backend port

@@ -1,14 +1,22 @@
-# Use the official Nginx image
+# Stage 1: Build the frontend
+FROM node:18 AS build
+
+WORKDIR /app
+
+COPY ./Frontend/package*.json ./
+RUN npm install
+
+COPY ./Frontend .
+RUN npm run build
+
+# Stage 2: Serve with Nginx
 FROM nginx:latest
 
-# Remove the default nginx static assets (optional)
+# Remove default html
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copy your static files to the Nginx html directory
-COPY ./Frontend /usr/share/nginx/html
+# Copy built frontend from previous stage
+COPY --from=build /app/build /usr/share/nginx/html
 
-# Expose port 80 to the outside world
 EXPOSE 80
-
-# Start Nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]
