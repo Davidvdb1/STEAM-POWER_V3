@@ -87,15 +87,13 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
     }
     connectedCallback() {
 
-        this.$answerInputContainer = this.shadowRoot.querySelector("#answer-input-container");
+        this.$inputContainer = this.shadowRoot.querySelector("#input-container");
 
         const loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
         if (loggedInUser && (loggedInUser.role === "ADMIN" || loggedInUser.role === "TEACHER")) {
-            this.$answerInputContainer.remove();
-            this.$answerInputContainer = null;
+            this.$inputContainer.remove();
+            this.$inputContainer = null;
         } else {
-
-            this.$actualQuestion = this.shadowRoot.querySelector("#actual-question");
             this.$submitAnswerButton = this.shadowRoot.querySelector("#submit-answer");
             this.$answerInput = this.shadowRoot.querySelector("input[type='text']");
 
@@ -105,6 +103,8 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
                 await this.handleSubmitAnswer(answer);
             });
         }
+
+        this.$actualQuestion = this.shadowRoot.querySelector("#actual-question");
     }
 
     async handleSubmitAnswer(answer) {
@@ -249,7 +249,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
     }
 
     disableInput() {
-        if (!this.$answerInputContainer) return;
+        if (!this.$inputContainer) return;
         this.$answerInput.disabled = true;
         this.$submitAnswerButton.disabled = true;
     }
