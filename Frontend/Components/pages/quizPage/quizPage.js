@@ -1,7 +1,7 @@
 //#region IMPORTS
 import '../../quiz/questionList/questionList.js';
 import '../../quiz/quizQuestionComponent/quizQuestionComponent.js';
-import '../../quiz/answerFeedbackComponent/answerFeedbackComponent.js';
+import '../../quiz/answerFeedBackComponent/answerFeedbackComponent.js';
 //#endregion IMPORTS
 
 //#region TEMPLATE
