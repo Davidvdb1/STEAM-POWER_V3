@@ -45,16 +45,12 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
     async init() {
         if (!navigator.bluetooth) return;
 
-        console.log('Searching for devices...');
         this.paused = false;
 
         try {
             await this.requestDevice();
-            console.log('Connecting to device...');
             await this.connectToDevice();
-            console.log('Configuring device...');
             await this.configurePins();
-            console.log('Starting monitoring...');
             await this.startMonitoring();
         } catch (error) {
             console.error('Bluetooth connection failed or was cancelled:', error);
@@ -68,7 +64,6 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
     }
 
     async disconnect() {
-        console.log('Disconnecting...');
         this.paused = false;
         this.server = null;
         this.ioPinService = null;
@@ -86,8 +81,6 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
 
     async requestDevice() {
         const microbitId = await JSON.parse(sessionStorage.getItem('loggedInUser'))?.microbitId;
-        console.log(sessionStorage.getItem('loggedInUser'));
-        console.log('MicrobitId:', microbitId);
         this.device = await navigator.bluetooth.requestDevice({
             filters: [{ namePrefix: microbitId ? `BBC micro:bit [${microbitId}]` : 'BBC micro:bit' }], // if microbitId is set, use it to filter the device name
             optionalServices: [IOPINSERVICE_SERVICE_UUID]
@@ -132,7 +125,6 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         await this.pinIoConfigurationCharacteristic.writeValue(adFlagsBuffer);
         await this.pinAdConfigurationCharacteristic.writeValue(ioFlagsBuffer);
         const pinconfig = await this.pinIoConfigurationCharacteristic.readValue();
-        console.log(pinconfig);
     }
 
     async readPinValues() {
@@ -155,7 +147,6 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
             if (data.value == 0) return;
             const response = await this.postEnergyData(data);
             const body = await response.json();
-            console.log(body);
             const datapoint = body.energyData;
 
             const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
