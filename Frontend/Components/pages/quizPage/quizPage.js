@@ -101,10 +101,21 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             this.shadowRoot.querySelector("#energy-data-container").style.display = "none";
             this.shadowRoot.querySelector(".answer-feedback-container").style.display = "none";
             this.shadowRoot.querySelector("#question-list-container").classList.add("admin-teacher-view");
+
+            this.$radioEls.forEach((radioEl) => {
+                radioEl.disabled = false;
+                radioEl.addEventListener("change", (e) => {
+                    this.energyContext = e.target.value;
+                    this.$questionList && (this.$questionList.energyContext = this.energyContext);
+                    this.$questionList && (this.$questionList.fetchQuestions());
+                });
+            });
+
             await this.initGroupSelect();
         } else if (role === "GROUP" && loggedInUser.groupId) {
             this.groupId = loggedInUser.groupId;
             this.setUpGroupQuizPage();
+            this.setupEnergyReadingDisplay();
         }
         return loggedInUser;
     }
@@ -112,7 +123,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     async connectedCallback() {
         if (!(await this.checkLogin())) return;
 
-        this.setupEnergyReadingDisplay();
 
         customElements.whenDefined('question-list-れ').then(() => {
             this.$questionList && (this.$questionList.groupId = this.groupId);
@@ -124,8 +134,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             const error = e.detail.error;
             this.shadowRoot.querySelector("answer-feedback-component-れ")?.setAttribute("error", error);
         });
-
-        const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
     }
 
     disconnectedCallback() {
@@ -158,6 +166,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
                         this.energyContext = e.target.value;
                         this.$energyDataValue.innerText = "loading...";
                         this.$questionList && (this.$questionList.energyContext = this.energyContext);
+                        this.$questionList && (this.$questionList.fetchQuestions());
                     });
                 }
             } else {
@@ -245,7 +254,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.groupSelectorContainer.remove();
 
         //remove group select from the page
-        const bluetoothEnabled = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
+        const bluetoothEnabled = true //JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
         if (!bluetoothEnabled) {
             this.showErrorMessage("Bluetooth is not enabled. Please enable Bluetooth to access this page.");
             return;

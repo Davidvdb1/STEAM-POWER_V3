@@ -50,6 +50,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
         this._id = null;
         this._score = 0;
+        this._energyType = null;
         this._isSolved = false;
         this._currentAttempts = 0;
         this._maxAttempts = 0;
@@ -58,8 +59,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this._description = "";
         this._picture = "";
 
-        this._questions = {}
-        this._actualQuestion = "";
+        this._questionStatement = "";
 
     }
 
@@ -217,6 +217,10 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this.shadowRoot.querySelector("#wattage").innerText = value;
     }
 
+    set energyType(value) {
+        this._energyType = value;
+    }
+
     set title(value) {
         this._title = value;
         this.shadowRoot.querySelector("#title").innerText = value;
@@ -235,8 +239,8 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
     set questions(value) {
         this._questions = value;
     }
-    set actualQuestion(value) {
-        this._actualQuestion = value;
+    set questionStatement(value) {
+        this._questionStatement = value;
         this.updateQuestion();
     }
 
@@ -252,13 +256,14 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
 
     updateQuestion() {
         if (this.$actualQuestion) {
-            this.$actualQuestion.innerText = this._questions[this._energyContext] || this._actualQuestion;
+            this.$actualQuestion.innerText = this._questionStatement;
         }
     }
 
-    initQuestion({ id, score, isSolved, answerCount, maxTries, wattage, title, description, picture, windQuestion, solarQuestion, waterQuestion }) {
+    initQuestion({ id, score, isSolved, answerCount, maxTries, wattage, title, description, picture, energyType, questionStatement }) {
         this.id = id;
         this.score = score;
+        this.energyType = energyType;
 
         this.isSolved = isSolved;
         this.maxAttempts = maxTries;
@@ -269,13 +274,7 @@ window.customElements.define('quiz-question-れ', class extends HTMLElement {
         this.description = description;
         this.picture = picture;
 
-        this.questions = {
-            "wind": windQuestion,
-            "solar": solarQuestion,
-            "water": waterQuestion
-        };
-
-        this.updateQuestion();
+        this.questionStatement = questionStatement;
     }
 });
 //#endregion CLASS
