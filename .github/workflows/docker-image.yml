@@ -19,22 +19,24 @@ jobs:
       run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
     - name: Set up environment variables
-      run: echo "TIMESTAMP=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+      run: |
+        echo "TIMESTAMP=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+        echo "OWNER=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
     - name: Build and tag backend image
       run: |
-        docker build -t ghcr.io/${{ github.repository_owner }}/twa-backend:latest -t ghcr.io/${{ github.repository_owner }}/twa-backend:${{ env.TIMESTAMP }} -f Backend/dockerfile .
+        docker build -t ghcr.io/${{ env.OWNER }}/twa-backend:latest -t ghcr.io/${{ env.OWNER }}/twa-backend:${{ env.TIMESTAMP }} -f Backend/dockerfile .
 
     - name: Build and tag frontend image
       run: |
-        docker build -t ghcr.io/${{ github.repository_owner }}/twa-frontend:latest -t ghcr.io/${{ github.repository_owner }}/twa-frontend:${{ env.TIMESTAMP }} -f Frontend/dockerfile .
+        docker build -t ghcr.io/${{ env.OWNER }}/twa-frontend:latest -t ghcr.io/${{ env.OWNER }}/twa-frontend:${{ env.TIMESTAMP }} -f Frontend/dockerfile .
 
     - name: Push backend image to GHCR
       run: |
-        docker push ghcr.io/${{ github.repository_owner }}/twa-backend:latest
-        docker push ghcr.io/${{ github.repository_owner }}/twa-backend:${{ env.TIMESTAMP }}
+        docker push ghcr.io/${{ env.OWNER }}/twa-backend:latest
+        docker push ghcr.io/${{ env.OWNER }}/twa-backend:${{ env.TIMESTAMP }}
 
     - name: Push frontend image to GHCR
       run: |
-        docker push ghcr.io/${{ github.repository_owner }}/twa-frontend:latest
-        docker push ghcr.io/${{ github.repository_owner }}/twa-frontend:${{ env.TIMESTAMP }}
+        docker push ghcr.io/${{ env.OWNER }}/twa-frontend:latest
+        docker push ghcr.io/${{ env.OWNER }}/twa-frontend:${{ env.TIMESTAMP }}
