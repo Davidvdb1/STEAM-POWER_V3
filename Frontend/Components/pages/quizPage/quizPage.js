@@ -66,6 +66,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
         this.energyContext = "wind";
         this.groupId = null;
+        this.energyMultiplier = 1;
 
         // Replace test counters with detected sensors array
         this._detectedSensors = new Set();
@@ -114,6 +115,8 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             await this.initGroupSelect();
         } else if (role === "GROUP" && loggedInUser.groupId) {
             this.groupId = loggedInUser.groupId;
+            this.energyMultiplier = await fetch(`${window.env.BACKEND_URL}/groups/multiplier`).then(res => res.json()).then(data => data);
+            console.log("Energy multiplier:", this.energyMultiplier);
             this.setUpGroupQuizPage();
             this.setupEnergyReadingDisplay();
         }
@@ -193,17 +196,17 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     handleEnergyDataReadingQuizPhase(e) {
         const data = e.detail;
         const energyType = data.type.toLowerCase();
-
-        console.log("Energy data reading:", energyType, data.value);
-
+        
         // Actual processing and displaying of energy data
         if (energyType === this.energyContext) {
             console.log("Energy data reading for context:");
             let voltage = data.value / 341; // Convert to volts
             let power = voltage * 0.5; // Convert to watts (assuming 0.5A current)
-            power = parseFloat(power.toFixed(3));
-            this.$questionList && (this.$questionList.energyReading = power);
-            this.$energyDataValue.innerText = `${power} W`;
+            let multipliedPower = power * this.energyMultiplier;
+            let energy = multipliedPower * 2 / 3600; // Convert to kWh
+            energy = parseFloat(energy.toFixed(3));
+            this.$questionList && (this.$questionList.energyReading = energy);
+            this.$energyDataValue.innerText = `${energy} Wh`;
         }
     }
 

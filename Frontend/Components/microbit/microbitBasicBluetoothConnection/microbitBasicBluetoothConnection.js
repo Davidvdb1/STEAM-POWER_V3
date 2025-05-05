@@ -170,9 +170,9 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
 
         const nextRandomValue = (val, spread) => Math.floor(Math.random() * spread) + val;
 
-        const solarValue = nextRandomValue(750, 80);
+        const solarValue = nextRandomValue(750, 10);
         const windValue = 0 //nextRandomValue(300, 50);
-        const waterValue = nextRandomValue(450, 35);
+        const waterValue = nextRandomValue(450, 10);
 
         const time = new Date().toISOString();
 
