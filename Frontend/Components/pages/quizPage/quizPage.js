@@ -103,20 +103,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             this.shadowRoot.querySelector(".answer-feedback-container").style.display = "none";
             this.shadowRoot.querySelector("#question-list-container").classList.add("admin-teacher-view");
 
-            this.$radioEls.forEach((radioEl) => {
-                radioEl.disabled = false;
-                const labelEl = radioEl.closest('label');
-                if (labelEl) {
-                    // reset label color to default
-                    labelEl.style.color = 'inherit';
-                }
-                
-                radioEl.addEventListener("change", (e) => {
-                    this.energyContext = e.target.value;
-                    this.$questionList && (this.$questionList.energyContext = this.energyContext);
-                    this.$questionList && (this.$questionList.fetchQuestions());
-                });
-            });
+            this.enableRadioButtons(this.$radioEls);
 
             await this.initGroupSelect();
         } else if (role === "GROUP" && loggedInUser.groupId) {
@@ -127,6 +114,26 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             this.setupEnergyReadingDisplay();
         }
         return loggedInUser;
+    }
+
+    enableRadioButtons(radioEls) {
+
+        radioEls.forEach((radioEl) => {
+            radioEl.disabled = false;
+            const labelEl = radioEl.closest('label');
+            if (labelEl) {
+                // reset label color to default
+                labelEl.style.color = 'inherit';
+            }
+
+            radioEl.addEventListener("change", (e) => {
+                this.energyContext = e.target.value;
+                this.$energyDataValue.innerText = "loading...";
+                this.$questionList && (this.$questionList.energyContext = this.energyContext);
+                this.$questionList && (this.$questionList.fetchQuestions());
+            });
+        });
+
     }
 
     async connectedCallback() {
@@ -164,20 +171,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
                 this._detectedSensors.add(energyType);
 
                 const radioEl = this.shadowRoot.querySelector(`#${energyType}-radio`);
-                if (radioEl) {
-                    radioEl.disabled = false;
-                    const labelEl = radioEl.closest('label');
-                    if (labelEl) {
-                        // reset label color to default
-                        labelEl.style.color = 'inherit';
-                    }
-                    radioEl.addEventListener("change", (e) => {
-                        this.energyContext = e.target.value;
-                        this.$energyDataValue.innerText = "loading...";
-                        this.$questionList && (this.$questionList.energyContext = this.energyContext);
-                        this.$questionList && (this.$questionList.fetchQuestions());
-                    });
-                }
+                this.enableRadioButtons([radioEl]);
             } else {
                 // then select the first available sensor.
                 const firstAvailableRadio = Array.from(this.$radioEls).find(radio => !radio.disabled);
