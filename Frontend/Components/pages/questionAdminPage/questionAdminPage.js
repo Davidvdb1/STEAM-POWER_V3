@@ -12,7 +12,14 @@ template.innerHTML = /*html*/`
         @import './Components/pages/questionAdminPage/style.css';
     </style>
     <h1>Vragenlijst aanpassen</h1>
-    <button id="add-question">Vraag toevoegen</button>
+    <div id="top-controls">
+        <button id="add-question">Vraag toevoegen</button>
+        <div>
+            <label for="errorMargin">Foutmarge (%): </label>
+            <input name="errorMargin" id="error-margin-input" type="number" step="0.01" min="0" max="1">
+            <button id="confirmUpdateErrorMargin" class="hidden">Bevestig</button>
+        </div>
+    </div>
     <div id="questions-container"></div>
 `;
 //#endregion TEMPLATE
@@ -23,6 +30,8 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+
+        this.originalErrorMargin = null;
     }
 
     // component attributes
@@ -37,6 +46,8 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
     connectedCallback() {
         this.$addQuestionButton = this._shadowRoot.querySelector("#add-question");
         this.$questionsContainer = this._shadowRoot.querySelector("#questions-container");
+        this.$errorMarginInput = this._shadowRoot.querySelector("#error-margin-input");
+        this.$confirmUpdateErrorMarginButton = this._shadowRoot.querySelector("#confirmUpdateErrorMargin");
 
         this.$addQuestionButton.addEventListener('click', () => this.openQuestionModal());
 
@@ -47,12 +58,52 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         })
 
         this.fetchQuestions();
+
+        this.$errorMarginInput.addEventListener("change", (e) => {
+            const currentValue = parseFloat(e.target.value); 
+            this.$confirmUpdateErrorMarginButton.classList.toggle("hidden", currentValue === this.originalErrorMargin);
+        });
+
+        this.$confirmUpdateErrorMarginButton.addEventListener("click", async () => {
+            const newErrorMargin = parseFloat(this.$errorMarginInput.value);
+            if (isNaN(newErrorMargin)) {
+                alert("Foutmarge moet een getal zijn.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${window.env.BACKEND_URL}/questions/errormargin`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ errorMargin: newErrorMargin })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                this.originalErrorMargin = newErrorMargin; // Update the original error margin
+                this.$confirmUpdateErrorMarginButton.classList.add("hidden");
+            } catch (error) {
+                console.error('Error updating error margin:', error);
+            }
+        });
     }
 
     async fetchQuestions() {
         try {
             const response = await fetch(`${window.env.BACKEND_URL}/questions`);
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
             const questions = await response.json();
+
+            this.originalErrorMargin = questions[0].errorMargin; // Store the current error margin
+            this.$errorMarginInput.value = this.originalErrorMargin; // Set the error margin input value to the first question's error margin
+
+
             this.renderQuestions(questions);
         } catch (error) {
             console.error('Error fetching questions:', error);

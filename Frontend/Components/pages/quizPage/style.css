@@ -39,6 +39,9 @@ answer-feedback-component-れ {
   margin-bottom: 1rem;
   width: 100%;
 }
+#energy-context-select label {
+  color: grey;
+}
 
 #error-container {
   background-color: #ffe5e5;

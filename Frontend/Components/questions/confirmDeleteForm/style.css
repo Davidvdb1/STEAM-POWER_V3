@@ -8,7 +8,6 @@ button {
   padding: 10px 15px;
   border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
   font-weight: bold;
   border-style: solid;
   border-color: #9FDAF9;
