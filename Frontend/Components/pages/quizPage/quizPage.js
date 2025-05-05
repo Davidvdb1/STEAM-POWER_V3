@@ -105,6 +105,12 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
             this.$radioEls.forEach((radioEl) => {
                 radioEl.disabled = false;
+                const labelEl = radioEl.closest('label');
+                if (labelEl) {
+                    // reset label color to default
+                    labelEl.style.color = 'inherit';
+                }
+                
                 radioEl.addEventListener("change", (e) => {
                     this.energyContext = e.target.value;
                     this.$questionList && (this.$questionList.energyContext = this.energyContext);
@@ -196,7 +202,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     handleEnergyDataReadingQuizPhase(e) {
         const data = e.detail;
         const energyType = data.type.toLowerCase();
-        
+
         // Actual processing and displaying of energy data
         if (energyType === this.energyContext) {
             console.log("Energy data reading for context:");
