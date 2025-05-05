@@ -38,7 +38,6 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
     }
 
     async connectedCallback() {
-        await this.startMockMonitoring();
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
     }

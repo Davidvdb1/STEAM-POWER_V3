@@ -109,7 +109,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         } else if (role === "GROUP" && loggedInUser.groupId) {
             this.groupId = loggedInUser.groupId;
             this.energyMultiplier = await fetch(`${window.env.BACKEND_URL}/groups/multiplier`).then(res => res.json()).then(data => data);
-            console.log("Energy multiplier:", this.energyMultiplier);
             this.setUpGroupQuizPage();
             this.setupEnergyReadingDisplay();
         }
@@ -125,7 +124,8 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
                 // reset label color to default
                 labelEl.style.color = 'inherit';
             }
-
+            radioEl.checked = radioEl.value === this.energyContext;
+            console.log("Radio button enabled:", radioEl.value, radioEl.disabled, radioEl.checked);
             radioEl.addEventListener("change", (e) => {
                 this.energyContext = e.target.value;
                 this.$energyDataValue.innerText = "loading...";
@@ -257,7 +257,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         this.groupSelectorContainer.remove();
 
         //remove group select from the page
-        const bluetoothEnabled = true //JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
+        const bluetoothEnabled = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
         if (!bluetoothEnabled) {
             this.showErrorMessage("Bluetooth is not enabled. Please enable Bluetooth to access this page.");
             return;
