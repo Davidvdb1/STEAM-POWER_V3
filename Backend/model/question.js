@@ -1,5 +1,5 @@
 class Question {
-    constructor({ id = undefined, title, description, questionStatement, energyType, picture, wattage, score, maxTries, active = true }, validate = true) {
+    constructor({ id = undefined, title, description, questionStatement, energyType, picture, wattage, score, maxTries, errorMargin = 0.5, active = true }, validate = true) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -10,6 +10,7 @@ class Question {
         this.score = parseInt(score);
         this.maxTries = parseInt(maxTries);
         this.active = active;
+        this.errorMargin = parseFloat(errorMargin);
 
         if (validate) {
             this.validate();
@@ -44,6 +45,9 @@ class Question {
         }
         if (this.energyType !== 'SOLAR' && this.energyType !== 'WIND' && this.energyType !== 'WATER') {
             error += 'Invalid energy type';
+        }
+        if (typeof this.errorMargin !== 'number' || this.errorMargin < 0 || this.errorMargin > 1) {
+            error += "Error margin must be a number between 0 and 1\n";
         }
 
         if (error.length > 0) {

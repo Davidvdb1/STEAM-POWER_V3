@@ -89,6 +89,7 @@ model Question {
   score             Int
   active            Boolean    @default(true)
   answers           Answer[]
+  errorMargin       Float      @default(0.5)
 }
 
 model Answer {
