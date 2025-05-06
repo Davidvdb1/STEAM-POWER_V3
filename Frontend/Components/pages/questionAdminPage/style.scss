@@ -27,3 +27,22 @@ button {
         border-color: #002757
     }
 }
+
+
+.hidden {
+    visibility: hidden;
+}
+
+#top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+#confirmUpdateErrorMargin {
+    padding: 0;
+    margin: 0;
+    border-radius: 1px;
+}
+

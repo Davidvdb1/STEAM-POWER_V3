@@ -14,6 +14,7 @@ import "../../pages/workshopInfo/workshopInfo.js"
 import "../../authentication/logout/logout.js"
 import "../../pages/questionAdminPage/questionAdminPage.js"
 import "../../pages/quizPage/quizPage.js"
+import "../../pages/leaderboardPage/leaderboardPage.js"
 import "../../pages/gamePage/gamePage.js"
 //#endregion IMPORTS
 

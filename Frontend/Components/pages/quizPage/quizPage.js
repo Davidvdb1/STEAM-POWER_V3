@@ -66,6 +66,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
 
         this.energyContext = "wind";
         this.groupId = null;
+        this.energyMultiplier = 1;
 
         // Replace test counters with detected sensors array
         this._detectedSensors = new Set();
@@ -101,18 +102,43 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             this.shadowRoot.querySelector("#energy-data-container").style.display = "none";
             this.shadowRoot.querySelector(".answer-feedback-container").style.display = "none";
             this.shadowRoot.querySelector("#question-list-container").classList.add("admin-teacher-view");
+
+            this.enableRadioButtons(this.$radioEls);
+
             await this.initGroupSelect();
         } else if (role === "GROUP" && loggedInUser.groupId) {
             this.groupId = loggedInUser.groupId;
+            this.energyMultiplier = await fetch(`${window.env.BACKEND_URL}/groups/multiplier`).then(res => res.json()).then(data => data);
             this.setUpGroupQuizPage();
+            this.setupEnergyReadingDisplay();
         }
         return loggedInUser;
+    }
+
+    enableRadioButtons(radioEls) {
+
+        radioEls.forEach((radioEl) => {
+            radioEl.disabled = false;
+            const labelEl = radioEl.closest('label');
+            if (labelEl) {
+                // reset label color to default
+                labelEl.style.color = 'inherit';
+            }
+            radioEl.checked = radioEl.value === this.energyContext;
+            console.log("Radio button enabled:", radioEl.value, radioEl.disabled, radioEl.checked);
+            radioEl.addEventListener("change", (e) => {
+                this.energyContext = e.target.value;
+                this.$energyDataValue.innerText = "loading...";
+                this.$questionList && (this.$questionList.energyContext = this.energyContext);
+                this.$questionList && (this.$questionList.fetchQuestions());
+            });
+        });
+
     }
 
     async connectedCallback() {
         if (!(await this.checkLogin())) return;
 
-        this.setupEnergyReadingDisplay();
 
         customElements.whenDefined('question-list-れ').then(() => {
             this.$questionList && (this.$questionList.groupId = this.groupId);
@@ -124,8 +150,6 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
             const error = e.detail.error;
             this.shadowRoot.querySelector("answer-feedback-component-れ")?.setAttribute("error", error);
         });
-
-        const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
     }
 
     disconnectedCallback() {
@@ -147,19 +171,7 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
                 this._detectedSensors.add(energyType);
 
                 const radioEl = this.shadowRoot.querySelector(`#${energyType}-radio`);
-                if (radioEl) {
-                    radioEl.disabled = false;
-                    const labelEl = radioEl.closest('label');
-                    if (labelEl) {
-                        // reset label color to default
-                        labelEl.style.color = 'inherit';
-                    }
-                    radioEl.addEventListener("change", (e) => {
-                        this.energyContext = e.target.value;
-                        this.$energyDataValue.innerText = "loading...";
-                        this.$questionList && (this.$questionList.energyContext = this.energyContext);
-                    });
-                }
+                this.enableRadioButtons([radioEl]);
             } else {
                 // then select the first available sensor.
                 const firstAvailableRadio = Array.from(this.$radioEls).find(radio => !radio.disabled);
@@ -185,16 +197,16 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
         const data = e.detail;
         const energyType = data.type.toLowerCase();
 
-        console.log("Energy data reading:", energyType, data.value);
-
         // Actual processing and displaying of energy data
         if (energyType === this.energyContext) {
             console.log("Energy data reading for context:");
             let voltage = data.value / 341; // Convert to volts
             let power = voltage * 0.5; // Convert to watts (assuming 0.5A current)
-            power = parseFloat(power.toFixed(3));
-            this.$questionList && (this.$questionList.energyReading = power);
-            this.$energyDataValue.innerText = `${power} W`;
+            let multipliedPower = power * this.energyMultiplier;
+            let energy = multipliedPower * 2 / 3600; // Convert to kWh
+            energy = parseFloat(energy.toFixed(3));
+            this.$questionList && (this.$questionList.energyReading = energy);
+            this.$energyDataValue.innerText = `${energy} Wh`;
         }
     }
 

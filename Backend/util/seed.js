@@ -188,63 +188,69 @@ async function main() {
             members: 'Jasper en Joris',
             microbitId: 'pavot',
         },
-    }); 
+    });
 
     // Questions
 
     const questionPicture = fs.readFileSync('./util/lightbulb.jpg', { encoding: 'base64' });
-    const fullQuestionPicture = `data:image/webp;base64,${questionPicture}`; // Convert to base64 string
+    const questionImage = `data:image/webp;base64,${questionPicture}`; // Convert to base64 string
 
-    const createQuestions = async (questionImage) => {
+    const qs = [{
+        title: "Waterkoker",
+        description: "Een kleine waterkoker heeft 210 W nodig om te werken.",
+        windQuestion: "Hoeveel windmolens heb je nodig om een kleine waterkoker van 210 W te laten werken?",
+        waterQuestion: "Hoeveel waterturbines heb je nodig om een kleine waterkoker van 210 W te laten werken?",
+        solarQuestion: "Hoeveel zonnepanelen heb je nodig om een kleine waterkoker van 210 W te laten werken?",
+        picture: questionImage,
+        wattage: 210,
+        score: 10,
+        maxTries: 3,
+        active: true
+    }, {
+        title: "Laptop",
+        description: "Een laptop heeft 50 W nodig om te werken.",
+        windQuestion: "Hoeveel windmolens heb je nodig om een laptop van 50 W te laten werken?",
+        waterQuestion: "Hoeveel waterturbines heb je nodig om een laptop van 50 W te laten werken?",
+        solarQuestion: "Hoeveel zonnepanelen heb je nodig om een laptop van 50 W te laten werken?",
+        picture: questionImage,
+        wattage: 50,
+        score: 20,
+        maxTries: 3,
+        active: true
+    }, {
+        title: "Koelkast",
+        description: "Een koelkast heeft 150 W nodig om te werken.",
+        windQuestion: "Hoeveel windmolens heb je nodig om een koelkast van 150 W te laten werken?",
+        waterQuestion: "Hoeveel waterturbines heb je nodig om een koelkast van 150 W te laten werken?",
+        solarQuestion: "Hoeveel zonnepanelen heb je nodig om een koelkast van 150 W te laten werken?",
+        picture: questionImage,
+        wattage: 150,
+        score: 30,
+        maxTries: 3,
+        active: true
 
-        const question1 = await prisma.question.create({
-            data: {
-                title: "Waterkoker",
-                description: "Een kleine waterkoker heeft 210 W nodig om te werken.",
-                windQuestion: "Hoeveel windmolens heb je nodig om een kleine waterkoker van 210 W te laten werken?",
-                waterQuestion: "Hoeveel waterturbines heb je nodig om een kleine waterkoker van 210 W te laten werken?",
-                solarQuestion: "Hoeveel zonnepanelen heb je nodig om een kleine waterkoker van 210 W te laten werken?",
-                picture: questionImage,
-                wattage: 210,
-                score: 10,
-                maxTries: 3,
-                active: true
-            }
-        });
+    }];
+    const obj = { "WIND": "windQuestion", "WATER": "waterQuestion", "SOLAR": "solarQuestion" };
+    
+    // 
+    for (const q of qs) {
+        for (const [key, value] of Object.entries(obj)) {
 
-        const question2 = await prisma.question.create({
-            data: {
-                title: "Laptop",
-                description: "Een laptop heeft 50 W nodig om te werken.",
-                windQuestion: "Hoeveel windmolens heb je nodig om een laptop van 50 W te laten werken?",
-                waterQuestion: "Hoeveel waterturbines heb je nodig om een laptop van 50 W te laten werken?",
-                solarQuestion: "Hoeveel zonnepanelen heb je nodig om een laptop van 50 W te laten werken?",
-                picture: questionImage,
-                wattage: 50,
-                score: 20,
-                maxTries: 3,
-                active: true
-            }
-        });
-
-        const question3 = await prisma.question.create({
-            data: {
-                title: "Koelkast",
-                description: "Een koelkast heeft 150 W nodig om te werken.",
-                windQuestion: "Hoeveel windmolens heb je nodig om een koelkast van 150 W te laten werken?",
-                waterQuestion: "Hoeveel waterturbines heb je nodig om een koelkast van 150 W te laten werken?",
-                solarQuestion: "Hoeveel zonnepanelen heb je nodig om een koelkast van 150 W te laten werken?",
-                picture: questionImage,
-                wattage: 150,
-                score: 30,
-                maxTries: 3,
-                active: true
-
-            }
-        });
-    };
-
-    createQuestions(fullQuestionPicture);
+            await prisma.question.create({
+                data: {
+                    title: q.title,
+                    description: q.description,
+                    picture: questionImage,
+                    wattage: q.wattage,
+                    score: q.score,
+                    maxTries: q.maxTries,
+                    active: q.active,
+                    energyType: key,
+                    questionStatement: q[value]
+                }
+            });
+        }
+    }
 }
 
 (async () => {

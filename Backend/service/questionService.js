@@ -73,7 +73,7 @@ class QuestionService {
             if (!question) throw new Error(`Could not find question with id ${questionId}`);
 
             const answer = new Answer({ questionId, groupId, answerValue, energyReading });
-            answer.checkAnswerValue(question.wattage);
+            answer.checkAnswerValue(question.wattage, question.errorMargin);
 
             const res = await this.answerRepo.create(answer);
 
@@ -112,6 +112,14 @@ class QuestionService {
             return groupSpecificQuestions;
 
 
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateErrorMargin(errorMargin) {
+        try {
+            return await this.qRepo.updateErrorMargin(errorMargin);
         } catch (error) {
             throw error;
         }
