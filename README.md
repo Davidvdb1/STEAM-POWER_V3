@@ -6,7 +6,8 @@
 ### 1. Push code to main branch
 
 ### 2. Run workflow
-Go to https://github.com/Davidvdb1/STEAM-POWER_V3/actions/workflows/docker-image.yml
+This should happen automatically.
+If this is not done automatically, go to https://github.com/Davidvdb1/STEAM-POWER_V3/actions/workflows/docker-image.yml
 
 ### 3. Pull containers on server
 Commands:
