@@ -41,7 +41,7 @@ template.innerHTML = /*html*/`
             </select>
         </div>
         <div class="energy-status">
-            <battery-れ id="energyBattery" current-watt-hour="0" required-watt-hour="500"></battery-れ>
+            <battery-れ id="energyBattery"></battery-れ>
         </div>
     </div>
     <div id= "fullscreenContainer">
@@ -183,6 +183,12 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
         const isAdmin = user.role === "ADMIN";
         const isTeacher = user.role === "TEACHER";
+        const userGroupId = user.groupId;
+
+        // Set initial group ID for the battery
+        if (userGroupId) {
+            this.energyBattery.setAttribute('group-id', userGroupId);
+        }
 
         if (!isAdmin && !isTeacher) {
             this.groupSelectorContainer.remove();   
@@ -264,13 +270,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         if (data.type === 'WATER') {
             this.waterBar.updateBar(data);
         }
-    
-        if (data.value !== undefined) {
-            this.currentWattValue += Math.abs(parseInt(data.value));
-            const requiredWatt = 500;
-            this.currentWattValue = Math.min(this.currentWattValue, requiredWatt);
-            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
-        }
     }
 
     //services
@@ -285,15 +284,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         
             this.energyData = await response.json();
 
-            let totalEnergy = 0;
-            this.energyData.forEach(data => {
-                if (data.value !== undefined) {
-                    totalEnergy += Math.abs(parseInt(data.value));
-                }
-            });
-            this.currentWattValue = Math.min(totalEnergy, 500);
-            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
-
             const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
             const windPoints = this.energyData.filter(d => d.type === 'WIND');
             const waterPoints = this.energyData.filter(d => d.type === 'WATER');
@@ -302,8 +292,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             this.windBar.setFullData(windPoints);
             this.waterBar.setFullData(waterPoints);
 
-            this.liveTeamData.updateGraph(this.energyData, null); // of gewoon weglaten
-
+            this.liveTeamData.updateGraph(this.energyData, null);
 
         } catch (error) {
             console.error("Fout bij ophalen van energyData:", error);
@@ -347,6 +336,9 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
     
             this.liveTeamData.updateGraph(this.energyData, null);
             this.averageValue.setAttribute('range', this.averageValue.getAttribute('range'));
+
+            // Update battery component with the selected group ID
+            this.energyBattery.setAttribute('group-id', groupId);
     
         } catch (error) {
             console.error("Fout bij ophalen van energyData voor groep", groupId, ":", error);
