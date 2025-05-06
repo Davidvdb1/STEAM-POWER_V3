@@ -17,3 +17,5 @@ prisma migrate
 run de seed file
 start prisma studio
 kopiëer productionConfig.js naar config.js in de frontend 
+
+Als de website niet geupdate is, kan dat liggen aan de cache van je browser of de cache van cloudflare.
