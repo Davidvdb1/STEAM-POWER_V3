@@ -42,18 +42,18 @@ model Workshop {
 }
 
 model Group {
-  id         String       @id @default(uuid())
-  name       String       @unique
-  members    String       @default("")
-  microbitId String       @default("")
-  code       String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
-  energy     Float          @default(0)
-  energyMultiplier Float @default(1)
-  batteryLevel Float @default(0)
-  batteryCapacity Float @default(500)
-  energyData EnergyData[]
-  bonusScore Int          @default(0)
-  answers    Answer[]
+  id               String       @id @default(uuid())
+  name             String       @unique
+  members          String       @default("")
+  microbitId       String       @default("")
+  code             String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+  energy           Float        @default(0)
+  energyMultiplier Float        @default(1)
+  batteryLevel     Float        @default(0)
+  batteryCapacity  Float        @default(500)
+  energyData       EnergyData[]
+  bonusScore       Int          @default(0)
+  answers          Answer[]
 }
 
 model EnergyData {
@@ -78,18 +78,18 @@ enum EnergyType {
 }
 
 model Question {
-  id            String   @id @default(uuid())
-  title         String
-  description   String
-  windQuestion  String
-  waterQuestion String
-  solarQuestion String
-  picture       String
-  maxTries      Int      @default(0)
-  wattage       Int
-  score         Int
-  active        Boolean  @default(true)
-  answers       Answer[]
+  id                String     @id @default(uuid())
+  title             String
+  description       String
+  questionStatement String
+  energyType        EnergyType
+  picture           String
+  maxTries          Int        @default(0)
+  wattage           Int
+  score             Int
+  active            Boolean    @default(true)
+  answers           Answer[]
+  errorMargin       Float      @default(0.5)
 }
 
 model Answer {
@@ -97,9 +97,9 @@ model Answer {
   groupId       String
   questionId    String
   isCorrect     Boolean
-  answerValue   Int
-  energyReading Int
+  answerValue   Float
+  energyReading Float
   group         Group    @relation(fields: [groupId], references: [id])
   question      Question @relation(fields: [questionId], references: [id])
-  errorMargin   Float @default(0)
+  errorMargin   Float    @default(0)
 }

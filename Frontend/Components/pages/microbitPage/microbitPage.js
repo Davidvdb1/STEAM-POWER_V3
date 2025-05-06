@@ -17,14 +17,15 @@ template.innerHTML = /*html*/`
     <div id="microbitPanel">
         <div id="switches">
             <div id="bluetoothToggleContainer">
-                <img src="Assets/SVGs/bluetooth.svg" alt="Bluetooth" class="icon" style="height: 20px;"/>
+                <img src="Assets/SVGs/bluetooth-off.svg" alt="Bluetooth" class="icon" style="height: 23px;"/>
                 <label class="switch">
                     <input type="checkbox" id="bluetoothToggle">
                     <span class="slider bluetooth"></span>
                 </label>
+                <img src="Assets/SVGs/bluetooth.svg" alt="Bluetooth" class="icon" style="height: 23px;"/>
             </div>
             <div id="dataTypeToggleContainer">
-                <img src="Assets/SVGs/voltage.svg" alt="microbit" class="icon" style="height: 20px;"/>
+                <img src="Assets/SVGs/voltage.svg" alt="microbit" class="icon" style="height: 20px; margin-right: 2px; margin-left: 2px;"/>
                 <label class="switch">
                     <input type="checkbox" id="dataTypeToggle">
                     <span class="slider datatype"></span>
@@ -83,8 +84,8 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         this.energyBattery = this._shadowRoot.querySelector('#energyBattery');
         this.groupSelectorContainer = this._shadowRoot.getElementById('groupSelectorContainer');
         this.energyData = [];
+        this.currentWattValue = 0;
         this.groupPollInterval = null;
-        this.energyPollInterval = null;
     }
 
     // component attributes
@@ -107,6 +108,14 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             }
         });
 
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                this.fullscreen.src = 'Assets/SVGs/exit-fullscreen.svg'; 
+            } else {
+                this.fullscreen.src = 'Assets/SVGs/fullscreen.png'; 
+            }
+        });
+
         this.liveTeamData.setAttribute('mode', 'voltage');
         this.solarBar.setAttribute('mode', 'voltage');
         this.windBar.setAttribute('mode', 'voltage');
@@ -116,7 +125,20 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const bluetoothToggle = this._shadowRoot.getElementById('bluetoothToggle');
         const dataTypeToggle = this._shadowRoot.getElementById('dataTypeToggle');
     
-        // Houd visuele toggle in sync met sessionStorage
+        this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(button => {
+            button.addEventListener('click', () => {
+                const range = button.getAttribute('data-range');
+                this.liveTeamData.setAttribute('range', range);
+                this.solarBar.setAttribute('range', range);
+                this.windBar.setAttribute('range', range);
+                this.waterBar.setAttribute('range', range);
+                this.averageValue.setAttribute('range', range);
+    
+                this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(b => b.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    
         const bluetoothWasOn = sessionStorage.getItem('bluetoothEnabled') === 'true';
         bluetoothToggle.checked = bluetoothWasOn;
     
@@ -126,7 +148,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             this.removeAttribute('bluetooth-enabled');
         }
     
-        // Toggle event
         bluetoothToggle.addEventListener('change', () => {
             if (bluetoothToggle.checked) {
                 this.startBluetoothConnection();
@@ -135,11 +156,19 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             }
         });
 
+        window.addEventListener('bluetoothconnectionfailed', () => {
+            const bluetoothToggle = this._shadowRoot.getElementById('bluetoothToggle');
+            if (bluetoothToggle) {
+                bluetoothToggle.checked = false;
+            }
+            sessionStorage.setItem('bluetoothEnabled', 'false');
+            this.removeAttribute('bluetooth-enabled');
+        });
+
         dataTypeToggle.addEventListener('change', () => {
             const mode = dataTypeToggle.checked ? 'microbit' : 'voltage';
             this.setAttribute('data-type-mode', mode);
         
-            // doorgeven aan de kinderen
             this.liveTeamData.setAttribute('mode', mode);
             this.solarBar.setAttribute('mode', mode);
             this.windBar.setAttribute('mode', mode);
@@ -156,15 +185,13 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         const isTeacher = user.role === "TEACHER";
 
         if (!isAdmin && !isTeacher) {
-            this.groupSelectorContainer.style.display = 'none';
-        } else {
-            this.groupSelectorContainer.style.display = 'block';
-        }
+            this.groupSelectorContainer.remove();   
+        } 
 
         const groupSelector = this._shadowRoot.getElementById('groupSelector');
         const groups = await this.getAllGroups();
 
-        groupSelector.innerHTML = ''; // Clear loading option
+        groupSelector.innerHTML = ''; 
 
         const placeholderOption = document.createElement('option');
         placeholderOption.value = '';
@@ -183,55 +210,22 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         groupSelector.addEventListener('change', () => {
             const selectedGroupId = groupSelector.value;
             if (!selectedGroupId) return;
-        
-            // Stop eventueel oude interval
+
             clearInterval(this.groupPollInterval);
         
-            // Voer eerste keer meteen uit
             this.fetchAndRenderGroupData(selectedGroupId);
 
             this.averageValue.setAttribute('groupId', selectedGroupId);
             this.totalEnergyBar.setAttribute('groupId', selectedGroupId);
         
-            // Stel interval in om om de 2 seconden te updaten
             this.groupPollInterval = setInterval(() => {
                 this.fetchAndRenderGroupData(selectedGroupId);
             }, 2000);
         });        
-    
-        // Range buttons...
-        this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(button => {
-            button.addEventListener('click', () => {
-                const range = button.getAttribute('data-range');
-                this.liveTeamData.setAttribute('range', range);
-                this.solarBar.setAttribute('range', range);
-                this.windBar.setAttribute('range', range);
-                this.waterBar.setAttribute('range', range);
-                this.averageValue.setAttribute('range', range);
-    
-                this._shadowRoot.querySelectorAll('#rangeButtons button').forEach(b => b.classList.remove('active'));
-                button.classList.add('active');
-            });
-        });
-
-        this.getGroupEnergy(user.groupId);
-        this.getBatteryCapacity();
-        this.getEnergyMultiplier();
-        
-        // Start polling for energy updates
-        this.energyPollInterval = setInterval(() => {
-            const user = JSON.parse(sessionStorage.getItem("loggedInUser")) || {};
-            const selectedGroupId = this._shadowRoot.getElementById('groupSelector')?.value || user.groupId;
-            if (selectedGroupId) {
-                this.getGroupEnergy(selectedGroupId);
-            }
-        }, 2000);
     }
     
     disconnectedCallback() {
         document.removeEventListener('energydatareading', this.updateEnergyData.bind(this));
-        clearInterval(this.groupPollInterval);
-        clearInterval(this.energyPollInterval);
     }
 
     startBluetoothConnection() {
@@ -258,20 +252,24 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         
         this.energyData.push(data);
         this.liveTeamData.updateGraph(this.energyData, data);
-    
+
         if (data.type === 'SOLAR') {
-            const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
-            this.solarBar.updateBar(solarPoints, data);
+            this.solarBar.updateBar(data);
         }
-    
+
         if (data.type === 'WIND') {
-            const windPoints = this.energyData.filter(d => d.type === 'WIND');
-            this.windBar.updateBar(windPoints, data);
+            this.windBar.updateBar(data);
+        }
+
+        if (data.type === 'WATER') {
+            this.waterBar.updateBar(data);
         }
     
-        if (data.type === 'WATER') {
-            const waterPoints = this.energyData.filter(d => d.type === 'WATER');
-            this.waterBar.updateBar(waterPoints, data);
+        if (data.value !== undefined) {
+            this.currentWattValue += Math.abs(parseInt(data.value));
+            const requiredWatt = 500;
+            this.currentWattValue = Math.min(this.currentWattValue, requiredWatt);
+            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
         }
     }
 
@@ -286,6 +284,15 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
             if (!response.ok) throw new Error(`Server error: ${response.status} ${response.statusText}`);
         
             this.energyData = await response.json();
+
+            let totalEnergy = 0;
+            this.energyData.forEach(data => {
+                if (data.value !== undefined) {
+                    totalEnergy += Math.abs(parseInt(data.value));
+                }
+            });
+            this.currentWattValue = Math.min(totalEnergy, 500);
+            this.energyBattery.setAttribute('current-watt-hour', this.currentWattValue.toString());
 
             const solarPoints = this.energyData.filter(d => d.type === 'SOLAR');
             const windPoints = this.energyData.filter(d => d.type === 'WIND');
@@ -344,66 +351,6 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         } catch (error) {
             console.error("Fout bij ophalen van energyData voor groep", groupId, ":", error);
         }
-    }
-
-    async getGroupEnergy(groupId) {
-        if (!groupId) return;
-        
-        try {
-            const jwt = JSON.parse(sessionStorage.getItem('loggedInUser'))?.token;
-            const response = await fetch(`${window.env.BACKEND_URL}/groups/${groupId}/energy`, {
-                headers: jwt ? { 'Authorization': `Bearer ${jwt}` } : {}
-            });
-            
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
-            
-            const data = await response.json();
-            
-            // Update battery component
-            if (this.energyBattery) {
-                this.energyBattery.setAttribute('current-watt-hour', data.batteryLevel || 0);
-                this.energyBattery.setAttribute('required-watt-hour', data.batteryCapacity || 500);
-            }
-            
-            return data;
-        } catch (error) {
-            console.error("Error fetching group energy:", error);
-            return null;
-        }
-    }
-
-    async getBatteryCapacity() {
-        try {
-            const response = await fetch(`${window.env.BACKEND_URL}/groups/battery`);
-            
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
-            
-            const batteryCapacity = await response.json();
-            
-            // Update battery component's required-watt-hour
-            if (this.energyBattery && batteryCapacity) {
-                this.energyBattery.setAttribute('required-watt-hour', batteryCapacity);
-            }
-            
-            return batteryCapacity;
-        } catch (error) {
-            console.error("Error fetching battery capacity:", error);
-            return null;
-        }
-    }
-
-    async getEnergyMultiplier() {
-        try {
-            const response = await fetch(`${window.env.BACKEND_URL}/groups/multiplier`);
-            
-            if (!response.ok) throw new Error(`Server error: ${response.status}`);
-            
-            const multiplier = await response.json();
-            return multiplier;
-        } catch (error) {
-            console.error("Error fetching energy multiplier:", error);
-            return null;
-        }
-    }
+    }    
 });
 //#endregion CLASS

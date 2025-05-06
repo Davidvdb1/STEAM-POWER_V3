@@ -4,12 +4,18 @@ FROM node:18
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY package.json package-lock.json ./
+# Copy Backend folder (including package.json and lock file) first
+COPY ./Backend/package*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Copy source code
-COPY . .
+# Copy Prisma schema and generate client
+COPY ./Backend/prisma ./prisma
+RUN npx prisma generate
+
+# Copy the rest of the backend source code
+COPY ./Backend .
 
 # Expose the backend port
 EXPOSE 3000

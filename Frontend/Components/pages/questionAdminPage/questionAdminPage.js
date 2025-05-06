@@ -1,6 +1,5 @@
 //#region IMPORTS
 import "../../questions/adminQuestionComponent/adminQuestionComponent.js"
-import "../../questions/newQuestionModal/newQuestionModal.js"
 import "../../questions/modal/genericModal.js"
 import "../../questions/questionForm/questionForm.js"
 import "../../questions/confirmDeleteForm/confirmDeleteForm.js"
@@ -13,7 +12,14 @@ template.innerHTML = /*html*/`
         @import './Components/pages/questionAdminPage/style.css';
     </style>
     <h1>Vragenlijst aanpassen</h1>
-    <button id="add-question">Vraag toevoegen</button>
+    <div id="top-controls">
+        <button id="add-question">Vraag toevoegen</button>
+        <div>
+            <label for="errorMargin">Foutmarge (%): </label>
+            <input name="errorMargin" id="error-margin-input" type="number" step="0.01" min="0" max="1">
+            <button id="confirmUpdateErrorMargin" class="hidden">Bevestig</button>
+        </div>
+    </div>
     <div id="questions-container"></div>
 `;
 //#endregion TEMPLATE
@@ -24,6 +30,8 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+
+        this.originalErrorMargin = null;
     }
 
     // component attributes
@@ -38,23 +46,64 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
     connectedCallback() {
         this.$addQuestionButton = this._shadowRoot.querySelector("#add-question");
         this.$questionsContainer = this._shadowRoot.querySelector("#questions-container");
+        this.$errorMarginInput = this._shadowRoot.querySelector("#error-margin-input");
+        this.$confirmUpdateErrorMarginButton = this._shadowRoot.querySelector("#confirmUpdateErrorMargin");
 
         this.$addQuestionButton.addEventListener('click', () => this.openQuestionModal());
 
         this.addEventListener("confirm-delete", (e) => this.deleteQuestion(e.detail.id))
 
         this.addEventListener("question-form:succes", async () => {
-
             await this.fetchQuestions();
         })
 
         this.fetchQuestions();
+
+        this.$errorMarginInput.addEventListener("change", (e) => {
+            const currentValue = parseFloat(e.target.value); 
+            this.$confirmUpdateErrorMarginButton.classList.toggle("hidden", currentValue === this.originalErrorMargin);
+        });
+
+        this.$confirmUpdateErrorMarginButton.addEventListener("click", async () => {
+            const newErrorMargin = parseFloat(this.$errorMarginInput.value);
+            if (isNaN(newErrorMargin)) {
+                alert("Foutmarge moet een getal zijn.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${window.env.BACKEND_URL}/questions/errormargin`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ errorMargin: newErrorMargin })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                this.originalErrorMargin = newErrorMargin; // Update the original error margin
+                this.$confirmUpdateErrorMarginButton.classList.add("hidden");
+            } catch (error) {
+                console.error('Error updating error margin:', error);
+            }
+        });
     }
 
     async fetchQuestions() {
         try {
             const response = await fetch(`${window.env.BACKEND_URL}/questions`);
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
             const questions = await response.json();
+
+            this.originalErrorMargin = questions[0].errorMargin; // Store the current error margin
+            this.$errorMarginInput.value = this.originalErrorMargin; // Set the error margin input value to the first question's error margin
+
+
             this.renderQuestions(questions);
         } catch (error) {
             console.error('Error fetching questions:', error);
@@ -68,9 +117,8 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
             questionElement.setAttribute('data-id', question.id);
             questionElement.setAttribute('data-title', question.title);
             questionElement.setAttribute('data-description', question.description);
-            questionElement.setAttribute('data-wind-question', question.windQuestion);
-            questionElement.setAttribute('data-water-question', question.waterQuestion);
-            questionElement.setAttribute('data-solar-question', question.solarQuestion);
+            questionElement.setAttribute('data-question-statement', question.questionStatement);
+            questionElement.setAttribute('data-energy-type', question.energyType);
             questionElement.setAttribute('data-max-tries', question.maxTries);
             questionElement.setAttribute('data-wattage', question.wattage);
             questionElement.setAttribute('data-score', question.score);
@@ -123,9 +171,7 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
             questionForm.setAttribute('data-id', question.id);
             questionForm.setAttribute('data-title', question.title);
             questionForm.setAttribute('data-description', question.description);
-            questionForm.setAttribute('data-wind-question', question.windQuestion);
-            questionForm.setAttribute('data-water-question', question.waterQuestion);
-            questionForm.setAttribute('data-solar-question', question.solarQuestion);
+            questionForm.setAttribute('data-question-statement', question.questionStatement);
             questionForm.setAttribute('data-max-tries', question.maxTries);
             questionForm.setAttribute('data-wattage', question.wattage);
             questionForm.setAttribute('data-score', question.score);
@@ -136,34 +182,7 @@ window.customElements.define('questionadmin-れ', class extends HTMLElement {
         questionModal.setBody(questionForm);
 
         questionModal.addEventListener("question-form:succes", async () => {
-            setTimeout(() => questionModal.close(), 1000);
-        });
-    }
-
-    editQuestion(question) {
-        const editQuestionModal = document.createElement("newquestionmodal-れ");
-        editQuestionModal.setAttribute('data-id', question.id);
-        editQuestionModal.setAttribute('data-title', question.title);
-        editQuestionModal.setAttribute('data-description', question.description);
-        editQuestionModal.setAttribute('data-wind-question', question.windQuestion);
-        editQuestionModal.setAttribute('data-water-question', question.waterQuestion);
-        editQuestionModal.setAttribute('data-solar-question', question.solarQuestion);
-        editQuestionModal.setAttribute('data-max-tries', question.maxTries);
-        editQuestionModal.setAttribute('data-wattage', question.wattage);
-        editQuestionModal.setAttribute('data-score', question.score);
-        editQuestionModal.setAttribute('data-active', question.active);
-        editQuestionModal.setAttribute('data-picture', question.picture); // Add this line
-        this._shadowRoot.appendChild(editQuestionModal);
-    }
-
-    addQuestion() {
-        const newQuestionModal = document.createElement("generic-modal-れ");
-        const newQuestionForm = document.createElement("newquestionform-れ");
-        this._shadowRoot.appendChild(newQuestionModal);
-        newQuestionModal.setTitle("Voeg vraag toe");
-        newQuestionModal.setBody(newQuestionForm);
-        newQuestionModal.addEventListener("question-form:succes", async () => {
-            newQuestionModal.close();
+            questionModal.close();
         });
     }
 });
