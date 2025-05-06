@@ -71,6 +71,7 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
     }
 
     async fetchQuestions() {
+        console.log("Fetching questions for group ID:", this._groupId);
         try {
             if (!this._groupId) throw new Error("Group ID is not set.");
             const response = await fetch(`${window.env.BACKEND_URL}/questions/group/${this._groupId}`);
@@ -80,7 +81,7 @@ window.customElements.define('question-list-れ', class extends HTMLElement {
 
             const data = await response.json();
 
-            const activeQuestions = data.filter(question => { console.log(question.active); return question.active === true });
+            const activeQuestions = data.filter(question => { return question.active === true && question.energyType.toLowerCase() === this._energyContext; });
 
             this.initQuestions(activeQuestions);
 

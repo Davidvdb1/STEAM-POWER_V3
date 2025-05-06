@@ -16,32 +16,43 @@ template.innerHTML = /*html*/`
         <textarea id="description" name="description" required></textarea>
         <span class="error-message" id="description-error"></span>
 
-        <h3>Vragen:</h3>
-
-        <!-- Added general question field -->
-        <div id="general-question-container" style="display: block">
-            <label for="general-question">Algemene vraag:</label>
-            <textarea id="general-question" name="generalQuestion" required></textarea>
-            <span class="error-message" id="general-question-error"></span>    
+        <div id="edit-question">
+            <div id="edit-question-container" style="display: block">
+                <label for="question-statement">Vraag:</label>
+                <textarea id="question-statement" name="questionStatement" required></textarea>
+                <span class="error-message" id="question-statement-error"></span>    
+            </div>
         </div>
 
-        <!-- Specific questions container, hidden by default -->
-        <div id="specific-questions-container" style="display: none;">
-            <label for="wind-question">Vraag voor windmolens:</label>
-            <textarea id="wind-question" name="windQuestion"></textarea>
-            <span class="error-message" id="wind-question-error"></span>
-            <br>
-            <label for="water-question">Vraag voor waterturbines:</label>
-            <textarea id="water-question" name="waterQuestion"></textarea>
-            <span class="error-message" id="water-question-error"></span>
-            <br>
-            <label for="solar-question">Vraag voor zonnepanelen:</label>
-            <textarea id="solar-question" name="solarQuestion"></textarea>
-            <span class="error-message" id="solar-question-error"></span>
-        </div>
+        <div id="create-questions">
+            <h3>Vragen:</h3>
 
-        <!-- Toggle button for specific questions -->
-        <button type="button" id="toggle-specific-questions">Pas specifieke vragen aan</button>
+            <!-- Added general question field -->
+            <div id="general-question-container" style="display: block">
+                <label for="general-question">Algemene vraag:</label>
+                <textarea id="general-question" name="generalQuestion" required></textarea>
+                <span class="error-message" id="general-question-error"></span>    
+            </div>
+
+            <!-- Specific questions container, hidden by default -->
+            <div id="specific-questions-container" style="display: none;">
+                <label for="wind-question">Vraag voor windmolens:</label>
+                <textarea id="wind-question" name="windQuestion"></textarea>
+                <span class="error-message" id="wind-question-error"></span>
+                <br>
+                <label for="water-question">Vraag voor waterturbines:</label>
+                <textarea id="water-question" name="waterQuestion"></textarea>
+                <span class="error-message" id="water-question-error"></span>
+                <br>
+                <label for="solar-question">Vraag voor zonnepanelen:</label>
+                <textarea id="solar-question" name="solarQuestion"></textarea>
+                <span class="error-message" id="solar-question-error"></span>
+            </div>
+
+            
+            <!-- Toggle button for specific questions -->
+            <button type="button" id="toggle-specific-questions">Pas specifieke vragen aan</button>
+        </div>
 
         <label for="wattage">Wattage:</label>
         <input type="number" id="wattage" name="wattage" min="0" required>
@@ -62,6 +73,8 @@ template.innerHTML = /*html*/`
         <input type="file" id="picture" name="picture">
         <span class="error-message" id="picture-error"></span>
 
+        <div class="response-error-message">Bliep Bloep</div>
+
         <button id="submit-button">Save Question</button>
     </form>
 `;
@@ -77,25 +90,22 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
 
     // component attributes
     static get observedAttributes() {
-        return ['data-id', 'data-title', 'data-description', 'data-wind-question', 'data-water-question', 'data-solar-question', 'data-wattage', 'data-max-tries', 'data-picture', 'data-score'];
+        return ['data-id', 'data-title', 'data-description', 'data-question-statement', 'data-wattage', 'data-max-tries', 'data-picture', 'data-score'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
+            case 'data-id':
+                // if id is set, remove the create questions section and leave the edit question section
+                this._shadowRoot.querySelector("#create-questions").remove();
             case 'data-title':
                 this._shadowRoot.querySelector('#title').value = newValue;
                 break;
             case 'data-description':
                 this._shadowRoot.querySelector('#description').value = newValue;
                 break;
-            case 'data-wind-question':
-                this._shadowRoot.querySelector('#wind-question').value = newValue;
-                break;
-            case 'data-water-question':
-                this._shadowRoot.querySelector('#water-question').value = newValue;
-                break;
-            case 'data-solar-question':
-                this._shadowRoot.querySelector('#solar-question').value = newValue;
+            case 'data-question-statement':
+                this._shadowRoot.querySelector('#question-statement').value = newValue;
                 break;
             case 'data-wattage':
                 this._shadowRoot.querySelector('#wattage').value = newValue;
@@ -123,43 +133,43 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
 
         this.$pictureInput.addEventListener('change', this.handlePicturePreview.bind(this));
 
-        // Added general question listener
-        this.$generalQuestionContainer = this._shadowRoot.querySelector("#general-question-container");
-        this.$generalQuestion = this._shadowRoot.querySelector('#general-question');
-        this.$generalQuestion.addEventListener('input', this.handleGeneralQuestion.bind(this));
-
-        // Added toggle for specific questions container
-        this.$toggleSpecific = this._shadowRoot.querySelector('#toggle-specific-questions');
-        this.$specificContainer = this._shadowRoot.querySelector('#specific-questions-container');
-
-        const isDisplayed = (el) => el.style.display === 'block';
-
-        this.$toggleSpecific.addEventListener('click', () => {
-            const specificQuestionEls = this.$specificContainer.querySelectorAll("textarea");
-            if (!isDisplayed(this.$generalQuestionContainer)) {
-                this.$generalQuestionContainer.style.display = 'block';
-                this.$generalQuestion.setAttribute("required", "");
-                specificQuestionEls.forEach((el) => {
-                    el.removeAttribute("required");
-                });
-                this.$specificContainer.style.display = 'none';
-                this.$toggleSpecific.textContent = "Pas specifieke vragen aan"
-            } else {
-                this.$generalQuestionContainer.style.display = 'none';
-                this.$generalQuestion.removeAttribute("required");
-                specificQuestionEls.forEach((el) => {
-                    el.setAttribute("required", "");
-                });
-                this.$specificContainer.style.display = 'block';
-                this.$toggleSpecific.textContent = "Pas algemene vraag aan"
-            }
-
-
-        });
-
         // Make picture input required only if data-id is not set
         if (!this.hasAttribute('data-id')) {
+            // if no id is set, remove the edit question section and leave the create questions section
             this.$pictureInput.setAttribute('required', 'required');
+            this.shadowRoot.querySelector('#edit-question').remove();
+
+            // Added general question listener
+            this.$generalQuestionContainer = this._shadowRoot.querySelector("#general-question-container");
+            this.$generalQuestion = this._shadowRoot.querySelector('#general-question');
+            this.$generalQuestion.addEventListener('input', this.handleGeneralQuestion.bind(this));
+
+            // Added toggle for specific questions container
+            this.$toggleSpecific = this._shadowRoot.querySelector('#toggle-specific-questions');
+            this.$specificContainer = this._shadowRoot.querySelector('#specific-questions-container');
+
+            const isDisplayed = (el) => el.style.display === 'block';
+
+            this.$toggleSpecific.addEventListener('click', () => {
+                const specificQuestionEls = this.$specificContainer.querySelectorAll("textarea");
+                if (!isDisplayed(this.$generalQuestionContainer)) {
+                    this.$generalQuestionContainer.style.display = 'block';
+                    this.$generalQuestion.setAttribute("required", "");
+                    specificQuestionEls.forEach((el) => {
+                        el.removeAttribute("required");
+                    });
+                    this.$specificContainer.style.display = 'none';
+                    this.$toggleSpecific.textContent = "Pas specifieke vragen aan"
+                } else {
+                    this.$generalQuestionContainer.style.display = 'none';
+                    this.$generalQuestion.removeAttribute("required");
+                    specificQuestionEls.forEach((el) => {
+                        el.setAttribute("required", "");
+                    });
+                    this.$specificContainer.style.display = 'block';
+                    this.$toggleSpecific.textContent = "Pas algemene vraag aan"
+                }
+            });
         } else {
             this.$pictureInput.removeAttribute('required');
         }
@@ -188,7 +198,10 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
     validateForm() {
         let isValid = true;
         let fields = ['title', 'description', 'wattage', 'score', 'max-tries'];
-        if (this.$generalQuestionContainer.style.display === 'none') {
+        if (this.hasAttribute('data-id')) {
+            fields = [...fields, 'question-statement'];
+        }
+        else if (this.$generalQuestionContainer.style.display === 'none') {
             fields = [...fields, 'wind-question', 'water-question', 'solar-question']
         } else {
             fields = [...fields, 'general-question']
@@ -246,31 +259,61 @@ window.customElements.define('newquestionform-れ', class extends HTMLElement {
 
     async saveQuestion(data) {
         const id = this.getAttribute('data-id');
-        const method = id ? 'PUT' : 'POST';
-        const url = `${window.env.BACKEND_URL}/questions${id ? `/${id}` : ''}`;
+        let url = `${window.env.BACKEND_URL}/questions`;
+        const reqData = [];
+        let method = "";
 
-        console.log(data);
+        if (id) {
+            url += `/${id}`;
+            method = 'PUT';
+            reqData.push(data);
+        } else {
+            method = 'POST';
+
+            const energyTypeToQuestionMapping = { "WIND": "windQuestion", "WATER": "waterQuestion", "SOLAR": "solarQuestion" };
+
+            for (const [key, value] of Object.entries(energyTypeToQuestionMapping)) {
+                reqData.push({
+                    title: data.title,
+                    description: data.description,
+                    picture: data.picture,
+                    wattage: data.wattage,
+                    score: data.score,
+                    maxTries: data.maxTries,
+                    active: data.active,
+                    energyType: key,
+                    questionStatement: data[value]
+                });
+            }
+        }
+
+        console.log(reqData);
 
         try {
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+            for (const question of reqData) {
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(question)
+                });
 
-            if (response.ok) {
-                this.dispatchEvent(new CustomEvent("question-form:succes", {
-                    bubbles: true,
-                    composed: true
-                }))
-            } else {
-                const error = await response.json();
-                alert(error.message);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
             }
+
+            this.dispatchEvent(new CustomEvent("question-form:succes", {
+                bubbles: true,
+                composed: true
+            }));
+
         } catch (error) {
             console.error('Error saving question:', error);
+            const errorMessage = this._shadowRoot.querySelector('.response-error-message');
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = 'Error saving question: ' + error.message;
         }
     }
 });

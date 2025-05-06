@@ -14,6 +14,7 @@ import "../../pages/workshopInfo/workshopInfo.js"
 import "../../authentication/logout/logout.js"
 import "../../pages/questionAdminPage/questionAdminPage.js"
 import "../../pages/quizPage/quizPage.js"
+import "../../pages/leaderboardPage/leaderboardPage.js"
 import "../../pages/gamePage/gamePage.js"
 //#endregion IMPORTS
 
@@ -40,6 +41,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
         this.$header = this._shadowRoot.querySelector("header-れ");
         this.landingPage = "campoverviewpage";
         this.loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+        this.allowNavigation = false;
     }
 
     // component attributes
@@ -52,14 +54,9 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tabFromUrl = urlParams.get("tab");
-        const campIDFromUrl = urlParams.get("camp");
-        const workshopIDFromUrl = urlParams.get("workshop");
-
-        this.landingPage = tabFromUrl || "campoverviewpage";
-        this.campID = campIDFromUrl
-        this.workshopID = workshopIDFromUrl
+        this.landingPage = "campoverviewpage";
+        this.campID = null;
+        this.workshopID = null;
 
         this.$content.setAttribute("active-tab", this.landingPage);
         this.$content.setAttribute("camp", this.campID);
@@ -133,11 +130,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
     }
 
     handlePopState(event) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = event.state?.tab || urlParams.get("tab")
-        const camp = event.state?.camp || urlParams.get("camp")
-        const workshop = event.state?.workshop || urlParams.get("workshop")
-
+        const { tab, camp, workshop } = event.state || { tab: this.landingPage, camp: null, workshop: null };
         this.$content.setAttribute("active-tab", tab);
         this.$content.setAttribute("camp", camp);
         this.$content.setAttribute("workshop", workshop);
