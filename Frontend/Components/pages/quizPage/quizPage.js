@@ -19,9 +19,9 @@ template.innerHTML = /*html*/`
         <div id="energy-context-select-container">
             <h2 id="energy-context-select-label">Energie bron:</h2>
             <div id="energy-context-select">
-                <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind" disabled>Wind</label>
-                <label for="water"><input type="radio" id="water-radio" name="power-source" value="water" disabled>Water</label>
-                <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar" disabled>Zon</label>
+                <label for="wind"><input type="radio" id="wind-radio" name="power-source" value="wind">Wind</label>
+                <label for="water"><input type="radio" id="water-radio" name="power-source" value="water">Water</label>
+                <label for="solar"><input type="radio" id="solar-radio" name="power-source" value="solar">Zon</label>
             </div>
             <div id="energy-data-container">Opgewekte waarde:<span id="energy-data-value">loading...</span></div>
         </div>
@@ -39,7 +39,6 @@ template.innerHTML = /*html*/`
                 <answer-feedback-component-れ width="400" height="200"></answer-feedback-component-れ>
             </div>
         </div>
-        
     </div>
 `;
 //#endregion TEMPLATE
@@ -253,15 +252,32 @@ window.customElements.define('quiz-れ', class extends HTMLElement {
     }
 
     setUpGroupQuizPage() {
-
         this.groupSelectorContainer.remove();
 
         //remove group select from the page
         const bluetoothEnabled = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
         if (!bluetoothEnabled) {
-            this.showErrorMessage("Bluetooth is not enabled. Please enable Bluetooth to access this page.");
-            return;
+            // Create warning element instead of blocking access
+            const warningDiv = document.createElement('div');
+            warningDiv.id = 'bluetooth-warning';
+            warningDiv.innerHTML = `
+                <p class="warning-message">Bluetooth is niet ingeschakeld. Je kunt de quiz nog steeds gebruiken, maar zonder energiegegevens.</p>
+            `;
+            warningDiv.style.backgroundColor = '#ffcc00';
+            warningDiv.style.padding = '10px';
+            warningDiv.style.marginBottom = '15px';
+            warningDiv.style.borderRadius = '5px';
+            warningDiv.style.textAlign = 'center';
+
+            // Insert warning at the top of the container
+            this.$container.insertBefore(warningDiv, this.$container.firstChild);
+
+            // Still set up energy display, but show a placeholder
+            this.$energyDataValue.innerText = "Niet beschikbaar";
         }
+        
+        // Continue with quiz setup regardless of Bluetooth status
+        this.$questionList && (this.$questionList.fetchQuestions());
     }
 
     //services

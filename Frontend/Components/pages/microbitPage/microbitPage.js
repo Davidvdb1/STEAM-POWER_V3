@@ -47,11 +47,11 @@ template.innerHTML = /*html*/`
     <div id= "fullscreenContainer">
         <div id="graphs">
             <div id="rangeButtons">
-                <button data-range="minute">1m</button>
+                <button data-range="minute" class="active">1m</button>
                 <button data-range="tenMinutes">10m</button>
                 <button data-range="oneHour">1u</button>
                 <button data-range="sixHour">6u</button>
-                <button data-range="oneDay" class="active">24u</button>
+                <button data-range="oneDay">24u</button>
             </div>
             <img src="Assets/SVGs/fullscreen.png" alt="fullscreen" class="fullscreen" style="height: 25px;"/>
             <livelinegraph-れ></livelinegraph-れ>
