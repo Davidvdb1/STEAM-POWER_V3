@@ -4,6 +4,18 @@
   justify-content: flex-start;
   width: 100%;
   background-color: white;
-  min-height: 155px;
   box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-}/*# sourceMappingURL=style.css.map */
+  margin-bottom: 20px;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+        .navigationListComponent {
+            width: 100%;
+            display: block; /* Ensure it's a block element */
+        }
+/*# sourceMappingURL=style.css.map */

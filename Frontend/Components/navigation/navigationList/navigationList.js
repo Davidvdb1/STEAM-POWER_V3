@@ -35,6 +35,7 @@ window.customElements.define('navigationlist-れ', class extends HTMLElement {
                 const item = document.createElement("navigationitem-れ");
                 item.setAttribute("id", id);
                 item.setAttribute("label", label);
+                item.className = "navigationListItemComponent";
                 this.$list.appendChild(item);
             });
         }

@@ -8,9 +8,9 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/navigation/header/style.css';
     </style>
-
+ 
     <img src="./Assets/images/logo.jpg" alt="Logo" class="nav-logo">
-    <navigationList-れ></navigationList-れ>
+    <navigationList-れ class="navigationListComponent"></navigationList-れ>
 `;
 //#endregion Header
 
@@ -38,7 +38,5 @@ window.customElements.define('header-れ', class extends HTMLElement {
     connectedCallback() {
         
     }
-    
-
 });
 //#endregion CLASS
