@@ -3,26 +3,48 @@ li {
     font-family: Verdana, sans-serif;
     color: #333;
     font-weight: bold;
-    padding: 10px 15px;
+    padding: 0;
+    margin: 0;
     transition: all 0.3s ease-in-out;
     border-radius: 5px;
-
+    list-style: none;
+    
     &:hover {
-        background-color: #f4f4f4;
+        background-color: transparent;
     }
-} 
+}
 
 button {
     background-color: #9FDAF9;
     color: #002757;
     border: none;
-    padding: 10px 15px;
+    padding: 12px 15px;
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
     font-weight: bold;
     width: 100%;
+    text-align: center;
+    font-size: 0.95rem;
+    
     &:hover {
         background-color: #E30147;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    &:active {
+        transform: translateY(0);
+    }
+    
+    &.active {
+        background-color: #002757;
+        color: white;
+    }
+    
+    @media screen and (max-width: 768px) {
+        padding: 10px;
+        font-size: 0.9rem;
     }
 }

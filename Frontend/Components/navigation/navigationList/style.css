@@ -6,17 +6,30 @@ ul {
   margin: 0;
   padding: 0;
   width: 100%;
-}/*# sourceMappingURL=style.css.map */
-
-navigation-list {
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-  width: 100%;
-  height: 100%;
+  flex-wrap: wrap;
 }
 
 .navigationListItemComponent {
-  width: 30%;
+  width: 150px;
+  margin: 5px;
+  flex-grow: 1;
 }
+
+@media screen and (max-width: 768px) {
+  ul {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .navigationListItemComponent {
+    width: 100%;
+    margin: 3px 0;
+  }
+}
+
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+  .navigationListItemComponent {
+    width: 120px;
+  }
+}   
 /*# sourceMappingURL=style.css.map */

@@ -4,18 +4,34 @@
   justify-content: flex-start;
   width: 100%;
   background-color: white;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  padding: 10px 15px;
+  box-sizing: border-box;
 }
 
 .nav-logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 50px;
+  margin-right: 20px;
+  display: block;
 }
 
-        .navigationListComponent {
-            width: 100%;
-            display: block; /* Ensure it's a block element */
-        }
+.navigationListComponent {  
+  width: 100%;
+  display: block;
+}
+
+@media screen and (max-width: 768px) {
+  :host {
+    flex-direction: column; 
+    align-items: center;
+    padding: 10px;
+  }
+
+  .nav-logo {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+}
+
 /*# sourceMappingURL=style.css.map */

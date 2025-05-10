@@ -5,5 +5,26 @@ ul {
     justify-content: space-evenly;
     margin: 0;
     padding: 0;
-    width: 3rem;}
-//I want break points like conventional media queries, it's to change the header, what width should I use for the header list items? 
+    width: 100%;
+    flex-wrap: wrap;
+    
+    @media screen and (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.navigationListItemComponent {
+    width: 150px;
+    margin: 5px;
+    flex-grow: 1;
+    
+    @media screen and (max-width: 768px) {
+        width: 100%;
+        margin: 3px 0;
+    }
+    
+    @media screen and (min-width: 769px) and (max-width: 1024px) {
+        width: 120px;
+    }
+}

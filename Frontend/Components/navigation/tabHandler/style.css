@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  min-height: 100vh;
 }
 
 .background-layer {
@@ -15,4 +17,26 @@
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-}/*# sourceMappingURL=style.css.map */
+}
+
+header-れ {
+  width: 100%;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+content-れ {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+@media screen and (max-width: 768px) {
+  content-れ {
+    padding: 10px;
+  }
+}
+/*# sourceMappingURL=style.css.map */
