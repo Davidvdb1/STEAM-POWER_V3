@@ -1,16 +1,75 @@
 :host {
-  width: 80%;
+  width: 90%;
   max-width: 1500px;
-  display: flex; /* Zorgt ervoor dat de container zijn inhoud correct weergeeft */
+  display: flex;
   justify-content: center;
+  padding: 20px 0;
 }
 
 #camp-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
-  grid-template-rows: repeat(auto-fill, 1fr);
-  gap: 50px;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 30px;
   justify-content: center;
   align-items: stretch;
   width: 100%;
-}/*# sourceMappingURL=style.css.map */
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Empty state styling */
+#camp-list:empty::after {
+  content: "Geen kampen gevonden met deze filters 😢";
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 50px 20px;
+  font-size: 1.2rem;
+  color: #666;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media screen and (max-width: 1200px) {
+  #camp-list {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  :host {
+    width: 95%;
+    padding: 15px 0;
+  }
+  
+  #camp-list {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  :host {
+    width: 98%;
+    padding: 10px 0;
+  }
+  
+  #camp-list {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+}
+/*# sourceMappingURL=style.css.map */

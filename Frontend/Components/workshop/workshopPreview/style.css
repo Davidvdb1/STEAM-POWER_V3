@@ -1,10 +1,10 @@
 :host {
   display: block;
   background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  margin-bottom: 50px;
+  border-radius: 12px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  margin-bottom: 30px;
   max-width: 685px;
   width: 100%;
   height: auto;
@@ -13,14 +13,185 @@
   overflow-y: auto;
   position: relative;
   cursor: pointer;
+  transition: all 0.3s ease-in-out, opacity 0.5s ease;
+  font-family: Verdana, sans-serif;
+  border: 1px solid #f0f0f0;
+}
+
+:host(:hover) {
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
 }
 
 .buttons {
   position: absolute;
-  right: 8px;
+  right: 15px;
   cursor: pointer;
-  padding: 5px;
-  background-color: #f2fafe;
-  border-radius: 20%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}/*# sourceMappingURL=style.css.map */
+  padding: 8px;
+  background-color: #f5f9fe;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s ease;
+  width: 26px;
+  height: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.buttons:hover {
+  background-color: #9FDAF9;
+  transform: scale(1.1);
+}
+
+#edit {
+  top: 15px;
+}
+
+#visible {
+  top: 60px;
+}
+
+#arrowup {
+  top: 105px;
+}
+
+#arrowdown {
+  top: 150px;
+}
+
+/* Style for the edit button specifically */
+#edit:hover {
+  background-color: #9FDAF9;
+}
+
+/* Style for the visibility button */
+#visible:hover {
+  background-color: #9FDAF9;
+}
+
+/* Style for the arrow buttons */
+#arrowup:hover, #arrowdown:hover {
+  background-color: #E30147;
+  filter: brightness(1.2);
+}
+
+/* Content area styling */
+#preview-content {
+  padding: 10px 40px 10px 10px; /* Add right padding to avoid text overlapping with buttons */
+  color: #333;
+}
+
+/* Style headings within preview content */
+#preview-content h1, 
+#preview-content h2, 
+#preview-content h3, 
+#preview-content h4 {
+  color: #002757;
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+#preview-content h1 {
+  font-size: 1.6rem;
+}
+
+#preview-content h2 {
+  font-size: 1.4rem;
+}
+
+#preview-content h3 {
+  font-size: 1.2rem;
+}
+
+/* Style paragraphs and lists */
+#preview-content p,
+#preview-content ul,
+#preview-content ol {
+  line-height: 1.5;
+  margin-bottom: 15px;
+}
+
+/* Style links within the content */
+#preview-content a {
+  color: #E30147;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+#preview-content a:hover {
+  color: #9FDAF9;
+  text-decoration: underline;
+}
+
+/* Style lists */
+#preview-content ul,
+#preview-content ol {
+  padding-left: 20px;
+}
+
+#preview-content li {
+  margin-bottom: 5px;
+}
+
+/* Style for when preview is archived */
+:host([archived="true"]) {
+  opacity: 0.4;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+}
+
+:host([archived="true"]:hover) {
+  opacity: 0.7;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  :host {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .buttons {
+    padding: 6px;
+    width: 22px;
+    height: 22px;
+  }
+  
+  #edit {
+    top: 10px;
+    right: 10px;
+  }
+  
+  #visible {
+    top: 45px;
+    right: 10px;
+  }
+  
+  #arrowup {
+    top: 80px;
+    right: 10px;
+  }
+  
+  #arrowdown {
+    top: 115px;
+    right: 10px;
+  }
+  
+  #preview-content {
+    padding-right: 35px;
+  }
+  
+  #preview-content h1 {
+    font-size: 1.4rem;
+  }
+  
+  #preview-content h2 {
+    font-size: 1.2rem;
+  }
+  
+  #preview-content h3 {
+    font-size: 1.1rem;
+  }
+}
+/*# sourceMappingURL=style.css.map */
