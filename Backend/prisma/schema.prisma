@@ -116,7 +116,6 @@ model Currency {
   greyEnergy  Float
   coins       Float
 
-  // back-relations only; FKs defined on the other side
   gameStatistics GameStatistics? @relation("GS_Currency")
   checkpoint     Checkpoint?     @relation("CP_Currency")
 }
@@ -140,11 +139,9 @@ model Asset {
   xSize            Int
   ySize            Int
 
-  // belongs to a snapshot
-  checkpoint       Checkpoint?      @relation(fields: [checkpointId], references: [id])
+  checkpoints       Checkpoints?      @relation(fields: [checkpointId], references: [id])
   checkpointId     String?
 
-  // belongs to the live aggregate
   gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
 }
@@ -159,29 +156,23 @@ model Building {
   level            Level            @relation(fields: [levelId], references: [id])
   levelId          String
 
-  // live aggregate relation
   gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
 
-  // back-relation for snapshot in Checkpoint
-  checkpoint       Checkpoint?      @relation("CP_Building")
+  checkpoints       Checkpoints?      @relation("CP_Building")
 }
 
 model Checkpoint {
   id               String           @id @default(uuid())
 
-  // one-to-one snapshot of Currency
-  currencies       Currency         @relation("CP_Currency", fields: [currenciesId], references: [id])
-  currenciesId     String           @unique
+  currency       Currency         @relation("CP_Currency", fields: [currenciesId], references: [id])
+  currencyId     String           @unique
 
-  // one-to-one snapshot of Building
-  building         Building         @relation("CP_Building", fields: [buildingId], references: [id])
+  buildings         Building         @relation("CP_Building", fields: [buildingId], references: [id])
   buildingId       String           @unique
 
-  // snapshot of Assets
   assets           Asset[]
 
-  // belongs to the live aggregate
   gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
 }
@@ -189,16 +180,13 @@ model Checkpoint {
 model GameStatistics {
   id               String           @id @default(uuid())
 
-  // the “current” Currency
-  currencies       Currency         @relation("GS_Currency", fields: [currenciesId], references: [id])
+  currency       Currency         @relation("GS_Currency", fields: [currenciesId], references: [id])
   currenciesId     String           @unique
 
-  // ties back to an existing Group
   group            Group            @relation(fields: [groupId], references: [id])
   groupId          String
 
-  // live Buildings, Checkpoints, Assets
-  building         Building[]
-  checkpoint       Checkpoint[]
+  buildings         Building[]
+  checkpoints       Checkpoint[]
   assets           Asset[]
 }

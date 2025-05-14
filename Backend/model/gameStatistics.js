@@ -6,32 +6,32 @@ const Asset = require('./asset');
 class GameStatistics {
   constructor({
     id = undefined,
-    currencies,
-    building,
+    currency,
+    buildings,
     groupID,
-    checkpoint,
+    checkpoints,
     assets,
   }, validate = true) {
     this.id = id;
-    this.currencies = currencies;
-    this.building = building;
+    this.currency = currency;
+    this.buildings = buildings;
     this.groupID = groupID;
-    this.checkpoint = checkpoint;
+    this.checkpoints = checkpoints;
     this.assets = assets;
     if (validate) this.validate();
   }
 
   validate() {
-    if (!(this.currencies instanceof Currency)) {
+    if (!(this.currency instanceof Currency)) {
       throw new Error('Invalid currencies (must be a Currency instance)');
     }
-    if (!Array.isArray(this.building) || !this.building.every(b => b instanceof Building)) {
+    if (!Array.isArray(this.buildings) || !this.buildings.every(b => b instanceof Building)) {
       throw new Error('Invalid building (must be an array of Building instances)');
     }
     if (typeof this.groupID !== 'string') {
       throw new Error('Invalid groupID (must be a string)');
     }
-    if (!Array.isArray(this.checkpoint) || !this.checkpoint.every(c => c instanceof Checkpoint)) {
+    if (!Array.isArray(this.checkpoints) || !this.checkpoints.every(c => c instanceof Checkpoint)) {
       throw new Error('Invalid checkpoint (must be an array of Checkpoint instances)');
     }
     if (!Array.isArray(this.assets) || !this.assets.every(a => a instanceof Asset)) {
@@ -42,10 +42,10 @@ class GameStatistics {
   static from(prismaGameStats) {
     return new GameStatistics({
       id: prismaGameStats.id,
-      currencies: Currency.from(prismaGameStats.currencies),
-      building: prismaGameStats.building.map(Building.from),
+      currency: Currency.from(prismaGameStats.currency),
+      buildings: prismaGameStats.buildings.map(Building.from),
       groupID: prismaGameStats.groupID,
-      checkpoint: prismaGameStats.checkpoint.map(Checkpoint.from),
+      checkpoints: prismaGameStats.checkpoints.map(Checkpoint.from),
       assets: prismaGameStats.assets.map(Asset.from),
     });
   }
