@@ -1,88 +1,82 @@
-const groupRepository = require('../repository/groupRepository');
-const { generateJWTtoken } = require('../util/jwt');
-const GameStatistics = require('../model/gameStatistics');
+const gameStatisticsRepository = require('../repository/gameStatisticsRepository');
+const GameStatistics           = require('../model/gameStatistics');
+const Currency                 = require('../model/currency');
+const Building                 = require('../model/building');
+const Asset                    = require('../model/asset');
+const Checkpoint               = require('../model/checkpoint');
 
 class GameStatisticsService {
-    async create(groupData) {
-        const existingGroup = await groupRepository.findByName(groupData.name);
-        if (existingGroup) throw new Error('Groep met deze naam bestaat al');
-        const newgroup = new Group(groupData);
-        return await groupRepository.create(newgroup);
-    }
-    
+  async create({ groupId, greenEnergy, greyEnergy, coins }) {
+    const currency = new Currency({
+      greenEnergy: greenEnergy ?? undefined,
+      greyEnergy:  greyEnergy  ?? undefined,
+      coins:       coins       ?? undefined,
+    });
+    const gs = await gameStatisticsRepository.create({ groupId, currency });
+    return gs;
+  }
 
-    // async update(groupData) {
-    //     const groupToUpdate = await groupRepository.findById(groupData.id);
+  async getById(id, includeCurrency = true, includeBuildings = true, includeAssets = true, includeCheckpoints = true, includeGroup = false) {
+    return await gameStatisticsRepository.findById(id, {
+      includeCurrency,
+      includeBuildings,
+      includeAssets,
+      includeCheckpoints,
+      includeGroup,
+    });
+  }
 
-    //     const newGroup = new Group({ ...groupToUpdate, ...groupData, id: groupToUpdate.id });
-    //     return await groupRepository.update(newGroup);
-    // }
+  async getByGroupId(groupId, includeCurrency = true, includeBuildings = true, includeAssets = true, includeCheckpoints = true, includeGroup = false) {
+    return await gameStatisticsRepository.findByGroupId(groupId, {
+      includeCurrency,
+      includeBuildings,
+      includeAssets,
+      includeCheckpoints,
+      includeGroup,
+    });
+  }
 
-    // async addScore(id, groupData) {
-    //     const groupToUpdate = await groupRepository.findById(id);
-    //     if (!groupToUpdate) throw new Error('Groep niet gevonden');
+  async updateCurrency(statsId, { greenEnergy, greyEnergy, coins }) {
+    return await gameStatisticsRepository.updateCurrency(statsId, { greenEnergy, greyEnergy, coins });
+  }
 
-    //     const bonusScore = groupToUpdate.bonusScore + parseInt(groupData.bonusScore);
+  async addBuilding(statsId, bData) {
+    const building = new Building(bData);
+    return await gameStatisticsRepository.addBuilding(statsId, building);
+  }
 
-    //     const newGroup = new Group({ ...groupToUpdate, bonusScore, id });
-    //     return await groupRepository.update(newGroup);
-    // }
+  async updateBuilding(buildingId, updates) {
+    return await gameStatisticsRepository.updateBuilding(buildingId, updates);
+  }
 
-    // async getById(id) {
-    //     return await groupRepository.findById(id);
-    // }
+  async removeBuilding(buildingId) {
+    return await gameStatisticsRepository.removeBuilding(buildingId);
+  }
 
-    // async getByCode(code) {
-    //     return await groupRepository.findByCode(code);
-    // }
+  async addAsset(statsId, aData) {
+    const asset = new Asset(aData);
+    return await gameStatisticsRepository.addAsset(statsId, asset);
+  }
 
-    // async getByName(name) {
-    //     return await groupRepository.findByName(name);
-    // }
+  async removeAsset(assetId) {
+    return await gameStatisticsRepository.removeAsset(assetId);
+  }
 
-    // async getAll() {
-    //     return await groupRepository.findAll();
-    // }
+  async recordCheckpoint(statsId, cpData) {
+    const currency   = new Currency(cpData.currency);
+    const buildings  = cpData.buildings.map(b => new Building(b));
+    const assets     = cpData.assets.map(a => new Asset(a));
+    const checkpoint = new Checkpoint({ currency, buildings, assets });
+    return await gameStatisticsRepository.recordCheckpoint(statsId, checkpoint);
+  }
 
-    // async login(code) {
-    //     code = code.toLowerCase();
-    //     const group = await groupRepository.findByCode(code);
-    //     if (!group) throw new Error('Geen groep met deze code gevonden');
+  async removeCheckpoint(checkpointId) {
+    return await gameStatisticsRepository.removeCheckpoint(checkpointId);
+  }
 
-    //     const JWT = generateJWTtoken(group.id, group.name, 'GROUP');
-    //     const response = {
-    //         groupId: group.id,
-    //         token: JWT,
-    //         name: group.name,
-    //         microbitId: group.microbitId,
-    //         members: group.members,
-    //         role: 'GROUP',
-    //     };
-    //     return response;
-    // }
-
-    // async deleteById(id) {
-    //     const group = await this.getById(id);
-    //     if (!group) throw new Error('Groep niet gevonden');
-
-    //     return await groupRepository.deleteById(id);
-    // }
-
-    // async changeBatteryCapacityForAllGroups(batteryCapacity) {
-    //     return await groupRepository.changeBatteryCapacity(batteryCapacity);
-    // }
-
-    // async getBatteryCapacity() {
-    //     return await groupRepository.getBatteryCapacity();
-    // }
-
-    // async changeEnergyMultiplierForAllGroups(energyMultiplier) {
-    //     return await groupRepository.changeEnergyMultiplier(energyMultiplier);
-    // }
-
-    // async getEnergyMultiplier() {
-    //     return await groupRepository.getEnergyMultiplier();
-    // }
+  async delete(id) {
+    return await gameStatisticsRepository.delete(id);
+  }
 }
 
 module.exports = new GameStatisticsService();
