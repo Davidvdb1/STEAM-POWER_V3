@@ -200,6 +200,14 @@ async function main() {
     },
   });
 
+    const currency2 = await prisma.currency.create({
+    data: {
+      greyEnergy: 10.6,
+      greenEnergy: 0.0,
+      coins: 0.0,
+    },
+  });
+
   const level1 = await prisma.level.create({
     data: {
       level: 1,
@@ -268,9 +276,9 @@ async function main() {
         },
       },
       buildings: {
-        connect: {
-          id: buidling1.id,
-        },
+        connect: [
+          {id: buidling1.id}
+        ],
       },
       assets: {
         connect: [
@@ -284,13 +292,13 @@ async function main() {
     data: {
       currency: {
         connect: {
-          id: currency1.id,
+          id: currency2.id,
         },
       },
       buildings: {
-        connect: {
-          id: buidling1.id,
-        },
+        connect: [
+          {id: buidling1.id}
+        ],
       },
       assets: {
         connect: [
@@ -310,7 +318,7 @@ async function main() {
       buildings: {
         connect: [{ id: buidling1.id }, { id: buidling2.id }],
       },
-      groupId: {
+      group: {
         connect: {
           id: group1.id,
         },

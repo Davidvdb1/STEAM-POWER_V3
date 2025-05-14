@@ -110,13 +110,13 @@ model Answer {
 }
 
 model Currency {
-  id            String           @id @default(uuid())
-  greenEnergy   Float
-  greyEnergy    Float
-  coins         Float
+  id             String           @id @default(uuid())
+  greenEnergy    Float
+  greyEnergy     Float
+  coins          Float
 
-  gameStatistics GameStatistics? @relation("GS_Currency")
-  checkpoint     Checkpoint?     @relation("CP_Currency")
+  gameStatistics GameStatistics?  @relation("GS_Currency")
+  checkpoint     Checkpoint?      @relation("CP_Currency")
 }
 
 model Level {
@@ -158,7 +158,7 @@ model Building {
   gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
 
-  checkpoint       Checkpoint?      @relation(fields: [checkpointId], references: [id])
+  checkpoint       Checkpoint?      @relation("CP_Building", fields: [checkpointId], references: [id])
   checkpointId     String?
 }
 
@@ -168,12 +168,7 @@ model Checkpoint {
   currency         Currency         @relation("CP_Currency", fields: [currencyId], references: [id])
   currencyId       String           @unique
 
-<<<<<<< HEAD
-  buildings      Building         @relation("CP_Building", fields: [buildingId], references: [id])
-  buildingId       String           @unique
-=======
-  buildings        Building[]
->>>>>>> cc574fb2fdacf66cd0b3ec7fa93514f8671a19c4
+  buildings        Building[]       @relation("CP_Building")
 
   assets           Asset[]
 
