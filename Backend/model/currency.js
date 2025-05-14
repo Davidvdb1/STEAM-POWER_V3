@@ -13,10 +13,10 @@ class Currency {
         if (!this.greenEnergy || typeof this.greenEnergy !== 'float') {
             throw new Error('Ongeldige greenEnergy');
         }
-        if (!this.greyEnergy || typeof this.greyEnergy !== 'float') {
+        if (!this.greyEnergy || typeof this.greyEnergy !== 'number') {
             throw new Error('Ongeldige greyEnergy');
         }
-        if (!this.coins || typeof this.coins !== 'float') {
+        if (!this.coins || typeof this.coins !=='number') {
             throw new Error('Ongeldige Coins');
         }
     }

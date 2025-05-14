@@ -5,7 +5,7 @@ const Asset = require("./asset");
 
 class GameStatistics {
   constructor(
-    { id = undefined, currencies, building, groupID, checkpoint, assets },
+    { id = undefined, currency, buildings, groupID, checkpoints, assets },
     validate = true
   ) {
     this.id = id;

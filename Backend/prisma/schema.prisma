@@ -168,7 +168,7 @@ model Checkpoint {
   currency       Currency         @relation("CP_Currency", fields: [currencyId], references: [id])
   currencyId     String           @unique
 
-  buildings         Building         @relation("CP_Building", fields: [buildingId], references: [id])
+  buildings      Building         @relation("CP_Building", fields: [buildingId], references: [id])
   buildingId       String           @unique
 
   assets           Asset[]

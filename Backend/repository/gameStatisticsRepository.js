@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const GameStatistics = require('../model/gameStatistics');
+const Building = require('../model/building');
 
 class GameStatisticsRepository {
     async create(gameStatistics, includeCurrency = false, includeBuildings = false, includeCheckpoints = false, includeAssets = false, includeGroupId = false) {
@@ -29,91 +30,100 @@ class GameStatisticsRepository {
         return GameStatistics.from(prismaGameStatistics);
     }
 
-    async findById(id, includeWorkshops = false) {
-        const prismaCamp = await prisma.camp.findUnique({
-            where: { id },
-            include: { 
-                workshops: includeWorkshops 
-                    ? { orderBy: { position: 'asc' } } 
-                    : { select: { id: true } }
-            }
+    async create(buidlings) {
+        const prismaBuilding = await prisma.buidlings.create({
+            data: {
+                ...buidlings,
+            },
         });
-        return prismaCamp ? Camp.from(prismaCamp) : null;
+        return Building.from(prismaBuilding);
     }
+
+    // async findCurrencyById(id, includeWorkshops = false) {
+    //     const prismaCamp = await prisma.camp.findUnique({
+    //         where: { id },
+    //         include: { 
+    //             workshops: includeWorkshops 
+    //                 ? { orderBy: { position: 'asc' } } 
+    //                 : { select: { id: true } }
+    //         }
+    //     });
+    //     return prismaCamp ? Camp.from(prismaCamp) : null;
+    // }
     
 
-    async findByTitle(title, includeWorkshops = false) {
-        const prismaCamp = await prisma.camp.findUnique({
-            where: { title },
-            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
-        });
-        return prismaCamp ? Camp.from(prismaCamp) : null;
-    }
+    // async findByTitle(title, includeWorkshops = false) {
+    //     const prismaCamp = await prisma.camp.findUnique({
+    //         where: { title },
+    //         include: { workshops: includeWorkshops ? true : { select: { id: true } } }
+    //     });
+    //     return prismaCamp ? Camp.from(prismaCamp) : null;
+    // }
 
-    async findAll(includeWorkshops = false) {
-        const prismaCamps = await prisma.camp.findMany({ 
-            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
-        });
-        return prismaCamps.map(Camp.from);
-    }
+    // async findAll(includeWorkshops = false) {
+    //     const prismaCamps = await prisma.camp.findMany({ 
+    //         include: { workshops: includeWorkshops ? true : { select: { id: true } } }
+    //     });
+    //     return prismaCamps.map(Camp.from);
+    // }
 
-    async update(id, updatedCamp) {
-        const existingCamp = await this.findById(id);
-        if (!existingCamp) {
-            throw new Error("Kamp niet gevonden");
-        }
+    // async update(id, updatedCamp) {
+    //     const existingCamp = await this.findById(id);
+    //     if (!existingCamp) {
+    //         throw new Error("Kamp niet gevonden");
+    //     }
 
-        updatedCamp.validate?.();
+    //     updatedCamp.validate?.();
 
-        const prismaCamp = await prisma.camp.update({
-            where: { id },
-            data: {
-                ...updatedCamp,
-                workshops: updatedCamp.workshops ? {
-                    set: updatedCamp.workshops.map(w => ({ id: w.id }))
-                } : undefined
-            },
-            include: { workshops: { select: { id: true } } }
-        });
+    //     const prismaCamp = await prisma.camp.update({
+    //         where: { id },
+    //         data: {
+    //             ...updatedCamp,
+    //             workshops: updatedCamp.workshops ? {
+    //                 set: updatedCamp.workshops.map(w => ({ id: w.id }))
+    //             } : undefined
+    //         },
+    //         include: { workshops: { select: { id: true } } }
+    //     });
 
-        return Camp.from(prismaCamp);
-    }
+    //     return Camp.from(prismaCamp);
+    // }
 
-    async delete(id) {
-        const existingCamp = await this.findById(id);
-        if (!existingCamp) {
-            return null;
-        }
+    // async delete(id) {
+    //     const existingCamp = await this.findById(id);
+    //     if (!existingCamp) {
+    //         return null;
+    //     }
         
-        await prisma.camp.delete({
-            where: { id }
-        });
+    //     await prisma.camp.delete({
+    //         where: { id }
+    //     });
 
-        return true;
-    }
+    //     return true;
+    // }
 
-    async addWorkshop(campId, workshopId) {
-        const existingCamp = await this.findById(campId, true);
-        if (!existingCamp) {
-            throw new Error("Kamp niet gevonden");
-        }
+    // async addWorkshop(campId, workshopId) {
+    //     const existingCamp = await this.findById(campId, true);
+    //     if (!existingCamp) {
+    //         throw new Error("Kamp niet gevonden");
+    //     }
 
-        const existingWorkshop = await prisma.workshop.findUnique({ where: { id: workshopId } });
-        if (!existingWorkshop) {
-            throw new Error("Workshop niet gevonden");
-        }
+    //     const existingWorkshop = await prisma.workshop.findUnique({ where: { id: workshopId } });
+    //     if (!existingWorkshop) {
+    //         throw new Error("Workshop niet gevonden");
+    //     }
 
-        await prisma.camp.update({
-            where: { id: campId },
-            data: {
-                workshops: {
-                    connect: { id: workshopId }
-                }
-            }
-        });
+    //     await prisma.camp.update({
+    //         where: { id: campId },
+    //         data: {
+    //             workshops: {
+    //                 connect: { id: workshopId }
+    //             }
+    //         }
+    //     });
 
-        return true;
-    }
+    //     return true;
+    // }
 }
 
 module.exports = new GameStatisticsRepository();

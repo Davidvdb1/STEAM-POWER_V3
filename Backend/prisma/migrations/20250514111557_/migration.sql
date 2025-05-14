@@ -154,7 +154,7 @@ CREATE TABLE "Building" (
 -- CreateTable
 CREATE TABLE "Checkpoint" (
     "id" TEXT NOT NULL,
-    "currenciesId" TEXT NOT NULL,
+    "currencyId" TEXT NOT NULL,
     "buildingId" TEXT NOT NULL,
     "gameStatisticsId" TEXT,
 
@@ -180,7 +180,7 @@ CREATE UNIQUE INDEX "Group_name_key" ON "Group"("name");
 CREATE UNIQUE INDEX "Group_code_key" ON "Group"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Checkpoint_currenciesId_key" ON "Checkpoint"("currenciesId");
+CREATE UNIQUE INDEX "Checkpoint_currencyId_key" ON "Checkpoint"("currencyId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Checkpoint_buildingId_key" ON "Checkpoint"("buildingId");
@@ -213,7 +213,7 @@ ALTER TABLE "Building" ADD CONSTRAINT "Building_levelId_fkey" FOREIGN KEY ("leve
 ALTER TABLE "Building" ADD CONSTRAINT "Building_gameStatisticsId_fkey" FOREIGN KEY ("gameStatisticsId") REFERENCES "GameStatistics"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Checkpoint" ADD CONSTRAINT "Checkpoint_currenciesId_fkey" FOREIGN KEY ("currenciesId") REFERENCES "Currency"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Checkpoint" ADD CONSTRAINT "Checkpoint_currencyId_fkey" FOREIGN KEY ("currencyId") REFERENCES "Currency"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Checkpoint" ADD CONSTRAINT "Checkpoint_buildingId_fkey" FOREIGN KEY ("buildingId") REFERENCES "Building"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
