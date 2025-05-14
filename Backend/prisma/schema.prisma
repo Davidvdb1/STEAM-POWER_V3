@@ -67,7 +67,6 @@ model Group {
   bonusScore       Int              @default(0)
   answers          Answer[]
 
-  // back-relation to GameStatistics aggregate
   gameStatistics   GameStatistics[]
 }
 
@@ -111,10 +110,10 @@ model Answer {
 }
 
 model Currency {
-  id          String            @id @default(uuid())
-  greenEnergy Float
-  greyEnergy  Float
-  coins       Float
+  id            String           @id @default(uuid())
+  greenEnergy   Float
+  greyEnergy    Float
+  coins         Float
 
   gameStatistics GameStatistics? @relation("GS_Currency")
   checkpoint     Checkpoint?     @relation("CP_Currency")
@@ -139,7 +138,7 @@ model Asset {
   xSize            Int
   ySize            Int
 
-  checkpoints       Checkpoint?      @relation(fields: [checkpointId], references: [id])
+  checkpoint       Checkpoint?      @relation(fields: [checkpointId], references: [id])
   checkpointId     String?
 
   gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
@@ -159,17 +158,17 @@ model Building {
   gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
 
-  checkpoints       Checkpoint?      @relation("CP_Building")
+  checkpoint       Checkpoint?      @relation(fields: [checkpointId], references: [id])
+  checkpointId     String?
 }
 
 model Checkpoint {
   id               String           @id @default(uuid())
 
-  currency       Currency         @relation("CP_Currency", fields: [currencyId], references: [id])
-  currencyId     String           @unique
+  currency         Currency         @relation("CP_Currency", fields: [currencyId], references: [id])
+  currencyId       String           @unique
 
-  buildings         Building         @relation("CP_Building", fields: [buildingId], references: [id])
-  buildingId       String           @unique
+  buildings        Building[]
 
   assets           Asset[]
 
@@ -180,13 +179,13 @@ model Checkpoint {
 model GameStatistics {
   id               String           @id @default(uuid())
 
-  currency       Currency         @relation("GS_Currency", fields: [currenciesId], references: [id])
-  currenciesId     String           @unique
+  currency         Currency         @relation("GS_Currency", fields: [currencyId], references: [id])
+  currencyId       String           @unique
 
   group            Group            @relation(fields: [groupId], references: [id])
   groupId          String
 
-  buildings         Building[]
-  checkpoints       Checkpoint[]
+  buildings        Building[]
+  checkpoints      Checkpoint[]
   assets           Asset[]
 }
