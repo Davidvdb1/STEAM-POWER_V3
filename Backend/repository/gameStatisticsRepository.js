@@ -1,119 +1,175 @@
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-const GameStatistics = require('../model/gameStatistics');
+const GameStatistics   = require('../model/gameStatistics');
+const Building         = require('../model/building');
+const Asset            = require('../model/asset');
+const Currency         = require('../model/currency');
+const Checkpoint       = require('../model/checkpoint');
 
 class GameStatisticsRepository {
-    async create(gameStatistics, includeCurrency = false, includeBuildings = false, includeCheckpoints = false, includeAssets = false, includeGroupId = false) {
-        currency.validate();
-        const prismaGameStatistics = await prisma.gameStatistics.create({
-            data: {
-                ...gameStatistics,
-                currency: {
-                    connect: gameStatistics.currency
-                },
-                buildings: {
-                    connect: gameStatistics.buildings
-                },
-                checkpoints: {
-                    connect: gameStatistics.checkpoints
-                },
-                assets: {
-                    connect: gameStatistics.assets
-                },
-                groupId: {
-                    connect: gameStatistics.groupId
-                }
-            },
-            include: { currency: includeCurrency ? true : { select: { id: true }},  buildings: includeBuildings ? true : { select: { id: true }}, checkpoints: includeCheckpoints ? true : { select: { id: true }}, assets: includeAssets ? true : { select: { id: true }}, groupId: includeGroupId ? true : { select: { id: true }}}
-        });
-        return GameStatistics.from(prismaGameStatistics);
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
+  async create({ groupId, currency }) {
+    currency.validate();
+    const prismaGS = await this.prisma.gameStatistics.create({
+      data: {
+        group:    { connect: { id: groupId } },
+        currency: { create: {
+          greenEnergy: currency.greenEnergy,
+          greyEnergy:  currency.greyEnergy,
+          coins:       currency.coins,
+        }},
+      },
+      include: { currency: true }
+    });
+    return GameStatistics.from(prismaGS);
+  }
+
+  async findById(
+    id,
+    {
+      includeCurrency    = true,
+      includeBuildings   = true,
+      includeAssets      = true,
+      includeCheckpoints = true,
+      includeGroup       = false,
+    } = {}
+  ) {
+    const prismaGS = await this.prisma.gameStatistics.findUnique({
+      where: { id },
+      include: {
+        currency:    includeCurrency,
+        buildings:   includeBuildings,
+        assets:      includeAssets,
+        checkpoints: includeCheckpoints,
+        group:       includeGroup,
+      }
+    });
+    return prismaGS ? GameStatistics.from(prismaGS) : null;
+  }
+
+  async findByGroupId(groupId, opts = {}) {
+    const prismaGS = await this.prisma.gameStatistics.findFirst({
+      where: { groupId },
+      include: {
+        currency:    opts.includeCurrency    ?? true,
+        buildings:   opts.includeBuildings   ?? true,
+        assets:      opts.includeAssets      ?? true,
+        checkpoints: opts.includeCheckpoints ?? true,
+        group:       opts.includeGroup       ?? false,
+      }
+    });
+    return prismaGS ? GameStatistics.from(prismaGS) : null;
+  }
+
+  async updateCurrency(statsId, { greenEnergy, greyEnergy, coins }) {
+    if (
+      typeof greenEnergy !== 'number' ||
+      typeof greyEnergy  !== 'number' ||
+      typeof coins       !== 'number'
+    ) {
+      throw new Error('Invalid currency values');
     }
+    const updated = await this.prisma.currency.update({
+      where: { gameStatisticsId: statsId },
+      data: { greenEnergy, greyEnergy, coins }
+    });
+    return Currency.from(updated);
+  }
 
-    async findById(id, includeWorkshops = false) {
-        const prismaCamp = await prisma.camp.findUnique({
-            where: { id },
-            include: { 
-                workshops: includeWorkshops 
-                    ? { orderBy: { position: 'asc' } } 
-                    : { select: { id: true } }
-            }
-        });
-        return prismaCamp ? Camp.from(prismaCamp) : null;
-    }
-    
+  async addBuilding(statsId, building) {
+    building.validate();
+    const created = await this.prisma.building.create({
+      data: {
+        xLocation:      building.xLocation,
+        yLocation:      building.yLocation,
+        xSize:          building.xSize,
+        ySize:          building.ySize,
+        level:          { connect: { id: building.level.id } },
+        gameStatistics: { connect: { id: statsId } }
+      }
+    });
+    return Building.from(created);
+  }
 
-    async findByTitle(title, includeWorkshops = false) {
-        const prismaCamp = await prisma.camp.findUnique({
-            where: { title },
-            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
-        });
-        return prismaCamp ? Camp.from(prismaCamp) : null;
-    }
+  async updateBuilding(buildingId, { xLocation, yLocation, xSize, ySize }) {
+    const data = {};
+    if (typeof xLocation === 'number') data.xLocation = xLocation;
+    if (typeof yLocation === 'number') data.yLocation = yLocation;
+    if (typeof xSize     === 'number') data.xSize     = xSize;
+    if (typeof ySize     === 'number') data.ySize     = ySize;
+    const updated = await this.prisma.building.update({
+      where: { id: buildingId },
+      data
+    });
+    return Building.from(updated);
+  }
 
-    async findAll(includeWorkshops = false) {
-        const prismaCamps = await prisma.camp.findMany({ 
-            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
-        });
-        return prismaCamps.map(Camp.from);
-    }
+  async removeBuilding(buildingId) {
+    await this.prisma.building.delete({ where: { id: buildingId } });
+  }
 
-    async update(id, updatedCamp) {
-        const existingCamp = await this.findById(id);
-        if (!existingCamp) {
-            throw new Error("Kamp niet gevonden");
-        }
+  async addAsset(statsId, asset) {
+    asset.validate();
+    const created = await this.prisma.asset.create({
+      data: {
+        buildCost:      asset.buildCost,
+        destroyCost:    asset.destroyCost,
+        energy:         asset.energy,
+        xLocation:      asset.xLocation,
+        yLocation:      asset.yLocation,
+        xSize:          asset.xSize,
+        ySize:          asset.ySize,
+        gameStatistics: { connect: { id: statsId } }
+      }
+    });
+    return Asset.from(created);
+  }
 
-        updatedCamp.validate?.();
+  async removeAsset(assetId) {
+    await this.prisma.asset.delete({ where: { id: assetId } });
+  }
 
-        const prismaCamp = await prisma.camp.update({
-            where: { id },
-            data: {
-                ...updatedCamp,
-                workshops: updatedCamp.workshops ? {
-                    set: updatedCamp.workshops.map(w => ({ id: w.id }))
-                } : undefined
-            },
-            include: { workshops: { select: { id: true } } }
-        });
+  async recordCheckpoint(statsId, cp) {
+    cp.validate();
+    const prismaCP = await this.prisma.checkpoint.create({
+      data: {
+        gameStatistics: { connect: { id: statsId } },
+        currency:       { create: {
+          greenEnergy: cp.currency.greenEnergy,
+          greyEnergy:  cp.currency.greyEnergy,
+          coins:       cp.currency.coins,
+        }},
+        buildings:      { create: cp.buildings.map(b => ({
+          xLocation: b.xLocation,
+          yLocation: b.yLocation,
+          xSize:     b.xSize,
+          ySize:     b.ySize,
+          level:     { connect: { id: b.level.id } },
+        }))},
+        assets:          { create: cp.assets.map(a => ({
+          buildCost:   a.buildCost,
+          destroyCost: a.destroyCost,
+          energy:      a.energy,
+          xLocation:   a.xLocation,
+          yLocation:   a.yLocation,
+          xSize:       a.xSize,
+          ySize:       a.ySize,
+        }))}
+      },
+      include: { currency: true, buildings: true, assets: true }
+    });
+    return Checkpoint.from(prismaCP);
+  }
 
-        return Camp.from(prismaCamp);
-    }
+  async removeCheckpoint(checkpointId) {
+    await this.prisma.checkpoint.delete({ where: { id: checkpointId } });
+  }
 
-    async delete(id) {
-        const existingCamp = await this.findById(id);
-        if (!existingCamp) {
-            return null;
-        }
-        
-        await prisma.camp.delete({
-            where: { id }
-        });
-
-        return true;
-    }
-
-    async addWorkshop(campId, workshopId) {
-        const existingCamp = await this.findById(campId, true);
-        if (!existingCamp) {
-            throw new Error("Kamp niet gevonden");
-        }
-
-        const existingWorkshop = await prisma.workshop.findUnique({ where: { id: workshopId } });
-        if (!existingWorkshop) {
-            throw new Error("Workshop niet gevonden");
-        }
-
-        await prisma.camp.update({
-            where: { id: campId },
-            data: {
-                workshops: {
-                    connect: { id: workshopId }
-                }
-            }
-        });
-
-        return true;
-    }
+  async delete(id) {
+    await this.prisma.gameStatistics.delete({ where: { id } });
+  }
 }
 
 module.exports = new GameStatisticsRepository();

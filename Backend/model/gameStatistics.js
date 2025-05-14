@@ -1,61 +1,65 @@
-const Currency = require("./currency");
-const Building = require("./building");
-const Checkpoint = require("./checkpoint");
-const Asset = require("./asset");
+const Currency   = require('./currency');
+const Building   = require('./building');
+const Asset      = require('./asset');
+const Checkpoint = require('./checkpoint');
 
 class GameStatistics {
   constructor(
-    { id = undefined, currencies, building, groupID, checkpoint, assets },
+    {
+      id          = undefined,
+      currency,            
+      buildings   = [],    
+      groupId,             
+      checkpoints = [],    
+      assets      = [],    
+    },
     validate = true
   ) {
-    this.id = id;
-    this.currency = currency;
-    this.buildings = buildings;
-    this.groupID = groupID;
+    this.id          = id;
+    this.currency    = currency;
+    this.buildings   = buildings;
+    this.groupId     = groupId;
     this.checkpoints = checkpoints;
-    this.assets = assets;
+    this.assets      = assets;
+
     if (validate) this.validate();
   }
 
   validate() {
-    if (!(this.currencies instanceof Currency)) {
-      throw new Error("Invalid currencies (must be a Currency instance)");
+    if (!(this.currency instanceof Currency)) {
+      throw new Error('Invalid currency (must be Currency)');
     }
     if (
-      !Array.isArray(this.building) ||
-      !this.building.every((b) => b instanceof Building)
+      !Array.isArray(this.buildings) ||
+      !this.buildings.every(b => b instanceof Building)
     ) {
-      throw new Error(
-        "Invalid building (must be an array of Building instances)"
-      );
+      throw new Error('Invalid buildings (must be Building[])');
     }
-    if (typeof this.groupID !== "string") {
-      throw new Error("Invalid groupID (must be a string)");
+    if (typeof this.groupId !== 'string') {
+      throw new Error('Invalid groupId (must be string)');
     }
     if (
-      !Array.isArray(this.checkpoint) ||
-      !this.checkpoint.every((c) => c instanceof Checkpoint)
+      !Array.isArray(this.checkpoints) ||
+      !this.checkpoints.every(c => c instanceof Checkpoint)
     ) {
-      throw new Error(
-        "Invalid checkpoint (must be an array of Checkpoint instances)"
-      );
+      throw new Error('Invalid checkpoints (must be Checkpoint[])');
     }
     if (
       !Array.isArray(this.assets) ||
-      !this.assets.every((a) => a instanceof Asset)
+      !this.assets.every(a => a instanceof Asset)
     ) {
-      throw new Error("Invalid assets (must be an array of Asset instances)");
+      throw new Error('Invalid assets (must be Asset[])');
     }
   }
 
-  static from(prismaGameStats) {
+  static from(prismaGS) {
     return new GameStatistics({
-      id: prismaGameStats.id,
-      currency: Currency.from(prismaGameStats.currency),
-      buildings: prismaGameStats.buildings.map(Building.from),
-      groupID: prismaGameStats.groupID,
-      checkpoints: prismaGameStats.checkpoints.map(Checkpoint.from),
-      assets: prismaGameStats.assets.map(Asset.from),
+      id:          prismaGS.id,
+      currency:    Currency.from(prismaGS.currency),
+      buildings:   prismaGS.buildings.map(Building.from),
+      groupId:     prismaGS.groupId,
+      checkpoints: prismaGS.checkpoints.map(Checkpoint.from),
+      assets:      prismaGS.assets.map(Asset.from),
     });
   }
 }
