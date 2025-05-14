@@ -1,20 +1,32 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-const Currency = require('../model/currency');
+const GameStatistics = require('../model/gameStatistics');
 
-class CurrencyRepository {
-    async create(currency, includeWorkshops = false) {
+class GameStatisticsRepository {
+    async create(gameStatistics, includeCurrency = false, includeBuildings = false, includeCheckpoints = false, includeAssets = false, includeGroupId = false) {
         currency.validate();
-        const prismaCamp = await prisma.currency.create({
+        const prismaGameStatistics = await prisma.gameStatistics.create({
             data: {
-                ...currency,
-                workshops: {
-                    connect: camp.workshops
+                ...gameStatistics,
+                currency: {
+                    connect: gameStatistics.currency
+                },
+                buildings: {
+                    connect: gameStatistics.buildings
+                },
+                checkpoints: {
+                    connect: gameStatistics.checkpoints
+                },
+                assets: {
+                    connect: gameStatistics.assets
+                },
+                groupId: {
+                    connect: gameStatistics.groupId
                 }
             },
-            include: { workshops: includeWorkshops ? true : { select: { id: true } } }
+            include: { currency: includeCurrency ? true : { select: { id: true }},  buildings: includeBuildings ? true : { select: { id: true }}, checkpoints: includeCheckpoints ? true : { select: { id: true }}, assets: includeAssets ? true : { select: { id: true }}, groupId: includeGroupId ? true : { select: { id: true }}}
         });
-        return Camp.from(prismaCamp);
+        return GameStatistics.from(prismaGameStatistics);
     }
 
     async findById(id, includeWorkshops = false) {
@@ -104,4 +116,4 @@ class CurrencyRepository {
     }
 }
 
-module.exports = new CurrencyRepository();
+module.exports = new GameStatisticsRepository();
