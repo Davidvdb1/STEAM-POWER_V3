@@ -156,10 +156,6 @@ CREATE TABLE "Building" (
 CREATE TABLE "Checkpoint" (
     "id" TEXT NOT NULL,
     "currencyId" TEXT NOT NULL,
-<<<<<<<< HEAD:Backend/prisma/migrations/20250514125034_/migration.sql
-========
-    "buildingId" TEXT NOT NULL,
->>>>>>>> 68650c9a22fa1ff4a385ddadb29524625934e51f:Backend/prisma/migrations/20250514111557_/migration.sql
     "gameStatisticsId" TEXT,
 
     CONSTRAINT "Checkpoint_pkey" PRIMARY KEY ("id")
@@ -214,11 +210,7 @@ ALTER TABLE "Building" ADD CONSTRAINT "Building_levelId_fkey" FOREIGN KEY ("leve
 ALTER TABLE "Building" ADD CONSTRAINT "Building_gameStatisticsId_fkey" FOREIGN KEY ("gameStatisticsId") REFERENCES "GameStatistics"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-<<<<<<<< HEAD:Backend/prisma/migrations/20250514125034_/migration.sql
 ALTER TABLE "Building" ADD CONSTRAINT "Building_checkpointId_fkey" FOREIGN KEY ("checkpointId") REFERENCES "Checkpoint"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-========
-ALTER TABLE "Checkpoint" ADD CONSTRAINT "Checkpoint_currencyId_fkey" FOREIGN KEY ("currencyId") REFERENCES "Currency"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
->>>>>>>> 68650c9a22fa1ff4a385ddadb29524625934e51f:Backend/prisma/migrations/20250514111557_/migration.sql
 
 -- AddForeignKey
 ALTER TABLE "Checkpoint" ADD CONSTRAINT "Checkpoint_currencyId_fkey" FOREIGN KEY ("currencyId") REFERENCES "Currency"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
