@@ -51,6 +51,10 @@ CREATE TABLE "Group" (
     "members" TEXT NOT NULL DEFAULT '',
     "microbitId" TEXT NOT NULL DEFAULT '',
     "code" TEXT NOT NULL DEFAULT substring(md5(random()::text), 1, 6),
+    "energy" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "energyMultiplier" DOUBLE PRECISION NOT NULL DEFAULT 1,
+    "batteryLevel" DOUBLE PRECISION NOT NULL DEFAULT 0,
+    "batteryCapacity" DOUBLE PRECISION NOT NULL DEFAULT 500,
     "bonusScore" INTEGER NOT NULL DEFAULT 0,
 
     CONSTRAINT "Group_pkey" PRIMARY KEY ("id")
@@ -73,16 +77,29 @@ CREATE TABLE "Question" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
-    "windQuestion" TEXT NOT NULL,
-    "waterQuestion" TEXT NOT NULL,
-    "solarQuestion" TEXT NOT NULL,
+    "questionStatement" TEXT NOT NULL,
+    "energyType" "EnergyType" NOT NULL,
     "picture" TEXT NOT NULL,
     "maxTries" INTEGER NOT NULL DEFAULT 0,
     "wattage" INTEGER NOT NULL,
     "score" INTEGER NOT NULL,
     "active" BOOLEAN NOT NULL DEFAULT true,
+    "errorMargin" DOUBLE PRECISION NOT NULL DEFAULT 0.5,
 
     CONSTRAINT "Question_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Answer" (
+    "id" TEXT NOT NULL,
+    "groupId" TEXT NOT NULL,
+    "questionId" TEXT NOT NULL,
+    "isCorrect" BOOLEAN NOT NULL,
+    "answerValue" DOUBLE PRECISION NOT NULL,
+    "energyReading" DOUBLE PRECISION NOT NULL,
+    "errorMargin" DOUBLE PRECISION NOT NULL DEFAULT 0,
+
+    CONSTRAINT "Answer_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -99,3 +116,9 @@ ALTER TABLE "Workshop" ADD CONSTRAINT "Workshop_campId_fkey" FOREIGN KEY ("campI
 
 -- AddForeignKey
 ALTER TABLE "EnergyData" ADD CONSTRAINT "EnergyData_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Answer" ADD CONSTRAINT "Answer_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Answer" ADD CONSTRAINT "Answer_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
