@@ -3,6 +3,7 @@ const gameStatisticsService = require('../service/gameStatisticsService');
 
 const router = express.Router();
 
+// Create new game statistics
 router.post('/', async (req, res) => {
   try {
     const { groupId, greenEnergy, greyEnergy, coins } = req.body;
@@ -15,6 +16,27 @@ router.post('/', async (req, res) => {
   }
 });
 
+// GET /gameStatistics/group/:groupId
+router.get('/group/:groupId', async (req, res) => {
+  const { groupId } = req.params;
+  console.log('→ [gameStatistics] fetching stats for groupId:', groupId);
+
+  try {
+    const gs = await gameStatisticsService.getByGroupId(groupId);
+    if (!gs) {
+      console.log(`→ [gameStatistics] no stats found for group ${groupId}`);
+      return res.status(404).json({ error: 'GameStatistics for group not found' });
+    }
+    console.log('→ [gameStatistics] found stats:', gs);
+    res.status(200).json(gs);
+  } catch (error) {
+    console.error('✖ [gameStatistics] ERROR in GET /group/:groupId →', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+// ——— Fetch by statistics ID ———
 router.get('/:id', async (req, res) => {
   try {
     const gs = await gameStatisticsService.getById(req.params.id);
@@ -29,20 +51,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.get('/group/:groupId', async (req, res) => {
-  try {
-    const gs = await gameStatisticsService.getByGroupId(req.params.groupId);
-    if (!gs) {
-      return res.status(404).json({ error: 'GameStatistics for group not found' });
-    }
-    res.status(200).json(gs);
-  } catch (error) {
-    console.error(`Error fetching GameStatistics for group ${req.params.groupId}:`, error);
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ error: error.message });
-  }
-});
-
+// Update currency
 router.put('/:id/currency', async (req, res) => {
   try {
     const updated = await gameStatisticsService.updateCurrency(req.params.id, req.body);
@@ -54,6 +63,7 @@ router.put('/:id/currency', async (req, res) => {
   }
 });
 
+// Add a building
 router.post('/:id/buildings', async (req, res) => {
   try {
     const building = await gameStatisticsService.addBuilding(req.params.id, req.body);
@@ -65,6 +75,7 @@ router.post('/:id/buildings', async (req, res) => {
   }
 });
 
+// Update a building
 router.put('/buildings/:buildingId', async (req, res) => {
   try {
     const building = await gameStatisticsService.updateBuilding(req.params.buildingId, req.body);
@@ -76,6 +87,7 @@ router.put('/buildings/:buildingId', async (req, res) => {
   }
 });
 
+// Delete a building
 router.delete('/buildings/:buildingId', async (req, res) => {
   try {
     await gameStatisticsService.removeBuilding(req.params.buildingId);
@@ -87,6 +99,7 @@ router.delete('/buildings/:buildingId', async (req, res) => {
   }
 });
 
+// Add an asset
 router.post('/:id/assets', async (req, res) => {
   try {
     const asset = await gameStatisticsService.addAsset(req.params.id, req.body);
@@ -98,6 +111,7 @@ router.post('/:id/assets', async (req, res) => {
   }
 });
 
+// Delete an asset
 router.delete('/assets/:assetId', async (req, res) => {
   try {
     await gameStatisticsService.removeAsset(req.params.assetId);
@@ -109,6 +123,7 @@ router.delete('/assets/:assetId', async (req, res) => {
   }
 });
 
+// Record a checkpoint
 router.post('/:id/checkpoints', async (req, res) => {
   try {
     const cp = await gameStatisticsService.recordCheckpoint(req.params.id, req.body);
@@ -120,6 +135,7 @@ router.post('/:id/checkpoints', async (req, res) => {
   }
 });
 
+// Delete a checkpoint
 router.delete('/checkpoints/:checkpointId', async (req, res) => {
   try {
     await gameStatisticsService.removeCheckpoint(req.params.checkpointId);
@@ -131,6 +147,7 @@ router.delete('/checkpoints/:checkpointId', async (req, res) => {
   }
 });
 
+// Delete game statistics
 router.delete('/:id', async (req, res) => {
   try {
     await gameStatisticsService.delete(req.params.id);

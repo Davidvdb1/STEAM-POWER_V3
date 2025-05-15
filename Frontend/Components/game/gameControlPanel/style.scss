@@ -1,5 +1,6 @@
 :host {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -37,10 +38,36 @@
   display: none;
 }
 
-#startButton:hover { 
+#startButton:hover {
   transform: translateX(-50%) scale(1.05);
 }
 
-#startButton:active { 
+#startButton:active {
   transform: translateX(-50%) scale(0.95);
+}
+
+#stats {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  margin-top: 20px;
+  background: #9bd5e4;
+  padding: 10px;
+  border-radius: 8px;
+  width: 800px;
+}
+
+#stats.hidden {
+  display: none;
+}
+
+.stat-item {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.stat-item .label {
+  color: #333;
+  margin-right: 0.5em;
 }
