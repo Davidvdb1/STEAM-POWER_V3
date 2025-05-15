@@ -2,7 +2,7 @@
 
 import { createLogoScene      } from '../scenes/logoScene.js';
 import { createCityScene      } from '../scenes/cityScene.js';
-import { createOuterCityScene } from '../scenes/outerCityScene.js';  // correct casing
+import { createOuterCityScene } from '../scenes/outerCityScene.js';
 import { fetchStats           } from '../utils/fetchStats.js';
 
 const template = document.createElement('template');
@@ -12,7 +12,6 @@ template.innerHTML = /*html*/`
   </style>
 
   <div id="wrapper">
-    <!-- Inner button (to go back), hidden until in outer scene -->
     <div id="inner-container">
       <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
       <div id="inner-text">Ga naar binnenstad</div>
@@ -20,7 +19,6 @@ template.innerHTML = /*html*/`
 
     <div id="game-container"></div>
 
-    <!-- Outer button (to go out), shown in city scene -->
     <div id="outer-container">
       <img id="outer-button" src="Assets/images/toOuter.png" alt="Ga naar buitenstad" />
       <div id="outer-text">Ga naar buitenstad</div>
@@ -36,7 +34,7 @@ template.innerHTML = /*html*/`
   </div>
 `;
 
-window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
+class GameControlPanel extends HTMLElement {
   constructor() {
     super();
     this._shadow        = this.attachShadow({ mode: 'open' });
@@ -53,15 +51,14 @@ window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
     this._greyEl         = this._shadow.getElementById('greyEnergy');
     this._coinsEl        = this._shadow.getElementById('coins');
 
-    // initial visibility
     this._outerContainer.style.display = 'none';
     this._innerContainer.style.display = 'none';
   }
 
   connectedCallback() {
-    this._startButton.addEventListener('click',    () => this._onStartClick());
-    this._outerButton.addEventListener('click',   () => this._transitionToOuterCity());
-    this._innerButton.addEventListener('click',   () => this._transitionToCity());
+    this._startButton.addEventListener('click',      () => this._onStartClick());
+    this._outerButton.addEventListener('click',      () => this._transitionToOuterCity());
+    this._innerButton.addEventListener('click',      () => this._transitionToCity());
     this._loadPhaser().then(() => this._initializeGame());
   }
 
@@ -116,18 +113,22 @@ window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
   }
 
   _transitionToOuterCity() {
-    // slide wrapper left, then switch to OuterCityScene and show inner-button
-    this._animateWrapper(-800, () => {
-      this._game.scene.start('OuterCityScene');
+    // slide wrapper left from further off-screen
+    const w = this._wrapper;
+    const distance = w.offsetWidth + 800;
+    this._animateWrapper(-distance, () => {
+      this._game.scene.switch('CityScene', 'OuterCityScene');
       this._outerContainer.style.display = 'none';
       this._innerContainer.style.display = 'flex';
     });
   }
 
   _transitionToCity() {
-    // slide wrapper right, then switch back to CityScene and show outer-button
-    this._animateWrapper(800, () => {
-      this._game.scene.start('CityScene');
+    // slide wrapper right from further off-screen
+    const w = this._wrapper;
+    const distance = w.offsetWidth + 800;
+    this._animateWrapper(distance, () => {
+      this._game.scene.switch('OuterCityScene', 'CityScene');
       this._innerContainer.style.display = 'none';
       this._outerContainer.style.display = 'flex';
     });
@@ -140,15 +141,13 @@ window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
 
     w.addEventListener('transitionend', () => {
       onComplete();
-
-      // snap to opposite side
       w.style.transition = 'none';
       w.style.transform  = `translateX(${-offsetX}px)`;
-      void w.offsetWidth; // reflow
-
-      // slide back to center
+      void w.offsetWidth;
       w.style.transition = 'transform 0.5s ease';
       w.style.transform  = 'translateX(0)';
     }, { once: true });
   }
-});
+}
+
+window.customElements.define('gamecontrolpanel-れ', GameControlPanel);
