@@ -1,4 +1,4 @@
-//style.scss
+/* components/game/gameControlPanel/style.scss */
 
 :host {
   display: flex;
@@ -7,19 +7,32 @@
   align-items: center;
 }
 
+/* wrapper just defines size and relative positioning */
 #wrapper {
   position: relative;
   width: 800px;
   height: 456px;
 }
 
-#game-container canvas {
+/* center the canvas absolutely within the wrapper */
+#game-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 800px;
   height: 456px;
+  z-index: 0; /* ensure canvas is below buttons */
+}
+
+#game-container canvas {
+  width: 100%;
+  height: 100%;
   image-rendering: pixelated;
   border: 2px solid #555;
 }
 
+/* Start button overlay at bottom center */
 #startButton {
   position: absolute;
   bottom: 10px;
@@ -46,6 +59,62 @@
 
 #startButton:active {
   transform: translateX(-50%) scale(0.95);
+}
+
+/* Outer button to the right of the canvas */
+#outer-container {
+  position: absolute;
+  top: 50%;
+  left: 100%;                  /* at right edge of canvas */
+  transform: translate(10px, -50%); /* move 10px outside */
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#outer-button {
+  cursor: pointer;
+  height: 72px;
+  width: auto;
+  border: 2px solid #333;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+#outer-text {
+  margin-top: 4px;
+  font-size: 0.9em;
+  color: #333;
+  text-align: center;
+}
+
+/* Inner button to the left of the canvas */
+#inner-container {
+  position: absolute;
+  top: 50%;
+  right: 100%;                /* anchor at left edge of canvas */
+  transform: translateX(-10px) translateY(-50%); /* 10px outside and vertically centered */
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#inner-button {
+  cursor: pointer;
+  height: 72px;
+  width: auto;
+  border: 2px solid #333;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+#inner-text {
+  margin-top: 4px;
+  font-size: 0.9em;
+  color: #333;
+  text-align: center;
 }
 
 #stats {
