@@ -1,4 +1,4 @@
-//style.scss
+/* components/game/gameControlPanel/style.scss */
 
 :host {
   display: flex;
@@ -9,6 +9,8 @@
 
 #wrapper {
   position: relative;
+  display: flex;
+  align-items: center;  /* center canvas and button vertically */
   width: 800px;
   height: 456px;
 }
@@ -20,6 +22,7 @@
   border: 2px solid #555;
 }
 
+/* Start button overlay at bottom center */
 #startButton {
   position: absolute;
   bottom: 10px;
@@ -48,6 +51,30 @@
   transform: translateX(-50%) scale(0.95);
 }
 
+/* Outer image button and caption */
+#outer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 10px;
+}
+
+#outer-button {
+  cursor: pointer;
+  height: 96px;      
+  width: auto;       
+  border: 2px solid #333;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+#outer-text {
+  margin-top: 4px;
+  font-size: 0.9em;
+  color: #333;
+  text-align: center;
+}
+
 #stats {
   display: flex;
   flex-direction: column;
@@ -68,7 +95,7 @@
   font-weight: bold;
   margin-bottom: 10px;
 }
-
+ 
 .stat-item .label {
   color: #333;
   margin-right: 0.5em;
