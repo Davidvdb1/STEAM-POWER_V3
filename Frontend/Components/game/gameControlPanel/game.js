@@ -1,3 +1,4 @@
+//game.js
 class LogoScene extends Phaser.Scene {
   preload() {
     this.load.image('gameLogo', 'images/gameLogo.png');
