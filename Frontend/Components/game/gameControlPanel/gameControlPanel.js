@@ -1,4 +1,5 @@
-//#region IMPORTS
+//gameControlPanel.js
+// //#region IMPORTS
 // No external JS imports needed; Phaser will be injected dynamically.
 //#endregion IMPORTS
 
