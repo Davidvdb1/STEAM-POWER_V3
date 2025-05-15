@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../../Components/simulation/simulation.js" 
+import "../../simulation/simulation.js"  // Corrected relative path
 //#endregion IMPORTS
 
 //#region SIMULATIONPAGE

@@ -1,6 +1,4 @@
 //#region IMPORTS
-// We'll use BabylonJS from CDN - make sure to include the script in your HTML
-// or add appropriate import if using a bundler
 //#endregion IMPORTS
 
 //#region SIMULATION
@@ -63,14 +61,23 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         if (this.engine) {
             this.engine.dispose();
         }
+        
+        // Remove resize listener
+        window.removeEventListener('resize', this._handleResize);
     }
     
     _preventScroll(event) {
         event.preventDefault();
     }
     
+    _handleResize = () => {
+        if (this.engine) {
+            this.engine.resize();
+        }
+    }
+    
     _initializeBabylonJS() {
-        // Get the canvas element
+        // Get the canvas element from shadow DOM
         const canvas = this._shadowRoot.getElementById('renderCanvas');
         
         // Check if BabylonJS is available
@@ -82,28 +89,155 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         // Initialize the BabylonJS engine
         this.engine = new BABYLON.Engine(canvas, true);
         
-        // Create a scene
+        // Create scene
         this.scene = new BABYLON.Scene(this.engine);
+
+        // Camera
+        this.camera = new BABYLON.ArcRotateCamera("Camera", 
+            Math.PI / 2, Math.PI / 3.5, 8,
+            new BABYLON.Vector3(0, 0, 0), this.scene);
+        this.camera.attachControl(canvas, true, false, 0); // noPreventDefault = false to prevent scrolling
         
-        // Update camera settings to prevent scrolling issues
-        this.camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 2, 10, BABYLON.Vector3.Zero(), this.scene);
-        this.camera.attachControl(canvas, true, false, 0); // noPreventDefault = false
-        this.camera.useFramingBehavior = true;
+        // Light
+        const light = new BABYLON.HemisphericLight("light", 
+            new BABYLON.Vector3(1, 1, 0), this.scene);
+
+        // Load Nature.glb
+        BABYLON.SceneLoader.Append("", "../Frontend/Assets/GLBs/Nature.glb", this.scene, () => {
+            console.log("Nature.glb loaded");
+        });
+
+        // Hot air balloon
+        BABYLON.SceneLoader.Append("", "../Frontend/Assets/GLBs/Hot air balloon.glb", this.scene, () => {
+            console.log("Hot air balloon.glb loaded");
+
+            // Get all meshes from the scene
+            this.scene.meshes.forEach(mesh => {
+                console.log("Loaded mesh:", mesh.name);
+
+                // If the hot air balloon has a root mesh or a recognizable part, transform it
+                if (mesh.name === "__root__" || mesh.name.toLowerCase().includes("balloon")) {
+                    // Resize the balloon
+                    mesh.scaling = new BABYLON.Vector3(0.002, 0.002, 0.002); 
+
+                    // Move the balloon to a good location
+                    mesh.position = new BABYLON.Vector3(-1, 1, -1.5); 
+
+                    // Rotate the balloon
+                    mesh.rotation = new BABYLON.Vector3(-1.6, 0, 0); 
+
+                    console.log(`Applied transform to ${mesh.name}`);
+                }
+            });
+        });
+
+        // Sun
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/Sun with beams.glb", this.scene, (meshes) => {
+            console.log("Sun.glb loaded");
+
+            // Find the root mesh
+            const sunRoot = meshes.find(m => m.name === "__root__");
+
+            if (sunRoot) {
+                sunRoot.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+                sunRoot.position = new BABYLON.Vector3(0.1, 1.3, -3);
+                sunRoot.rotation = new BABYLON.Vector3(0, 0.8, 0);
+                console.log("Applied transform to Sun root");
+            }
+        });
+
+        // Clouds (multiple instances)
+        this._loadClouds(1.5, 1.7, -3, 0);
+        this._loadClouds(-2.5, 1.8, -3, 0);
+        this._loadClouds(2.5, 1, -3, 0);
+        this._loadClouds(-1.5, 1.2, -3, 0);
         
-        // Add a light
-        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), this.scene);
-        
-        // Create a simple object (a sphere)
-        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", {diameter: 2, segments: 32}, this.scene);
-        
-        // Add material to the sphere
-        const material = new BABYLON.StandardMaterial("material", this.scene);
-        material.diffuseColor = new BABYLON.Color3(0.5, 0, 0.5);
-        sphere.material = material;
-        
-        // Handle canvas resize
-        window.addEventListener('resize', () => {
-            this.engine.resize();
+        // Windmill
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/windmill.glb", this.scene, (meshes) => {
+            console.log("Tower Windmill.glb loaded");
+
+            const windmillRoot = meshes.find(m => m.name === "__root__");
+            if (windmillRoot) {
+                windmillRoot.scaling = new BABYLON.Vector3(3.5, 3.5, 3.5);
+                windmillRoot.position = new BABYLON.Vector3(-1.5, 0, 0);
+                windmillRoot.rotation = new BABYLON.Vector3(0, 0.5, 0);
+            }
+        });
+
+        // House
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/House.glb", this.scene, (meshes) => {
+            console.log("House.glb loaded");
+
+            const houseRoot = meshes.find(m => m.name === "__root__");
+            if (houseRoot) {
+                houseRoot.scaling = new BABYLON.Vector3(0.3, 0.3, 0.3);
+                houseRoot.position = new BABYLON.Vector3(1, 0, -0.9);
+                houseRoot.rotation = new BABYLON.Vector3(0, 0, 0);
+            }
+        });
+
+        // Sail Boat
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/Sail Boat.glb", this.scene, (meshes) => {
+            console.log("Sail Boat.glb loaded");
+
+            const boatRoot = meshes.find(m => m.name === "__root__" || m.name.toLowerCase().includes("boat"));
+            if (boatRoot) {
+                boatRoot.scaling = new BABYLON.Vector3(0.8, 0.8, 0.8);
+                boatRoot.position = new BABYLON.Vector3(-0.7, -0.1, -0.6);
+                boatRoot.rotation = new BABYLON.Vector3(0, 0.8, 0);
+            }
+        });
+
+        // Logs
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/logs.glb", this.scene, (meshes) => {
+            console.log("logs.glb loaded");
+
+            const logsRoot = meshes.find(m => m.name === "__root__" || m.name.toLowerCase().includes("log"));
+            if (logsRoot) {
+                logsRoot.scaling = new BABYLON.Vector3(1, 1, 1);
+                logsRoot.position = new BABYLON.Vector3(1.48, 0, -0.3);
+                logsRoot.rotation = new BABYLON.Vector3(0, 0, 0);
+            }
+        });
+
+        // Well
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/Well.glb", this.scene, (meshes) => {
+            console.log("Well.glb loaded");
+
+            const wellRoot = meshes.find(m => m.name === "__root__" || m.name.toLowerCase().includes("well"));
+            if (wellRoot) {
+                wellRoot.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
+                wellRoot.position = new BABYLON.Vector3(0.3, 0, -0.5);
+                wellRoot.rotation = new BABYLON.Vector3(0, 1, 0);
+            }
+        });
+
+        // Watermill
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/watermill.glb", this.scene, (meshes) => {
+            console.log("watermill.glb loaded");
+
+            const watermillRoot = meshes.find(m => m.name === "__root__" || m.name.toLowerCase().includes("watermill"));
+            if (watermillRoot) {
+                watermillRoot.scaling = new BABYLON.Vector3(0.03, 0.03, 0.03);
+                watermillRoot.position = new BABYLON.Vector3(1, -0.08, 0.9);
+                watermillRoot.rotation = new BABYLON.Vector3(0, -0.5, 0);
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', this._handleResize);
+    }
+    
+    _loadClouds(x, y, z, rotation) {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/Clouds.glb", this.scene, (meshes) => {
+            console.log("Clouds.glb loaded");
+
+            const cloudsRoot = meshes.find(m => m.name === "__root__");
+            if (cloudsRoot) {
+                cloudsRoot.scaling = new BABYLON.Vector3(1.2, 1.2, 1.2);
+                cloudsRoot.position = new BABYLON.Vector3(x, y, z);
+                cloudsRoot.rotation = new BABYLON.Vector3(0, rotation, 0);
+            }
         });
     }
     
