@@ -4,6 +4,7 @@
   touch-action: none;
   display: block;
   outline: none;
+  image-rendering: high-quality;
 }
 
 .simulation-container {
@@ -12,6 +13,6 @@
   position: relative;
   border-radius: 5px;
   margin: 20px auto;
-  overflow: hidden; /* Keep this to prevent overflow */
-  touch-action: none; /* Prevent touch events from causing scroll */
+  overflow: hidden;
+  touch-action: none;
 }/*# sourceMappingURL=style.css.map */

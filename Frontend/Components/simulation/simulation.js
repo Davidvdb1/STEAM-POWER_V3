@@ -24,6 +24,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         this.engine = null;
         this.scene = null;
         this.camera = null;
+        this.resizeObserver = null;
     }
 
     // component attributes
@@ -48,6 +49,9 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         
         // Also prevent touch events from scrolling
         canvas.addEventListener('touchmove', this._preventScroll);
+        
+        // Set up resize observer for high resolution rendering
+        this._setupResizeObserver();
     }
     
     disconnectedCallback() {
@@ -64,6 +68,11 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         
         // Remove resize listener
         window.removeEventListener('resize', this._handleResize);
+        
+        // Disconnect the resize observer
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
     }
     
     _preventScroll(event) {
@@ -72,7 +81,43 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
     
     _handleResize = () => {
         if (this.engine) {
+            this._updateCanvasSize();
             this.engine.resize();
+        }
+    }
+    
+    _setupResizeObserver() {
+        const container = this._shadowRoot.querySelector('.simulation-container');
+        const canvas = this._shadowRoot.getElementById('renderCanvas');
+        
+        // Use ResizeObserver to detect size changes with higher precision
+        this.resizeObserver = new ResizeObserver(() => {
+            this._updateCanvasSize();
+            if (this.engine) {
+                this.engine.resize();
+            }
+        });
+        
+        this.resizeObserver.observe(container);
+        
+        // Initial size adjustment
+        this._updateCanvasSize();
+    }
+    
+    _updateCanvasSize() {
+        const container = this._shadowRoot.querySelector('.simulation-container');
+        const canvas = this._shadowRoot.getElementById('renderCanvas');
+        
+        if (container && canvas) {
+            // Get the actual displayed size
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Only update if needed to avoid unnecessary reflows
+            if (canvas.width !== width || canvas.height !== height) {
+                canvas.width = width;
+                canvas.height = height;
+            }
         }
     }
     
@@ -86,8 +131,12 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             return;
         }
         
-        // Initialize the BabylonJS engine
-        this.engine = new BABYLON.Engine(canvas, true);
+        // Initialize the BabylonJS engine with high DPI support
+        this.engine = new BABYLON.Engine(canvas, true, {
+            preserveDrawingBuffer: true,
+            stencil: true,
+            adaptToDeviceRatio: true // Enable high DPI rendering
+        });
         
         // Create scene
         this.scene = new BABYLON.Scene(this.engine);
