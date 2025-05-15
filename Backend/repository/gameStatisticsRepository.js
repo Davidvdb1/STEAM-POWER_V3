@@ -40,9 +40,9 @@ class GameStatisticsRepository {
       where: { id },
       include: {
         currency:    includeCurrency,
-        buildings:   includeBuildings,
+        buildings:   includeBuildings ? { include: { level: true } } : false,
         assets:      includeAssets,
-        checkpoints: includeCheckpoints,
+        checkpoints: includeCheckpoints ? { include: { currency: true, buildings: { include: { level: true } }, assets: true } } : false,
         group:       includeGroup,
       }
     });
@@ -54,9 +54,9 @@ class GameStatisticsRepository {
       where: { groupId },
       include: {
         currency:    opts.includeCurrency    ?? true,
-        buildings:   opts.includeBuildings   ?? true,
+        buildings:   opts.includeBuildings   ? { include: { level: true } } : false,
         assets:      opts.includeAssets      ?? true,
-        checkpoints: opts.includeCheckpoints ?? true,
+        checkpoints: opts.includeCheckpoints ? { include: { currency: true, buildings: { include: { level: true } }, assets: true } } : false,
         group:       opts.includeGroup       ?? false,
       }
     });
@@ -88,7 +88,8 @@ class GameStatisticsRepository {
         ySize:          building.ySize,
         level:          { connect: { id: building.level.id } },
         gameStatistics: { connect: { id: statsId } }
-      }
+      },
+      include: { level: true }
     });
     return Building.from(created);
   }
@@ -101,7 +102,8 @@ class GameStatisticsRepository {
     if (typeof ySize     === 'number') data.ySize     = ySize;
     const updated = await this.prisma.building.update({
       where: { id: buildingId },
-      data
+      data,
+      include: { level: true }
     });
     return Building.from(updated);
   }
@@ -140,7 +142,7 @@ class GameStatisticsRepository {
           greenEnergy: cp.currency.greenEnergy,
           greyEnergy:  cp.currency.greyEnergy,
           coins:       cp.currency.coins,
-        }},
+        }} ,
         buildings:      { create: cp.buildings.map(b => ({
           xLocation: b.xLocation,
           yLocation: b.yLocation,
@@ -158,7 +160,11 @@ class GameStatisticsRepository {
           ySize:       a.ySize,
         }))}
       },
-      include: { currency: true, buildings: true, assets: true }
+      include: {
+        currency: true,
+        buildings: { include: { level: true } },
+        assets: true
+      }
     });
     return Checkpoint.from(prismaCP);
   }

@@ -8,6 +8,7 @@ const workshopRoutes = require('./controller/workshopController');
 const groupRoutes = require('./controller/groupController');
 const energyDataRoutes = require('./controller/energyDataController');
 const questionsRoutes = require('./controller/questionController');
+const gameStatisticsRoutes = require('./controller/gameStatisticsController');
 
 
 const app = express();
@@ -42,6 +43,7 @@ app.use('/workshops', workshopRoutes);
 app.use('/groups', groupRoutes);
 app.use('/energydata', energyDataRoutes);
 app.use('/questions', questionsRoutes);
+app.use('/gameStatistics', gameStatisticsRoutes);
 
 app.get('/status', (req, res) => {
     res.send(`Server is running on http://localhost:${PORT}`);
