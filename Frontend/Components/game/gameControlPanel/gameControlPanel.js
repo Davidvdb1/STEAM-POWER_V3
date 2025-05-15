@@ -113,7 +113,6 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToOuterCity() {
-    // slide wrapper left from further off-screen
     const w = this._wrapper;
     const distance = w.offsetWidth + 800;
     this._animateWrapper(-distance, () => {
@@ -124,7 +123,6 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToCity() {
-    // slide wrapper right from further off-screen
     const w = this._wrapper;
     const distance = w.offsetWidth + 800;
     this._animateWrapper(distance, () => {
