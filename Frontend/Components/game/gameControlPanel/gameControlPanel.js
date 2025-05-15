@@ -1,7 +1,8 @@
 // components/game/gameControlPanel/gameControlPanel.js
 
 import { createLogoScene } from '../scenes/logoScene.js';
-import { createCityScene } from '../scenes/cityScene.js';
+import { createCityScene  } from '../scenes/cityScene.js';
+import { fetchStats      } from '../utils/fetchStats.js';
 
 const template = document.createElement('template');
 template.innerHTML = /*html*/`
@@ -18,16 +19,13 @@ template.innerHTML = /*html*/`
   <!-- Stats panel below canvas, hidden until Start -->
   <div id="stats" class="hidden">
     <div class="stat-item">
-      <span class="label">Groene energie:</span>
-      <span id="greenEnergy">0</span>
+      <span class="label">Groene energie:</span><span id="greenEnergy">0</span>
     </div>
     <div class="stat-item">
-      <span class="label">Grijze energie:</span>
-      <span id="greyEnergy">0</span>
+      <span class="label">Grijze energie:</span><span id="greyEnergy">0</span>
     </div>
     <div class="stat-item">
-      <span class="label">Coins:</span>
-      <span id="coins">0</span>
+      <span class="label">Coins:</span><span id="coins">0</span>
     </div>
   </div>
 `;
@@ -90,14 +88,9 @@ window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
       if (!raw) throw new Error('Not logged in');
 
       const { token, groupId } = JSON.parse(raw);
-      const url = `${window.env.BACKEND_URL}/gameStatistics/group/${groupId}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const gs  = await res.json();
+      const gs = await fetchStats(groupId, token);
       const cur = gs.currency;
+
       this._greenEl.textContent = cur.greenEnergy;
       this._greyEl.textContent  = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
