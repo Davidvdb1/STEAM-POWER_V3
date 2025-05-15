@@ -1,10 +1,10 @@
-//gameControlPanel.js
-// //#region IMPORTS
-// No external JS imports needed; Phaser will be injected dynamically.
-//#endregion IMPORTS
+// components/game/gameControlPanel/gameControlPanel.js
 
-//#region GAMECONTROLPANEL
-let template = document.createElement('template');
+import { createLogoScene } from '../scenes/logoScene.js';
+import { createCityScene  } from '../scenes/cityScene.js';
+import { fetchStats      } from '../utils/fetchStats.js';
+
+const template = document.createElement('template');
 template.innerHTML = /*html*/`
   <style>
     @import './Components/game/gameControlPanel/style.css';
@@ -19,22 +19,17 @@ template.innerHTML = /*html*/`
   <!-- Stats panel below canvas, hidden until Start -->
   <div id="stats" class="hidden">
     <div class="stat-item">
-      <span class="label">Groene energie:</span>
-      <span id="greenEnergy">0</span>
+      <span class="label">Groene energie:</span><span id="greenEnergy">0</span>
     </div>
     <div class="stat-item">
-      <span class="label">Grijze energie:</span>
-      <span id="greyEnergy">0</span>
+      <span class="label">Grijze energie:</span><span id="greyEnergy">0</span>
     </div>
     <div class="stat-item">
-      <span class="label">Coins:</span>
-      <span id="coins">0</span>
+      <span class="label">Coins:</span><span id="coins">0</span>
     </div>
   </div>
 `;
-//#endregion GAMECONTROLPANEL
 
-//#region CLASS
 window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
   constructor() {
     super();
@@ -49,8 +44,8 @@ window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
   }
 
   connectedCallback() {
-    this._loadPhaser().then(() => this._initializeGame());
     this._startButton.addEventListener('click', () => this._onStartClick());
+    this._loadPhaser().then(() => this._initializeGame());
   }
 
   _loadPhaser() {
@@ -67,34 +62,8 @@ window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
     const container = this._shadowRoot.getElementById('game-container');
     const startBtn  = this._startButton;
 
-    class LogoScene extends Phaser.Scene {
-      constructor() { super('LogoScene'); }
-      preload() {
-        this.load.image('gameLogo', 'Assets/images/gameLogo.png');
-      }
-      create() {
-        const { width, height } = this.sys.game.config;
-        const img = this.textures.get('gameLogo').getSourceImage();
-        const scale = Math.min(width / img.width, height / img.height);
-        this.add.image(width/2, height/2, 'gameLogo')
-          .setDisplaySize(img.width * scale, img.height * scale)
-          .setOrigin(0.5);
-        startBtn.classList.remove('hidden');
-      }
-    }
-
-    class CityScene extends Phaser.Scene {
-      constructor() { super('CityScene'); }
-      preload() {
-        this.load.image('citymap', 'Assets/images/citymap.png');
-      }
-      create() {
-        const { width, height } = this.sys.game.config;
-        this.add.image(width/2, height/2, 'citymap')
-          .setDisplaySize(width, height)
-          .setOrigin(0.5);
-      }
-    }
+    const LogoScene = createLogoScene(startBtn);
+    const CityScene = createCityScene();
 
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
@@ -103,7 +72,10 @@ window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
       height: 456,
       scene: [ LogoScene, CityScene ],
       backgroundColor: '#9bd5e4',
-      scale: { mode: Phaser.Scale.NONE, autoCenter: Phaser.Scale.CENTER_BOTH }
+      scale: {
+        mode: Phaser.Scale.NONE,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+      }
     });
   }
 
@@ -111,37 +83,20 @@ window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
     this._startButton.classList.add('hidden');
     this._game.scene.start('CityScene');
 
-    await this._fetchStats();
-    this._statsContainer.classList.remove('hidden');
-  }
-
-  async _fetchStats() {
     try {
       const raw = sessionStorage.getItem('loggedInUser');
       if (!raw) throw new Error('Not logged in');
 
-      const parsed = JSON.parse(raw);
-      const token   = parsed.token;
-      const groupId = parsed.groupId;
-      if (!token || !groupId) throw new Error('Invalid session data');
-
-      const url = `${window.env.BACKEND_URL}/gameStatistics/group/${groupId}`;
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (!res.ok) {
-        throw new Error(`Failed to load stats: HTTP ${res.status}`);
-      }
-
-      const gs  = await res.json();
+      const { token, groupId } = JSON.parse(raw);
+      const gs = await fetchStats(groupId, token);
       const cur = gs.currency;
+
       this._greenEl.textContent = cur.greenEnergy;
       this._greyEl.textContent  = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
+      this._statsContainer.classList.remove('hidden');
     } catch (e) {
       console.error('Error fetching stats:', e);
     }
   }
 });
-//#endregion CLASS
