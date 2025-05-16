@@ -51,7 +51,7 @@ async function main() {
   const level2 = await prisma.level.create({ data: { level: 2, upgradeCost: 5, energyCost: 4 } });
 
   const building1 = await prisma.building.create({ data: { xLocation: 1, yLocation: 2, xSize: 3, ySize: 4, level: { connect: { id: level1.id } } } });
-  const building2 = await prisma.building.create({ data: { xLocation: 2, yLocation: 3, xSize: 2, ySize: 2, level: { connect: { id: level1.id } } } });
+  const building2 = await prisma.building.create({ data: { xLocation: 5, yLocation: 1, xSize: 2, ySize: 2, level: { connect: { id: level1.id } } } });
   const building3 = await prisma.building.create({ data: { xLocation: 6, yLocation: 3, xSize: 2, ySize: 2, level: { connect: { id: level2.id } } } });
 
   const asset1 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 4, yLocation: 5, xSize: 6, ySize: 7 } });
