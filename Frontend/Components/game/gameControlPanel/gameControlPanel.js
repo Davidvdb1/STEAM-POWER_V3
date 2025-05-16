@@ -115,7 +115,6 @@ class GameControlPanel extends HTMLElement {
       const { token, groupId } = JSON.parse(raw);
       const gs = await fetchStats(groupId, token);
 
-      // stash both arrays on the Phaser.Game instance:
       this._game.buildingData = gs.buildings;
       this._game.assetData    = gs.assets;
 
