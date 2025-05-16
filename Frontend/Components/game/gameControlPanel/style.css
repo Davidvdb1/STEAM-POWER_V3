@@ -8,8 +8,8 @@
 
 #wrapper {
   position: relative;
-  width: 800px;
-  height: 456px;
+  width: 960px;
+  height: 560px;
 }
 
 #game-container {
@@ -17,8 +17,8 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 800px;
-  height: 456px;
+  width: 960px;
+  height: 560px;
   z-index: 0;
 }
 
@@ -118,7 +118,7 @@
   flex-direction: column;
   justify-content: flex-start;
   margin-top: 20px;
-  background: #9bd5e4;
+  background: #D3D3D3;
   padding: 10px;
   border-radius: 8px;
   width: 800px;
