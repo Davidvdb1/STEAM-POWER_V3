@@ -54,9 +54,9 @@ async function main() {
   const building2 = await prisma.building.create({ data: { xLocation: 5, yLocation: 1, xSize: 2, ySize: 2, level: { connect: { id: level1.id } } } });
   const building3 = await prisma.building.create({ data: { xLocation: 6, yLocation: 3, xSize: 2, ySize: 2, level: { connect: { id: level2.id } } } });
 
-  const asset1 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 4, yLocation: 5, xSize: 6, ySize: 7 } });
-  const asset2 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 5, yLocation: 6, xSize: 3, ySize: 3 } });
-  const asset3 = await prisma.asset.create({ data: { buildCost: 2, destroyCost: 1, energy: 2, xLocation: 8, yLocation: 2, xSize: 1, ySize: 1 } });
+  const asset1 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 4, yLocation: 5, xSize: 6, ySize: 7, type: "windmolen" } });
+  const asset2 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 5, yLocation: 6, xSize: 3, ySize: 3, type: "waterwiel" } });
+  const asset3 = await prisma.asset.create({ data: { buildCost: 2, destroyCost: 1, energy: 2, xLocation: 8, yLocation: 2, xSize: 1, ySize: 1, type: "kernreactor" } });
 
   const currency1 = await prisma.currency.create({ data: { greyEnergy: 10.6, greenEnergy: 0.0, coins: 0.0 } });
   const checkpoint1 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency1.id } }, buildings: { connect: [{ id: building1.id }, { id: building2.id }] }, assets: { connect: [{ id: asset1.id }] } } });

@@ -123,6 +123,7 @@ class GameStatisticsRepository {
         yLocation:      asset.yLocation,
         xSize:          asset.xSize,
         ySize:          asset.ySize,
+        type:            asset.type,
         gameStatistics: { connect: { id: statsId } }
       }
     });
@@ -158,6 +159,7 @@ class GameStatisticsRepository {
           yLocation:   a.yLocation,
           xSize:       a.xSize,
           ySize:       a.ySize,
+          type:        a.type,
         }))}
       },
       include: {

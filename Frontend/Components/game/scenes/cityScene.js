@@ -5,10 +5,7 @@ export function createCityScene() {
     }
 
     preload() {
-      this.load.tilemapTiledJSON(
-        "citymap",
-        "Assets/json/binnenstad-v1.json"
-      );
+      this.load.tilemapTiledJSON("citymap", "Assets/json/binnenstad-v1.json");
       this.load.image(
         "tilesetImage",
         "Assets/images/Modern_Exteriors_Complete_Tileset.png"
@@ -47,6 +44,7 @@ export function createCityScene() {
       this.input.on("pointermove", (pointer) => {
         const worldPoint = pointer.positionToCamera(this.cameras.main);
         const tile = this.layer.getTileAtWorldXY(worldPoint.x, worldPoint.y);
+
         if (tile) {
           if (
             !this.hoveredTile ||
@@ -57,17 +55,24 @@ export function createCityScene() {
             this.hoverMarker.clear();
             this.hoverMarker.lineStyle(1, 0x0000ff, 1);
             this.hoverMarker.fillStyle(0x0000ff, 0.3);
-            this.hoverMarker.fillRect(
-              tile.pixelX,
-              tile.pixelY,
-              this.map.tileWidth,
-              this.map.tileHeight
-            );
+
+            const tileW = this.map.tileWidth;
+            const tileH = this.map.tileHeight;
+
+            const startX = tile.x - 1;
+            const startY = tile.y - 1;
+
             this.hoverMarker.strokeRect(
-              tile.pixelX,
-              tile.pixelY,
-              this.map.tileWidth,
-              this.map.tileHeight
+              startX * tileW,
+              startY * tileH,
+              tileW * 3,
+              tileH * 3
+            );
+            this.hoverMarker.fillRect(
+              startX * tileW,
+              startY * tileH,
+              tileW * 3,
+              tileH * 3
             );
           }
         } else {

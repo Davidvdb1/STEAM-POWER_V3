@@ -132,6 +132,7 @@ CREATE TABLE "Asset" (
     "yLocation" INTEGER NOT NULL,
     "xSize" INTEGER NOT NULL,
     "ySize" INTEGER NOT NULL,
+    "type" TEXT NOT NULL,
     "checkpointId" TEXT,
     "gameStatisticsId" TEXT,
 

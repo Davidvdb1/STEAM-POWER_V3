@@ -8,6 +8,7 @@ class Asset {
     yLocation,
     xSize,
     ySize,
+    type
   }, validate = true) {
     this.id = id;
     this.buildCost = buildCost;
@@ -17,6 +18,7 @@ class Asset {
     this.yLocation = yLocation;
     this.xSize = xSize;
     this.ySize = ySize;
+    this.type = type
     if (validate) this.validate();
   }
 
@@ -42,6 +44,9 @@ class Asset {
     if (typeof this.ySize !== 'number') {
       throw new Error('Invalid ySize');
     }
+    if (typeof this.type !== 'string') {
+      throw new Error('Invalid type');
+    }
   }
 
   static from(prismaAsset) {
@@ -54,6 +59,7 @@ class Asset {
       yLocation: prismaAsset.yLocation,
       xSize: prismaAsset.xSize,
       ySize: prismaAsset.ySize,
+      type: prismaAsset.type
     });
   }
 }

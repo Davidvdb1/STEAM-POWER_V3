@@ -137,6 +137,7 @@ model Asset {
   yLocation        Int
   xSize            Int
   ySize            Int
+  type             String
 
   checkpoint       Checkpoint?      @relation(fields: [checkpointId], references: [id])
   checkpointId     String?

@@ -115,13 +115,13 @@
 
 #stats {
   display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  margin-top: 20px;
+  flex-direction: row;
+  justify-content: space-evenly;
   background: #D3D3D3;
-  padding: 10px;
-  border-radius: 8px;
-  width: 800px;
+  border-bottom: 2px solid #555;
+  border-left: 2px solid #555;
+  border-right: 2px solid #555;
+  width: 960px;
 }
 
 #stats.hidden {
@@ -140,6 +140,7 @@
 
 .img-euro {
   height: 30px;
+  padding: 10px;
 }
 
 .p-euro {

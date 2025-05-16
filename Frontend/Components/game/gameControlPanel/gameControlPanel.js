@@ -27,28 +27,26 @@ template.innerHTML = /*html*/ `
 
   <div id="stats" class="hidden">
     <div class="greyEnergy">
-      <p class="p-greyEnergy">Grijze energie:</p>
+      <img class="img-greyEnergy" src="Assets/images/pixelGreyEnergy.svg" alt="">
       <div class="currencyDiv">
         <p id="greyEnergy" class="p-greyEnergy mr">0</p><p class="p-greyEnergy">kW</p>
       </div>
-      <img class="img-greyEnergy" src="Assets/images/pixelGreyEnergy.svg" alt="">
     </div>
+
     <div class="greenEnergy">
-      <p class="p-greenEnergy">Groene energie:</p>
+      <img class="img-greenEnergy" src="Assets/images/pixelGreenEnergy.svg" alt="">
       <div class="currencyDiv">
-        <p id="greenEnergy" class="p-greenEnergy">0</p><p class="p-greenEnergy">kWh</p>
+        <p id="greenEnergy" class="p-greenEnergy mr">0</p><p class="p-greenEnergy">kWh</p>
       </div>
+    </div>
 
       <div class="euro">
-        <p class="p-euro">Coins:</p>
+        <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
         <div class="currencyDiv">
           <p id="coins" class="p-euro">0</p>
         </div>
-        <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
       </div>
-      <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-    </div>
-  </div>
+
 `;
 
 class GameControlPanel extends HTMLElement {
