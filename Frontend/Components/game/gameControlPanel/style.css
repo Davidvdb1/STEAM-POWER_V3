@@ -61,13 +61,68 @@
   display: none;
 }
 
-.stat-item {
-  font-size: 1.2em;
-  font-weight: bold;
-  margin-bottom: 10px;
+#stat-item {
+  display: flex;
+  align-items: center;
 }
 
-.stat-item .label {
-  color: #333;
-  margin-right: 0.5em;
+.euro {
+  display: flex;
+  align-items: center;
+}
+
+.img-euro {
+  height: 30px;
+}
+
+.p-euro {
+  color: #fbac2b;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+
+.greenEnergy {
+  display: flex;
+  align-items: center;
+}
+.greenEnergy .div {
+  display: flex;
+}
+
+.greenEnergy {
+  display: flex;
+}
+
+.img-greenEnergy {
+  height: 50px;
+}
+
+.p-greenEnergy {
+  color: #9ba143;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+
+.greyEnergy {
+  display: flex;
+  align-items: center;
+}
+
+.img-greyEnergy {
+  height: 50px;
+}
+
+.p-greyEnergy {
+  color: #151515;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+
+.currencyDiv {
+  display: flex;
+  align-items: center;
+}
+
+.mr {
+  margin-right: 3px;
 }/*# sourceMappingURL=style.css.map */

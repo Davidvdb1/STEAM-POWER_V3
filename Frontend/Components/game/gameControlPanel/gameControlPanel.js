@@ -9,26 +9,36 @@ template.innerHTML = /*html*/`
     @import './Components/game/gameControlPanel/style.css';
   </style>
 
-  <!-- Canvas + Start button overlay -->
   <div id="wrapper">
     <div id="game-container"></div>
     <button id="startButton" class="hidden">Start</button>
   </div>
 
-  <!-- Stats panel below canvas, hidden until Start -->
   <div id="stats" class="hidden">
-    <div class="stat-item">
-      <span class="label">Groene energie:</span>
-      <span id="greenEnergy">0</span>
-    </div>
-    <div class="stat-item">
-      <span class="label">Grijze energie:</span>
-      <span id="greyEnergy">0</span>
-    </div>
-    <div class="stat-item">
-      <span class="label">Coins:</span>
-      <span id="coins">0</span>
-    </div>
+      <div class="greyEnergy">
+        <p class="p-greyEnergy">Grijze energie:</p>
+        <div class="currencyDiv">
+          <p id="greyEnergy" class="p-greyEnergy mr">0</p>
+          <p class="p-greyEnergy">kW</p>
+        </div>
+        <img class="img-greyEnergy" src="Assets/images/pixelGreyEnergy.svg" alt="">
+      </div>
+      <div class="greenEnergy">
+        <p class="p-greenEnergy">Groene energie:</p>
+        <div class="currencyDiv">
+          <p id="greenEnergy" class="p-greenEnergy">0</p>
+          <p class="p-greenEnergy">kWh</p>
+        </div>
+        <img class="img-greenEnergy" src="Assets/images/pixelGreenEnergy.svg" alt="pixelGreenEnergy">
+      </div>
+      <div class="euro">
+        <p class="p-euro">Coins:</p>
+        <div class="currencyDiv">
+          <p id="coins" class="p-euro">0</p>
+          <p class="p-euro">kW</p>
+        </div>
+        <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+      </div>
   </div>
 `;
 //#endregion GAMECONTROLPANEL
