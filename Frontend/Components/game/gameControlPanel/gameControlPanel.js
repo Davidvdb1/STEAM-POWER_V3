@@ -1,5 +1,3 @@
-// components/game/gameControlPanel/gameControlPanel.js
-
 import { createLogoScene      } from '../scenes/logoScene.js';
 import { createCityScene      } from '../scenes/cityScene.js';
 import { createOuterCityScene } from '../scenes/outerCityScene.js';
@@ -10,48 +8,41 @@ template.innerHTML = /*html*/`
   <style>
     @import './Components/game/gameControlPanel/style.css';
   </style>
-
   <div id="wrapper">
     <div id="inner-container">
       <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
       <div id="inner-text">Ga naar binnenstad</div>
     </div>
-
     <div id="game-container"></div>
-
     <div id="outer-container">
       <img id="outer-button" src="Assets/images/toOuter.png" alt="Ga naar buitenstad" />
       <div id="outer-text">Ga naar buitenstad</div>
     </div>
-
     <button id="startButton" class="hidden">Start</button>
   </div>
 
   <div id="stats" class="hidden">
-      <div class="greyEnergy">
-        <p class="p-greyEnergy">Grijze energie:</p>
-        <div class="currencyDiv">
-          <p id="greyEnergy" class="p-greyEnergy mr">0</p>
-          <p class="p-greyEnergy">kW</p>
-        </div>
-        <img class="img-greyEnergy" src="Assets/images/pixelGreyEnergy.svg" alt="">
+    <div class="greyEnergy">
+      <p class="p-greyEnergy">Grijze energie:</p>
+      <div class="currencyDiv">
+        <p id="greyEnergy" class="p-greyEnergy mr">0</p><p class="p-greyEnergy">kW</p>
       </div>
-      <div class="greenEnergy">
-        <p class="p-greenEnergy">Groene energie:</p>
-        <div class="currencyDiv">
-          <p id="greenEnergy" class="p-greenEnergy">0</p>
-          <p class="p-greenEnergy">kWh</p>
-        </div>
-        <img class="img-greenEnergy" src="Assets/images/pixelGreenEnergy.svg" alt="pixelGreenEnergy">
+      <img class="img-greyEnergy" src="Assets/images/pixelGreyEnergy.svg" alt="">
+    </div>
+    <div class="greenEnergy">
+      <p class="p-greenEnergy">Groene energie:</p>
+      <div class="currencyDiv">
+        <p id="greenEnergy" class="p-greenEnergy">0</p><p class="p-greenEnergy">kWh</p>
       </div>
-      <div class="euro">
-        <p class="p-euro">Coins:</p>
-        <div class="currencyDiv">
-          <p id="coins" class="p-euro">0</p>
-          <p class="p-euro">kW</p>
-        </div>
-        <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+      <img class="img-greenEnergy" src="Assets/images/pixelGreenEnergy.svg" alt="">
+    </div>
+    <div class="euro">
+      <p class="p-euro">Coins:</p>
+      <div class="currencyDiv">
+        <p id="coins" class="p-euro">0</p><p class="p-euro">kW</p>
       </div>
+      <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+    </div>
   </div>
 `;
 
@@ -77,9 +68,9 @@ class GameControlPanel extends HTMLElement {
   }
 
   connectedCallback() {
-    this._startButton.addEventListener('click',      () => this._onStartClick());
-    this._outerButton.addEventListener('click',      () => this._transitionToOuterCity());
-    this._innerButton.addEventListener('click',      () => this._transitionToCity());
+    this._startButton.addEventListener('click',   () => this._onStartClick());
+    this._outerButton .addEventListener('click',  () => this._transitionToOuterCity());
+    this._innerButton .addEventListener('click',  () => this._transitionToCity());
     this._loadPhaser().then(() => this._initializeGame());
   }
 
@@ -123,6 +114,11 @@ class GameControlPanel extends HTMLElement {
       if (!raw) throw new Error('Not logged in');
       const { token, groupId } = JSON.parse(raw);
       const gs = await fetchStats(groupId, token);
+
+      // stash both arrays on the Phaser.Game instance:
+      this._game.buildingData = gs.buildings;
+      this._game.assetData    = gs.assets;
+
       const cur = gs.currency;
       this._greenEl.textContent = cur.greenEnergy;
       this._greyEl.textContent  = cur.greyEnergy;
@@ -157,7 +153,6 @@ class GameControlPanel extends HTMLElement {
     const w = this._wrapper;
     w.style.transition = 'transform 0.5s ease';
     w.style.transform  = `translateX(${offsetX}px)`;
-
     w.addEventListener('transitionend', () => {
       onComplete();
       w.style.transition = 'none';
