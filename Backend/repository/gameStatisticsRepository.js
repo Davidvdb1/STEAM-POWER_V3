@@ -49,19 +49,37 @@ class GameStatisticsRepository {
     return prismaGS ? GameStatistics.from(prismaGS) : null;
   }
 
-  async findByGroupId(groupId, opts = {}) {
-    const prismaGS = await this.prisma.gameStatistics.findFirst({
-      where: { groupId },
-      include: {
-        currency:    opts.includeCurrency    ?? true,
-        buildings:   opts.includeBuildings   ? { include: { level: true } } : false,
-        assets:      opts.includeAssets      ?? true,
-        checkpoints: opts.includeCheckpoints ? { include: { currency: true, buildings: { include: { level: true } }, assets: true } } : false,
-        group:       opts.includeGroup       ?? false,
-      }
-    });
-    return prismaGS ? GameStatistics.from(prismaGS) : null;
-  }
+async findByGroupId(groupId, opts = {}) {
+  const prismaGS = await this.prisma.gameStatistics.findFirst({
+    where: { groupId },
+    include: {
+      currency:    opts.includeCurrency    ?? true,
+      buildings:   opts.includeBuildings   ? { include: { level: true } } : false,
+      assets:      opts.includeAssets      ?? true,
+      checkpoints: opts.includeCheckpoints ? { 
+        include: { 
+          currency: true, 
+          buildings: { include: { level: true } }, 
+          assets: true 
+        } 
+      } : false,
+      group:       opts.includeGroup       ?? false,
+    }
+  });
+
+  if (!prismaGS) return null;
+
+  console.log('▶️ raw asset types:', prismaGS.assets.map(a => a.type));
+  console.log(
+    '▶️ checkpoint asset types:',
+    prismaGS.checkpoints
+      ? prismaGS.checkpoints.flatMap(cp => cp.assets.map(a => a.type))
+      : []
+  );
+
+  return GameStatistics.from(prismaGS);
+}
+
 
   async updateCurrency(statsId, { greenEnergy, greyEnergy, coins }) {
     if (

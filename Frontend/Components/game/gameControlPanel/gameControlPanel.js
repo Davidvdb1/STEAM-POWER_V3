@@ -1,11 +1,9 @@
-
 // components/game/gameControlPanel/gameControlPanel.js
 
-import { createLogoScene } from "../scenes/logoScene.js";
-import { createCityScene } from "../scenes/cityScene.js";
+import { createLogoScene }      from "../scenes/logoScene.js";
+import { createCityScene }      from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
-import { fetchStats } from "../utils/fetchStats.js";
-
+import { fetchStats }           from "../utils/fetchStats.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -22,11 +20,14 @@ template.innerHTML = /*html*/ `
         <div id="inner-text">Ga naar binnenstad</div>
       </div>
     </div>
+
     <div id="game-container"></div>
+
     <div id="outer-container">
       <img id="outer-button" src="Assets/images/toOuter.png" alt="Ga naar buitenstad" />
       <div id="outer-text">Ga naar buitenstad</div>
     </div>
+
     <button id="startButton" class="hidden">Start</button>
   </div>
 
@@ -45,42 +46,40 @@ template.innerHTML = /*html*/ `
       </div>
     </div>
 
-      <div class="euro">
-        <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-        <div class="currencyDiv">
-          <p id="coins" class="p-euro">0</p>
-        </div>
+    <div class="euro">
+      <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+      <div class="currencyDiv">
+        <p id="coins" class="p-euro">0</p>
       </div>
-
+    </div>
+  </div>
 `;
 
 class GameControlPanel extends HTMLElement {
   constructor() {
     super();
-    this._shadow = this.attachShadow({ mode: "open" });
+    this._shadow          = this.attachShadow({ mode: "open" });
     this._shadow.appendChild(template.content.cloneNode(true));
 
-    this._wrapper = this._shadow.getElementById("wrapper");
-    this._startButton = this._shadow.getElementById("startButton");
-    this._innerContainer = this._shadow.getElementById("inner-container");
-    this._innerButton = this._shadow.getElementById("inner-button");
-    this._outerContainer = this._shadow.getElementById("outer-container");
-    this._outerButton = this._shadow.getElementById("outer-button");
-    this._statsContainer = this._shadow.getElementById("stats");
-    this._greenEl = this._shadow.getElementById("greenEnergy");
-    this._greyEl = this._shadow.getElementById("greyEnergy");
-    this._coinsEl = this._shadow.getElementById("coins");
+    this._wrapper         = this._shadow.getElementById("wrapper");
+    this._statsContainer  = this._shadow.getElementById("stats");
+    this._startButton     = this._shadow.getElementById("startButton");
+    this._innerContainer  = this._shadow.getElementById("inner-container");
+    this._innerButton     = this._shadow.getElementById("inner-button");
+    this._outerContainer  = this._shadow.getElementById("outer-container");
+    this._outerButton     = this._shadow.getElementById("outer-button");
+    this._greenEl         = this._shadow.getElementById("greenEnergy");
+    this._greyEl          = this._shadow.getElementById("greyEnergy");
+    this._coinsEl         = this._shadow.getElementById("coins");
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
   }
 
   connectedCallback() {
-    this._startButton.addEventListener("click", () => this._onStartClick());
-    this._outerButton.addEventListener("click", () =>
-      this._transitionToOuterCity()
-    );
-    this._innerButton.addEventListener("click", () => this._transitionToCity());
+    this._startButton .addEventListener("click", () => this._onStartClick());
+    this._outerButton .addEventListener("click", () => this._transitionToOuterCity());
+    this._innerButton .addEventListener("click", () => this._transitionToCity());
     this._loadPhaser().then(() => this._initializeGame());
   }
 
@@ -95,8 +94,8 @@ class GameControlPanel extends HTMLElement {
   }
 
   _initializeGame() {
-    const LogoScene = createLogoScene(this._startButton);
-    const CityScene = createCityScene();
+    const LogoScene      = createLogoScene(this._startButton);
+    const CityScene      = createCityScene();
     const OuterCityScene = createOuterCityScene();
 
     this._game = new Phaser.Game({
@@ -120,17 +119,17 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
 
     try {
-      const raw = sessionStorage.getItem("loggedInUser");
+      const raw     = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
-      const gs = await fetchStats(groupId, token);
+      const gs      = await fetchStats(groupId, token);
 
       this._game.buildingData = gs.buildings;
       this._game.assetData    = gs.assets;
 
       const cur = gs.currency;
       this._greenEl.textContent = cur.greenEnergy;
-      this._greyEl.textContent = cur.greyEnergy;
+      this._greyEl.textContent  = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
@@ -139,8 +138,7 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToOuterCity() {
-    const w = this._wrapper;
-    const distance = w.offsetWidth + 800;
+    const distance = this._wrapper.offsetWidth + 800;
     this._animateWrapper(-distance, () => {
       this._game.scene.switch("CityScene", "OuterCityScene");
       this._outerContainer.style.display = "none";
@@ -149,8 +147,7 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToCity() {
-    const w = this._wrapper;
-    const distance = w.offsetWidth + 800;
+    const distance = this._wrapper.offsetWidth + 800;
     this._animateWrapper(distance, () => {
       this._game.scene.switch("OuterCityScene", "CityScene");
       this._innerContainer.style.display = "none";
@@ -159,22 +156,30 @@ class GameControlPanel extends HTMLElement {
   }
 
   _animateWrapper(offsetX, onComplete) {
-    const w = this._wrapper;
-    w.style.transition = "transform 0.5s ease";
-    w.style.transform = `translateX(${offsetX}px)`;
+    const els = [ this._wrapper, this._statsContainer ];
 
-    w.addEventListener(
-      "transitionend",
-      () => {
-        onComplete();
-        w.style.transition = "none";
-        w.style.transform = `translateX(${-offsetX}px)`;
-        void w.offsetWidth;
-        w.style.transition = "transform 0.5s ease";
-        w.style.transform = "translateX(0)";
-      },
-      { once: true }
-    );
+    els.forEach(el => {
+      el.style.transition = "transform 0.5s ease";
+      el.style.transform  = `translateX(${offsetX}px)`;
+    });
+
+    let done = 0;
+    els.forEach(el => {
+      el.addEventListener("transitionend", () => {
+        done += 1;
+        if (done === els.length) {
+          onComplete();
+
+          els.forEach(el => {
+            el.style.transition = "none";
+            el.style.transform  = `translateX(${-offsetX}px)`;
+            void el.offsetWidth; 
+            el.style.transition = "transform 0.5s ease";
+            el.style.transform  = "translateX(0)";
+          });
+        }
+      }, { once: true });
+    });
   }
 }
 
