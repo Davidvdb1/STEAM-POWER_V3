@@ -272,10 +272,12 @@
   position: relative;
   display: flex;
   justify-content: center;
+  width: 50%;
   align-items: center;
   flex-direction: column;
   border: 2px solid #32a80e;
   padding: 2rem;
+  background-color: white;
 }
 
 .corner-icon {
@@ -286,4 +288,11 @@
 
 .img-greenEnergy-card {
   height: 30px;
+}
+
+#inner-container .shop {
+  top: 0;
+  height: 560px;
+  overflow-y: auto;
+  transform: translate(-10px);
 }/*# sourceMappingURL=style.css.map */

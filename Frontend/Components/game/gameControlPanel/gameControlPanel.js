@@ -19,7 +19,40 @@ template.innerHTML = /*html*/ `
             <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
           </div>
           <img class="windturbine" src="Assets/images/windturbine.png" alt="">
-          <p>Test asset</p>
+          <p>Windmolen</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
+        <div class="card-asset">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+          </div>
+          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <p>Waterrad</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
+        <div class="card-asset">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+          </div>
+          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <p>Zonnepaneel</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
+        <div class="card-asset">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+          </div>
+          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <p>Kerncentrale</p>
           <div class="assetCoinDiv">
             <p>20</p>
             <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
