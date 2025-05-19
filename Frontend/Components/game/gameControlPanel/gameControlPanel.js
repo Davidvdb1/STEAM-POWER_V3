@@ -3,7 +3,7 @@
 import { createLogoScene } from "../scenes/logoScene.js";
 import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
-import { fetchStats } from "../utils/fetchStats.js";
+import { gameService } from "../utils/gameService.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -14,7 +14,7 @@ template.innerHTML = /*html*/ `
   <div id="wrapper">
     <div id="inner-container">
       <div class="shop">
-        <div class="card-asset">
+        <div class="card-asset" draggable="true" data-type="Windmolen">
           <div class="corner-icon">
             <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
           </div>
@@ -25,7 +25,7 @@ template.innerHTML = /*html*/ `
             <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
           </div>
         </div>
-        <div class="card-asset">
+        <div class="card-asset" draggable="true" data-type="Waterrad">
           <div class="corner-icon">
             <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
           </div>
@@ -36,7 +36,7 @@ template.innerHTML = /*html*/ `
             <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
           </div>
         </div>
-        <div class="card-asset">
+        <div class="card-asset" draggable="true" data-type="Zonnepaneel">
           <div class="corner-icon">
             <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
           </div>
@@ -47,7 +47,7 @@ template.innerHTML = /*html*/ `
             <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
           </div>
         </div>
-        <div class="card-asset">
+        <div class="card-asset" draggable="true" data-type="Kerncentrale">
           <div class="corner-icon">
             <img class="img-greenEnergy-card" src="Assets/images/greyEnergyTransparent2.png" alt="">
           </div>
@@ -104,7 +104,6 @@ class GameControlPanel extends HTMLElement {
     super();
     this._shadow = this.attachShadow({ mode: "open" });
     this._shadow.appendChild(template.content.cloneNode(true));
-
     this._wrapper = this._shadow.getElementById("wrapper");
     this._statsContainer = this._shadow.getElementById("stats");
     this._startButton = this._shadow.getElementById("startButton");
@@ -115,30 +114,24 @@ class GameControlPanel extends HTMLElement {
     this._greenEl = this._shadow.getElementById("greenEnergy");
     this._greyEl = this._shadow.getElementById("greyEnergy");
     this._coinsEl = this._shadow.getElementById("coins");
-    // this._shopButton = this._shadow.querySelector(".shop button");
-    // this._popup = this._shadow.getElementById("shop-popup");
-    // this._closePopup = this._shadow.getElementById("close-popup");
-
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
   }
 
   connectedCallback() {
     this._startButton.addEventListener("click", () => this._onStartClick());
-    this._outerButton.addEventListener("click", () =>
-      this._transitionToOuterCity()
-    );
+    this._outerButton.addEventListener("click", () => this._transitionToOuterCity());
     this._innerButton.addEventListener("click", () => this._transitionToCity());
-
-    // this._shopButton.addEventListener("click", () => {
-    //   this._popup.classList.remove("hidden");
-    // });
-
-    // this._closePopup.addEventListener("click", () => {
-    //   this._popup.classList.add("hidden");
-    // });
-
+    this._enableDragFromShop();
     this._loadPhaser().then(() => this._initializeGame());
+  }
+
+  _enableDragFromShop() {
+    this._shadow.querySelectorAll(".card-asset").forEach(card => {
+      card.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", card.dataset.type);
+      });
+    });
   }
 
   _loadPhaser() {
@@ -168,6 +161,9 @@ class GameControlPanel extends HTMLElement {
         autoCenter: Phaser.Scale.CENTER_BOTH,
       },
     });
+
+    // Make Phaser scene globally accessible to handle drops
+    window.phaserGame = this._game;
   }
 
   async _onStartClick() {
@@ -180,7 +176,7 @@ class GameControlPanel extends HTMLElement {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
-      const gs = await fetchStats(groupId, token);
+      const gs = await gameService(groupId, token);
 
       this._game.buildingData = gs.buildings;
       this._game.assetData = gs.assets;

@@ -1,6 +1,6 @@
-//fetchStats.js
+//gameService.js
 
-export async function fetchStats(groupId, token) {
+export async function gameService(groupId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/group/${groupId}`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` }
