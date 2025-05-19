@@ -29,7 +29,7 @@ template.innerHTML = /*html*/ `
           <div class="corner-icon">
             <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
           </div>
-          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <img class="windturbine" src="Assets/images/waterrad.png" alt="">
           <p>Waterrad</p>
           <div class="assetCoinDiv">
             <p>20</p>
@@ -40,7 +40,7 @@ template.innerHTML = /*html*/ `
           <div class="corner-icon">
             <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
           </div>
-          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <img class="windturbine" src="Assets/images/solar_panel.png" alt="">
           <p>Zonnepaneel</p>
           <div class="assetCoinDiv">
             <p>20</p>
@@ -49,9 +49,9 @@ template.innerHTML = /*html*/ `
         </div>
         <div class="card-asset">
           <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+            <img class="img-greenEnergy-card" src="Assets/images/greyEnergyTransparent2.png" alt="">
           </div>
-          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <img class="kerncentrale" src="Assets/images/kerncentrale.png" alt="">
           <p>Kerncentrale</p>
           <div class="assetCoinDiv">
             <p>20</p>
@@ -94,43 +94,6 @@ template.innerHTML = /*html*/ `
       <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
       <div class="currencyDiv">
         <p id="coins" class="p-euro">0</p>
-      </div>
-    </div>
-  </div>
-
-  <div id="shop-popup" class="popup hidden">
-    <div class="popup-content">
-      <button id="close-popup" class="close-button">✖</button>
-      <h2>Winkel</h2>
-      <div class="card">
-        <div class="card-asset">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
-          </div>
-          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
-          <p>Test asset</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-          </div>
-        </div>
-            <div class="card-asset">
-              
-              <img class="windturbine" src="Assets/images/windturbine.png" alt="">
-              <p>Test asset</p>
-              <div class="assetCoinDiv">
-                <p>20</p>
-                <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-        </div>
-                <div class="card-asset">
-            <img class="windturbine" src="Assets/images/windturbine.png" alt="">
-            <p>Test asset</p>
-            <div class="assetCoinDiv">
-              <p>20</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-        </div>
       </div>
     </div>
   </div>

@@ -268,16 +268,28 @@
   width: 48px;
 }
 
+.kerncentrale {
+  height: 80px;
+  width: 98px;
+}
+
 .card-asset {
   position: relative;
   display: flex;
   justify-content: center;
-  width: 50%;
+  width: 58%;
   align-items: center;
   flex-direction: column;
-  border: 2px solid #32a80e;
-  padding: 2rem;
-  background-color: white;
+  padding: 1rem 2rem 0;
+}
+
+#inner-container .shop .card-asset:nth-child(-n+3) {
+  border-bottom: 2px solid #555;
+  background-color: rgb(210, 247, 210);
+}
+
+#inner-container .shop .card-asset:nth-child(4) {
+  background-color: #d3d3d3;
 }
 
 .corner-icon {
@@ -295,4 +307,5 @@
   height: 560px;
   overflow-y: auto;
   transform: translate(-10px);
+  border: 2px solid #555;
 }/*# sourceMappingURL=style.css.map */
