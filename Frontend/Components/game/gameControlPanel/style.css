@@ -98,8 +98,8 @@
 
 #inner-container .shop {
   position: absolute;
-  top: 5%;
-  right: 100%;
+  top: 24%;
+  left: 102%;
   transform: translateX(-10px) translateY(-50%);
   z-index: 1;
   display: flex;
@@ -137,7 +137,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
-  background: #D3D3D3;
+  background: #d3d3d3;
   border: 2px solid #555;
   width: 960px;
 }
@@ -211,4 +211,79 @@
 
 .mr {
   margin-right: 3px;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-content {
+  background: white;
+  padding: 2rem;
+  width: 600px;
+  height: 400px;
+  position: relative;
+  font-family: "PixelFont" !important;
+}
+
+.close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.assetCoinDiv {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.windturbine {
+  height: 80px;
+  width: 48px;
+}
+
+.card-asset {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border: 2px solid #32a80e;
+  padding: 2rem;
+}
+
+.corner-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.img-greenEnergy-card {
+  height: 30px;
 }/*# sourceMappingURL=style.css.map */

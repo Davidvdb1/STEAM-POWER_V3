@@ -1,19 +1,30 @@
 // components/game/gameControlPanel/gameControlPanel.js
 
-import { createLogoScene }      from "../scenes/logoScene.js";
-import { createCityScene }      from "../scenes/cityScene.js";
+import { createLogoScene } from "../scenes/logoScene.js";
+import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
-import { fetchStats }           from "../utils/fetchStats.js";
+import { fetchStats } from "../utils/fetchStats.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
     @import './Components/game/gameControlPanel/style.css';
   </style>
+
   <div id="wrapper">
     <div id="inner-container">
       <div class="shop">
-        <button>Winkel</button>
+        <div class="card-asset">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+          </div>
+          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <p>Test asset</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
       </div>
       <div class="test">
         <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
@@ -53,33 +64,84 @@ template.innerHTML = /*html*/ `
       </div>
     </div>
   </div>
+
+  <div id="shop-popup" class="popup hidden">
+    <div class="popup-content">
+      <button id="close-popup" class="close-button">✖</button>
+      <h2>Winkel</h2>
+      <div class="card">
+        <div class="card-asset">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+          </div>
+          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <p>Test asset</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
+            <div class="card-asset">
+              
+              <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+              <p>Test asset</p>
+              <div class="assetCoinDiv">
+                <p>20</p>
+                <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+        </div>
+                <div class="card-asset">
+            <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+            <p>Test asset</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
 `;
 
 class GameControlPanel extends HTMLElement {
   constructor() {
     super();
-    this._shadow          = this.attachShadow({ mode: "open" });
+    this._shadow = this.attachShadow({ mode: "open" });
     this._shadow.appendChild(template.content.cloneNode(true));
 
-    this._wrapper         = this._shadow.getElementById("wrapper");
-    this._statsContainer  = this._shadow.getElementById("stats");
-    this._startButton     = this._shadow.getElementById("startButton");
-    this._innerContainer  = this._shadow.getElementById("inner-container");
-    this._innerButton     = this._shadow.getElementById("inner-button");
-    this._outerContainer  = this._shadow.getElementById("outer-container");
-    this._outerButton     = this._shadow.getElementById("outer-button");
-    this._greenEl         = this._shadow.getElementById("greenEnergy");
-    this._greyEl          = this._shadow.getElementById("greyEnergy");
-    this._coinsEl         = this._shadow.getElementById("coins");
+    this._wrapper = this._shadow.getElementById("wrapper");
+    this._statsContainer = this._shadow.getElementById("stats");
+    this._startButton = this._shadow.getElementById("startButton");
+    this._innerContainer = this._shadow.getElementById("inner-container");
+    this._innerButton = this._shadow.getElementById("inner-button");
+    this._outerContainer = this._shadow.getElementById("outer-container");
+    this._outerButton = this._shadow.getElementById("outer-button");
+    this._greenEl = this._shadow.getElementById("greenEnergy");
+    this._greyEl = this._shadow.getElementById("greyEnergy");
+    this._coinsEl = this._shadow.getElementById("coins");
+    // this._shopButton = this._shadow.querySelector(".shop button");
+    // this._popup = this._shadow.getElementById("shop-popup");
+    // this._closePopup = this._shadow.getElementById("close-popup");
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
   }
 
   connectedCallback() {
-    this._startButton .addEventListener("click", () => this._onStartClick());
-    this._outerButton .addEventListener("click", () => this._transitionToOuterCity());
-    this._innerButton .addEventListener("click", () => this._transitionToCity());
+    this._startButton.addEventListener("click", () => this._onStartClick());
+    this._outerButton.addEventListener("click", () =>
+      this._transitionToOuterCity()
+    );
+    this._innerButton.addEventListener("click", () => this._transitionToCity());
+
+    // this._shopButton.addEventListener("click", () => {
+    //   this._popup.classList.remove("hidden");
+    // });
+
+    // this._closePopup.addEventListener("click", () => {
+    //   this._popup.classList.add("hidden");
+    // });
+
     this._loadPhaser().then(() => this._initializeGame());
   }
 
@@ -94,8 +156,8 @@ class GameControlPanel extends HTMLElement {
   }
 
   _initializeGame() {
-    const LogoScene      = createLogoScene(this._startButton);
-    const CityScene      = createCityScene();
+    const LogoScene = createLogoScene(this._startButton);
+    const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();
 
     this._game = new Phaser.Game({
@@ -119,17 +181,17 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
 
     try {
-      const raw     = sessionStorage.getItem("loggedInUser");
+      const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
-      const gs      = await fetchStats(groupId, token);
+      const gs = await fetchStats(groupId, token);
 
       this._game.buildingData = gs.buildings;
-      this._game.assetData    = gs.assets;
+      this._game.assetData = gs.assets;
 
       const cur = gs.currency;
       this._greenEl.textContent = cur.greenEnergy;
-      this._greyEl.textContent  = cur.greyEnergy;
+      this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
@@ -156,29 +218,33 @@ class GameControlPanel extends HTMLElement {
   }
 
   _animateWrapper(offsetX, onComplete) {
-    const els = [ this._wrapper, this._statsContainer ];
+    const els = [this._wrapper, this._statsContainer];
 
-    els.forEach(el => {
+    els.forEach((el) => {
       el.style.transition = "transform 0.5s ease";
-      el.style.transform  = `translateX(${offsetX}px)`;
+      el.style.transform = `translateX(${offsetX}px)`;
     });
 
     let done = 0;
-    els.forEach(el => {
-      el.addEventListener("transitionend", () => {
-        done += 1;
-        if (done === els.length) {
-          onComplete();
+    els.forEach((el) => {
+      el.addEventListener(
+        "transitionend",
+        () => {
+          done += 1;
+          if (done === els.length) {
+            onComplete();
 
-          els.forEach(el => {
-            el.style.transition = "none";
-            el.style.transform  = `translateX(${-offsetX}px)`;
-            void el.offsetWidth; 
-            el.style.transition = "transform 0.5s ease";
-            el.style.transform  = "translateX(0)";
-          });
-        }
-      }, { once: true });
+            els.forEach((el) => {
+              el.style.transition = "none";
+              el.style.transform = `translateX(${-offsetX}px)`;
+              void el.offsetWidth;
+              el.style.transition = "transform 0.5s ease";
+              el.style.transform = "translateX(0)";
+            });
+          }
+        },
+        { once: true }
+      );
     });
   }
 }
