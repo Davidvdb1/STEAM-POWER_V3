@@ -14,8 +14,13 @@ template.innerHTML = /*html*/ `
   </style>
   <div id="wrapper">
     <div id="inner-container">
-      <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
-      <div id="inner-text">Ga naar binnenstad</div>
+      <div class="shop">
+        <button>Winkel</button>
+      </div>
+      <div class="test">
+        <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
+        <div id="inner-text">Ga naar binnenstad</div>
+      </div>
     </div>
     <div id="game-container"></div>
     <div id="outer-container">
