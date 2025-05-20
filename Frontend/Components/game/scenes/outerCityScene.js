@@ -42,41 +42,147 @@ export function createOuterCityScene() {
       this.dragHighlight = this.add.graphics({ depth: 100 });
 
       // Rounded, centered error popup
-const width = 700;
-const height = 300;
-const centerX = this.cameras.main.width / 2;
-const centerY = this.cameras.main.height / 2;
+      const popupWidth = 700;
+      const popupHeight = 300;
+      const centerX = this.cameras.main.width / 2;
+      const centerY = this.cameras.main.height / 2;
 
-this.errorBg = this.add.graphics()
-  .fillStyle(0x000000, 1)
-  .fillRoundedRect(
-    centerX - width / 2,
-    centerY - height / 2,
-    width,
-    height,
-    20
-  )
-  .setDepth(199)
-  .setScrollFactor(0)
-  .setVisible(false);
+      // Error popup
+      this.errorBg = this.add.graphics()
+        .fillStyle(0x000000, 1)
+        .fillRoundedRect(
+          centerX - popupWidth / 2,
+          centerY - popupHeight / 2,
+          popupWidth,
+          popupHeight,
+          20
+        )
+        .setDepth(199)
+        .setScrollFactor(0)
+        .setVisible(false);
 
-this.errorText = this.add.text(
-  centerX,
-  centerY,
-  "",
-  {
-    fontSize: '40px',
-    color: '#ffffff',
-    align: 'center',
-    wordWrap: { width: width - 32 }
-  }
-)
-.setOrigin(0.5, 0.5)
-.setDepth(200)
-.setScrollFactor(0)
-.setVisible(false);
+      this.errorText = this.add.text(
+        centerX,
+        centerY,
+        "",
+        {
+          fontSize: '40px',
+          color: '#ffffff',
+          align: 'center',
+          wordWrap: { width: popupWidth - 32 }
+        }
+      )
+      .setOrigin(0.5, 0.5)
+      .setDepth(200)
+      .setScrollFactor(0)
+      .setVisible(false);
 
-// --- Helpers ---
+      // Custom confirmation popup
+      this.confirmBg = this.add.graphics()
+        .fillStyle(0x222222, 0.9)
+        .fillRoundedRect(
+          centerX - popupWidth / 2,
+          centerY - popupHeight / 2,
+          popupWidth,
+          popupHeight,
+          20
+        )
+        .setDepth(299)
+        .setScrollFactor(0)
+        .setVisible(false);
+
+      this.confirmText = this.add.text(
+        centerX,
+        centerY - 40,
+        "",
+        {
+          fontSize: '32px',
+          color: '#ffffff',
+          align: 'center',
+          wordWrap: { width: popupWidth - 50 }
+        }
+      )
+      .setOrigin(0.5, 0.5)
+      .setDepth(300)
+      .setScrollFactor(0)
+      .setVisible(false);
+
+      // Confirm buttons
+      const buttonWidth = 180;
+      const buttonHeight = 60;
+      const padding = 20;
+
+      // Yes button
+      this.confirmYesButton = this.add.graphics()
+        .fillStyle(0x4CAF50, 1)
+        .fillRoundedRect(
+          centerX - buttonWidth - padding,
+          centerY + 40,
+          buttonWidth,
+          buttonHeight,
+          10
+        )
+        .setDepth(300)
+        .setScrollFactor(0)
+        .setVisible(false)
+        .setInteractive(new Phaser.Geom.Rectangle(
+          centerX - buttonWidth - padding,
+          centerY + 40,
+          buttonWidth,
+          buttonHeight
+        ), Phaser.Geom.Rectangle.Contains);
+
+      this.confirmYesText = this.add.text(
+        centerX - buttonWidth/2 - padding,
+        centerY + 40 + buttonHeight/2,
+        "Ja",
+        {
+          fontSize: '28px',
+          color: '#ffffff',
+          align: 'center'
+        }
+      )
+      .setOrigin(0.5, 0.5)
+      .setDepth(301)
+      .setScrollFactor(0)
+      .setVisible(false);
+
+      // No button
+      this.confirmNoButton = this.add.graphics()
+        .fillStyle(0xF44336, 1)
+        .fillRoundedRect(
+          centerX + padding,
+          centerY + 40,
+          buttonWidth,
+          buttonHeight,
+          10
+        )
+        .setDepth(300)
+        .setScrollFactor(0)
+        .setVisible(false)
+        .setInteractive(new Phaser.Geom.Rectangle(
+          centerX + padding,
+          centerY + 40,
+          buttonWidth,
+          buttonHeight
+        ), Phaser.Geom.Rectangle.Contains);
+
+      this.confirmNoText = this.add.text(
+        centerX + buttonWidth/2 + padding,
+        centerY + 40 + buttonHeight/2,
+        "Nee",
+        {
+          fontSize: '28px',
+          color: '#ffffff',
+          align: 'center'
+        }
+      )
+      .setOrigin(0.5, 0.5)
+      .setDepth(301)
+      .setScrollFactor(0)
+      .setVisible(false);
+
+      // --- Helpers ---
       const assetSizes = {
         Kerncentrale: { width: 12, height: 10 },
         Windmolen:    { width:  6, height: 10 },
@@ -104,6 +210,51 @@ this.errorText = this.add.text(
             this.errorText.setVisible(false).setAlpha(1);
           }
         });
+      };
+
+      this.showConfirmation = (msg, callback) => {
+        // Show popup elements
+        this.confirmBg.setVisible(true);
+        this.confirmText.setText(msg).setVisible(true);
+        this.confirmYesButton.setVisible(true);
+        this.confirmYesText.setVisible(true);
+        this.confirmNoButton.setVisible(true);
+        this.confirmNoText.setVisible(true);
+        
+        // Disable game interaction while popup is visible
+        this.input.keyboard.enabled = false;
+        
+        // Set up button interactions
+        const onYesClick = () => {
+          this.hideConfirmation();
+          callback(true);
+        };
+        
+        const onNoClick = () => {
+          this.hideConfirmation();
+          callback(false);
+        };
+        
+        // Remove existing listeners to prevent duplicates
+        this.confirmYesButton.off('pointerdown');
+        this.confirmNoButton.off('pointerdown');
+        
+        // Add new listeners
+        this.confirmYesButton.on('pointerdown', onYesClick);
+        this.confirmNoButton.on('pointerdown', onNoClick);
+      };
+      
+      this.hideConfirmation = () => {
+        // Hide all popup elements
+        this.confirmBg.setVisible(false);
+        this.confirmText.setVisible(false);
+        this.confirmYesButton.setVisible(false);
+        this.confirmYesText.setVisible(false);
+        this.confirmNoButton.setVisible(false);
+        this.confirmNoText.setVisible(false);
+        
+        // Re-enable keyboard input
+        this.input.keyboard.enabled = true;
       };
 
       // --- Drop & drag events ---
@@ -171,14 +322,17 @@ this.errorText = this.add.text(
           return;
         }
 
-        // ask native confirm
+        // Custom confirmation dialog
         const cost = assetCosts[type] || 0;
-        const msg = `Wil een ${type} hier plaatsen voor ${cost} coins?`;
-        if (window.confirm(msg)) {
-          this._placeAsset(type, tx, ty, size);
-        }
-        this.dragHighlight.clear();
-        this.draggedAssetType = null;
+        const msg = `Wil je een ${type} hier plaatsen voor ${cost} coins?`;
+        
+        this.showConfirmation(msg, (confirmed) => {
+          if (confirmed) {
+            this._placeAsset(type, tx, ty, size);
+          }
+          this.dragHighlight.clear();
+          this.draggedAssetType = null;
+        });
       });
 
       // --- Existing assets ---
