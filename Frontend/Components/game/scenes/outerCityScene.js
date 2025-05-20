@@ -7,10 +7,10 @@ export function createOuterCityScene() {
     }
 
     preload() {
-      this.load.tilemapTiledJSON("citymap", "Assets/json/binnenstad-v1.json");
+      this.load.tilemapTiledJSON("outerCityMap", "Assets/json/buitenstad.json");
       this.load.image(
         "tilesetImage",
-        "Assets/images/Modern_Exteriors_Complete_Tileset.png"
+        "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
       );
       this.load.image("Zonnepaneel", "Assets/images/solar_panel.png");
       this.load.image("Windmolen", "Assets/images/windturbine.png");
@@ -19,24 +19,32 @@ export function createOuterCityScene() {
     }
 
     create() {
-      this.map = this.make.tilemap({ key: "citymap" });
+      this.map = this.make.tilemap({ key: "outerCityMap" });
       const tileset = this.map.addTilesetImage(
-        "Modern_Exteriors_Complete_Tileset",
+        "Modern_Exteriors_Complete_Tileset_Custom",
         "tilesetImage"
       );
-      this.map.createLayer(this.map.layers[0].name, tileset, 0, 0);
 
+      this.layer1 = this.map.createLayer("Layer-1", tileset);
+      this.layer2 = this.map.createLayer("Layer-2", tileset);
+      this.layer3 = this.map.createLayer("Layer-3", tileset);
+
+      // Set camera boundaries to match the tilemap dimensions 
       this.cameras.main.setBounds(
         0,
         0,
         this.map.widthInPixels,
         this.map.heightInPixels
       );
+
+      // Set up keyboard input for camera navigation
       this.cursors = this.input.keyboard.createCursorKeys();
       this.WASD = this.input.keyboard.addKeys("Z,S,Q,D");
+
+      // Enable zooming with mouse wheel
       this.input.on("wheel", (pointer, gameObjects, dx, dy) => {
         let newZoom = this.cameras.main.zoom - dy * 0.001;
-        this.cameras.main.setZoom(Phaser.Math.Clamp(newZoom, 0.5, 2));
+        this.cameras.main.setZoom(Phaser.Math.Clamp(newZoom, 1, 2));
       });
 
       this.dragHighlight = this.add.graphics({ depth: 100 });
