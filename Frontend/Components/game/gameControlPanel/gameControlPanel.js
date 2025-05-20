@@ -3,7 +3,7 @@
 import { createLogoScene } from "../scenes/logoScene.js";
 import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
-import { gameService } from "../utils/gameService.js";
+import * as gameService from "../utils/gameService.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -176,7 +176,7 @@ class GameControlPanel extends HTMLElement {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
-      const gs = await gameService(groupId, token);
+      const gs = await gameService.fetchGameStatistics(groupId, token);
 
       this._game.buildingData = gs.buildings;
       this._game.assetData = gs.assets;
