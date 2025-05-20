@@ -1,4 +1,9 @@
-import { addAsset, updateCurrency, getCurrencyById } from "../utils/gameService.js";
+import {
+  addAsset,
+  updateCurrency,
+  getCurrencyById,
+  removeAsset
+} from "../utils/gameService.js";
 
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
@@ -48,13 +53,18 @@ export function createOuterCityScene() {
       });
 
       this.dragHighlight = this.add.graphics({ depth: 100 });
+      this.hoverMarker = this.add.graphics({ depth: 99 });
+
+      this.hoverTilesHighlight = this.add.graphics({ depth: 101 });
+
 
       const popupWidth = 700;
       const popupHeight = 300;
       const centerX = this.cameras.main.width / 2;
       const centerY = this.cameras.main.height / 2;
 
-      this.errorBg = this.add.graphics()
+      this.errorBg = this.add
+        .graphics()
         .fillStyle(0x000000, 1)
         .fillRoundedRect(
           centerX - popupWidth / 2,
@@ -67,25 +77,22 @@ export function createOuterCityScene() {
         .setScrollFactor(0)
         .setVisible(false);
 
-      this.errorText = this.add.text(
-        centerX,
-        centerY,
-        "",
-        {
-          fontSize: '40px',
-          color: '#ffffff',
-          align: 'center',
+      this.errorText = this.add
+        .text(centerX, centerY, "", {
+          fontSize: "40px",
+          color: "#ffffff",
+          align: "center",
           wordWrap: { width: popupWidth - 32 },
-          fontStyle: 'bold',
-        }
-      )
-      .setOrigin(0.5, 0.5)
-      .setDepth(200)
-      .setScrollFactor(0)
-      .setVisible(false);
+          fontStyle: "bold",
+        })
+        .setOrigin(0.5, 0.5)
+        .setDepth(200)
+        .setScrollFactor(0)
+        .setVisible(false);
 
       // Custom confirmation popup
-      this.confirmBg = this.add.graphics()
+      this.confirmBg = this.add
+        .graphics()
         .fillStyle(0x222222, 0.9)
         .fillRoundedRect(
           centerX - popupWidth / 2,

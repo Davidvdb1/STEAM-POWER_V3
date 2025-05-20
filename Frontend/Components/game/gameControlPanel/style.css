@@ -8,8 +8,8 @@
 
 #wrapper {
   position: relative;
-  width: 960px;
-  height: 560px;
+  width: 964px;
+  height: 484px;
 }
 
 #game-container {
@@ -17,8 +17,8 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 960px;
-  height: 560px;
+  width: 100%;
+  height: 100%;
   z-index: 0;
 }
 
@@ -139,8 +139,10 @@
   flex-direction: row;
   justify-content: space-evenly;
   background: #d3d3d3;
-  border: 2px solid #555;
-  width: 960px;
+  border-left: 2px solid #555;
+  border-right: 2px solid #555;
+  border-bottom: 2px solid #555;
+  width: 964px;
 }
 
 #stats.hidden {
@@ -304,9 +306,12 @@
 }
 
 #inner-container .shop {
+  position: absolute;
   top: 0;
-  height: 560px;
+  height: 100%;
   overflow-y: auto;
-  transform: translate(-10px);
+  left: 102%;
+  transform: translateX(-10px);
   border: 2px solid #555;
+  z-index: 1;
 }/*# sourceMappingURL=style.css.map */
