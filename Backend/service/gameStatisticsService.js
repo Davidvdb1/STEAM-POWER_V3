@@ -36,6 +36,10 @@ class GameStatisticsService {
     });
   }
 
+  async getCurrencyById(currencyId) {
+    return await gameStatisticsRepository.findCurrencyById(currencyId);
+  }
+
   async updateCurrency(statsId, { greenEnergy, greyEnergy, coins }) {
     return await gameStatisticsRepository.updateCurrency(statsId, { greenEnergy, greyEnergy, coins });
   }

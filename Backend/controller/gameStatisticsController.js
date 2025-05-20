@@ -51,6 +51,21 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// get currency by id
+router.get('/:id/currency', async (req, res) => {
+  try {
+    const currency = await gameStatisticsService.getCurrencyById(req.params.id);
+    if (!currency) {
+      return res.status(404).json({ error: 'Currency not found' });
+    }
+    res.status(200).json(currency);
+  } catch (error) {
+    console.error(`Error fetching currency for GameStatistics ${req.params.id}:`, error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
 // Update currency
 router.put('/:id/currency', async (req, res) => {
   try {

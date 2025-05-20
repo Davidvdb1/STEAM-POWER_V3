@@ -80,7 +80,14 @@ async findByGroupId(groupId, opts = {}) {
   return GameStatistics.from(prismaGS);
 }
 
-
+  async findCurrencyById(id) {
+    const prismaCurrency = await this.prisma.currency.findUnique({
+      where: { id },
+      include: { gameStatistics: true }
+    });
+    return prismaCurrency ? Currency.from(prismaCurrency) : null;
+  }
+  
   async updateCurrency(statsId, { greenEnergy, greyEnergy, coins }) {
     if (
       typeof greenEnergy !== 'number' ||
