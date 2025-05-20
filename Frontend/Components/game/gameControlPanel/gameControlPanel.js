@@ -161,6 +161,7 @@ class GameControlPanel extends HTMLElement {
       height: MAP_HEIGHT * TILE_HEIGHT,
       scene: [LogoScene, CityScene, OuterCityScene],
       backgroundColor: "#9bd5e4",
+      pixelArt: true,
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
