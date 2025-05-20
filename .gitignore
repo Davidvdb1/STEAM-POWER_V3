@@ -133,3 +133,6 @@ dist
 .vscode/
 
 requests.http
+*.toml
+*.sql
+

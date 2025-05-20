@@ -6,6 +6,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   await prisma.energyData.deleteMany();
+  await prisma.gameStatistics.deleteMany();
   await prisma.user.deleteMany();
   await prisma.workshop.deleteMany();
   await prisma.camp.deleteMany();

@@ -5,10 +5,10 @@ export function createCityScene() {
     }
 
     preload() {
-      this.load.tilemapTiledJSON("citymap", "Assets/json/binnenstad-v1.json");
+      this.load.tilemapTiledJSON("citymap", "Assets/json/binnenstad.json");
       this.load.image(
         "tilesetImage",
-        "Assets/images/Modern_Exteriors_Complete_Tileset.png"
+        "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
       );
       this.load.on("complete", () => console.log("Assets geladen"));
     }
@@ -16,15 +16,18 @@ export function createCityScene() {
     create() {
       this.map = this.make.tilemap({ key: "citymap" });
       const tileset = this.map.addTilesetImage(
-        "Modern_Exteriors_Complete_Tileset",
+        "Modern_Exteriors_Complete_Tileset_Custom",
         "tilesetImage"
       );
       if (!tileset) {
         console.error("Tileset niet gevonden.");
         return;
       }
-      this.layer = this.map.createLayer("road-layout", tileset, 0, 0);
-      this.buildingsLayer = this.map.createLayer("buildings", tileset, 0, 0);
+      this.layer1 = this.map.createLayer("Layer-1", tileset);
+      this.layer2 = this.map.createLayer("Layer-2", tileset);
+      this.layer3 = this.map.createLayer("Layer-3", tileset);
+      this.layer4 = this.map.createLayer("Layer-4", tileset);
+      this.layer5 = this.map.createLayer("Layer-5", tileset);
       this.cameras.main.setBounds(
         0,
         0,
@@ -36,14 +39,14 @@ export function createCityScene() {
       this.WASD = this.input.keyboard.addKeys("Z,S,Q,D");
       this.input.on("wheel", (pointer, gameObjects, dx, dy) => {
         let newZoom = this.cameras.main.zoom - dy * 0.001;
-        newZoom = Phaser.Math.Clamp(newZoom, 0.5, 2);
+        newZoom = Phaser.Math.Clamp(newZoom, 1, 2);
         this.cameras.main.setZoom(newZoom);
       });
       this.hoverMarker = this.add.graphics();
       this.hoveredTile = null;
       this.input.on("pointermove", (pointer) => {
         const worldPoint = pointer.positionToCamera(this.cameras.main);
-        const tile = this.layer.getTileAtWorldXY(worldPoint.x, worldPoint.y);
+        const tile = this.layer1.getTileAtWorldXY(worldPoint.x, worldPoint.y);
 
         if (tile) {
           if (

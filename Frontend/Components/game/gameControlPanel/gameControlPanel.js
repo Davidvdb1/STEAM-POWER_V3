@@ -149,16 +149,23 @@ class GameControlPanel extends HTMLElement {
     const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();
 
+    const TILE_WIDTH = 16;
+    const TILE_HEIGHT = 16;
+    const MAP_WIDTH = 140;
+    const MAP_HEIGHT = 70;
+
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: this._shadow.getElementById("game-container"),
-      width: 960,
-      height: 560,
+      width: MAP_WIDTH * TILE_WIDTH,
+      height: MAP_HEIGHT * TILE_HEIGHT,
       scene: [LogoScene, CityScene, OuterCityScene],
       backgroundColor: "#9bd5e4",
       scale: {
-        mode: Phaser.Scale.NONE,
+        mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: MAP_WIDTH * TILE_WIDTH,
+        height: MAP_HEIGHT * TILE_HEIGHT
       },
     });
 
