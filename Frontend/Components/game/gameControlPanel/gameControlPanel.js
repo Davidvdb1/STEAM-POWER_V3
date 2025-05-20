@@ -177,8 +177,12 @@ class GameControlPanel extends HTMLElement {
       const { token, groupId } = JSON.parse(raw);
       const gs = await gameService.fetchGameStatistics(groupId, token);
 
+      this._game.token = token
+      this._game.groupId = groupId
       this._game.buildingData = gs.buildings;
       this._game.assetData = gs.assets;
+      this._game.gameStatisticsId = gs.id;
+      this._game.currencyId = gs.currency.id;
 
       const cur = gs.currency;
       this._greenEl.textContent = cur.greenEnergy;

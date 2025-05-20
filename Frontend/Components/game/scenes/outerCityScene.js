@@ -1,3 +1,5 @@
+import { addAsset, updateCurrency, getCurrencyById } from "../utils/gameService.js";
+
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
     constructor() {
@@ -17,7 +19,6 @@ export function createOuterCityScene() {
     }
 
     create() {
-      // --- Setup map & camera ---
       this.map = this.make.tilemap({ key: "citymap" });
       const tileset = this.map.addTilesetImage(
         "Modern_Exteriors_Complete_Tileset",
@@ -38,16 +39,13 @@ export function createOuterCityScene() {
         this.cameras.main.setZoom(Phaser.Math.Clamp(newZoom, 0.5, 2));
       });
 
-      // --- UI layers ---
       this.dragHighlight = this.add.graphics({ depth: 100 });
 
-      // Rounded, centered error popup
       const popupWidth = 700;
       const popupHeight = 300;
       const centerX = this.cameras.main.width / 2;
       const centerY = this.cameras.main.height / 2;
 
-      // Error popup
       this.errorBg = this.add.graphics()
         .fillStyle(0x000000, 1)
         .fillRoundedRect(
@@ -69,7 +67,8 @@ export function createOuterCityScene() {
           fontSize: '40px',
           color: '#ffffff',
           align: 'center',
-          wordWrap: { width: popupWidth - 32 }
+          wordWrap: { width: popupWidth - 32 },
+          fontStyle: 'bold',
         }
       )
       .setOrigin(0.5, 0.5)
@@ -99,6 +98,7 @@ export function createOuterCityScene() {
           fontSize: '32px',
           color: '#ffffff',
           align: 'center',
+          fontStyle: 'bold',
           wordWrap: { width: popupWidth - 50 }
         }
       )
@@ -107,12 +107,10 @@ export function createOuterCityScene() {
       .setScrollFactor(0)
       .setVisible(false);
 
-      // Confirm buttons
       const buttonWidth = 180;
       const buttonHeight = 60;
       const padding = 20;
 
-      // Yes button
       this.confirmYesButton = this.add.graphics()
         .fillStyle(0x4CAF50, 1)
         .fillRoundedRect(
@@ -139,7 +137,8 @@ export function createOuterCityScene() {
         {
           fontSize: '28px',
           color: '#ffffff',
-          align: 'center'
+          align: 'center',
+          fontStyle: 'bold',
         }
       )
       .setOrigin(0.5, 0.5)
@@ -147,7 +146,6 @@ export function createOuterCityScene() {
       .setScrollFactor(0)
       .setVisible(false);
 
-      // No button
       this.confirmNoButton = this.add.graphics()
         .fillStyle(0xF44336, 1)
         .fillRoundedRect(
@@ -174,7 +172,8 @@ export function createOuterCityScene() {
         {
           fontSize: '28px',
           color: '#ffffff',
-          align: 'center'
+          align: 'center',
+          fontStyle: 'bold'
         }
       )
       .setOrigin(0.5, 0.5)
@@ -182,7 +181,6 @@ export function createOuterCityScene() {
       .setScrollFactor(0)
       .setVisible(false);
 
-      // --- Helpers ---
       const assetSizes = {
         Kerncentrale: { width: 12, height: 10 },
         Windmolen:    { width:  6, height: 10 },
@@ -213,7 +211,6 @@ export function createOuterCityScene() {
       };
 
       this.showConfirmation = (msg, callback) => {
-        // Show popup elements
         this.confirmBg.setVisible(true);
         this.confirmText.setText(msg).setVisible(true);
         this.confirmYesButton.setVisible(true);
@@ -221,10 +218,8 @@ export function createOuterCityScene() {
         this.confirmNoButton.setVisible(true);
         this.confirmNoText.setVisible(true);
         
-        // Disable game interaction while popup is visible
         this.input.keyboard.enabled = false;
         
-        // Set up button interactions
         const onYesClick = () => {
           this.hideConfirmation();
           callback(true);
@@ -235,17 +230,14 @@ export function createOuterCityScene() {
           callback(false);
         };
         
-        // Remove existing listeners to prevent duplicates
         this.confirmYesButton.off('pointerdown');
         this.confirmNoButton.off('pointerdown');
         
-        // Add new listeners
         this.confirmYesButton.on('pointerdown', onYesClick);
         this.confirmNoButton.on('pointerdown', onNoClick);
       };
       
       this.hideConfirmation = () => {
-        // Hide all popup elements
         this.confirmBg.setVisible(false);
         this.confirmText.setVisible(false);
         this.confirmYesButton.setVisible(false);
@@ -253,11 +245,9 @@ export function createOuterCityScene() {
         this.confirmNoButton.setVisible(false);
         this.confirmNoText.setVisible(false);
         
-        // Re-enable keyboard input
         this.input.keyboard.enabled = true;
       };
 
-      // --- Drop & drag events ---
       this.tileAssetMap = {};
       const canvas = this.game.canvas;
 
@@ -303,7 +293,6 @@ export function createOuterCityScene() {
         const ty = Math.floor(world.y / this.map.tileHeight);
         const size = assetSizes[type] || { width:1, height:1 };
 
-        // occupancy check
         let canPlace = true;
         for (let dx=0; dx<size.width; dx++){
           for (let dy=0; dy<size.height; dy++){
@@ -322,20 +311,54 @@ export function createOuterCityScene() {
           return;
         }
 
-        // Custom confirmation dialog
         const cost = assetCosts[type] || 0;
         const msg = `Wil je een ${type} hier plaatsen voor ${cost} coins?`;
         
-        this.showConfirmation(msg, (confirmed) => {
-          if (confirmed) {
-            this._placeAsset(type, tx, ty, size);
-          }
-          this.dragHighlight.clear();
-          this.draggedAssetType = null;
-        });
+this.showConfirmation(msg, async (confirmed) => {
+  if (confirmed) {
+    try {
+      // Plaats visueel op kaart
+      this._placeAsset(type, tx, ty, size);
+
+      const gameStatsId = this.sys.game.gameStatisticsId;
+      const groupId = this.sys.game.groupId;
+      const token = this.sys.game.token;
+      const currencyId = this.sys.game.currencyId;
+
+      const assetData = {
+        buildCost: cost,
+        destroyCost: cost,
+        energy: 10,
+        xLocation: tx,
+        yLocation: ty,
+        xSize: size.width,
+        ySize: size.height,
+        type
+      };
+
+      // console.log("Hello" + currencyId)
+      const currentCurrencyData = await getCurrencyById(currencyId, token)
+      
+      const currencyData = {
+        greenEnergy: currentCurrencyData.greenEnergy,
+        greyEnergy: currentCurrencyData.greyEnergy,
+        coins: currentCurrencyData.coins - cost
+      };
+
+      console.log("Hello" + currencyId)
+      await addAsset(gameStatsId, assetData, token);
+      await updateCurrency(currencyId, currencyData, token);
+    } catch (err) {
+      this.showError("Plaatsen mislukt: " + err.message);
+    }
+  }
+
+  this.dragHighlight.clear();
+  this.draggedAssetType = null;
+});
+
       });
 
-      // --- Existing assets ---
       (this.sys.game.assetData || []).forEach(a => {
         const wx = a.xLocation * this.map.tileWidth;
         const wy = a.yLocation * this.map.tileHeight;
