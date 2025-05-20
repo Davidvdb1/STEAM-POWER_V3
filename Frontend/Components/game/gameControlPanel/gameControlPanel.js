@@ -164,6 +164,8 @@ class GameControlPanel extends HTMLElement {
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: MAP_WIDTH * TILE_WIDTH,
+        height: MAP_HEIGHT * TILE_HEIGHT
       },
     });
 

@@ -39,7 +39,7 @@ export function createCityScene() {
       this.WASD = this.input.keyboard.addKeys("Z,S,Q,D");
       this.input.on("wheel", (pointer, gameObjects, dx, dy) => {
         let newZoom = this.cameras.main.zoom - dy * 0.001;
-        newZoom = Phaser.Math.Clamp(newZoom, 0.5, 2);
+        newZoom = Phaser.Math.Clamp(newZoom, 1, 2);
         this.cameras.main.setZoom(newZoom);
       });
       this.hoverMarker = this.add.graphics();
