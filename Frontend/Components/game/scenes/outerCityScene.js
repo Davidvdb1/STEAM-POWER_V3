@@ -35,7 +35,6 @@ export function createOuterCityScene() {
 
       this.layer1 = this.map.createLayer("Layer-1", tileset);
       this.layer2 = this.map.createLayer("Layer-2", tileset);
-      this.layer3 = this.map.createLayer("Layer-3", tileset);
 
       this.cameras.main.setBounds(
         0,
