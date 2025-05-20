@@ -19,15 +19,19 @@ export function createCityScene() {
         "Modern_Exteriors_Complete_Tileset_Custom",
         "tilesetImage"
       );
+
       if (!tileset) {
         console.error("Tileset niet gevonden.");
         return;
       }
+      
       this.layer1 = this.map.createLayer("Layer-1", tileset);
       this.layer2 = this.map.createLayer("Layer-2", tileset);
       this.layer3 = this.map.createLayer("Layer-3", tileset);
       this.layer4 = this.map.createLayer("Layer-4", tileset);
       this.layer5 = this.map.createLayer("Layer-5", tileset);
+
+      // Set camera boundaries to match the tilemap dimensions 
       this.cameras.main.setBounds(
         0,
         0,
@@ -35,13 +39,17 @@ export function createCityScene() {
         this.map.heightInPixels
       );
 
+      // Set up keyboard input for camera navigation
       this.cursors = this.input.keyboard.createCursorKeys();
       this.WASD = this.input.keyboard.addKeys("Z,S,Q,D");
+
+      // Enable zooming with mouse wheel
       this.input.on("wheel", (pointer, gameObjects, dx, dy) => {
         let newZoom = this.cameras.main.zoom - dy * 0.001;
         newZoom = Phaser.Math.Clamp(newZoom, 1, 2);
         this.cameras.main.setZoom(newZoom);
       });
+      
       this.hoverMarker = this.add.graphics();
       this.hoveredTile = null;
       this.input.on("pointermove", (pointer) => {
