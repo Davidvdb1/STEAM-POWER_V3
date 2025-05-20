@@ -12,15 +12,15 @@ class LogoScene extends Phaser.Scene {
   }
 }
 
-const config = {
-  type: Phaser.AUTO,
-  parent: 'game-container',
-  scene: LogoScene,
-  backgroundColor: '#222',
-  scale: {
-    mode: Phaser.Scale.NONE,
-    autoCenter: Phaser.Scale.CENTER_BOTH
-  }
-};
+// const config = {
+//   type: Phaser.AUTO,
+//   parent: 'game-container',
+//   scene: LogoScene,
+//   backgroundColor: '#222',
+//   scale: {
+//     mode: Phaser.Scale.NONE,
+//     autoCenter: Phaser.Scale.CENTER_BOTH
+//   }
+// };
 
 new Phaser.Game(config);
