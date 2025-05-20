@@ -40,14 +40,43 @@ export function createOuterCityScene() {
 
       // --- UI layers ---
       this.dragHighlight = this.add.graphics({ depth: 100 });
-      this.errorText = this.add.text(
-        this.cameras.main.width / 2,
-        this.cameras.main.height / 2,
-        "",
-        { fontSize: '24px', backgroundColor: '#000', color: '#fff', padding: { x: 12, y: 8 } }
-      ).setOrigin(0.5).setScrollFactor(0).setDepth(200).setAlpha(0);
 
-      // --- Helpers ---
+      // Rounded, centered error popup
+const width = 700;
+const height = 300;
+const centerX = this.cameras.main.width / 2;
+const centerY = this.cameras.main.height / 2;
+
+this.errorBg = this.add.graphics()
+  .fillStyle(0x000000, 1)
+  .fillRoundedRect(
+    centerX - width / 2,
+    centerY - height / 2,
+    width,
+    height,
+    20
+  )
+  .setDepth(199)
+  .setScrollFactor(0)
+  .setVisible(false);
+
+this.errorText = this.add.text(
+  centerX,
+  centerY,
+  "",
+  {
+    fontSize: '40px',
+    color: '#ffffff',
+    align: 'center',
+    wordWrap: { width: width - 32 }
+  }
+)
+.setOrigin(0.5, 0.5)
+.setDepth(200)
+.setScrollFactor(0)
+.setVisible(false);
+
+// --- Helpers ---
       const assetSizes = {
         Kerncentrale: { width: 12, height: 10 },
         Windmolen:    { width:  6, height: 10 },
@@ -62,9 +91,19 @@ export function createOuterCityScene() {
       };
 
       this.showError = (msg) => {
-        this.errorText.setText(msg).setAlpha(1);
-        this.tweens.killTweensOf(this.errorText);
-        this.tweens.add({ targets: this.errorText, alpha: 0, delay: 1500, duration: 500 });
+        this.errorBg.setVisible(true).setAlpha(1);
+        this.errorText.setText(msg).setVisible(true).setAlpha(1);
+        this.tweens.killTweensOf([this.errorBg, this.errorText]);
+        this.tweens.add({
+          targets: [this.errorBg, this.errorText],
+          alpha: { from: 1, to: 0 },
+          delay: 2000,
+          duration: 600,
+          onComplete: () => {
+            this.errorBg.setVisible(false).setAlpha(1);
+            this.errorText.setVisible(false).setAlpha(1);
+          }
+        });
       };
 
       // --- Drop & drag events ---
@@ -118,7 +157,8 @@ export function createOuterCityScene() {
         for (let dx=0; dx<size.width; dx++){
           for (let dy=0; dy<size.height; dy++){
             if (this.tileAssetMap[`${tx+dx},${ty+dy}`]){
-              canPlace = false; break;
+              canPlace = false;
+              break;
             }
           }
           if (!canPlace) break;
@@ -135,10 +175,8 @@ export function createOuterCityScene() {
         const cost = assetCosts[type] || 0;
         const msg = `Wil een ${type} hier plaatsen voor ${cost} coins?`;
         if (window.confirm(msg)) {
-          // place
           this._placeAsset(type, tx, ty, size);
         }
-        // clear in either case
         this.dragHighlight.clear();
         this.draggedAssetType = null;
       });
@@ -160,7 +198,6 @@ export function createOuterCityScene() {
     }
 
     _placeAsset(type, tx, ty, size) {
-      // place sprite
       this.add.image(
         tx * this.map.tileWidth,
         ty * this.map.tileHeight,
@@ -173,14 +210,12 @@ export function createOuterCityScene() {
       )
       .setInteractive();
 
-      // mark occupied
       for (let dx=0; dx<size.width; dx++){
         for (let dy=0; dy<size.height; dy++){
           this.tileAssetMap[`${tx+dx},${ty+dy}`] = true;
         }
       }
 
-      // clear highlight & dragged
       this.dragHighlight.clear();
       this.draggedAssetType = null;
     }
