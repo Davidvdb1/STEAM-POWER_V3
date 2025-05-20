@@ -1,55 +1,43 @@
-import {
-  addAsset,
-  updateCurrency,
-  getCurrencyById,
-  removeAsset
-} from "../utils/gameService.js";
+import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys } from "../utils/phaserSceneUtils.js";
+import { addAsset, updateCurrency, getCurrencyById, removeAsset } from "../utils/gameService.js";
 
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
     constructor() {
-      super({ key: "OuterCityScene" });
+      super("OuterCityScene" );
     }
 
+
     preload() {
+      // Load the tilemap, tileset image and assets
       this.load.tilemapTiledJSON("outerCityMap", "Assets/json/buitenstad.json");
-      this.load.image(
-        "tilesetImage",
-        "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
-      );
+      this.load.image("tilesetImage", "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png");
       this.load.image("Zonnepaneel", "Assets/images/solar_panel.png");
       this.load.image("Windmolen", "Assets/images/windturbine.png");
       this.load.image("Waterrad", "Assets/images/waterrad.png");
       this.load.image("Kerncentrale", "Assets/images/kerncentrale.png");
     }
 
+
     create() {
       this.assetObjects = [];
       this.tileAssetMap = {};
-      
+
+      // Set up the tilemap and its layers
       this.map = this.make.tilemap({ key: "outerCityMap" });
-      const tileset = this.map.addTilesetImage(
-        "Modern_Exteriors_Complete_Tileset_Custom",
-        "tilesetImage"
-      );
+      const tileset = this.map.addTilesetImage("Modern_Exteriors_Complete_Tileset_Custom", "tilesetImage");
 
       this.layer1 = this.map.createLayer("Layer-1", tileset);
       this.layer2 = this.map.createLayer("Layer-2", tileset);
 
-      this.cameras.main.setBounds(
-        0,
-        0,
-        this.map.widthInPixels,
-        this.map.heightInPixels
-      );
+      // Set camera boundaries to match the tilemap dimensions 
+      setCameraBounds(this);
 
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.WASD = this.input.keyboard.addKeys("Z,S,Q,D");
+      // Enable zooming with mouse wheel
+      handleZoom(this);
 
-      this.input.on("wheel", (pointer, gameObjects, dx, dy) => {
-        let newZoom = this.cameras.main.zoom - dy * 0.001;
-        this.cameras.main.setZoom(Phaser.Math.Clamp(newZoom, 1, 2));
-      });
+      // Set up keyboard input for camera navigation
+      setMovementKeys(this);
 
       this.dragHighlight = this.add.graphics({ depth: 100 });
       this.hoverMarker = this.add.graphics({ depth: 99 });
@@ -484,6 +472,11 @@ export function createOuterCityScene() {
     }
 
 
+    update(time, delta) {
+      handleMovementKeys(this, delta);
+    }
+
+
     _placeAsset(type, tx, ty, size) {
       const image = this.add
         .image(tx * this.map.tileWidth, ty * this.map.tileHeight, type)
@@ -545,17 +538,6 @@ export function createOuterCityScene() {
         
         this.hoverTilesHighlight.clear();
       }
-    }
-
-    update(time, delta) {
-      const speed = 300;
-      const cam = this.cameras.main;
-      if (this.cursors.left.isDown  || this.WASD.Q.isDown) cam.scrollX -= speed * delta/1000;
-      if (this.cursors.right.isDown || this.WASD.D.isDown) cam.scrollX += speed * delta/1000;
-      if (this.cursors.up.isDown    || this.WASD.Z.isDown) cam.scrollY -= speed * delta/1000;
-      if (this.cursors.down.isDown  || this.WASD.S.isDown) cam.scrollY += speed * delta/1000;
-      cam.scrollX = Phaser.Math.Clamp(cam.scrollX, 0, this.map.widthInPixels - cam.width/cam.zoom);
-      cam.scrollY = Phaser.Math.Clamp(cam.scrollY, 0, this.map.heightInPixels - cam.height/cam.zoom);
     }
   };
 }
