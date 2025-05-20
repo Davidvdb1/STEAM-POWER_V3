@@ -118,7 +118,7 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
   }
 
-  connectedCallback() {
+  connectedCallback() { 
     this._startButton.addEventListener("click", () => this._onStartClick());
     this._outerButton.addEventListener("click", () => this._transitionToOuterCity());
     this._innerButton.addEventListener("click", () => this._transitionToCity());
@@ -128,14 +128,14 @@ class GameControlPanel extends HTMLElement {
 
   _enableDragFromShop() {
     this._shadow.querySelectorAll(".card-asset").forEach(card => {
-      card.addEventListener("dragstart", (e) => {
+      card.addEventListener("dragstart", e => {
         e.dataTransfer.setData("text/plain", card.dataset.type);
       });
     });
   }
 
   _loadPhaser() {
-    return new Promise((res) => {
+    return new Promise(res => {
       if (window.Phaser) return res();
       const s = document.createElement("script");
       s.src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js";
@@ -162,7 +162,6 @@ class GameControlPanel extends HTMLElement {
       },
     });
 
-    // Make Phaser scene globally accessible to handle drops
     window.phaserGame = this._game;
   }
 
@@ -211,32 +210,26 @@ class GameControlPanel extends HTMLElement {
 
   _animateWrapper(offsetX, onComplete) {
     const els = [this._wrapper, this._statsContainer];
-
-    els.forEach((el) => {
+    els.forEach(el => {
       el.style.transition = "transform 0.5s ease";
       el.style.transform = `translateX(${offsetX}px)`;
     });
 
     let done = 0;
-    els.forEach((el) => {
-      el.addEventListener(
-        "transitionend",
-        () => {
-          done += 1;
-          if (done === els.length) {
-            onComplete();
-
-            els.forEach((el) => {
-              el.style.transition = "none";
-              el.style.transform = `translateX(${-offsetX}px)`;
-              void el.offsetWidth;
-              el.style.transition = "transform 0.5s ease";
-              el.style.transform = "translateX(0)";
-            });
-          }
-        },
-        { once: true }
-      );
+    els.forEach(el => {
+      el.addEventListener("transitionend", () => {
+        done++;
+        if (done === els.length) {
+          onComplete();
+          els.forEach(inner => {
+            inner.style.transition = "none";
+            inner.style.transform = `translateX(${-offsetX}px)`;
+            void inner.offsetWidth;
+            inner.style.transition = "transform 0.5s ease";
+            inner.style.transform = "translateX(0)";
+          });
+        }
+      }, { once: true });
     });
   }
 }
