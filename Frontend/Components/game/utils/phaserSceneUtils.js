@@ -20,7 +20,7 @@ export function setCameraBounds(scene) {
  * @param {number} maxZoom - The maximum zoom level allowed (default = 5).
  */
 export function handleZoom(scene, maxZoom = 5) {
-    scene.input.on("wheel", (pointer, gameObjects, dx, dy) => {
+  scene.input.on("wheel", (pointer, gameObjects, dx, dy) => {
     let newZoom = scene.cameras.main.zoom - dy * 0.001;
     newZoom = Phaser.Math.Clamp(newZoom, 1, maxZoom);
     scene.cameras.main.setZoom(newZoom);
