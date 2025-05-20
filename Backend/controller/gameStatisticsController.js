@@ -53,6 +53,7 @@ router.get('/:id', async (req, res) => {
 
 // get currency by id
 router.get('/:id/currency', async (req, res) => {
+  console.log(`→ HIT /:id/currency; req.params.id =`, req.params.id);
   try {
     const currency = await gameStatisticsService.getCurrencyById(req.params.id);
     if (!currency) {
@@ -70,11 +71,10 @@ router.get('/:id/currency', async (req, res) => {
 router.put('/:id/currency', async (req, res) => {
   try {
     const updated = await gameStatisticsService.updateCurrency(req.params.id, req.body);
-    res.status(200).json(updated);
+    res.json(updated);
   } catch (error) {
-    console.error(`Error updating currency for GameStatistics ${req.params.id}:`, error);
-    const statusCode = error.statusCode || 400;
-    res.status(statusCode).json({ error: error.message });
+    console.error(`Error updating currency ${req.params.id}:`, error);
+    res.status(error.statusCode || 400).json({ error: error.message });
   }
 });
 

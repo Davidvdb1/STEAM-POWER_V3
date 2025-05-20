@@ -14,14 +14,15 @@ export async function fetchGameStatistics(groupId, token) {
 }
 
 export async function getCurrencyById(currencyId, token) {
-  const url = `${window.env.BACKEND_URL}/${currencyId}/currency`;
+  const url = `${window.env.BACKEND_URL}/gameStatistics/${currencyId}/currency`;
+  console.log('→ GET Currency URL:', url);
   const res = await fetch(url, {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` }
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to load stats: HTTP ${res.status}`);
+    throw new Error(`Failed to get currency: HTTP ${res.status}`);
   }
 
   return res.json();
@@ -63,7 +64,7 @@ export async function removeAsset(assetId, token) {
 
 
 export async function updateCurrency(groupId, currencyData, token) {
-  const url = `${window.env.BACKEND_URL}/${groupId}/currency`;
+  const url = `${window.env.BACKEND_URL}/gameStatistics/${groupId}/currency`;
   const res = await fetch(url, {
     method: 'PUT',
     headers: {

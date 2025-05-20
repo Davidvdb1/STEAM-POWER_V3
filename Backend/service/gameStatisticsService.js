@@ -40,8 +40,8 @@ class GameStatisticsService {
     return await gameStatisticsRepository.findCurrencyById(currencyId);
   }
 
-  async updateCurrency(statsId, { greenEnergy, greyEnergy, coins }) {
-    return await gameStatisticsRepository.updateCurrency(statsId, { greenEnergy, greyEnergy, coins });
+  async updateCurrency(currencyId, payload) {
+    return gameStatisticsRepository.updateCurrency(currencyId, payload);
   }
 
   async addBuilding(statsId, bData) {
