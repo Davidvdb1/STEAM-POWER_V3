@@ -114,7 +114,6 @@
   padding-bottom: 8px;
   padding-left: 16px;
   padding-right: 16px;
-  // border-radius: 8px;
   font-family: "PixelFont" !important;
 }
 
@@ -139,7 +138,9 @@
   flex-direction: row;
   justify-content: space-evenly;
   background: #d3d3d3;
-  border: 2px solid #555;
+  border-left: 2px solid #555;
+  border-right: 2px solid #555;
+  border-bottom: 2px solid #555;
   width: 964px;
 }
 
@@ -274,7 +275,7 @@
 .kerncentrale {
   height: 80px;
   width: 98px;
-}
+} 
 
 .card-asset {
   position: relative;
@@ -306,9 +307,12 @@
 
 
 #inner-container .shop {
-  top: 0;
-  height: 560px;
+  position: absolute;      
+  top: 0;                 
+  height: 100%;            
   overflow-y: auto;
-  transform: translate(-10px);
+  left: 102%;             
+  transform: translateX(-10px);
   border: 2px solid #555;
+  z-index: 1;        
 }
