@@ -87,8 +87,9 @@ async findByGroupId(groupId, opts = {}) {
     });
     return prismaCurrency ? Currency.from(prismaCurrency) : null;
   }
-  
-  async updateCurrency(statsId, { greenEnergy, greyEnergy, coins }) {
+
+
+  async updateCurrency(currencyId, { greenEnergy, greyEnergy, coins }) {
     if (
       typeof greenEnergy !== 'number' ||
       typeof greyEnergy  !== 'number' ||
@@ -96,12 +97,16 @@ async findByGroupId(groupId, opts = {}) {
     ) {
       throw new Error('Invalid currency values');
     }
+
     const updated = await this.prisma.currency.update({
-      where: { gameStatisticsId: statsId },
+      where: { id: currencyId },      
       data: { greenEnergy, greyEnergy, coins }
     });
+
     return Currency.from(updated);
   }
+
+
 
   async addBuilding(statsId, building) {
     building.validate();
