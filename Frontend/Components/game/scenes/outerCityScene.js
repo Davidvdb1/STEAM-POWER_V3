@@ -29,7 +29,13 @@ export function createOuterCityScene() {
         Kerncentrale: "Kerncentrale",
       };
 
-      // Create the tilemap and tileset
+            const assetSizes = {
+        Kerncentrale: { width: 12, height: 10 },
+        Windmolen: { width: 6, height: 10 },
+        Waterrad: { width: 7, height: 8 },
+        Zonnepaneel: { width: 4, height: 6 },
+      };
+
       this.map = this.make.tilemap({ key: "citymap" });
       const tileset = this.map.addTilesetImage(
         "Modern_Exteriors_Complete_Tileset",
@@ -40,11 +46,9 @@ export function createOuterCityScene() {
         return;
       }
 
-      // Only render the bottom (first) layer from Tiled
       const bottomLayerName = this.map.layers[0].name;
       this.map.createLayer(bottomLayerName, tileset, 0, 0);
 
-      // Set camera bounds to the size of the map
       this.cameras.main.setBounds(
         0,
         0,
@@ -52,55 +56,139 @@ export function createOuterCityScene() {
         this.map.heightInPixels
       );
 
-      // Set up camera controls
       this.cursors = this.input.keyboard.createCursorKeys();
       this.WASD = this.input.keyboard.addKeys("Z,S,Q,D");
 
-      // Zoom with mouse wheel
       this.input.on("wheel", (pointer, gameObjects, dx, dy) => {
         let newZoom = this.cameras.main.zoom - dy * 0.001;
         newZoom = Phaser.Math.Clamp(newZoom, 0.5, 2);
         this.cameras.main.setZoom(newZoom);
       });
 
-      // Highlight tile under pointer
       this.highlight = this.add.graphics();
-      this.input.on("pointermove", (pointer) => {
-        const worldPoint = pointer.positionToCamera(this.cameras.main);
-        const tile = this.map.getTileAtWorldXY(worldPoint.x, worldPoint.y);
-        if (tile) {
-          this.highlightTile(tile);
-        }
-      });
 
-      // Drag & drop assets onto map
+            this.draggedAssetType = null;
+this.dragHighlight = this.add.graphics();
+this.input.on("pointermove", (pointer) => {
+  const worldPoint = pointer.positionToCamera(this.cameras.main);
+  const tileX = Math.floor(worldPoint.x / this.map.tileWidth);
+  const tileY = Math.floor(worldPoint.y / this.map.tileHeight);
+
+  const tile = this.map.getTileAt(tileX, tileY);
+  if (tile) {
+    this.highlightTile(tile);
+  }
+
+  if (this.draggedAssetType && assetSizes[this.draggedAssetType]) {
+    const size = assetSizes[this.draggedAssetType];
+    this.dragHighlight.clear();
+    this.dragHighlight.fillStyle(0x00ff00, 0.4);
+
+    for (let dx = 0; dx < size.width; dx++) {
+      for (let dy = 0; dy < size.height; dy++) {
+        const x = (tileX + dx) * this.map.tileWidth;
+        const y = (tileY + dy) * this.map.tileHeight;
+        this.dragHighlight.fillRect(
+          x,
+          y,
+          this.map.tileWidth,
+          this.map.tileHeight
+        );
+      }
+    }
+  } else {
+    this.dragHighlight.clear();
+  }
+});
+;
+
       this.game.canvas.addEventListener("dragover", (event) => {
         event.preventDefault();
       });
 
-      this.game.canvas.addEventListener("drop", (event) => {
-        event.preventDefault();
-        const type = event.dataTransfer.getData("text/plain");
-        if (!type || !typeToSprite[type]) return;
+      this.game.canvas.addEventListener("dragenter", (event) => {
+  const type = event.dataTransfer.getData("text/plain");
+  this.draggedAssetType = type;
+});
 
-        const rect = this.game.canvas.getBoundingClientRect();
-        const pointerX = event.clientX - rect.left;
-        const pointerY = event.clientY - rect.top;
-        const worldPoint = this.cameras.main.getWorldPoint(pointerX, pointerY);
-        const tileX = Math.floor(worldPoint.x / this.map.tileWidth);
-        const tileY = Math.floor(worldPoint.y / this.map.tileHeight);
-        const spriteKey = typeToSprite[type];
+this.game.canvas.addEventListener("dragleave", (event) => {
+  this.draggedAssetType = null;
+  this.dragHighlight.clear();
+});
 
-        console.log(`Asset ${type} geplaatst op (${tileX}, ${tileY})`);
 
-        this.add
-          .image(tileX * this.map.tileWidth, tileY * this.map.tileHeight, spriteKey)
-          .setOrigin(0)
-          .setDisplaySize(this.map.tileWidth * 3, this.map.tileHeight * 3)
-          .setInteractive();
-      });
 
-      // Place saved assets on map startup
+      this.tileAssetMap = {};
+
+this.game.canvas.addEventListener("drop", (event) => {
+  event.preventDefault();
+  const type = event.dataTransfer.getData("text/plain");
+  if (!type || !typeToSprite[type]) return;
+
+  const rect = this.game.canvas.getBoundingClientRect();
+  const pointerX = event.clientX - rect.left;
+  const pointerY = event.clientY - rect.top;
+  const worldPoint = this.cameras.main.getWorldPoint(pointerX, pointerY);
+  const tileX = Math.floor(worldPoint.x / this.map.tileWidth);
+  const tileY = Math.floor(worldPoint.y / this.map.tileHeight);
+  const spriteKey = typeToSprite[type];
+  const size = assetSizes[type] || { width: 1, height: 1 };
+
+  let canPlace = true;
+  for (let dx = 0; dx < size.width; dx++) {
+    for (let dy = 0; dy < size.height; dy++) {
+      const key = `${tileX + dx},${tileY + dy}`;
+      if (this.tileAssetMap[key]) {
+        canPlace = false;
+        break;
+      }
+    }
+  }
+
+  if (!canPlace) {
+    console.log("Kan gebouw hier niet plaatsen, tegels zijn bezet.");
+    return;
+  }
+
+  const sprite = this.add
+    .image(
+      tileX * this.map.tileWidth,
+      tileY * this.map.tileHeight,
+      spriteKey
+    )
+    .setOrigin(0)
+    .setDisplaySize(
+      size.width * this.map.tileWidth,
+      size.height * this.map.tileHeight
+    )
+    .setInteractive();
+
+  for (let dx = 0; dx < size.width; dx++) {
+    for (let dy = 0; dy < size.height; dy++) {
+      const tx = tileX + dx;
+      const ty = tileY + dy;
+      const key = `${tx},${ty}`;
+      this.tileAssetMap[key] = {
+        type,
+        parentSprite: sprite,
+        origin: { x: tileX, y: tileY },
+        localOffset: { x: dx, y: dy },
+      };
+    }
+  }
+
+  console.log(
+    `Asset ${type} geplaatst van (${tileX}, ${tileY}) tot (${
+      tileX + size.width - 1
+    }, ${tileY + size.height - 1})`
+  );
+
+  // **Hier toevoegen:**
+  this.draggedAssetType = null;
+  this.dragHighlight.clear();
+});
+
+
       const assets = this.sys.game.assetData || [];
       assets.forEach((a) => {
         const worldX = a.xLocation * this.map.tileWidth;
@@ -108,13 +196,18 @@ export function createOuterCityScene() {
         const spriteKey = typeToSprite[a.type] || "Zonnepaneel";
 
         console.log(
-          `Asset ${a.id} geplaatst op tiles: X: ${a.xLocation} tot ${a.xLocation + a.xSize - 1} Y: ${a.yLocation} tot ${a.yLocation + a.ySize - 1}`
+          `Asset ${a.id} geplaatst op tiles: X: ${a.xLocation} tot ${
+            a.xLocation + a.xSize - 1
+          } Y: ${a.yLocation} tot ${a.yLocation + a.ySize - 1}`
         );
 
         this.add
           .image(worldX, worldY, spriteKey)
           .setOrigin(0)
-          .setDisplaySize(a.xSize * this.map.tileWidth, a.ySize * this.map.tileHeight)
+          .setDisplaySize(
+            a.xSize * this.map.tileWidth,
+            a.ySize * this.map.tileHeight
+          )
           .setInteractive({ useHandCursor: true })
           .on("pointerdown", () => {
             console.log(
