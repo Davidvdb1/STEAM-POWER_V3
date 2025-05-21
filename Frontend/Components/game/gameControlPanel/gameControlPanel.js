@@ -175,7 +175,7 @@ class GameControlPanel extends HTMLElement {
     window.phaserGame = this._game;
   }
 
-  async _updateStatistics() {
+    async _updateStatistics() {
     try {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
@@ -207,9 +207,7 @@ class GameControlPanel extends HTMLElement {
 
     await this._updateStatistics();
 
-    this._game.events.on("asset-placed", () => {
-      this._updateStatistics();
-    });
+    this._statsInterval = setInterval(() => this._updateStatistics(), 3000);
     try {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
