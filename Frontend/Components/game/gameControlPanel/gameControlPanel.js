@@ -1,121 +1,249 @@
-//#region IMPORTS
-//#endregion IMPORTS
+// components/game/gameControlPanel/gameControlPanel.js
 
-//#region GAMECONTROLPANEL
-let template = document.createElement('template');
-template.innerHTML = /*html*/`
-    <style>
-        @import './Components/game/gameControlPanel/style.css';
-        .hidden { display: none; }
-    </style>
+import { createLogoScene } from "../scenes/logoScene.js";
+import { createCityScene } from "../scenes/cityScene.js";
+import { createOuterCityScene } from "../scenes/outerCityScene.js";
+import * as gameService from "../utils/gameService.js";
 
-    <div>
-        <label for="batteryInput">Batterijcapaciteit (Wh):</label>
-        <input type="number" id="batteryInput" />
-        <button id="confirmCapacityButton" class="hidden">Bevestig</button>
+const template = document.createElement("template");
+template.innerHTML = /*html*/ `
+  <style>
+    @import './Components/game/gameControlPanel/style.css';
+  </style>
+
+  <div id="wrapper">
+    <div id="inner-container">
+      <div class="shop">
+        <div class="card-asset" draggable="true" data-type="Windmolen">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+          </div>
+          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+          <p>Windmolen</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
+        <div class="card-asset" draggable="true" data-type="Waterrad">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+          </div>
+          <img class="windturbine" src="Assets/images/waterrad.png" alt="">
+          <p>Waterrad</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
+        <div class="card-asset" draggable="true" data-type="Zonnepaneel">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+          </div>
+          <img class="windturbine" src="Assets/images/solar_panel.png" alt="">
+          <p>Zonnepaneel</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
+        <div class="card-asset" draggable="true" data-type="Kerncentrale">
+          <div class="corner-icon">
+            <img class="img-greenEnergy-card" src="Assets/images/greyEnergyTransparent2.png" alt="">
+          </div>
+          <img class="kerncentrale" src="Assets/images/kerncentrale.png" alt="">
+          <p>Kerncentrale</p>
+          <div class="assetCoinDiv">
+            <p>20</p>
+            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+          </div>
+        </div>
+      </div>
+      <div class="test">
+        <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
+        <div id="inner-text">Ga naar binnenstad</div>
+      </div>
     </div>
 
-    <div>
-        <label for="multiplierInput">Energie-multiplier:</label>
-        <input type="number" id="multiplierInput" step="0.01" />
-        <button id="confirmMultiplierButton" class="hidden">Bevestig</button>
+    <div id="game-container"></div>
+
+    <div id="outer-container">
+      <img id="outer-button" src="Assets/images/toOuter.png" alt="Ga naar buitenstad" />
+      <div id="outer-text">Ga naar buitenstad</div>
     </div>
+
+    <button id="startButton" class="hidden">Start</button>
+  </div>
+
+  <div id="stats" class="hidden">
+    <div class="greyEnergy">
+      <img class="img-greyEnergy" src="Assets/images/pixelGreyEnergy.svg" alt="">
+      <div class="currencyDiv">
+        <p id="greyEnergy" class="p-greyEnergy mr">0</p><p class="p-greyEnergy">kW</p>
+      </div>
+    </div>
+
+    <div class="greenEnergy">
+      <img class="img-greenEnergy" src="Assets/images/pixelGreenEnergy.svg" alt="">
+      <div class="currencyDiv">
+        <p id="greenEnergy" class="p-greenEnergy mr">0</p><p class="p-greenEnergy">kWh</p>
+      </div>
+    </div>
+
+    <div class="euro">
+      <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+      <div class="currencyDiv">
+        <p id="coins" class="p-euro">0</p>
+      </div>
+    </div>
+  </div>
 `;
-//#endregion GAMECONTROLPANEL
 
-//#region CLASS
-window.customElements.define('gamecontrolpanel-れ', class extends HTMLElement {
-    constructor() {
-        super();
-        this._shadowRoot = this.attachShadow({ 'mode': 'open' });
-        this._shadowRoot.appendChild(template.content.cloneNode(true));
+class GameControlPanel extends HTMLElement {
+  constructor() {
+    super();
+    this._shadow = this.attachShadow({ mode: "open" });
+    this._shadow.appendChild(template.content.cloneNode(true));
+    this._wrapper = this._shadow.getElementById("wrapper");
+    this._statsContainer = this._shadow.getElementById("stats");
+    this._startButton = this._shadow.getElementById("startButton");
+    this._innerContainer = this._shadow.getElementById("inner-container");
+    this._innerButton = this._shadow.getElementById("inner-button");
+    this._outerContainer = this._shadow.getElementById("outer-container");
+    this._outerButton = this._shadow.getElementById("outer-button");
+    this._greenEl = this._shadow.getElementById("greenEnergy");
+    this._greyEl = this._shadow.getElementById("greyEnergy");
+    this._coinsEl = this._shadow.getElementById("coins");
+    this._outerContainer.style.display = "none";
+    this._innerContainer.style.display = "none";
+  }
 
-        this.batteryInput = this._shadowRoot.querySelector('#batteryInput');
-        this.confirmCapacityButton = this._shadowRoot.querySelector('#confirmCapacityButton');
-        this.multiplierInput = this._shadowRoot.querySelector('#multiplierInput');
-        this.confirmMultiplierButton = this._shadowRoot.querySelector('#confirmMultiplierButton');
+  connectedCallback() { 
+    this._startButton.addEventListener("click", () => this._onStartClick());
+    this._outerButton.addEventListener("click", () => this._transitionToOuterCity());
+    this._innerButton.addEventListener("click", () => this._transitionToCity());
+    this._enableDragFromShop();
+    this._loadPhaser().then(() => this._initializeGame());
+  }
 
-        this.originalBatteryValue = null;
-        this.originalMultiplierValue = null;
+  _enableDragFromShop() {
+    this._shadow.querySelectorAll(".card-asset").forEach(card => {
+      card.addEventListener("dragstart", e => {
+        e.dataTransfer.setData("text/plain", card.dataset.type);
+      });
+    });
+  }
 
-        this.onBatteryInputChange = this.onBatteryInputChange.bind(this);
-        this.onConfirmBatteryClick = this.onConfirmBatteryClick.bind(this);
-        this.onMultiplierInputChange = this.onMultiplierInputChange.bind(this);
-        this.onConfirmMultiplierClick = this.onConfirmMultiplierClick.bind(this);
+  _loadPhaser() {
+    return new Promise(res => {
+      if (window.Phaser) return res();
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js";
+      s.onload = () => res();
+      this._shadow.appendChild(s);
+    });
+  }
+
+  _initializeGame() {
+    const LogoScene = createLogoScene(this._startButton);
+    const CityScene = createCityScene();
+    const OuterCityScene = createOuterCityScene();
+
+    const TILE_WIDTH = 16;
+    const TILE_HEIGHT = 16;
+    const MAP_WIDTH = 140;
+    const MAP_HEIGHT = 70;
+
+    this._game = new Phaser.Game({
+      type: Phaser.AUTO,
+      parent: this._shadow.getElementById("game-container"),
+      width: MAP_WIDTH * TILE_WIDTH,
+      height: MAP_HEIGHT * TILE_HEIGHT,
+      scene: [LogoScene, CityScene, OuterCityScene],
+      backgroundColor: "#9bd5e4",
+      pixelArt: true,
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: MAP_WIDTH * TILE_WIDTH,
+        height: MAP_HEIGHT * TILE_HEIGHT
+      },
+    });
+
+    window.phaserGame = this._game;
+  }
+
+  async _onStartClick() {
+    this._startButton.classList.add("hidden");
+    this._game.scene.start("CityScene");
+    this._outerContainer.style.display = "flex";
+    this._innerContainer.style.display = "none";
+
+    try {
+      const raw = sessionStorage.getItem("loggedInUser");
+      if (!raw) throw new Error("Not logged in");
+      const { token, groupId } = JSON.parse(raw);
+      const gs = await gameService.fetchGameStatistics(groupId, token);
+
+      this._game.token = token
+      this._game.groupId = groupId
+      this._game.buildingData = gs.buildings;
+      this._game.assetData = gs.assets;
+      this._game.gameStatisticsId = gs.id;
+      this._game.currencyId = gs.currency.id;
+
+      const cur = gs.currency;
+      this._greenEl.textContent = cur.greenEnergy;
+      this._greyEl.textContent = cur.greyEnergy;
+      this._coinsEl.textContent = cur.coins;
+      this._statsContainer.classList.remove("hidden");
+    } catch (e) {
+      console.error("Error fetching stats:", e);
     }
+  }
 
-    connectedCallback() {
-        // Init battery capacity
-        fetch(`${window.env.BACKEND_URL}/groups/battery`)
-            .then(res => res.json())
-            .then(data => {
-                this.originalBatteryValue = parseInt(data);
-                this.batteryInput.value = this.originalBatteryValue;
-            })
-            .catch(console.error);
+  _transitionToOuterCity() {
+    const distance = this._wrapper.offsetWidth + 800;
+    this._animateWrapper(-distance, () => {
+      this._game.scene.switch("CityScene", "OuterCityScene");
+      this._outerContainer.style.display = "none";
+      this._innerContainer.style.display = "flex";
+    });
+  }
 
-        // Init energy multiplier
-        fetch(`${window.env.BACKEND_URL}/groups/Multiplier`)
-            .then(res => res.json())
-            .then(data => {
-                this.originalMultiplierValue = parseFloat(data);
-                this.multiplierInput.value = this.originalMultiplierValue;
-            })
-            .catch(console.error);
+  _transitionToCity() {
+    const distance = this._wrapper.offsetWidth + 800;
+    this._animateWrapper(distance, () => {
+      this._game.scene.switch("OuterCityScene", "CityScene");
+      this._innerContainer.style.display = "none";
+      this._outerContainer.style.display = "flex";
+    });
+  }
 
-        // Event listeners
-        this.batteryInput.addEventListener('input', this.onBatteryInputChange);
-        this.confirmCapacityButton.addEventListener('click', this.onConfirmBatteryClick);
-        this.multiplierInput.addEventListener('input', this.onMultiplierInputChange);
-        this.confirmMultiplierButton.addEventListener('click', this.onConfirmMultiplierClick);
-    }
+  _animateWrapper(offsetX, onComplete) {
+    const els = [this._wrapper, this._statsContainer];
+    els.forEach(el => {
+      el.style.transition = "transform 0.5s ease";
+      el.style.transform = `translateX(${offsetX}px)`;
+    });
 
-    onBatteryInputChange() {
-        const current = parseInt(this.batteryInput.value);
-        this.toggleButton(this.confirmCapacityButton, current !== this.originalBatteryValue);
-    }
-
-    onConfirmBatteryClick() {
-        const newValue = parseInt(this.batteryInput.value);
-        fetch(`${window.env.BACKEND_URL}/groups/battery`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ batteryCapacity: newValue })
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Update failed');
-                this.originalBatteryValue = newValue;
-                this.confirmCapacityButton.classList.add('hidden');
-            })
-            .catch(console.error);
-    }
-
-    onMultiplierInputChange() {
-        const current = parseFloat(this.multiplierInput.value);
-        this.toggleButton(this.confirmMultiplierButton, current !== this.originalMultiplierValue);
-    }
-
-    onConfirmMultiplierClick() {
-        const newValue = parseFloat(this.multiplierInput.value);
-        fetch(`${window.env.BACKEND_URL}/groups/Multiplier`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ energyMultiplier: newValue })
-        })
-            .then(response => {
-                if (!response.ok) throw new Error('Update failed');
-                this.originalMultiplierValue = newValue;
-                this.confirmMultiplierButton.classList.add('hidden');
-            })
-            .catch(console.error);
-    }
-
-    toggleButton(button, condition) {
-        if (condition) {
-            button.classList.remove('hidden');
-        } else {
-            button.classList.add('hidden');
+    let done = 0;
+    els.forEach(el => {
+      el.addEventListener("transitionend", () => {
+        done++;
+        if (done === els.length) {
+          onComplete();
+          els.forEach(inner => {
+            inner.style.transition = "none";
+            inner.style.transform = `translateX(${-offsetX}px)`;
+            void inner.offsetWidth;
+            inner.style.transition = "transform 0.5s ease";
+            inner.style.transform = "translateX(0)";
+          });
         }
-    }
-});
-//#endregion CLASS
+      }, { once: true });
+    });
+  }
+}
+
+window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
