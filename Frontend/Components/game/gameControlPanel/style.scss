@@ -13,17 +13,17 @@
   height: 484px;
 }
 
+/* ==== DETAIL PANEL ==== */
 #wrapper #detail-container {
   position: absolute;
-  top: 0;               
-  height: 100%;       
-  overflow-y: auto;     
-  right: 102%;            
-  transform: translateX(10px); 
+  top: 0;                              /* stick to top */
+  bottom: calc(50% + 45px);           /* end just above the nav‐button */
+  overflow-y: auto;                   /* allow scrolling if content is tall */
+  right: 102%;                         /* mirror the shop’s left:102% */
+  transform: translateX(10px);        /* inverse of shop’s -10px */
   width: 200px;
-  z-index: 10; 
+  z-index: 10;
 }
-
 
 #game-container {
   position: absolute;
@@ -250,7 +250,6 @@
   padding: 2rem;
   width: 600px;
   height: 400px;
-  // text-align: center;
   position: relative;
   font-family: "PixelFont" !important;
 }
@@ -287,7 +286,7 @@
 .kerncentrale {
   height: 80px;
   width: 98px;
-} 
+}
 
 .card-asset {
   position: relative;
@@ -303,6 +302,7 @@
   border-bottom: 2px solid #555;
   background-color: rgb(210, 247, 210);
 }
+
 #inner-container .shop .card-asset:nth-child(4) {
   background-color: #d3d3d3;
 }
@@ -316,7 +316,6 @@
 .img-greenEnergy-card {
   height: 30px;
 }
-
 
 #inner-container .shop {
   position: absolute;      

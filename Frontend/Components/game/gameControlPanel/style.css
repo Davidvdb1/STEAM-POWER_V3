@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* components/game/gameControlPanel/style.scss */
 :host {
   display: flex;
@@ -12,13 +13,14 @@
   height: 484px;
 }
 
+/* ==== DETAIL PANEL ==== */
 #wrapper #detail-container {
   position: absolute;
-  top: 0;
-  height: 100%;
-  overflow-y: auto;
-  right: 102%;
-  transform: translateX(10px);
+  top: 0; /* stick to top */
+  bottom: calc(50% + 45px); /* end just above the nav‐button */
+  overflow-y: auto; /* allow scrolling if content is tall */
+  right: 102%; /* mirror the shop’s left:102% */
+  transform: translateX(10px); /* inverse of shop’s -10px */
   width: 200px;
   z-index: 10;
 }
