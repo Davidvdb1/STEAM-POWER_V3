@@ -1,4 +1,5 @@
 import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys } from "../utils/phaserSceneUtils.js";
+import { BuildingRegistry } from "../utils/buildingRegistry.js";
 
 export function createCityScene() {
   return class CityScene extends Phaser.Scene {
@@ -34,8 +35,15 @@ export function createCityScene() {
       // Set up keyboard input for camera navigation
       setMovementKeys(this);
 
+      // Configure tile selections for buildings
+      this.configureTileSelections();
+
+      this.buildingRegistry.grayoutAllBuildings(0.6);
+      this.buildingRegistry.grayoutBuilding("gasStation", 0.2);
+
       // Enable visibly hovering over a selection of tiles
       this.handleTileHover();
+
     }
 
 
@@ -116,5 +124,19 @@ export function createCityScene() {
           });
       });
     }
-  };
+
+    configureTileSelections() {
+      // Set up A building registry to define buildings
+      this.buildingRegistry = new BuildingRegistry();
+
+      // Define buildings by specific tile coordinates
+      this.buildingRegistry.createBuilding("office", this.map, 0, 0, 21, 24);
+      this.buildingRegistry.createBuilding("apartmentBlockTopLeft", this.map, 22, 0, 52, 24);
+      this.buildingRegistry.createBuilding("townhall", this.map, 58, 0, 82, 24);
+      this.buildingRegistry.createBuilding("gasStation", this.map, 88, 0, 103, 14);
+      this.buildingRegistry.createBuilding("hotdogStand", this.map, 88, 15, 103, 24);
+      this.buildingRegistry.createBuilding("hospital", this.map, 104, 0, 139, 24);
+      this.buildingRegistry.createBuilding("hotel", this.map, 7, 51, 23, 69);
+    };
+  }
 }
