@@ -324,10 +324,16 @@ export function createOuterCityScene() {
               const token = this.sys.game.token;
               const currencyId = this.sys.game.currencyId;
 
+              if (type === "Kerncentrale") {
+                this.energy = 30;
+              } else if (type === "Windmolen" || type === "Waterrad" || type === "Zonnepaneel") {
+                this.energy = 1;
+              }
+
               const assetData = {
                 buildCost: cost,
                 destroyCost: cost,
-                energy: 10,
+                energy: this.energy,
                 xLocation: tx,
                 yLocation: ty,
                 xSize: size.width,
