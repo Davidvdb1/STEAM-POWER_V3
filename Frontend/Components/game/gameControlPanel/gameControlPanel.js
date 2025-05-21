@@ -1,11 +1,9 @@
-// components/game/gameControlPanel/gameControlPanel.js
-
 import { createLogoScene } from "../scenes/logoScene.js";
 import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
 import * as gameService from "../utils/gameService.js";
 
-// register our detail-panel components
+// register our detail‐panel components
 import "./details/buildingDetail.js";
 import "./details/assetDetail.js";
 
@@ -213,6 +211,7 @@ class GameControlPanel extends HTMLElement {
 
       this._game.token            = token;
       this._game.groupId          = groupId;
+      // keep buildingData as the original array
       this._game.buildingData     = gs.buildings;
       this._game.assetData        = gs.assets;
       this._game.gameStatisticsId = gs.id;
@@ -282,7 +281,11 @@ class GameControlPanel extends HTMLElement {
   _showBuildingDetail(id) {
     this._detailContainer.innerHTML = "";
     const detail = document.createElement("building-detail");
-    detail.setAttribute("building-id", id);
+    // look up the single building object by id
+    const building = this._game.buildingData.find(b => b.id === id);
+    if (building) {
+      detail.data = building;
+    }
     this._detailContainer.appendChild(detail);
     this._detailContainer.classList.remove("hidden");
   }

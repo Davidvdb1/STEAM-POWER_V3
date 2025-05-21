@@ -1,4 +1,5 @@
 // components/game/gameControlPanel/details/buildingDetail.js
+
 const template = document.createElement("template");
 template.innerHTML = /*html*/`
   <style>
@@ -18,37 +19,65 @@ template.innerHTML = /*html*/`
 class BuildingDetail extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: "open" })
-        .appendChild(template.content.cloneNode(true));
+    const shadow = this.attachShadow({ mode: "open" });
+    shadow.appendChild(template.content.cloneNode(true));
 
-    this._closeBtn      = this.shadowRoot.querySelector("button.close");
-    this._levelEl       = this.shadowRoot.querySelector(".level");
-    this._energyCostEl  = this.shadowRoot.querySelector(".energy-cost");
-    this._upgradeBtn    = this.shadowRoot.querySelector(".upgrade");
-    this._upgradeCostEl = this.shadowRoot.querySelector(".upgrade-cost");
+    this._closeBtn      = shadow.querySelector("button.close");
+    this._levelEl       = shadow.querySelector(".level");
+    this._energyCostEl  = shadow.querySelector(".energy-cost");
+    this._upgradeBtn    = shadow.querySelector(".upgrade");
+    this._upgradeCostEl = shadow.querySelector(".upgrade-cost");
+    this._data          = null;
+  }
+
+  // Parent can set .data directly
+  set data(value) {
+    this._data = value;
+    this._render();
+  }
+
+  get data() {
+    return this._data;
   }
 
   connectedCallback() {
+    // close button
     this._closeBtn.addEventListener("click", () =>
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
     );
 
-    const id = this.getAttribute("building-id");
-    if (!id) return;
-    const data = window.phaserGame.buildingData[id];
-    const { level, currentEnergyCost, upgradeCost } = data;
+    // fallback if someone still uses building-id attribute
+    const raw = this.getAttribute("building-id");
+    if (raw && !this._data) {
+      const id = parseInt(raw, 10);
+      if (!isNaN(id) && Array.isArray(window.phaserGame.buildingData)) {
+        const b = window.phaserGame.buildingData.find(b => b.id === id);
+        if (b) this.data = b;
+      }
+    }
+  }
 
-    this._levelEl.textContent      = level;
-    this._energyCostEl.textContent = currentEnergyCost;
+  _render() {
+    if (!this._data) return;
 
-    if (level < 5) {
-      this._upgradeCostEl.textContent = upgradeCost;
-      this._upgradeBtn.addEventListener("click", () => {
+    // unpack nested Level instance
+    const lvl = this._data.level;
+    const num   = lvl.level;        // numeric level
+    const cost  = lvl.energyCost;   // kW
+    const upg   = lvl.upgradeCost;  // coins
+
+    this._levelEl.textContent       = num;
+    this._energyCostEl.textContent  = cost;
+
+    if (num < 5) {
+      this._upgradeCostEl.textContent = upg;
+      this._upgradeBtn.style.display   = "";
+      this._upgradeBtn.onclick = () => {
         this.dispatchEvent(new CustomEvent("upgrade-build", {
-          detail: { buildingId: id },
+          detail: { buildingId: this._data.id },
           bubbles: true
         }));
-      });
+      };
     } else {
       this._upgradeBtn.style.display = "none";
     }
