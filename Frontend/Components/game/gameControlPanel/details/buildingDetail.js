@@ -7,7 +7,7 @@ template.innerHTML = /*html*/`
       position: absolute;
       top: 16px;
       left: 16px;
-      width: 220px;
+      width: 150px;
       background: white;
       border: 1px solid #333;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
