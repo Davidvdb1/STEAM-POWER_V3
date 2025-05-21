@@ -14,8 +14,10 @@ class EnergyDataService {
             const currency = gameStats.currency;
             const group = await groupRepository.findById(data.groupId);
             const multiplier = group.energyMultiplier;
+            const greenEnergy = Energy * multiplier / 1000; // 1000 omdat de currency in kWh is
             await groupRepository.addEnergyToGroup(data.groupId, Energy);
-            await gameStatisticsRepository.incrementCurrency(currency.id, { greenEnergy: Energy * multiplier / 1000 }); // 1000 omdat de currency in kWh is
+            await gameStatisticsRepository.incrementCurrency(currency.id, { greenEnergy }); 
+            await gameStatisticsRepository.incrementGreenEnergyWithMultiplier(data.groupId, greenEnergy, data.type); // om factor van groene energiebronnen erin te brengen
             return await energyDataRepository.create(energyData);
         } catch (error) {
             if (error instanceof utility.ValidationError) throw error;
