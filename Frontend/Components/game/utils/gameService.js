@@ -83,23 +83,17 @@ export async function updateCurrency(groupId, currencyData, token) {
 }
 
 export async function upgradeBuilding(buildingId, upgradeData, token) {
-  const url = `${window.env.BACKEND_URL}/buildings/${buildingId}/upgrade`;
+  // Make sure this matches router.put('/buildings/:buildingId/upgrade') under /gameStatistics mount
+  const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${buildingId}/upgrade`;
+  console.log('PUT', url);
   const res = await fetch(url, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify(upgradeData)
   });
-
   if (!res.ok) {
-    const errorBody = await res.json().catch(() => ({}));
-    throw new Error(
-      `Failed to upgrade building: HTTP ${res.status}` +
-      (errorBody.error ? ` - ${errorBody.error}` : '')
-    );
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Failed to upgrade building: HTTP ${res.status}` + (err.error ? ` - ${err.error}` : ''));
   }
-
   return res.json();
 }

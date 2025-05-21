@@ -1,10 +1,13 @@
-// components/game/gameControlPanel/gameControlPanel.js
-
 import { createLogoScene } from "../scenes/logoScene.js";
 import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
-import * as gameService from "../utils/gameService.js";
-import { removeAsset, getCurrencyById, updateCurrency } from "../utils/gameService.js";
+import {
+  fetchGameStatistics,
+  removeAsset,
+  getCurrencyById,
+  updateCurrency,
+  upgradeBuilding
+} from "../utils/gameService.js";
 
 // register our detail-panel components
 import "./details/buildingDetail.js";
@@ -141,8 +144,13 @@ class GameControlPanel extends HTMLElement {
       this._detailContainer.classList.add("hidden");
       this._detailContainer.innerHTML = "";
     });
+
     this._shadow.addEventListener("destroy-asset", e => {
       this._confirmDestroyAsset(e.detail.assetId);
+    });
+
+    this._shadow.addEventListener("upgrade-build", e => {
+      this._confirmUpgradeBuilding(e.detail.buildingId);
     });
 
     this._loadPhaser().then(() => this._initializeGame());
@@ -200,7 +208,7 @@ class GameControlPanel extends HTMLElement {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
-      const gs = await gameService.fetchGameStatistics(groupId, token);
+      const gs = await fetchGameStatistics(groupId, token);
 
       this._game.token            = token;
       this._game.groupId          = groupId;
@@ -334,6 +342,63 @@ class GameControlPanel extends HTMLElement {
       console.error("Error destroying asset:", err);
     }
   }
+
+  _confirmUpgradeBuilding(buildingId) {
+    const building = this._game.buildingData.find(b => b.id === buildingId);
+    if (!building) return;
+
+    const currentLevel = building.level.level;
+    const nextLevel    = currentLevel + 1;
+    const cost         = building.level.upgradeCost;
+    const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${cost} coins?`;
+
+    const scene = this._game.scene.getScene("CityScene");
+    scene.showConfirmation(msg, confirmed => {
+      if (confirmed) {
+        this._performUpgradeBuilding(buildingId);
+      }
+    });
+  }
+
+  async _performUpgradeBuilding(buildingId) {
+    try {
+      const token      = this._game.token;
+      const currencyId = this._game.currencyId;
+      const building   = this._game.buildingData.find(b => b.id === buildingId);
+      if (!building) throw new Error("Building not found");
+
+      const nextLevel = building.level.level + 1;
+
+      const upgradedBuilding = await upgradeBuilding(
+        buildingId,
+        { level: nextLevel },
+        token
+      );
+      Object.assign(building, upgradedBuilding);
+
+      const cur = await getCurrencyById(currencyId, token);
+      const updatedCurrency = {
+        greenEnergy: cur.greenEnergy,
+        greyEnergy:  cur.greyEnergy,
+        coins:       cur.coins - upgradedBuilding.level.upgradeCost
+      };
+      await updateCurrency(currencyId, updatedCurrency, token);
+
+      this._coinsEl.textContent = updatedCurrency.coins;
+      this._greenEl.textContent = updatedCurrency.greenEnergy;
+      this._greyEl.textContent  = updatedCurrency.greyEnergy;
+
+      const cityScene = this._game.scene.getScene("CityScene");
+      if (typeof cityScene._updateBuildingSprite === "function") {
+        cityScene._updateBuildingSprite(upgradedBuilding);
+      }
+
+      this._showBuildingDetail(buildingId);
+    } catch (err) {
+      console.error("Error upgrading building:", err);
+    }
+  }
+
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
