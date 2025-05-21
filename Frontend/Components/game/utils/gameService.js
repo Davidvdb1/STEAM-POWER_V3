@@ -81,3 +81,25 @@ export async function updateCurrency(groupId, currencyData, token) {
 
   return res.json();
 }
+
+export async function upgradeBuilding(buildingId, upgradeData, token) {
+  const url = `${window.env.BACKEND_URL}/buildings/${buildingId}/upgrade`;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(upgradeData)
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(
+      `Failed to upgrade building: HTTP ${res.status}` +
+      (errorBody.error ? ` - ${errorBody.error}` : '')
+    );
+  }
+
+  return res.json();
+}
