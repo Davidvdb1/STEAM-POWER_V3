@@ -14,7 +14,7 @@ template.innerHTML = /*html*/ `
   <style>
     @import './Components/game/gameControlPanel/style.css';
     :host { display: block; position: relative; }
-    #detail-container { position: absolute; top: 16px; left: 0; z-index: 10; }
+    #detail-container { position: absolute; top: 0; left: -220px; width: 200px; z-index: 10; }
   </style>
 
   <!-- wrapper holds both game and panel -->
