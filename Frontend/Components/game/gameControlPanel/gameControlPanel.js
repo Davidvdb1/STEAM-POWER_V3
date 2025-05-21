@@ -323,10 +323,8 @@ class GameControlPanel extends HTMLElement {
       };
       await updateCurrency(currencyId, updated, token);
 
-      // update UI
       this._coinsEl.textContent = updated.coins;
 
-      // remove sprite
       const outer = this._game.scene.getScene("OuterCityScene");
       outer._removeAsset({
         id:  assetId,
@@ -335,7 +333,6 @@ class GameControlPanel extends HTMLElement {
         size:{ width: asset.xSize, height: asset.ySize }
       });
 
-      // close panel
       this._detailContainer.classList.add("hidden");
       this._detailContainer.innerHTML = "";
     } catch (err) {

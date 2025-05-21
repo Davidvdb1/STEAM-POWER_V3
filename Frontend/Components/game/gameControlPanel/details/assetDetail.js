@@ -3,7 +3,7 @@
 const template = document.createElement("template");
 template.innerHTML = /*html*/`
   <style>
-    @import "./style.scss";
+    @import "/Components/game/gameControlPanel/details/style.css";
   </style>
 
   <button class="close">&times;</button>
