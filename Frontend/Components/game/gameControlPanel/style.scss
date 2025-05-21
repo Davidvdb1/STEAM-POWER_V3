@@ -15,11 +15,15 @@
 
 #wrapper #detail-container {
   position: absolute;
-  top: 16px;        
-  left: -220px;     
-  width: 200px;      
-  z-index: 10;
+  top: 0;               
+  height: 100%;       
+  overflow-y: auto;     
+  right: 102%;            
+  transform: translateX(10px); 
+  width: 200px;
+  z-index: 10; 
 }
+
 
 #game-container {
   position: absolute;
