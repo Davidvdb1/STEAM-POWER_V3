@@ -1,50 +1,39 @@
 // components/game/gameControlPanel/details/assetDetail.js
-
 const template = document.createElement("template");
 template.innerHTML = /*html*/`
   <style>
-    :host {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      width: 150px;
-      background: white;
-      border: 1px solid #333;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      display: flex;
-      flex-direction: column;
-      padding: 8px;
-      z-index: 10;
-    }
-    button.close {
-      align-self: flex-end;
-      background: none;
-      border: none;
-      font-size: 1.2em;
-      cursor: pointer;
-    }
-    .content {
-      flex: 1;
-      /* empty for now */
-    }
+    @import "./style.scss";
   </style>
+
   <button class="close">&times;</button>
-  <div class="content">
-    <!-- asset details go here later -->
+  <div class="info">
+    <!-- fill in asset fields as needed -->
+    <p>Type: <span class="asset-type"></span></p>
+    <p>Output: <span class="asset-output"></span> kWh</p>
   </div>
 `;
 
 class AssetDetail extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: "open" }).appendChild(template.content.cloneNode(true));
+    this.attachShadow({ mode: "open" })
+        .appendChild(template.content.cloneNode(true));
+
     this._closeBtn = this.shadowRoot.querySelector("button.close");
+    this._typeEl   = this.shadowRoot.querySelector(".asset-type");
+    this._outEl    = this.shadowRoot.querySelector(".asset-output");
   }
 
   connectedCallback() {
     this._closeBtn.addEventListener("click", () =>
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
     );
+
+    const id = this.getAttribute("asset-id");
+    if (!id) return;
+    const data = window.phaserGame.assetData[id];
+    this._typeEl.textContent   = data.type;
+    this._outEl.textContent    = data.currentOutput;
   }
 }
 
