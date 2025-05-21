@@ -5,7 +5,7 @@ import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
 import * as gameService from "../utils/gameService.js";
 
-// register our detail‑panel components
+// register our detail-panel components
 import "./details/buildingDetail.js";
 import "./details/assetDetail.js";
 
@@ -118,16 +118,16 @@ class GameControlPanel extends HTMLElement {
     this._detailContainer = this._shadow.getElementById("detail-container");
 
     // existing references
-    this._wrapper = this._shadow.getElementById("wrapper");
+    this._wrapper        = this._shadow.getElementById("wrapper");
     this._statsContainer = this._shadow.getElementById("stats");
-    this._startButton = this._shadow.getElementById("startButton");
+    this._startButton    = this._shadow.getElementById("startButton");
     this._innerContainer = this._shadow.getElementById("inner-container");
-    this._innerButton = this._shadow.getElementById("inner-button");
+    this._innerButton    = this._shadow.getElementById("inner-button");
     this._outerContainer = this._shadow.getElementById("outer-container");
-    this._outerButton = this._shadow.getElementById("outer-button");
-    this._greenEl = this._shadow.getElementById("greenEnergy");
-    this._greyEl = this._shadow.getElementById("greyEnergy");
-    this._coinsEl = this._shadow.getElementById("coins");
+    this._outerButton    = this._shadow.getElementById("outer-button");
+    this._greenEl        = this._shadow.getElementById("greenEnergy");
+    this._greyEl         = this._shadow.getElementById("greyEnergy");
+    this._coinsEl        = this._shadow.getElementById("coins");
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
@@ -229,6 +229,10 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToOuterCity() {
+    // close detail-panel when navigating
+    this._detailContainer.classList.add("hidden");
+    this._detailContainer.innerHTML = "";
+
     const distance = this._wrapper.offsetWidth + 800;
     this._animateWrapper(-distance, () => {
       this._game.scene.switch("CityScene", "OuterCityScene");
@@ -238,6 +242,10 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToCity() {
+    // close detail-panel when navigating
+    this._detailContainer.classList.add("hidden");
+    this._detailContainer.innerHTML = "";
+
     const distance = this._wrapper.offsetWidth + 800;
     this._animateWrapper(distance, () => {
       this._game.scene.switch("OuterCityScene", "CityScene");
@@ -274,6 +282,7 @@ class GameControlPanel extends HTMLElement {
   _showBuildingDetail(id) {
     this._detailContainer.innerHTML = "";
     const detail = document.createElement("building-detail");
+    detail.setAttribute("building-id", id);
     this._detailContainer.appendChild(detail);
     this._detailContainer.classList.remove("hidden");
   }
@@ -281,6 +290,7 @@ class GameControlPanel extends HTMLElement {
   _showAssetDetail(id) {
     this._detailContainer.innerHTML = "";
     const detail = document.createElement("asset-detail");
+    detail.setAttribute("asset-id", id);
     this._detailContainer.appendChild(detail);
     this._detailContainer.classList.remove("hidden");
   }
