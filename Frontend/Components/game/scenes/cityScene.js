@@ -1,49 +1,64 @@
+import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys } from "../utils/phaserSceneUtils.js";
+
 export function createCityScene() {
   return class CityScene extends Phaser.Scene {
     constructor() {
       super("CityScene");
     }
 
+
     preload() {
-      this.load.tilemapTiledJSON("citymap", "Assets/json/binnenstad-v1.json");
-      this.load.image(
-        "tilesetImage",
-        "Assets/images/Modern_Exteriors_Complete_Tileset.png"
-      );
-      this.load.on("complete", () => console.log("Assets geladen"));
+      // Load the tilemap and tileset image
+      this.load.tilemapTiledJSON("innerCityMap", "Assets/json/binnenstad.json");
+      this.load.image("tilesetImage", "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png");
     }
 
-    create() {
-      this.map = this.make.tilemap({ key: "citymap" });
-      const tileset = this.map.addTilesetImage(
-        "Modern_Exteriors_Complete_Tileset",
-        "tilesetImage"
-      );
-      if (!tileset) {
-        console.error("Tileset niet gevonden.");
-        return;
-      }
-      this.layer = this.map.createLayer("road-layout", tileset, 0, 0);
-      this.buildingsLayer = this.map.createLayer("buildings", tileset, 0, 0);
-      this.cameras.main.setBounds(
-        0,
-        0,
-        this.map.widthInPixels,
-        this.map.heightInPixels
-      );
 
-      this.cursors = this.input.keyboard.createCursorKeys();
-      this.WASD = this.input.keyboard.addKeys("Z,S,Q,D");
-      this.input.on("wheel", (pointer, gameObjects, dx, dy) => {
-        let newZoom = this.cameras.main.zoom - dy * 0.001;
-        newZoom = Phaser.Math.Clamp(newZoom, 0.5, 2);
-        this.cameras.main.setZoom(newZoom);
-      });
+    create() {
+      // Set up the tilemap and its layers
+      this.map = this.make.tilemap({ key: "innerCityMap" });
+      const tileset = this.map.addTilesetImage("Modern_Exteriors_Complete_Tileset_Custom", "tilesetImage");
+
+      this.layer1 = this.map.createLayer("Layer-1", tileset);
+      this.layer2 = this.map.createLayer("Layer-2", tileset);
+      this.layer3 = this.map.createLayer("Layer-3", tileset);
+      this.layer4 = this.map.createLayer("Layer-4", tileset);
+      this.layer5 = this.map.createLayer("Layer-5", tileset);
+
+      // Set camera boundaries to match the tilemap dimensions 
+      setCameraBounds(this);
+
+      // Enable zooming with mouse wheel
+      handleZoom(this);
+
+      // Set up keyboard input for camera navigation
+      setMovementKeys(this);
+
+      // Enable visibly hovering over a selection of tiles
+      this.handleTileHover();
+    }
+
+
+    update(time, delta) {
+      // Update the camera position based on user input
+      handleMovementKeys(this, delta);
+    }
+
+
+    /**
+     * Handles tile hover interactions in the city scene.
+     * 
+     * - Draws a hover marker over a 3x3 tile area centered on the currently hovered tile.
+     * - TODO: Add interactive rectangles for each building zone, allowing for click events.
+     * 
+     * Assumes `this.layer1`, `this.map`, and `this.sys.game.buildingData` are defined.
+     */
+    handleTileHover() {
       this.hoverMarker = this.add.graphics();
       this.hoveredTile = null;
       this.input.on("pointermove", (pointer) => {
         const worldPoint = pointer.positionToCamera(this.cameras.main);
-        const tile = this.layer.getTileAtWorldXY(worldPoint.x, worldPoint.y);
+        const tile = this.layer1.getTileAtWorldXY(worldPoint.x, worldPoint.y);
 
         if (tile) {
           if (
@@ -100,33 +115,6 @@ export function createCityScene() {
             // TODO: open building UI
           });
       });
-    }
-
-    update(time, delta) {
-      const speed = 300;
-      const cam = this.cameras.main;
-
-      if (this.cursors.left.isDown || this.WASD.Q.isDown) {
-        cam.scrollX -= speed * (delta / 1000);
-      } else if (this.cursors.right.isDown || this.WASD.D.isDown) {
-        cam.scrollX += speed * (delta / 1000);
-      }
-      if (this.cursors.up.isDown || this.WASD.Z.isDown) {
-        cam.scrollY -= speed * (delta / 1000);
-      } else if (this.cursors.down.isDown || this.WASD.S.isDown) {
-        cam.scrollY += speed * (delta / 1000);
-      }
-
-      cam.scrollX = Phaser.Math.Clamp(
-        cam.scrollX,
-        0,
-        this.map.widthInPixels - cam.width / cam.zoom
-      );
-      cam.scrollY = Phaser.Math.Clamp(
-        cam.scrollY,
-        0,
-        this.map.heightInPixels - cam.height / cam.zoom
-      );
     }
   };
 }

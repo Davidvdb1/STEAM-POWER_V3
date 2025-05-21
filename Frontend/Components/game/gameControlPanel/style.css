@@ -8,8 +8,8 @@
 
 #wrapper {
   position: relative;
-  width: 960px;
-  height: 560px;
+  width: 964px;
+  height: 484px;
 }
 
 #game-container {
@@ -17,8 +17,8 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 960px;
-  height: 560px;
+  width: 100%;
+  height: 100%;
   z-index: 0;
 }
 
@@ -98,13 +98,14 @@
 
 #inner-container .shop {
   position: absolute;
-  top: 5%;
-  right: 100%;
+  top: 24%;
+  left: 102%;
   transform: translateX(-10px) translateY(-50%);
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
+  font-family: "PixelFont" !important;
 }
 
 #inner-container .shop button {
@@ -137,9 +138,11 @@
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
-  background: #D3D3D3;
-  border: 2px solid #555;
-  width: 960px;
+  background: #d3d3d3;
+  border-left: 2px solid #555;
+  border-right: 2px solid #555;
+  border-bottom: 2px solid #555;
+  width: 964px;
 }
 
 #stats.hidden {
@@ -211,4 +214,104 @@
 
 .mr {
   margin-right: 3px;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-content {
+  background: white;
+  padding: 2rem;
+  width: 600px;
+  height: 400px;
+  position: relative;
+  font-family: "PixelFont" !important;
+}
+
+.close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.assetCoinDiv {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.windturbine {
+  height: 80px;
+  width: 48px;
+}
+
+.kerncentrale {
+  height: 80px;
+  width: 98px;
+}
+
+.card-asset {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 61%;
+  align-items: center;
+  flex-direction: column;
+  padding: 1rem 2rem 0;
+}
+
+#inner-container .shop .card-asset:nth-child(-n+3) {
+  border-bottom: 2px solid #555;
+  background-color: rgb(210, 247, 210);
+}
+
+#inner-container .shop .card-asset:nth-child(4) {
+  background-color: #d3d3d3;
+}
+
+.corner-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.img-greenEnergy-card {
+  height: 30px;
+}
+
+#inner-container .shop {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  overflow-y: auto;
+  left: 102%;
+  transform: translateX(-10px);
+  border: 2px solid #555;
+  z-index: 1;
 }/*# sourceMappingURL=style.css.map */
