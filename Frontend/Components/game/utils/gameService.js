@@ -15,7 +15,6 @@ export async function fetchGameStatistics(groupId, token) {
 
 export async function getCurrencyById(currencyId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/${currencyId}/currency`;
-  console.log('→ GET Currency URL:', url);
   const res = await fetch(url, {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` }

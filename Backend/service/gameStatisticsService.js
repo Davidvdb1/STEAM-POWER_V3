@@ -44,6 +44,10 @@ class GameStatisticsService {
     return gameStatisticsRepository.updateCurrency(currencyId, payload);
   }
 
+  async incrementCurrency(currencyId, payload) {
+    return gameStatisticsRepository.incrementCurrency(currencyId, payload);
+  }
+
   async addBuilding(statsId, bData) {
     const building = new Building(bData);
     return await gameStatisticsRepository.addBuilding(statsId, building);

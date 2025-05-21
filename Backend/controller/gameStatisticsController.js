@@ -78,6 +78,17 @@ router.put('/:id/currency', async (req, res) => {
   }
 });
 
+router.post('/:id/currency/increment', async (req, res) => {
+  try {
+    const updated = await gameStatisticsService.incrementCurrency(req.params.id, req.body);
+    res.json(updated);
+  } catch (error) {
+    console.error(`Error incrementing currency ${req.params.id}:`, error);
+    res.status(error.statusCode || 400).json({ error: error.message });
+  }
+});
+
+
 // Add a building
 router.post('/:id/buildings', async (req, res) => {
   try {

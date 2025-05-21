@@ -2,6 +2,7 @@ const energyDataRepository = require('../repository/energyDataRepository');
 const EnergyData = require('../model/energyData');
 const utility = require('../util/utility');
 const groupRepository = require('../repository/groupRepository');
+const gameStatisticsRepository = require('../repository/gameStatisticsRepository');
 
 class EnergyDataService {
     async create(data) {
@@ -9,7 +10,12 @@ class EnergyDataService {
             data.time = new Date(data.time);
             const energyData = new EnergyData(data);
             const Energy = data.value /1024 * 3 * 0.5 * 2 /3600; // /1024 * 3 voorde voltagewaarde, * 0.5 Ampère voor het vermogen, * 2/3600  voor de energie te verkrijgen in Wh.
+            const gameStats = await gameStatisticsRepository.findByGroupId(data.groupId);
+            const currency = gameStats.currency;
+            const group = await groupRepository.findById(data.groupId);
+            const multiplier = group.energyMultiplier;
             await groupRepository.addEnergyToGroup(data.groupId, Energy);
+            await gameStatisticsRepository.incrementCurrency(currency.id, { greenEnergy: Energy * multiplier / 1000 }); // 1000 omdat de currency in kWh is
             return await energyDataRepository.create(energyData);
         } catch (error) {
             if (error instanceof utility.ValidationError) throw error;

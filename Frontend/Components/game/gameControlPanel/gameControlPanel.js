@@ -124,7 +124,18 @@ class GameControlPanel extends HTMLElement {
     this._innerButton.addEventListener("click", () => this._transitionToCity());
     this._enableDragFromShop();
     this._loadPhaser().then(() => this._initializeGame());
+
+    const bluetooth = JSON.parse(sessionStorage.getItem('bluetoothEnabled')); 
+    if (bluetooth) {
+      this._interval = setInterval(() => {
+        this._updateCurrency();
+      }, 2000);
+    } 
   }
+
+  disconnectedCallback() {
+    if (this._interval) clearInterval(this._interval);
+  }    
 
   _enableDragFromShop() {
     this._shadow.querySelectorAll(".card-asset").forEach(card => {
@@ -193,12 +204,23 @@ class GameControlPanel extends HTMLElement {
       this._game.currencyId = gs.currency.id;
 
       const cur = gs.currency;
-      this._greenEl.textContent = cur.greenEnergy;
+      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
+    }
+  }
+
+  async _updateCurrency() {
+    try {
+      const cur = await gameService.getCurrencyById(this._game.currencyId, this._game.token);
+      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
+      this._greyEl.textContent = cur.greyEnergy;
+      this._coinsEl.textContent = cur.coins;
+    } catch (e) {
+      console.error("Error fetching currency:", e);
     }
   }
 
