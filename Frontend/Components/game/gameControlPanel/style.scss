@@ -13,6 +13,14 @@
   height: 484px;
 }
 
+#wrapper #detail-container {
+  position: absolute;
+  top: 16px;        
+  left: -220px;     
+  width: 200px;      
+  z-index: 10;
+}
+
 #game-container {
   position: absolute;
   top: 0;

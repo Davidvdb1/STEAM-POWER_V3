@@ -14,12 +14,13 @@ template.innerHTML = /*html*/ `
   <style>
     @import './Components/game/gameControlPanel/style.css';
     :host { display: block; position: relative; }
+    #detail-container { position: absolute; top: 16px; left: 0; z-index: 10; }
   </style>
 
-  <!-- DETAIL PANEL: appears when you click a building or asset -->
-  <div id="detail-container" class="hidden"></div>
-
+  <!-- wrapper holds both game and panel -->
   <div id="wrapper">
+    <!-- DETAIL PANEL: appears when you click a building or asset -->
+    <div id="detail-container" class="hidden"></div>
     <div id="inner-container">
       <div class="shop">
         <div class="card-asset" draggable="true" data-type="Windmolen">
