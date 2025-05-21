@@ -48,7 +48,7 @@ export function setMovementKeys(scene) {
  * @param {number} delta - The time elapsed since the last frame in milliseconds.
  * @param {number} speed - Movement speed in pixels per second (default: 300).
  */
-export function handleMovementKeys(scene, delta, speed = 300) {
+export function handleMovementKeys(scene, delta, speed = 750) {
   const cam = scene.cameras.main;
 
   // Handle movement when using arrow keys or WASD
