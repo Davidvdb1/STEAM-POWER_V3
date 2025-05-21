@@ -111,6 +111,10 @@ export function createCityScene() {
           .setOrigin(0, 0)
           .setInteractive({ useHandCursor: true })
           .on("pointerdown", () => {
+            // open detail panel
+            this.game.events.emit("buildingClicked", b.id);
+            return;
+
             console.log(`Clicked building ${b.id}`);
             // TODO: open building UI
           });

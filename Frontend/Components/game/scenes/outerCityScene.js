@@ -4,7 +4,7 @@ import { addAsset, updateCurrency, getCurrencyById, removeAsset } from "../utils
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
     constructor() {
-      super("OuterCityScene" );
+      super("OuterCityScene");
     }
 
 
@@ -41,7 +41,6 @@ export function createOuterCityScene() {
 
       this.dragHighlight = this.add.graphics({ depth: 100 });
       this.hoverMarker = this.add.graphics({ depth: 99 });
-
       this.hoverTilesHighlight = this.add.graphics({ depth: 101 });
 
 
@@ -437,6 +436,10 @@ export function createOuterCityScene() {
           )
           .setInteractive()
           .on("pointerdown", () => {
+            // open detail panel
+            this.game.events.emit("assetClicked", a.id);
+            return;
+
             const msg = `Wil je deze ${a.type} verwijderen?`;
             this.showConfirmation(msg, async (confirmed) => {
               if (confirmed) {
@@ -487,6 +490,10 @@ export function createOuterCityScene() {
         )
         .setInteractive()
         .on("pointerdown", () => {
+          // open detail panel for newly placed asset
+          this.game.events.emit("assetClicked", null);
+          return;
+
           const msg = `Wil je deze ${type} verwijderen?`;
           this.showConfirmation(msg, (confirmed) => {
             if (confirmed) {

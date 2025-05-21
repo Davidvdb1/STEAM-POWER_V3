@@ -5,7 +5,7 @@ import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
 import * as gameService from "../utils/gameService.js";
 
-// register our detail‐panel components
+// register our detail‑panel components
 import "./details/buildingDetail.js";
 import "./details/assetDetail.js";
 
@@ -13,6 +13,7 @@ const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
     @import './Components/game/gameControlPanel/style.css';
+    :host { display: block; position: relative; }
   </style>
 
   <!-- DETAIL PANEL: appears when you click a building or asset -->
@@ -165,14 +166,14 @@ class GameControlPanel extends HTMLElement {
   }
 
   _initializeGame() {
-    const LogoScene = createLogoScene(this._startButton);
-    const CityScene = createCityScene();
+    const LogoScene      = createLogoScene(this._startButton);
+    const CityScene      = createCityScene();
     const OuterCityScene = createOuterCityScene();
 
-    const TILE_WIDTH = 16;
+    const TILE_WIDTH  = 16;
     const TILE_HEIGHT = 16;
-    const MAP_WIDTH = 140;
-    const MAP_HEIGHT = 70;
+    const MAP_WIDTH   = 140;
+    const MAP_HEIGHT  = 70;
 
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
@@ -209,16 +210,16 @@ class GameControlPanel extends HTMLElement {
       const { token, groupId } = JSON.parse(raw);
       const gs = await gameService.fetchGameStatistics(groupId, token);
 
-      this._game.token = token;
-      this._game.groupId = groupId;
-      this._game.buildingData = gs.buildings;
-      this._game.assetData = gs.assets;
+      this._game.token            = token;
+      this._game.groupId          = groupId;
+      this._game.buildingData     = gs.buildings;
+      this._game.assetData        = gs.assets;
       this._game.gameStatisticsId = gs.id;
-      this._game.currencyId = gs.currency.id;
+      this._game.currencyId       = gs.currency.id;
 
       const cur = gs.currency;
       this._greenEl.textContent = cur.greenEnergy;
-      this._greyEl.textContent = cur.greyEnergy;
+      this._greyEl.textContent  = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
@@ -248,7 +249,7 @@ class GameControlPanel extends HTMLElement {
     const els = [this._wrapper, this._statsContainer];
     els.forEach(el => {
       el.style.transition = "transform 0.5s ease";
-      el.style.transform = `translateX(${offsetX}px)`;
+      el.style.transform  = `translateX(${offsetX}px)`;
     });
 
     let done = 0;
@@ -259,10 +260,10 @@ class GameControlPanel extends HTMLElement {
           onComplete();
           els.forEach(inner => {
             inner.style.transition = "none";
-            inner.style.transform = `translateX(${-offsetX}px)`;
+            inner.style.transform  = `translateX(${-offsetX}px)`;
             void inner.offsetWidth;
             inner.style.transition = "transform 0.5s ease";
-            inner.style.transform = "translateX(0)";
+            inner.style.transform  = "translateX(0)";
           });
         }
       }, { once: true });
