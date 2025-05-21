@@ -5,11 +5,18 @@ import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
 import * as gameService from "../utils/gameService.js";
 
+// register our detail‐panel components
+import "./details/buildingDetail.js";
+import "./details/assetDetail.js";
+
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
     @import './Components/game/gameControlPanel/style.css';
   </style>
+
+  <!-- DETAIL PANEL: appears when you click a building or asset -->
+  <div id="detail-container" class="hidden"></div>
 
   <div id="wrapper">
     <div id="inner-container">
@@ -104,6 +111,11 @@ class GameControlPanel extends HTMLElement {
     super();
     this._shadow = this.attachShadow({ mode: "open" });
     this._shadow.appendChild(template.content.cloneNode(true));
+
+    // detail panel container
+    this._detailContainer = this._shadow.getElementById("detail-container");
+
+    // existing references
     this._wrapper = this._shadow.getElementById("wrapper");
     this._statsContainer = this._shadow.getElementById("stats");
     this._startButton = this._shadow.getElementById("startButton");
@@ -114,15 +126,23 @@ class GameControlPanel extends HTMLElement {
     this._greenEl = this._shadow.getElementById("greenEnergy");
     this._greyEl = this._shadow.getElementById("greyEnergy");
     this._coinsEl = this._shadow.getElementById("coins");
+
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
   }
 
-  connectedCallback() { 
+  connectedCallback() {
     this._startButton.addEventListener("click", () => this._onStartClick());
     this._outerButton.addEventListener("click", () => this._transitionToOuterCity());
     this._innerButton.addEventListener("click", () => this._transitionToCity());
     this._enableDragFromShop();
+
+    // close detail‐panel when its close button fires
+    this._shadow.addEventListener("close-detail", () => {
+      this._detailContainer.classList.add("hidden");
+      this._detailContainer.innerHTML = "";
+    });
+
     this._loadPhaser().then(() => this._initializeGame());
   }
 
@@ -171,6 +191,10 @@ class GameControlPanel extends HTMLElement {
     });
 
     window.phaserGame = this._game;
+
+    // show detail panels on click events
+    this._game.events.on("buildingClicked", id => this._showBuildingDetail(id));
+    this._game.events.on("assetClicked",    id => this._showAssetDetail(id));
   }
 
   async _onStartClick() {
@@ -185,8 +209,8 @@ class GameControlPanel extends HTMLElement {
       const { token, groupId } = JSON.parse(raw);
       const gs = await gameService.fetchGameStatistics(groupId, token);
 
-      this._game.token = token
-      this._game.groupId = groupId
+      this._game.token = token;
+      this._game.groupId = groupId;
       this._game.buildingData = gs.buildings;
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
@@ -243,6 +267,20 @@ class GameControlPanel extends HTMLElement {
         }
       }, { once: true });
     });
+  }
+
+  _showBuildingDetail(id) {
+    this._detailContainer.innerHTML = "";
+    const detail = document.createElement("building-detail");
+    this._detailContainer.appendChild(detail);
+    this._detailContainer.classList.remove("hidden");
+  }
+
+  _showAssetDetail(id) {
+    this._detailContainer.innerHTML = "";
+    const detail = document.createElement("asset-detail");
+    this._detailContainer.appendChild(detail);
+    this._detailContainer.classList.remove("hidden");
   }
 }
 
