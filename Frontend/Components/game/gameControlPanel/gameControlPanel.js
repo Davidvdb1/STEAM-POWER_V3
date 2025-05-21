@@ -118,24 +118,26 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
   }
 
-  connectedCallback() { 
+  connectedCallback() {
     this._startButton.addEventListener("click", () => this._onStartClick());
-    this._outerButton.addEventListener("click", () => this._transitionToOuterCity());
+    this._outerButton.addEventListener("click", () =>
+      this._transitionToOuterCity()
+    );
     this._innerButton.addEventListener("click", () => this._transitionToCity());
     this._enableDragFromShop();
     this._loadPhaser().then(() => this._initializeGame());
   }
 
   _enableDragFromShop() {
-    this._shadow.querySelectorAll(".card-asset").forEach(card => {
-      card.addEventListener("dragstart", e => {
+    this._shadow.querySelectorAll(".card-asset").forEach((card) => {
+      card.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", card.dataset.type);
       });
     });
   }
 
   _loadPhaser() {
-    return new Promise(res => {
+    return new Promise((res) => {
       if (window.Phaser) return res();
       const s = document.createElement("script");
       s.src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js";
@@ -166,11 +168,35 @@ class GameControlPanel extends HTMLElement {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: MAP_WIDTH * TILE_WIDTH,
-        height: MAP_HEIGHT * TILE_HEIGHT
+        height: MAP_HEIGHT * TILE_HEIGHT,
       },
     });
 
     window.phaserGame = this._game;
+  }
+
+  async _updateStatistics() {
+    try {
+      const raw = sessionStorage.getItem("loggedInUser");
+      if (!raw) throw new Error("Not logged in");
+      const { token, groupId } = JSON.parse(raw);
+      const gs = await gameService.fetchGameStatistics(groupId, token);
+
+      this._game.token = token;
+      this._game.groupId = groupId;
+      this._game.buildingData = gs.buildings;
+      this._game.assetData = gs.assets;
+      this._game.gameStatisticsId = gs.id;
+      this._game.currencyId = gs.currency.id;
+
+      const cur = gs.currency;
+      this._greenEl.textContent = cur.greenEnergy;
+      this._greyEl.textContent = cur.greyEnergy;
+      this._coinsEl.textContent = cur.coins;
+      this._statsContainer.classList.remove("hidden");
+    } catch (e) {
+      console.error("Error fetching stats:", e);
+    }
   }
 
   async _onStartClick() {
@@ -179,14 +205,19 @@ class GameControlPanel extends HTMLElement {
     this._outerContainer.style.display = "flex";
     this._innerContainer.style.display = "none";
 
+    await this._updateStatistics();
+
+    this._game.events.on("asset-placed", () => {
+      this._updateStatistics();
+    });
     try {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
       const gs = await gameService.fetchGameStatistics(groupId, token);
 
-      this._game.token = token
-      this._game.groupId = groupId
+      this._game.token = token;
+      this._game.groupId = groupId;
       this._game.buildingData = gs.buildings;
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
@@ -222,26 +253,30 @@ class GameControlPanel extends HTMLElement {
 
   _animateWrapper(offsetX, onComplete) {
     const els = [this._wrapper, this._statsContainer];
-    els.forEach(el => {
+    els.forEach((el) => {
       el.style.transition = "transform 0.5s ease";
       el.style.transform = `translateX(${offsetX}px)`;
     });
 
     let done = 0;
-    els.forEach(el => {
-      el.addEventListener("transitionend", () => {
-        done++;
-        if (done === els.length) {
-          onComplete();
-          els.forEach(inner => {
-            inner.style.transition = "none";
-            inner.style.transform = `translateX(${-offsetX}px)`;
-            void inner.offsetWidth;
-            inner.style.transition = "transform 0.5s ease";
-            inner.style.transform = "translateX(0)";
-          });
-        }
-      }, { once: true });
+    els.forEach((el) => {
+      el.addEventListener(
+        "transitionend",
+        () => {
+          done++;
+          if (done === els.length) {
+            onComplete();
+            els.forEach((inner) => {
+              inner.style.transition = "none";
+              inner.style.transform = `translateX(${-offsetX}px)`;
+              void inner.offsetWidth;
+              inner.style.transition = "transform 0.5s ease";
+              inner.style.transform = "translateX(0)";
+            });
+          }
+        },
+        { once: true }
+      );
     });
   }
 }
