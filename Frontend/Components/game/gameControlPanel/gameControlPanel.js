@@ -1,7 +1,10 @@
+// components/game/gameControlPanel/gameControlPanel.js
+
 import { createLogoScene } from "../scenes/logoScene.js";
 import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
 import * as gameService from "../utils/gameService.js";
+import { removeAsset, getCurrencyById, updateCurrency } from "../utils/gameService.js";
 
 // register our detail-panel components
 import "./details/buildingDetail.js";
@@ -112,20 +115,17 @@ class GameControlPanel extends HTMLElement {
     this._shadow = this.attachShadow({ mode: "open" });
     this._shadow.appendChild(template.content.cloneNode(true));
 
-    // detail panel container
     this._detailContainer = this._shadow.getElementById("detail-container");
-
-    // existing references
-    this._wrapper        = this._shadow.getElementById("wrapper");
-    this._statsContainer = this._shadow.getElementById("stats");
-    this._startButton    = this._shadow.getElementById("startButton");
-    this._innerContainer = this._shadow.getElementById("inner-container");
-    this._innerButton    = this._shadow.getElementById("inner-button");
-    this._outerContainer = this._shadow.getElementById("outer-container");
-    this._outerButton    = this._shadow.getElementById("outer-button");
-    this._greenEl        = this._shadow.getElementById("greenEnergy");
-    this._greyEl         = this._shadow.getElementById("greyEnergy");
-    this._coinsEl        = this._shadow.getElementById("coins");
+    this._wrapper         = this._shadow.getElementById("wrapper");
+    this._statsContainer  = this._shadow.getElementById("stats");
+    this._startButton     = this._shadow.getElementById("startButton");
+    this._innerContainer  = this._shadow.getElementById("inner-container");
+    this._innerButton     = this._shadow.getElementById("inner-button");
+    this._outerContainer  = this._shadow.getElementById("outer-container");
+    this._outerButton     = this._shadow.getElementById("outer-button");
+    this._greenEl         = this._shadow.getElementById("greenEnergy");
+    this._greyEl          = this._shadow.getElementById("greyEnergy");
+    this._coinsEl         = this._shadow.getElementById("coins");
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
@@ -137,10 +137,12 @@ class GameControlPanel extends HTMLElement {
     this._innerButton.addEventListener("click", () => this._transitionToCity());
     this._enableDragFromShop();
 
-    // close detail‐panel when its close button fires
     this._shadow.addEventListener("close-detail", () => {
       this._detailContainer.classList.add("hidden");
       this._detailContainer.innerHTML = "";
+    });
+    this._shadow.addEventListener("destroy-asset", e => {
+      this._confirmDestroyAsset(e.detail.assetId);
     });
 
     this._loadPhaser().then(() => this._initializeGame());
@@ -169,30 +171,21 @@ class GameControlPanel extends HTMLElement {
     const CityScene      = createCityScene();
     const OuterCityScene = createOuterCityScene();
 
-    const TILE_WIDTH  = 16;
-    const TILE_HEIGHT = 16;
-    const MAP_WIDTH   = 140;
-    const MAP_HEIGHT  = 70;
-
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: this._shadow.getElementById("game-container"),
-      width: MAP_WIDTH * TILE_WIDTH,
-      height: MAP_HEIGHT * TILE_HEIGHT,
+      width: 140 * 16,
+      height: 70  * 16,
       scene: [LogoScene, CityScene, OuterCityScene],
       backgroundColor: "#9bd5e4",
       pixelArt: true,
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
-        width: MAP_WIDTH * TILE_WIDTH,
-        height: MAP_HEIGHT * TILE_HEIGHT
       },
     });
 
     window.phaserGame = this._game;
-
-    // show detail panels on click events
     this._game.events.on("buildingClicked", id => this._showBuildingDetail(id));
     this._game.events.on("assetClicked",    id => this._showAssetDetail(id));
   }
@@ -216,10 +209,9 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId       = gs.currency.id;
 
-      const cur = gs.currency;
-      this._greenEl.textContent = cur.greenEnergy;
-      this._greyEl.textContent  = cur.greyEnergy;
-      this._coinsEl.textContent = cur.coins;
+      this._greenEl.textContent = gs.currency.greenEnergy;
+      this._greyEl.textContent  = gs.currency.greyEnergy;
+      this._coinsEl.textContent = gs.currency.coins;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
@@ -227,7 +219,6 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToOuterCity() {
-    // close detail-panel when navigating
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
 
@@ -240,7 +231,6 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToCity() {
-    // close detail-panel when navigating
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
 
@@ -279,13 +269,9 @@ class GameControlPanel extends HTMLElement {
 
   _showBuildingDetail(id) {
     this._detailContainer.innerHTML = "";
-    const detail = document.createElement("building-detail");
+    const detail   = document.createElement("building-detail");
     const building = this._game.buildingData.find(b => b.id === id);
-    if (building) {
-      detail.data = building;
-    } else {
-      detail.setAttribute("building-id", id);
-    }
+    if (building) detail.data = building;
     this._detailContainer.appendChild(detail);
     this._detailContainer.classList.remove("hidden");
   }
@@ -293,14 +279,60 @@ class GameControlPanel extends HTMLElement {
   _showAssetDetail(id) {
     this._detailContainer.innerHTML = "";
     const detail = document.createElement("asset-detail");
-    const asset = this._game.assetData.find(a => a.id === id);
-    if (asset) {
-      detail.data = asset;
-    } else {
-      detail.setAttribute("asset-id", id);
-    }
+    const asset  = this._game.assetData.find(a => a.id === id);
+    if (asset) detail.data = asset;
     this._detailContainer.appendChild(detail);
     this._detailContainer.classList.remove("hidden");
+  }
+
+  _confirmDestroyAsset(assetId) {
+    const asset = this._game.assetData.find(a => a.id === assetId);
+    if (!asset) return;
+
+    const msg = `Wil je deze ${asset.type} slopen voor ${asset.destroyCost} coins?`;
+    const outer = this._game.scene.getScene("OuterCityScene");
+    outer.showConfirmation(msg, confirmed => {
+      if (confirmed) this._performDestroyAsset(assetId);
+    });
+  }
+
+  async _performDestroyAsset(assetId) {
+    try {
+      const token      = this._game.token;
+      const currencyId = this._game.currencyId;
+      const asset      = this._game.assetData.find(a => a.id === assetId);
+      if (!asset) throw new Error("Asset not found");
+
+      // remove on backend
+      await removeAsset(assetId, token);
+
+      // deduct destroyCost
+      const cur = await getCurrencyById(currencyId, token);
+      const updated = {
+        greenEnergy: cur.greenEnergy,
+        greyEnergy:  cur.greyEnergy,
+        coins:       cur.coins - asset.destroyCost
+      };
+      await updateCurrency(currencyId, updated, token);
+
+      // update UI
+      this._coinsEl.textContent = updated.coins;
+
+      // remove sprite
+      const outer = this._game.scene.getScene("OuterCityScene");
+      outer._removeAsset({
+        id:  assetId,
+        tx:  asset.xLocation,
+        ty:  asset.yLocation,
+        size:{ width: asset.xSize, height: asset.ySize }
+      });
+
+      // close panel
+      this._detailContainer.classList.add("hidden");
+      this._detailContainer.innerHTML = "";
+    } catch (err) {
+      console.error("Error destroying asset:", err);
+    }
   }
 }
 
