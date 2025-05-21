@@ -1,3 +1,318 @@
-.hidden { 
-    display: none;
+/* components/game/gameControlPanel/style.scss */
+
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#wrapper {
+  position: relative;
+  width: 964px;
+  height: 484px;
+}
+
+#game-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+#game-container canvas {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  border: 2px solid #555;
+}
+
+#startButton {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: green;
+  color: white;
+  font-size: 1.1em;
+  padding: 0.5em 1.5em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.1s ease-in-out;
+}
+
+#startButton.hidden {
+  display: none;
+}
+
+#startButton:hover {
+  transform: translateX(-50%) scale(1.05);
+}
+
+#startButton:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+#outer-container {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translate(10px, -50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#outer-button {
+  cursor: pointer;
+  height: 72px;
+  width: auto;
+  border: 2px solid #333;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+#outer-text {
+  margin-top: 4px;
+  font-size: 0.9em;
+  color: #333;
+  text-align: center;
+}
+
+#inner-container .test {
+  position: absolute;
+  top: 50%;
+  right: 100%;
+  transform: translateX(-10px) translateY(-50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#inner-container .shop {
+  position: absolute;
+  top: 24%;
+  left: 102%;
+  transform: translateX(-10px) translateY(-50%);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "PixelFont" !important;
+}
+
+#inner-container .shop button {
+  border: 2px solid #555;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+  font-family: "PixelFont" !important;
+}
+
+#inner-button {
+  cursor: pointer;
+  height: 72px;
+  width: auto;
+  border: 2px solid #333;
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+#inner-text {
+  margin-top: 4px;
+  font-size: 0.9em;
+  color: #333;
+  text-align: center;
+}
+
+#stats {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  background: #d3d3d3;
+  border-left: 2px solid #555;
+  border-right: 2px solid #555;
+  border-bottom: 2px solid #555;
+  width: 964px;
+}
+
+#stats.hidden {
+  display: none;
+}
+
+#stat-item {
+  display: flex;
+  align-items: center;
+}
+
+.euro {
+  display: flex;
+  align-items: center;
+}
+
+.img-euro {
+  height: 30px;
+  padding: 10px;
+}
+
+.p-euro {
+  color: #fbac2b;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+
+.greenEnergy {
+  display: flex;
+  align-items: center;
+
+  .div {
+    display: flex;
+  }
+}
+
+.greenEnergy {
+  display: flex;
+}
+
+.img-greenEnergy {
+  height: 50px;
+}
+
+.p-greenEnergy {
+  color: #9ba143;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+
+.greyEnergy {
+  display: flex;
+  align-items: center;
+}
+
+.img-greyEnergy {
+  height: 50px;
+}
+
+.p-greyEnergy {
+  color: #151515;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+
+.currencyDiv {
+  display: flex;
+  align-items: center;
+}
+
+.mr {
+  margin-right: 3px;
+}
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-content {
+  background: white;
+  padding: 2rem;
+  width: 600px;
+  height: 400px;
+  // text-align: center;
+  position: relative;
+  font-family: "PixelFont" !important;
+}
+
+.close-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.assetCoinDiv {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+.windturbine {
+  height: 80px;
+  width: 48px;
+}
+
+.kerncentrale {
+  height: 80px;
+  width: 98px;
+} 
+
+.card-asset {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 61%;
+  align-items: center;
+  flex-direction: column;
+  padding: 1rem 2rem 0; 
+}
+
+#inner-container .shop .card-asset:nth-child(-n+3) {
+  border-bottom: 2px solid #555;
+  background-color: rgb(210, 247, 210);
+}
+#inner-container .shop .card-asset:nth-child(4) {
+  background-color: #d3d3d3;
+}
+
+.corner-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.img-greenEnergy-card {
+  height: 30px;
+}
+
+
+#inner-container .shop {
+  position: absolute;      
+  top: 0;                 
+  height: 100%;            
+  overflow-y: auto;
+  left: 102%;             
+  transform: translateX(-10px);
+  border: 2px solid #555;
+  z-index: 1;        
 }
