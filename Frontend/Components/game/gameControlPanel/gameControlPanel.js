@@ -216,7 +216,7 @@ class GameControlPanel extends HTMLElement {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
-      const gs = await gameService.fetchGameStatistics(groupId, token);
+      const gs = await fetchGameStatistics(groupId, token);
 
       this._game.token = token;
       this._game.groupId = groupId;
