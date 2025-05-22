@@ -84,9 +84,10 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "campoverviewpage", label: "Home" },
                 { id: "leaderboard", label: "Leaderboard" },
                 { id: "groupoverviewpage", label: "Groepen" },
-                { id: "users", label: "Gebruikers" },
-                { id: "logout", label: "Logout" },
+                { id: "quiz", label: "Quiz" },
+                { id: "microbitpage", label: "Micro:bit" },
                 { id: "questionadmin", label: "Vragen aanpassen" },
+                { id: "logout", label: "Logout" },
             ],
             "ADMIN": [
                 { id: "campoverviewpage", label: "Home" },

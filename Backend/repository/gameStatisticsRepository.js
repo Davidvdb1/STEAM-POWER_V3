@@ -124,6 +124,39 @@ class GameStatisticsRepository {
     return Currency.from(updated);
   }
 
+async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
+  const gs = await this.findByGroupId(groupId);
+
+  if (!gs || !gs.currency || !gs.assets) {
+    throw new Error('GameStatistics, currency of assets niet gevonden');
+  }
+
+  const typeMap = {
+    WIND: "windmolen",
+    SOLAR: "zonnepaneel",
+    WATER: "waterrad"
+  };
+
+  const assetType = typeMap[type.toUpperCase()];
+  if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
+
+  const matchingAssets = gs.assets.filter(a => a.type.toLowerCase() === assetType);
+
+  const totalGain = matchingAssets.reduce((sum, asset) => {
+    return sum + (greenEnergy * asset.energy);
+  }, 0);
+
+  const updated = await this.prisma.currency.update({
+    where: { id: gs.currency.id },
+    data: {
+      greenEnergy: { increment: totalGain }
+    }
+  });
+
+  return Currency.from(updated);
+}
+
+
   async addBuilding(statsId, building) {
     building.validate();
     const created = await this.prisma.building.create({
@@ -140,6 +173,7 @@ class GameStatisticsRepository {
     return Building.from(created);
   }
 
+
   async updateBuilding(buildingId, { xLocation, yLocation, xSize, ySize }) {
     const data = {};
     if (typeof xLocation === "number") data.xLocation = xLocation;
@@ -150,9 +184,21 @@ class GameStatisticsRepository {
       where: { id: buildingId },
       data,
       include: { level: true },
+
+//   async upgradeBuilding(buildingId, { level }) {
+//     const updated = await this.prisma.building.update({
+//       where: { id: buildingId },
+//       data: {
+//         level: {
+//           update: { level }
+//         }
+//       },
+//       include: { level: true }
+
     });
     return Building.from(updated);
   }
+
 
   async removeBuilding(buildingId) {
     await this.prisma.building.delete({ where: { id: buildingId } });
@@ -231,6 +277,14 @@ class GameStatisticsRepository {
 
   async delete(id) {
     await this.prisma.gameStatistics.delete({ where: { id } });
+  }
+
+  async findBuildingById(buildingId) {
+    const building = await this.prisma.building.findUnique({
+      where: { id: buildingId },
+      include: { level: true }
+    });
+    return building ? Building.from(building) : null;
   }
 }
 

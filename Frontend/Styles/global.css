@@ -2,7 +2,6 @@
   font-family: "PixelFont";
   src: url("../public/fonts/Minecraft.woff2") format("woff2");
 }
-
 * {
   font-family: Roboto, sans-serif;
 }
@@ -10,4 +9,4 @@
 html, body {
   height: 100%;
   margin: 0;
-}
+}/*# sourceMappingURL=global.css.map */
