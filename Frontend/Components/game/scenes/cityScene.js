@@ -7,19 +7,18 @@ export function createCityScene() {
       super("CityScene");
     }
 
+
     preload() {
       // Load the tilemap and tileset image
       this.load.tilemapTiledJSON("innerCityMap", "Assets/json/binnenstad.json");
       this.load.image("tilesetImage", "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png");
     }
 
+
     create() {
       // Set up the tilemap and its layers
       this.map = this.make.tilemap({ key: "innerCityMap" });
-      const tileset = this.map.addTilesetImage(
-        "Modern_Exteriors_Complete_Tileset_Custom",
-        "tilesetImage"
-      );
+      const tileset = this.map.addTilesetImage("Modern_Exteriors_Complete_Tileset_Custom", "tilesetImage");
 
       this.layer1 = this.map.createLayer("Layer-1", tileset);
       this.layer2 = this.map.createLayer("Layer-2", tileset);
@@ -42,6 +41,11 @@ export function createCityScene() {
       // Gray out all buildings at the start of the game
       this.buildingRegistry.grayoutAllBuildings(1);
 
+      // Enable visibly hovering over a selection of tiles
+      this.handleTileHover();
+
+
+      // Configure the building info panel and 'upgrade building' dialog
       // Setup confirmation dialog UI
       const popupWidth = 700;
       const popupHeight = 300;
@@ -191,14 +195,13 @@ export function createCityScene() {
         this.confirmNoText.setVisible(false);
         this.input.keyboard.enabled = true;
       };
-
-      // Enable visibly hovering over a selection of tiles
-      this.handleTileHover();
     }
+
 
     update(time, delta) {
       handleMovementKeys(this, delta);
     }
+
 
     /**
      * Handles tile hover interactions in the city scene.
@@ -268,6 +271,10 @@ export function createCityScene() {
       });
     }
 
+
+    /**
+     * Configures the selectable tile regions for various buildings on the city map.
+     */
     configureTileSelections() {
       // Set up A building registry to define buildings
       this.buildingRegistry = new BuildingRegistry();
