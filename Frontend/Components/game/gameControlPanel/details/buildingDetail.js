@@ -9,9 +9,12 @@ template.innerHTML = /*html*/`
   <button class="close">&times;</button>
   <div class="info">
     <p>Level: <span class="level"></span></p>
-    <p>Energy cost: <span class="energy-cost"></span> kW</p>
+    <p>Energie kost: <span class="energy-cost"></span> kW</p>
+    <p class="upgrade-line">
+      Upgrade kost: <span class="upgrade-cost"></span> coins
+    </p>
     <button class="upgrade">
-      Upgrade (<span class="upgrade-cost"></span> coins)
+      Upgrade
     </button>
   </div>
 `;
@@ -25,12 +28,12 @@ class BuildingDetail extends HTMLElement {
     this._closeBtn      = shadow.querySelector("button.close");
     this._levelEl       = shadow.querySelector(".level");
     this._energyCostEl  = shadow.querySelector(".energy-cost");
-    this._upgradeBtn    = shadow.querySelector(".upgrade");
+    this._upgradeLine   = shadow.querySelector(".upgrade-line");
     this._upgradeCostEl = shadow.querySelector(".upgrade-cost");
+    this._upgradeBtn    = shadow.querySelector(".upgrade");
     this._data          = null;
   }
 
-  // Parent can set .data directly
   set data(value) {
     this._data = value;
     this._render();
@@ -41,12 +44,10 @@ class BuildingDetail extends HTMLElement {
   }
 
   connectedCallback() {
-    // close button
     this._closeBtn.addEventListener("click", () =>
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
     );
 
-    // fallback if someone still uses building-id attribute
     const raw = this.getAttribute("building-id");
     if (raw && !this._data) {
       const id = parseInt(raw, 10);
@@ -60,18 +61,19 @@ class BuildingDetail extends HTMLElement {
   _render() {
     if (!this._data) return;
 
-    // unpack nested Level instance
-    const lvl = this._data.level;
-    const num   = lvl.level;        // numeric level
-    const cost  = lvl.energyCost;   // kW
-    const upg   = lvl.upgradeCost;  // coins
+    const lvl     = this._data.level;
+    const num     = lvl.level;        // numeric level
+    const cost    = lvl.energyCost;   // kW
+    const upgCost = lvl.upgradeCost;  // coins
 
-    this._levelEl.textContent       = num;
-    this._energyCostEl.textContent  = cost;
+    // populate basics
+    this._levelEl.textContent      = num;
+    this._energyCostEl.textContent = cost;
 
     if (num < 5) {
-      this._upgradeCostEl.textContent = upg;
-      this._upgradeBtn.style.display   = "";
+      // under max: show cost & button
+      this._upgradeLine.textContent = `Upgrade kost: ${upgCost} coins`;
+      this._upgradeBtn.style.display = "";
       this._upgradeBtn.onclick = () => {
         this.dispatchEvent(new CustomEvent("upgrade-build", {
           detail: { buildingId: this._data.id },
@@ -79,6 +81,8 @@ class BuildingDetail extends HTMLElement {
         }));
       };
     } else {
+      // at max: replace line and hide button
+      this._upgradeLine.textContent = "Max level";
       this._upgradeBtn.style.display = "none";
     }
   }

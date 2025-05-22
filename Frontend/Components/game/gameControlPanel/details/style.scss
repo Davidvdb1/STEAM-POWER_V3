@@ -3,11 +3,11 @@
   top: 16px;
   left: 16px;
   width: 150px;
-  background: #d2f7d2;    // light green default
+  background: #d2f7d2;   
   border: 2px solid #333;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   padding: 12px;
-  font-family: "PixelFont", sans-serif;
+  font-family: "PixelFont", sans-serif !important;
   z-index: 20;
 }
 
@@ -43,6 +43,7 @@ button.destroy {
   border: 2px solid #555;
   background: #d3d3d3;
   cursor: pointer;
+  font-family: "PixelFont", sans-serif !important;
 }
 
 button.destroy:hover {
