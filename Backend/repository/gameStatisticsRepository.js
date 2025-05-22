@@ -10,6 +10,8 @@ class GameStatisticsRepository {
     this.prisma = new PrismaClient();
   }
 
+  // GameStatistics ---------------------------------------------------------------------------------------------------------------------------------------------------
+
   async create({ groupId, currency }) {
     currency.validate();
     const prismaGS = await this.prisma.gameStatistics.create({
@@ -64,13 +66,13 @@ class GameStatisticsRepository {
       where: { groupId },
       include: {
         currency: opts.includeCurrency ?? true,
-        buildings: opts.includeBuildings ? { include: { level: true } } : false,
+        buildings: opts.includeBuildings ?? true,
         assets: opts.includeAssets ?? true,
         checkpoints: opts.includeCheckpoints
           ? {
               include: {
                 currency: true,
-                buildings: { include: { level: true } },
+                buildings: true,
                 assets: true,
               },
             }
@@ -82,6 +84,8 @@ class GameStatisticsRepository {
     if (!prismaGS) return null;
     return GameStatistics.from(prismaGS);
   }
+
+    // Currency ---------------------------------------------------------------------------------------------------------------------------------------------------
 
   async findCurrencyById(id) {
     const prismaCurrency = await this.prisma.currency.findUnique({
@@ -156,19 +160,15 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
   return Currency.from(updated);
 }
 
+  // Building ---------------------------------------------------------------------------------------------------------------------------------------------------
+
 
   async addBuilding(statsId, building) {
     building.validate();
     const created = await this.prisma.building.create({
       data: {
-        xLocation: building.xLocation,
-        yLocation: building.yLocation,
-        xSize: building.xSize,
-        ySize: building.ySize,
-        level: { connect: { id: building.level.id } },
-        gameStatistics: { connect: { id: statsId } },
+        name: building.name,
       },
-      include: { level: true },
     });
     return Building.from(created);
   }

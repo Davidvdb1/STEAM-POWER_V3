@@ -54,20 +54,20 @@ model Workshop {
 }
 
 model Group {
-  id               String           @id @default(uuid())
-  name             String           @unique
-  members          String           @default("")
-  microbitId       String           @default("")
-  code             String           @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
-  energy           Float            @default(0)
-  energyMultiplier Float            @default(1)
-  batteryLevel     Float            @default(0)
-  batteryCapacity  Float            @default(500)
+  id               String       @id @default(uuid())
+  name             String       @unique
+  members          String       @default("")
+  microbitId       String       @default("")
+  code             String       @unique @default(dbgenerated("substring(md5(random()::text), 1, 6)"))
+  energy           Float        @default(0)
+  energyMultiplier Float        @default(1)
+  batteryLevel     Float        @default(0)
+  batteryCapacity  Float        @default(500)
   energyData       EnergyData[]
-  bonusScore       Int              @default(0)
+  bonusScore       Int          @default(0)
   answers          Answer[]
 
-  gameStatistics   GameStatistics[]
+  gameStatistics GameStatistics[]
 }
 
 model EnergyData {
@@ -97,96 +97,107 @@ model Question {
 }
 
 model Answer {
-  id            String   @id @default(uuid())
+  id            String  @id @default(uuid())
   groupId       String
   questionId    String
   isCorrect     Boolean
   answerValue   Float
   energyReading Float
-  errorMargin   Float    @default(0)
+  errorMargin   Float   @default(0)
 
   group    Group    @relation(fields: [groupId], references: [id])
   question Question @relation(fields: [questionId], references: [id])
 }
 
 model Currency {
-  id             String           @id @default(uuid())
-  greenEnergy    Float
-  greyEnergy     Float
-  coins          Float
+  id          String @id @default(uuid())
+  greenEnergy Float
+  greyEnergy  Float
+  coins       Float
 
-  gameStatistics GameStatistics?  @relation("GS_Currency")
-  checkpoint     Checkpoint?      @relation("CP_Currency")
+  gameStatistics GameStatistics? @relation("GS_Currency")
+  checkpoint     Checkpoint?     @relation("CP_Currency")
 }
 
-model Level {
-  id           String     @id @default(uuid())
-  level        Int
-  upgradeCost  Int
-  energyCost   Int
+model BuildingLevel {
+  id             String   @id @default(uuid())
+  buildingId     String
+  building       Building @relation(fields: [buildingId], references: [id])
+  level          Int
+  energyCost     Int
+  upgradeCost    Int
+  scoreDeduction Int
 
-  buildings    Building[]
+  gameBuildingsId String?
+  gameBuildings   GameBuildings? @relation(fields: [gameBuildingsId], references: [id])
 }
 
 model Asset {
-  id               String           @id @default(uuid())
-  buildCost        Int
-  destroyCost      Int
-  energy           Float
-  xLocation        Int
-  yLocation        Int
-  xSize            Int
-  ySize            Int
-  type             String
+  id          String @id @default(uuid())
+  buildCost   Int
+  destroyCost Int
+  energy      Float
+  xLocation   Int
+  yLocation   Int
+  xSize       Int
+  ySize       Int
+  type        String
 
-  checkpoint       Checkpoint?      @relation(fields: [checkpointId], references: [id])
-  checkpointId     String?
+  checkpoint   Checkpoint? @relation(fields: [checkpointId], references: [id])
+  checkpointId String?
 
-  gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
+  gameStatistics   GameStatistics? @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
 }
 
 model Building {
-  id               String           @id @default(uuid())
-  xLocation        Int
-  yLocation        Int
-  xSize            Int
-  ySize            Int
+  id   String @id @default(uuid())
+  name String
 
-  level            Level            @relation(fields: [levelId], references: [id])
-  levelId          String
+  // Add the relation to Checkpoint 
+  checkpoint   Checkpoint? @relation("CP_Building", fields: [checkpointId], references: [id])
+  checkpointId String?
 
-  gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
+  // Existing relations to other models can stay as they are
+  BuildingLevel    BuildingLevel[]
+  GameStatistics   GameStatistics? @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
-
-  checkpoint       Checkpoint?      @relation("CP_Building", fields: [checkpointId], references: [id])
-  checkpointId     String?
 }
 
 model Checkpoint {
-  id               String           @id @default(uuid())
+  id String @id @default(uuid())
 
-  currency         Currency         @relation("CP_Currency", fields: [currencyId], references: [id])
-  currencyId       String           @unique
+  currency   Currency @relation("CP_Currency", fields: [currencyId], references: [id])
+  currencyId String   @unique
 
-  buildings        Building[]       @relation("CP_Building")
+  // Add the relation back to Building
+  buildings Building[] @relation("CP_Building")
 
-  assets           Asset[]
+  assets Asset[]
 
-  gameStatistics   GameStatistics?  @relation(fields: [gameStatisticsId], references: [id])
+  gameStatistics   GameStatistics? @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
 }
 
 model GameStatistics {
-  id               String           @id @default(uuid())
+  id String @id @default(uuid())
 
-  currency         Currency         @relation("GS_Currency", fields: [currencyId], references: [id])
-  currencyId       String           @unique
+  currency   Currency @relation("GS_Currency", fields: [currencyId], references: [id])
+  currencyId String   @unique
 
-  group            Group            @relation(fields: [groupId], references: [id])
-  groupId          String
+  group   Group  @relation(fields: [groupId], references: [id])
+  groupId String
 
-  buildings        Building[]
-  checkpoints      Checkpoint[]
-  assets           Asset[]
+  buildings     Building[]
+  checkpoints   Checkpoint[]
+  assets        Asset[]
+  GameBuildings GameBuildings[]
 }
+
+model GameBuildings {
+  id               String          @id @default(uuid())
+  gameStatisticsId String
+  gameStatistics   GameStatistics  @relation(fields: [gameStatisticsId], references: [id])
+  buildingLevels   BuildingLevel[]
+}
+
