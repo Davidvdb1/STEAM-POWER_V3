@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* components/game/gameControlPanel/style.scss */
 :host {
   display: flex;
@@ -10,6 +11,19 @@
   position: relative;
   width: 964px;
   height: 484px;
+  margin: 0 auto;
+}
+
+/* ==== DETAIL PANEL ==== */
+#wrapper #detail-container {
+  position: absolute;
+  top: 0; /* stick to top */
+  bottom: calc(50% + 45px); /* end just above the nav‐button */
+  overflow-y: auto; /* allow scrolling if content is tall */
+  right: 102%; /* mirror the shop’s left:102% */
+  transform: translateX(10px); /* inverse of shop’s -10px */
+  width: 200px;
+  z-index: 10;
 }
 
 #game-container {
@@ -143,6 +157,7 @@
   border-right: 2px solid #555;
   border-bottom: 2px solid #555;
   width: 964px;
+  margin: 0 auto;
 }
 
 #stats.hidden {
