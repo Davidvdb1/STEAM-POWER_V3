@@ -1,22 +1,35 @@
-const gameStatisticsRepository = require('../repository/gameStatisticsRepository');
-const GameStatistics           = require('../model/gameStatistics');
-const Currency                 = require('../model/currency');
-const Building                 = require('../model/building');
-const Asset                    = require('../model/asset');
-const Checkpoint               = require('../model/checkpoint');
+const gameStatisticsRepository = require("../repository/gameStatisticsRepository");
+const GameStatistics = require("../model/gameStatistics");
+const Currency = require("../model/currency");
+const Building = require("../model/building");
+const Asset = require("../model/asset");
+const Checkpoint = require("../model/checkpoint");
+const Level = require("../model/level");
+
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+
+
 
 class GameStatisticsService {
   async create({ groupId, greenEnergy, greyEnergy, coins }) {
     const currency = new Currency({
       greenEnergy: greenEnergy ?? undefined,
-      greyEnergy:  greyEnergy  ?? undefined,
-      coins:       coins       ?? undefined,
+      greyEnergy: greyEnergy ?? undefined,
+      coins: coins ?? undefined,
     });
     const gs = await gameStatisticsRepository.create({ groupId, currency });
     return gs;
   }
 
-  async getById(id, includeCurrency = true, includeBuildings = true, includeAssets = true, includeCheckpoints = true, includeGroup = false) {
+  async getById(
+    id,
+    includeCurrency = true,
+    includeBuildings = true,
+    includeAssets = true,
+    includeCheckpoints = true,
+    includeGroup = false
+  ) {
     return await gameStatisticsRepository.findById(id, {
       includeCurrency,
       includeBuildings,
@@ -26,7 +39,14 @@ class GameStatisticsService {
     });
   }
 
-  async getByGroupId(groupId, includeCurrency = true, includeBuildings = true, includeAssets = true, includeCheckpoints = true, includeGroup = false) {
+  async getByGroupId(
+    groupId,
+    includeCurrency = true,
+    includeBuildings = true,
+    includeAssets = true,
+    includeCheckpoints = true,
+    includeGroup = false
+  ) {
     return await gameStatisticsRepository.findByGroupId(groupId, {
       includeCurrency,
       includeBuildings,
@@ -48,7 +68,16 @@ class GameStatisticsService {
     return gameStatisticsRepository.incrementCurrency(currencyId, payload);
   }
 
+  // async addBuilding(statsId, bData) {
+  //   const building = new Building(bData);
+  //   return await gameStatisticsRepository.addBuilding(statsId, building);
+  // }
+
   async addBuilding(statsId, bData) {
+    if (bData.level && !(bData.level instanceof Level)) {
+      bData.level = new Level(bData.level);
+    }
+
     const building = new Building(bData);
     return await gameStatisticsRepository.addBuilding(statsId, building);
   }
@@ -71,9 +100,30 @@ class GameStatisticsService {
   }
 
   async recordCheckpoint(statsId, cpData) {
-    const currency   = new Currency(cpData.currency);
-    const buildings  = cpData.buildings.map(b => new Building(b));
-    const assets     = cpData.assets.map(a => new Asset(a));
+    const currency = new Currency(cpData.currency);
+
+    const buildings = await Promise.all(
+      cpData.buildings.map(async (b) => {
+        if (b.level && !(b.level instanceof Level)) {
+          // Haal volledige Level data op als nodig
+          if (!b.level.level || !b.level.upgradeCost || !b.level.energyCost) {
+            const fullLevelData = await prisma.level.findUnique({
+              where: { id: b.level.id },
+            });
+            if (!fullLevelData) {
+              throw new Error(`Level with id ${b.level.id} not found`);
+            }
+            b.level = new Level(fullLevelData);
+          } else {
+            b.level = new Level(b.level);
+          }
+        }
+        return new Building(b);
+      })
+    );
+
+    const assets = cpData.assets.map((a) => new Asset(a));
+
     const checkpoint = new Checkpoint({ currency, buildings, assets });
     return await gameStatisticsRepository.recordCheckpoint(statsId, checkpoint);
   }
