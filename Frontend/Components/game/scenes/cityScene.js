@@ -1,4 +1,4 @@
-import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys } from "../utils/phaserSceneUtils.js";
+import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys, handleMapDragging } from "../utils/phaserSceneUtils.js";
 import { BuildingRegistry } from "../utils/buildingRegistry.js";
 
 export function createCityScene() {
@@ -43,6 +43,9 @@ export function createCityScene() {
 
       // Enable visibly hovering over a selection of tiles
       this.handleTileHover();
+
+      // Enable dragging the map with the mouse
+      handleMapDragging(this);
 
 
       // Configure the building info panel and 'upgrade building' dialog
@@ -211,6 +214,12 @@ export function createCityScene() {
       this.hoverMarker = this.add.graphics();
       this.hoveredTile = null;
       this.input.on("pointermove", (pointer) => {
+        // Skip hover effects when dragging
+        if (this.isDragging) {
+          this.hoverMarker.clear();
+          return;
+        }
+        
         const worldPoint = pointer.positionToCamera(this.cameras.main);
         const tile = this.layer1.getTileAtWorldXY(worldPoint.x, worldPoint.y);
 
@@ -265,6 +274,8 @@ export function createCityScene() {
           .setOrigin(0, 0)
           .setInteractive({ useHandCursor: true })
           .on("pointerdown", () => {
+            // Prevent drag when clicking on buildings
+            this.isDragging = false;
             // open detail panel
             this.game.events.emit("buildingClicked", b.id);
           });

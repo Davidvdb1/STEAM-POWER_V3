@@ -5,6 +5,7 @@ import {
   handleZoom,
   setMovementKeys,
   handleMovementKeys,
+  handleMapDragging
 } from "../utils/phaserSceneUtils.js";
 import {
   addAsset,
@@ -68,6 +69,7 @@ export function createOuterCityScene() {
       setCameraBounds(this);
       handleZoom(this);
       setMovementKeys(this);
+      handleMapDragging(this);
 
       // Highlights
       this.dragHighlight       = this.add.graphics({ depth: 100 });
@@ -274,6 +276,8 @@ export function createOuterCityScene() {
           )
           .setInteractive()
           .on("pointerdown", () => {
+            // Prevent drag when clicking on buildings
+            this.isDragging = false;
             // DETAIL PANEL: emit and open
             this.game.events.emit("assetClicked", a.id);
           });
@@ -448,6 +452,12 @@ export function createOuterCityScene() {
         const world = pointer.positionToCamera(this.cameras.main);
         const tile  = this.layer1.getTileAtWorldXY(world.x, world.y);
         this.hoverMarker.clear();
+
+        // Skip hover effects when dragging
+        if (this.isDragging) {
+          this.hoverMarker.clear();
+          return;
+        }
 
         if (!tile) {
           this.hoverTilesHighlight.clear();
