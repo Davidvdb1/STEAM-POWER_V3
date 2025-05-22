@@ -56,12 +56,13 @@ class GameStatistics {
     return new GameStatistics({
       id:          prismaGS.id,
       currency:    Currency.from(prismaGS.currency),
-      buildings:   prismaGS.buildings.map(Building.from),
+      buildings:   (prismaGS.buildings ?? []).map(Building.from),
       groupId:     prismaGS.groupId,
-      checkpoints: prismaGS.checkpoints.map(Checkpoint.from),
-      assets:      prismaGS.assets.map(Asset.from),
+      checkpoints: (prismaGS.checkpoints ?? []).map(Checkpoint.from),
+      assets:      (prismaGS.assets ?? []).map(Asset.from),
     });
   }
+
 }
 
 module.exports = GameStatistics;

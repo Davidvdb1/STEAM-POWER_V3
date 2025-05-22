@@ -68,15 +68,6 @@ async findByGroupId(groupId, opts = {}) {
   });
 
   if (!prismaGS) return null;
-
-  console.log('▶️ raw asset types:', prismaGS.assets.map(a => a.type));
-  console.log(
-    '▶️ checkpoint asset types:',
-    prismaGS.checkpoints
-      ? prismaGS.checkpoints.flatMap(cp => cp.assets.map(a => a.type))
-      : []
-  );
-
   return GameStatistics.from(prismaGS);
 }
 
@@ -106,6 +97,50 @@ async findByGroupId(groupId, opts = {}) {
     return Currency.from(updated);
   }
 
+  async incrementCurrency(currencyId, { greenEnergy = 0, greyEnergy = 0, coins = 0 }) {
+    const updated = await this.prisma.currency.update({
+      where: { id: currencyId },
+      data: {
+        greenEnergy: { increment: greenEnergy },
+        greyEnergy:  { increment: greyEnergy },
+        coins:       { increment: coins }
+      }
+    });
+
+    return Currency.from(updated);
+  }
+
+async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
+  const gs = await this.findByGroupId(groupId);
+
+  if (!gs || !gs.currency || !gs.assets) {
+    throw new Error('GameStatistics, currency of assets niet gevonden');
+  }
+
+  const typeMap = {
+    WIND: "windmolen",
+    SOLAR: "zonnepaneel",
+    WATER: "waterrad"
+  };
+
+  const assetType = typeMap[type.toUpperCase()];
+  if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
+
+  const matchingAssets = gs.assets.filter(a => a.type.toLowerCase() === assetType);
+
+  const totalGain = matchingAssets.reduce((sum, asset) => {
+    return sum + (greenEnergy * asset.energy);
+  }, 0);
+
+  const updated = await this.prisma.currency.update({
+    where: { id: gs.currency.id },
+    data: {
+      greenEnergy: { increment: totalGain }
+    }
+  });
+
+  return Currency.from(updated);
+}
 
 
   async addBuilding(statsId, building) {

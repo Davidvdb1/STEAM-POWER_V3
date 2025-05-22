@@ -136,7 +136,9 @@ class GameControlPanel extends HTMLElement {
 
   connectedCallback() {
     this._startButton.addEventListener("click", () => this._onStartClick());
-    this._outerButton.addEventListener("click", () => this._transitionToOuterCity());
+    this._outerButton.addEventListener("click", () =>
+      this._transitionToOuterCity()
+    );
     this._innerButton.addEventListener("click", () => this._transitionToCity());
     this._enableDragFromShop();
 
@@ -154,18 +156,29 @@ class GameControlPanel extends HTMLElement {
     });
 
     this._loadPhaser().then(() => this._initializeGame());
+
+    const bluetooth = JSON.parse(sessionStorage.getItem('bluetoothEnabled')); 
+    if (bluetooth) {
+      this._interval = setInterval(() => {
+        this._updateCurrency();
+      }, 2000);
+    } 
   }
 
+  disconnectedCallback() {
+    if (this._interval) clearInterval(this._interval);
+  }    
+
   _enableDragFromShop() {
-    this._shadow.querySelectorAll(".card-asset").forEach(card => {
-      card.addEventListener("dragstart", e => {
+    this._shadow.querySelectorAll(".card-asset").forEach((card) => {
+      card.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", card.dataset.type);
       });
     });
   }
 
   _loadPhaser() {
-    return new Promise(res => {
+    return new Promise((res) => {
       if (window.Phaser) return res();
       const s = document.createElement("script");
       s.src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js";
@@ -190,6 +203,9 @@ class GameControlPanel extends HTMLElement {
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
+
+        width: MAP_WIDTH * TILE_WIDTH,
+        height: MAP_HEIGHT * TILE_HEIGHT,
       },
     });
 
@@ -198,31 +214,71 @@ class GameControlPanel extends HTMLElement {
     this._game.events.on("assetClicked",    id => this._showAssetDetail(id));
   }
 
+    async _updateStatistics() {
+    try {
+      const raw = sessionStorage.getItem("loggedInUser");
+      if (!raw) throw new Error("Not logged in");
+      const { token, groupId } = JSON.parse(raw);
+      const gs = await gameService.fetchGameStatistics(groupId, token);
+
+      this._game.token = token;
+      this._game.groupId = groupId;
+      this._game.buildingData = gs.buildings;
+      this._game.assetData = gs.assets;
+      this._game.gameStatisticsId = gs.id;
+      this._game.currencyId = gs.currency.id;
+
+      const cur = gs.currency;
+      this._greenEl.textContent = cur.greenEnergy;
+      this._greyEl.textContent = cur.greyEnergy;
+      this._coinsEl.textContent = cur.coins;
+      this._statsContainer.classList.remove("hidden");
+    } catch (e) {
+      console.error("Error fetching stats:", e);
+    }
+  }
+
   async _onStartClick() {
     this._startButton.classList.add("hidden");
     this._game.scene.start("CityScene");
     this._outerContainer.style.display = "flex";
     this._innerContainer.style.display = "none";
 
+    await this._updateStatistics();
+
+    this._statsInterval = setInterval(() => this._updateStatistics(), 3000);
     try {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
       const gs = await fetchGameStatistics(groupId, token);
 
-      this._game.token            = token;
-      this._game.groupId          = groupId;
-      this._game.buildingData     = gs.buildings;
-      this._game.assetData        = gs.assets;
+
+      this._game.token = token;
+      this._game.groupId = groupId;
+      this._game.buildingData = gs.buildings;
+      this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId       = gs.currency.id;
 
-      this._greenEl.textContent = gs.currency.greenEnergy;
-      this._greyEl.textContent  = gs.currency.greyEnergy;
-      this._coinsEl.textContent = gs.currency.coins;
+      const cur = gs.currency;
+      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
+      this._greyEl.textContent = cur.greyEnergy;
+      this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
+    }
+  }
+
+  async _updateCurrency() {
+    try {
+      const cur = await gameService.getCurrencyById(this._game.currencyId, this._game.token);
+      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
+      this._greyEl.textContent = cur.greyEnergy;
+      this._coinsEl.textContent = cur.coins;
+    } catch (e) {
+      console.error("Error fetching currency:", e);
     }
   }
 
@@ -252,26 +308,30 @@ class GameControlPanel extends HTMLElement {
 
   _animateWrapper(offsetX, onComplete) {
     const els = [this._wrapper, this._statsContainer];
-    els.forEach(el => {
+    els.forEach((el) => {
       el.style.transition = "transform 0.5s ease";
       el.style.transform  = `translateX(${offsetX}px)`;
     });
 
     let done = 0;
-    els.forEach(el => {
-      el.addEventListener("transitionend", () => {
-        done++;
-        if (done === els.length) {
-          onComplete();
-          els.forEach(inner => {
-            inner.style.transition = "none";
-            inner.style.transform  = `translateX(${-offsetX}px)`;
-            void inner.offsetWidth;
-            inner.style.transition = "transform 0.5s ease";
-            inner.style.transform  = "translateX(0)";
-          });
-        }
-      }, { once: true });
+    els.forEach((el) => {
+      el.addEventListener(
+        "transitionend",
+        () => {
+          done++;
+          if (done === els.length) {
+            onComplete();
+            els.forEach((inner) => {
+              inner.style.transition = "none";
+              inner.style.transform = `translateX(${-offsetX}px)`;
+              void inner.offsetWidth;
+              inner.style.transition = "transform 0.5s ease";
+              inner.style.transform = "translateX(0)";
+            });
+          }
+        },
+        { once: true }
+      );
     });
   }
 
