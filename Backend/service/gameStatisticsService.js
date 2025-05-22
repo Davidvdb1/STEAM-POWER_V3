@@ -85,6 +85,22 @@ class GameStatisticsService {
   async delete(id) {
     return await gameStatisticsRepository.delete(id);
   }
+
+  async upgradeBuilding(buildingId, { level }) {
+    console.log('→ [upgradeBuilding] buildingId=', buildingId, 'new level=', level);
+    const building = await gameStatisticsRepository.findBuildingById(buildingId);
+    console.log('→ [upgradeBuilding] current building:', building);
+
+    if (!building) {
+      throw new Error('Building not found');
+    }
+
+    const updatedBuilding = await gameStatisticsRepository.upgradeBuilding(buildingId, { level });
+    console.log('→ [upgradeBuilding] updated building:', updatedBuilding);
+    return updatedBuilding;
+  }
+
 }
+
 
 module.exports = new GameStatisticsService();

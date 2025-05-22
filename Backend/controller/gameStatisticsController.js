@@ -185,4 +185,18 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// upgrade a building
+
+router.put('/buildings/:buildingId/upgrade', async (req, res) => {
+   console.log('→ [PUT /buildings/:buildingId/upgrade] params =', req.params, 'body =', req.body);
+  try {
+    const building = await gameStatisticsService.upgradeBuilding(req.params.buildingId, req.body);
+    res.status(200).json(building);
+  } catch (error) {
+    console.error(`Error upgrading building ${req.params.buildingId}:`, error);
+    const statusCode = error.statusCode || 400;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
 module.exports = router;

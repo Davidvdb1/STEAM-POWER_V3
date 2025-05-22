@@ -159,19 +159,19 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
     return Building.from(created);
   }
 
-  async updateBuilding(buildingId, { xLocation, yLocation, xSize, ySize }) {
-    const data = {};
-    if (typeof xLocation === 'number') data.xLocation = xLocation;
-    if (typeof yLocation === 'number') data.yLocation = yLocation;
-    if (typeof xSize     === 'number') data.xSize     = xSize;
-    if (typeof ySize     === 'number') data.ySize     = ySize;
+  async upgradeBuilding(buildingId, { level }) {
     const updated = await this.prisma.building.update({
       where: { id: buildingId },
-      data,
+      data: {
+        level: {
+          update: { level }
+        }
+      },
       include: { level: true }
     });
     return Building.from(updated);
   }
+
 
   async removeBuilding(buildingId) {
     await this.prisma.building.delete({ where: { id: buildingId } });
@@ -242,6 +242,14 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
 
   async delete(id) {
     await this.prisma.gameStatistics.delete({ where: { id } });
+  }
+
+  async findBuildingById(buildingId) {
+    const building = await this.prisma.building.findUnique({
+      where: { id: buildingId },
+      include: { level: true }
+    });
+    return building ? Building.from(building) : null;
   }
 }
 

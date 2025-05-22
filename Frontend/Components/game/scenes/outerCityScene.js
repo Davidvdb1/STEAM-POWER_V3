@@ -596,6 +596,55 @@ export function createOuterCityScene() {
           }
         }
       });
+
+      (this.sys.game.assetData || []).forEach((a) => {
+        const wx = a.xLocation * this.map.tileWidth;
+        const wy = a.yLocation * this.map.tileHeight;
+        const asset = this.add
+          .image(wx, wy, a.type)
+          .setOrigin(0)
+          .setDisplaySize(
+            a.xSize * this.map.tileWidth,
+            a.ySize * this.map.tileHeight
+          )
+          .setInteractive()
+          .on("pointerdown", () => {
+            // open detail panel
+            this.game.events.emit("assetClicked", a.id);
+            return;
+
+            const msg = `Wil je deze ${a.type} verwijderen?`;
+            this.showConfirmation(msg, async (confirmed) => {
+              if (confirmed) {
+                try {
+                  await removeAsset(a.id, this.sys.game.token);
+                  
+                  this._removeAsset(a);
+                  
+                  this.showError(`${a.type} succesvol verwijderd!`);
+                } catch (err) {
+                  console.error("Fout bij verwijderen:", err);
+                  this.showError("Verwijderen mislukt: " + err.message);
+                }
+              } else {
+                console.log("Actie geannuleerd");
+              }
+            });
+          });
+
+        for (let dx = 0; dx < a.xSize; dx++)
+          for (let dy = 0; dy < a.ySize; dy++)
+            this.tileAssetMap[`${a.xLocation + dx},${a.yLocation + dy}`] = true;
+
+        this.assetObjects.push({
+          id: a.id,
+          image: asset,
+          tx: a.xLocation,
+          ty: a.yLocation,
+          size: { width: a.xSize, height: a.ySize },
+          type: a.type,
+        });
+      });
     }
 
     update(time, delta) {
@@ -612,6 +661,10 @@ export function createOuterCityScene() {
         )
         .setInteractive()
         .on("pointerdown", () => {
+          // open detail panel for newly placed asset
+          this.game.events.emit("assetClicked", null);
+          return;
+
           const msg = `Wil je deze ${type} verwijderen?`;
           this.showConfirmation(msg, async (confirmed) => {
             if (confirmed) {
