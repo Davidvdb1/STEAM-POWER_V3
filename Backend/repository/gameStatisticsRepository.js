@@ -1,9 +1,9 @@
-const { PrismaClient } = require('@prisma/client');
-const GameStatistics   = require('../model/gameStatistics');
-const Building         = require('../model/building');
-const Asset            = require('../model/asset');
-const Currency         = require('../model/currency');
-const Checkpoint       = require('../model/checkpoint');
+const { PrismaClient } = require("@prisma/client");
+const GameStatistics = require("../model/gameStatistics");
+const Building = require("../model/building");
+const Asset = require("../model/asset");
+const Currency = require("../model/currency");
+const Checkpoint = require("../model/checkpoint");
 
 class GameStatisticsRepository {
   constructor() {
@@ -14,14 +14,16 @@ class GameStatisticsRepository {
     currency.validate();
     const prismaGS = await this.prisma.gameStatistics.create({
       data: {
-        group:    { connect: { id: groupId } },
-        currency: { create: {
-          greenEnergy: currency.greenEnergy,
-          greyEnergy:  currency.greyEnergy,
-          coins:       currency.coins,
-        }},
+        group: { connect: { id: groupId } },
+        currency: {
+          create: {
+            greenEnergy: currency.greenEnergy,
+            greyEnergy: currency.greyEnergy,
+            coins: currency.coins,
+          },
+        },
       },
-      include: { currency: true }
+      include: { currency: true },
     });
     return GameStatistics.from(prismaGS);
   }
@@ -29,82 +31,94 @@ class GameStatisticsRepository {
   async findById(
     id,
     {
-      includeCurrency    = true,
-      includeBuildings   = true,
-      includeAssets      = true,
+      includeCurrency = true,
+      includeBuildings = true,
+      includeAssets = true,
       includeCheckpoints = true,
-      includeGroup       = false,
+      includeGroup = false,
     } = {}
   ) {
     const prismaGS = await this.prisma.gameStatistics.findUnique({
       where: { id },
       include: {
-        currency:    includeCurrency,
-        buildings:   includeBuildings ? { include: { level: true } } : false,
-        assets:      includeAssets,
-        checkpoints: includeCheckpoints ? { include: { currency: true, buildings: { include: { level: true } }, assets: true } } : false,
-        group:       includeGroup,
-      }
+        currency: includeCurrency,
+        buildings: includeBuildings ? { include: { level: true } } : false,
+        assets: includeAssets,
+        checkpoints: includeCheckpoints
+          ? {
+              include: {
+                currency: true,
+                buildings: { include: { level: true } },
+                assets: true,
+              },
+            }
+          : false,
+        group: includeGroup,
+      },
     });
     return prismaGS ? GameStatistics.from(prismaGS) : null;
   }
 
-async findByGroupId(groupId, opts = {}) {
-  const prismaGS = await this.prisma.gameStatistics.findFirst({
-    where: { groupId },
-    include: {
-      currency:    opts.includeCurrency    ?? true,
-      buildings:   opts.includeBuildings   ? { include: { level: true } } : false,
-      assets:      opts.includeAssets      ?? true,
-      checkpoints: opts.includeCheckpoints ? { 
-        include: { 
-          currency: true, 
-          buildings: { include: { level: true } }, 
-          assets: true 
-        } 
-      } : false,
-      group:       opts.includeGroup       ?? false,
-    }
-  });
+  async findByGroupId(groupId, opts = {}) {
+    const prismaGS = await this.prisma.gameStatistics.findFirst({
+      where: { groupId },
+      include: {
+        currency: opts.includeCurrency ?? true,
+        buildings: opts.includeBuildings ? { include: { level: true } } : false,
+        assets: opts.includeAssets ?? true,
+        checkpoints: opts.includeCheckpoints
+          ? {
+              include: {
+                currency: true,
+                buildings: { include: { level: true } },
+                assets: true,
+              },
+            }
+          : false,
+        group: opts.includeGroup ?? false,
+      },
+    });
 
-  if (!prismaGS) return null;
-  return GameStatistics.from(prismaGS);
-}
+    if (!prismaGS) return null;
+    return GameStatistics.from(prismaGS);
+  }
 
   async findCurrencyById(id) {
     const prismaCurrency = await this.prisma.currency.findUnique({
       where: { id },
-      include: { gameStatistics: true }
+      include: { gameStatistics: true },
     });
     return prismaCurrency ? Currency.from(prismaCurrency) : null;
   }
 
-
   async updateCurrency(currencyId, { greenEnergy, greyEnergy, coins }) {
     if (
-      typeof greenEnergy !== 'number' ||
-      typeof greyEnergy  !== 'number' ||
-      typeof coins       !== 'number'
+      typeof greenEnergy !== "number" ||
+      typeof greyEnergy !== "number" ||
+      typeof coins !== "number"
     ) {
-      throw new Error('Invalid currency values');
+      throw new Error("Invalid currency values");
     }
 
     const updated = await this.prisma.currency.update({
-      where: { id: currencyId },      
-      data: { greenEnergy, greyEnergy, coins }
+      where: { id: currencyId },
+      data: { greenEnergy, greyEnergy, coins },
     });
 
     return Currency.from(updated);
   }
 
-  async incrementCurrency(currencyId, { greenEnergy = 0, greyEnergy = 0, coins = 0 }) {
+  async incrementCurrency(
+    currencyId,
+    { greenEnergy = 0, greyEnergy = 0, coins = 0 }
+  ) {
     const updated = await this.prisma.currency.update({
       where: { id: currencyId },
       data: {
         greenEnergy: { increment: greenEnergy },
-        greyEnergy:  { increment: greyEnergy },
-        coins:       { increment: coins }
-      }
+        greyEnergy: { increment: greyEnergy },
+        coins: { increment: coins },
+      },
     });
 
     return Currency.from(updated);
@@ -114,28 +128,28 @@ async findByGroupId(groupId, opts = {}) {
     building.validate();
     const created = await this.prisma.building.create({
       data: {
-        xLocation:      building.xLocation,
-        yLocation:      building.yLocation,
-        xSize:          building.xSize,
-        ySize:          building.ySize,
-        level:          { connect: { id: building.level.id } },
-        gameStatistics: { connect: { id: statsId } }
+        xLocation: building.xLocation,
+        yLocation: building.yLocation,
+        xSize: building.xSize,
+        ySize: building.ySize,
+        level: { connect: { id: building.level.id } },
+        gameStatistics: { connect: { id: statsId } },
       },
-      include: { level: true }
+      include: { level: true },
     });
     return Building.from(created);
   }
 
   async updateBuilding(buildingId, { xLocation, yLocation, xSize, ySize }) {
     const data = {};
-    if (typeof xLocation === 'number') data.xLocation = xLocation;
-    if (typeof yLocation === 'number') data.yLocation = yLocation;
-    if (typeof xSize     === 'number') data.xSize     = xSize;
-    if (typeof ySize     === 'number') data.ySize     = ySize;
+    if (typeof xLocation === "number") data.xLocation = xLocation;
+    if (typeof yLocation === "number") data.yLocation = yLocation;
+    if (typeof xSize === "number") data.xSize = xSize;
+    if (typeof ySize === "number") data.ySize = ySize;
     const updated = await this.prisma.building.update({
       where: { id: buildingId },
       data,
-      include: { level: true }
+      include: { level: true },
     });
     return Building.from(updated);
   }
@@ -148,16 +162,16 @@ async findByGroupId(groupId, opts = {}) {
     asset.validate();
     const created = await this.prisma.asset.create({
       data: {
-        buildCost:      asset.buildCost,
-        destroyCost:    asset.destroyCost,
-        energy:         asset.energy,
-        xLocation:      asset.xLocation,
-        yLocation:      asset.yLocation,
-        xSize:          asset.xSize,
-        ySize:          asset.ySize,
-        type:            asset.type,
-        gameStatistics: { connect: { id: statsId } }
-      }
+        buildCost: asset.buildCost,
+        destroyCost: asset.destroyCost,
+        energy: asset.energy,
+        xLocation: asset.xLocation,
+        yLocation: asset.yLocation,
+        xSize: asset.xSize,
+        ySize: asset.ySize,
+        type: asset.type,
+        gameStatistics: { connect: { id: statsId } },
+      },
     });
     return Asset.from(created);
   }
@@ -168,38 +182,46 @@ async findByGroupId(groupId, opts = {}) {
 
   async recordCheckpoint(statsId, cp) {
     cp.validate();
+
     const prismaCP = await this.prisma.checkpoint.create({
       data: {
         gameStatistics: { connect: { id: statsId } },
-        currency:       { create: {
-          greenEnergy: cp.currency.greenEnergy,
-          greyEnergy:  cp.currency.greyEnergy,
-          coins:       cp.currency.coins,
-        }} ,
-        buildings:      { create: cp.buildings.map(b => ({
-          xLocation: b.xLocation,
-          yLocation: b.yLocation,
-          xSize:     b.xSize,
-          ySize:     b.ySize,
-          level:     { connect: { id: b.level.id } },
-        }))},
-        assets:          { create: cp.assets.map(a => ({
-          buildCost:   a.buildCost,
-          destroyCost: a.destroyCost,
-          energy:      a.energy,
-          xLocation:   a.xLocation,
-          yLocation:   a.yLocation,
-          xSize:       a.xSize,
-          ySize:       a.ySize,
-          type:        a.type,
-        }))}
+        currency: {
+          create: {
+            greenEnergy: cp.currency.greenEnergy,
+            greyEnergy: cp.currency.greyEnergy,
+            coins: cp.currency.coins,
+          },
+        },
+        buildings: {
+          create: cp.buildings.map((b) => ({
+            xLocation: b.xLocation,
+            yLocation: b.yLocation,
+            xSize: b.xSize,
+            ySize: b.ySize,
+            level: { connect: { id: b.level.id } }, // connect via id
+          })),
+        },
+        assets: {
+          create: cp.assets.map((a) => ({
+            buildCost: a.buildCost,
+            destroyCost: a.destroyCost,
+            energy: a.energy,
+            xLocation: a.xLocation,
+            yLocation: a.yLocation,
+            xSize: a.xSize,
+            ySize: a.ySize,
+            type: a.type,
+          })),
+        },
       },
       include: {
         currency: true,
         buildings: { include: { level: true } },
-        assets: true
-      }
+        assets: true,
+      },
     });
+
     return Checkpoint.from(prismaCP);
   }
 
