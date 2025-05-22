@@ -124,11 +124,21 @@ export function createCityScene() {
       });
     }
 
+
+    /**
+     * Configures the selectable tile regions for various buildings in the city scene.
+     * 
+     * Initializes a `BuildingRegistry` and registers multiple buildings by specifying their
+     * names, associated map, and the tile coordinate ranges on different layers that define
+     * their selectable areas. Each building can span multiple layers and rectangular regions.
+     * 
+     * This setup enables the game to recognize which tiles correspond to which buildings,
+     * facilitating interactions such as selection, highlighting, or triggering building-specific logic.
+     */
     configureTileSelections() {
       // Set up A building registry to define buildings
       this.buildingRegistry = new BuildingRegistry();
 
-      // Define buildings by specific tile coordinates
       // Define buildings by specific tile coordinates and layers
       this.buildingRegistry.createBuilding(
         "office", 
@@ -160,7 +170,7 @@ export function createCityScene() {
         ["Layer-2", [88, 14], [90, 14]],
         ["Layer-3", [88, 0], [103, 13]]
       );
-      
+
       this.buildingRegistry.createBuilding(
         "hotdogStand", 
         this.map,
@@ -169,7 +179,7 @@ export function createCityScene() {
         ["Layer-3", [100, 14], [101, 14]],
         ["Layer-4", [90, 15], [102, 22]]
       );
-      
+
       this.buildingRegistry.createBuilding(
         "hospital", 
         this.map,
@@ -204,7 +214,7 @@ export function createCityScene() {
         ["Layer-2", [96, 30], [115, 45]],
         ["Layer-3", [96, 30], [115, 45]]
       );
-      
+
       this.buildingRegistry.createBuilding(
         "policeStation", 
         this.map,
