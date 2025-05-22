@@ -4,12 +4,11 @@ import {
   setMovementKeys,
   handleMovementKeys,
 } from "../utils/phaserSceneUtils.js";
-import {
-  addAsset,
-  updateCurrency,
-  getCurrencyById,
-  removeAsset,
-} from "../utils/gameService.js";
+
+import * as gameService from "../utils/gameService.js";
+
+const template = document.createElement("template");
+template.innerHTML = /*html*/ ``
 
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
@@ -44,7 +43,14 @@ export function createOuterCityScene() {
         Zonnepaneel: { width: 4, height: 6 },
       };
 
-      this.assetCosts = {
+      this.assetBuildCosts = {
+        Kerncentrale: 20,
+        Windmolen: 20,
+        Waterrad: 20,
+        Zonnepaneel: 20,
+      };
+
+      this.assetDestroyCosts = {
         Kerncentrale: 20,
         Windmolen: 20,
         Waterrad: 20,
@@ -305,7 +311,7 @@ export function createOuterCityScene() {
             this.showConfirmation(msg, async (confirmed) => {
               if (confirmed) {
                 try {
-                  await removeAsset(a.id, this.sys.game.token);
+                  await gameService.removeAsset(a.id, this.sys.game.token);
                   this._removeAsset(a);
                   this.showError(`${a.type} succesvol verwijderd!`);
                 } catch (err) {
@@ -332,6 +338,7 @@ export function createOuterCityScene() {
           ty: a.yLocation,
           size: { width: a.xSize, height: a.ySize },
           type: a.type,
+          destroyCost: a.destroyCost,
         });
       });
 
@@ -429,7 +436,7 @@ export function createOuterCityScene() {
         this.dragHighlight.clear();
       });
 
-      canvas.addEventListener("drop", (e) => {
+      canvas.addEventListener("drop", async (e) => {
         e.preventDefault();
         const type = e.dataTransfer.getData("text/plain");
 
@@ -467,7 +474,29 @@ export function createOuterCityScene() {
           return;
         }
 
-        const cost = this.assetCosts[type] || 0;
+        const token = this.sys.game.token;
+        const currencyId = this.sys.game.currencyId;
+
+        const currentCurrencyData = await gameService.getCurrencyById(
+          currencyId,
+          token
+        );
+
+        const currencyData = {
+          greenEnergy: currentCurrencyData.greenEnergy,
+          greyEnergy: currentCurrencyData.greyEnergy,
+          coins: currentCurrencyData.coins,
+        };
+
+        const cost = this.assetBuildCosts[type] || 0;
+
+        if (currentCurrencyData.coins < cost) {
+          this.showError("Niet genoeg coins om dit te plaatsen");
+          this.dragHighlight.clear();
+          this.draggedAssetType = null;
+          return;
+        }
+
         const msg = `Wil je een ${type} hier plaatsen voor ${cost} coins?`;
 
         this.showConfirmation(msg, async (confirmed) => {
@@ -494,7 +523,7 @@ export function createOuterCityScene() {
                 type,
               };
 
-              const currentCurrencyData = await getCurrencyById(
+              const currentCurrencyData = await gameService.getCurrencyById(
                 currencyId,
                 token
               );
@@ -506,14 +535,16 @@ export function createOuterCityScene() {
               };
 
               // First add the asset to the database to get an ID
-              const response = await addAsset(gameStatsId, assetData, token);
+              const response = await gameService.addAsset(gameStatsId, assetData, token);
               // Get the asset ID from the response
               const assetId = response.id || Date.now(); // Use timestamp as fallback
 
               // Place the asset with the obtained ID
-              this._placeAsset(type, tx, ty, size, assetId);
+              const destroyCost = this.assetDestroyCosts[type] || 0;
+              this._placeAsset(type, tx, ty, size, assetId, destroyCost);
+              this.updateStats();
 
-              await updateCurrency(currencyId, currencyData, token);
+              await gameService.updateCurrency(currencyId, currencyData, token);
             } catch (err) {
               console.error("Error placing asset:", err);
               this.showError(
@@ -602,7 +633,7 @@ export function createOuterCityScene() {
       handleMovementKeys(this, delta);
     }
 
-    _placeAsset(type, tx, ty, size, assetId) {
+    _placeAsset(type, tx, ty, size, assetId, destroyCost) {
       const image = this.add
         .image(tx * this.map.tileWidth, ty * this.map.tileHeight, type)
         .setOrigin(0)
@@ -616,7 +647,7 @@ export function createOuterCityScene() {
           this.showConfirmation(msg, async (confirmed) => {
             if (confirmed) {
               try {
-                await removeAsset(assetId, this.sys.game.token);
+                await gameService.removeAsset(assetId, this.sys.game.token);
 
                 this._removeAsset({
                   id: assetId,
@@ -624,9 +655,11 @@ export function createOuterCityScene() {
                   ty: ty,
                   type: type,
                   size: size,
+                  destroyCost: destroyCost,
                 });
 
                 this.showError(`${type} succesvol verwijderd!`);
+                
               } catch (err) {
                 console.error("Fout bij verwijderen:", err);
                 this.showError("Verwijderen mislukt: " + err.message);
@@ -652,6 +685,7 @@ export function createOuterCityScene() {
         ty,
         size,
         type,
+        destroyCost,
       });
 
       // Clear highlight
@@ -669,6 +703,8 @@ export function createOuterCityScene() {
         }
         return a.tx === asset.tx && a.ty === asset.ty && a.type === asset.type;
       });
+
+      this.updateStats()
 
       if (assetIndex !== -1) {
         const assetToRemove = this.assetObjects[assetIndex];
@@ -691,6 +727,10 @@ export function createOuterCityScene() {
         // Clear any highlights
         this.hoverTilesHighlight.clear();
       }
+    }
+
+    updateStats() {
+      window.dispatchEvent(new CustomEvent("update"));
     }
   };
 }

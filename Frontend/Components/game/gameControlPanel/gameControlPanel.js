@@ -126,6 +126,7 @@ class GameControlPanel extends HTMLElement {
     this._innerButton.addEventListener("click", () => this._transitionToCity());
     this._enableDragFromShop();
     this._loadPhaser().then(() => this._initializeGame());
+    window.addEventListener("update", this._updateStatistics.bind(this));
 
     const bluetooth = JSON.parse(sessionStorage.getItem('bluetoothEnabled')); 
     if (bluetooth) {
@@ -186,29 +187,30 @@ class GameControlPanel extends HTMLElement {
     window.phaserGame = this._game;
   }
 
-    async _updateStatistics() {
-    try {
-      const raw = sessionStorage.getItem("loggedInUser");
-      if (!raw) throw new Error("Not logged in");
-      const { token, groupId } = JSON.parse(raw);
-      const gs = await gameService.fetchGameStatistics(groupId, token);
+  async _updateStatistics() {
+  try {
+    console.log("Updating statistics...");
+    const raw = sessionStorage.getItem("loggedInUser");
+    if (!raw) throw new Error("Not logged in");
+    const { token, groupId } = JSON.parse(raw);
+    const gs = await gameService.fetchGameStatistics(groupId, token);
 
-      this._game.token = token;
-      this._game.groupId = groupId;
-      this._game.buildingData = gs.buildings;
-      this._game.assetData = gs.assets;
-      this._game.gameStatisticsId = gs.id;
-      this._game.currencyId = gs.currency.id;
+    this._game.token = token;
+    this._game.groupId = groupId;
+    this._game.buildingData = gs.buildings;
+    this._game.assetData = gs.assets;
+    this._game.gameStatisticsId = gs.id;
+    this._game.currencyId = gs.currency.id;
 
-      const cur = gs.currency;
-      this._greenEl.textContent = cur.greenEnergy;
-      this._greyEl.textContent = cur.greyEnergy;
-      this._coinsEl.textContent = cur.coins;
-      this._statsContainer.classList.remove("hidden");
-    } catch (e) {
-      console.error("Error fetching stats:", e);
-    }
+    const cur = gs.currency;
+    this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3)
+    this._greyEl.textContent = cur.greyEnergy;
+    this._coinsEl.textContent = cur.coins;
+    this._statsContainer.classList.remove("hidden");
+  } catch (e) {
+    console.error("Error fetching stats:", e);
   }
+}
 
   async _onStartClick() {
     this._startButton.classList.add("hidden");
@@ -217,40 +219,6 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
 
     await this._updateStatistics();
-
-    this._statsInterval = setInterval(() => this._updateStatistics(), 3000);
-    try {
-      const raw = sessionStorage.getItem("loggedInUser");
-      if (!raw) throw new Error("Not logged in");
-      const { token, groupId } = JSON.parse(raw);
-      const gs = await gameService.fetchGameStatistics(groupId, token);
-
-      this._game.token = token;
-      this._game.groupId = groupId;
-      this._game.buildingData = gs.buildings;
-      this._game.assetData = gs.assets;
-      this._game.gameStatisticsId = gs.id;
-      this._game.currencyId = gs.currency.id;
-
-      const cur = gs.currency;
-      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
-      this._greyEl.textContent = cur.greyEnergy;
-      this._coinsEl.textContent = cur.coins;
-      this._statsContainer.classList.remove("hidden");
-    } catch (e) {
-      console.error("Error fetching stats:", e);
-    }
-  }
-
-  async _updateCurrency() {
-    try {
-      const cur = await gameService.getCurrencyById(this._game.currencyId, this._game.token);
-      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
-      this._greyEl.textContent = cur.greyEnergy;
-      this._coinsEl.textContent = cur.coins;
-    } catch (e) {
-      console.error("Error fetching currency:", e);
-    }
   }
 
   _transitionToOuterCity() {
