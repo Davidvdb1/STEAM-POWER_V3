@@ -184,21 +184,23 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
       where: { id: buildingId },
       data,
       include: { level: true },
-
-//   async upgradeBuilding(buildingId, { level }) {
-//     const updated = await this.prisma.building.update({
-//       where: { id: buildingId },
-//       data: {
-//         level: {
-//           update: { level }
-//         }
-//       },
-//       include: { level: true }
-
     });
     return Building.from(updated);
   }
 
+    async upgradeBuilding(buildingId, { level }) {
+    const updated = await this.prisma.building.update({
+      where: { id: buildingId },
+      data: {
+        level: {
+          update: { level }
+        }
+      },
+      include: { level: true }
+
+    });
+    return Building.from(updated);
+  }
 
   async removeBuilding(buildingId) {
     await this.prisma.building.delete({ where: { id: buildingId } });
