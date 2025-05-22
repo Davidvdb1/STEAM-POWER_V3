@@ -1,5 +1,3 @@
-// components/game/gameControlPanel/details/assetDetail.js
-
 const template = document.createElement("template");
 template.innerHTML = /*html*/`
   <style>
@@ -8,6 +6,7 @@ template.innerHTML = /*html*/`
 
   <button class="close">&times;</button>
   <div class="info">
+    <p>Type: <span class="type"></span></p>
     <p>Energy: <span class="energy"></span></p>
     <button class="destroy">
       Sloop (<span class="destroy-cost"></span> coins)
@@ -22,13 +21,13 @@ class AssetDetail extends HTMLElement {
     shadow.appendChild(template.content.cloneNode(true));
 
     this._closeBtn       = shadow.querySelector("button.close");
+    this._typeEl         = shadow.querySelector(".type");
     this._energyEl       = shadow.querySelector(".energy");
     this._destroyBtn     = shadow.querySelector("button.destroy");
     this._destroyCostEl  = shadow.querySelector(".destroy-cost");
     this._data           = null;
   }
 
-  // allow parent to set the Asset instance directly
   set data(value) {
     this._data = value;
     this._render();
@@ -39,12 +38,10 @@ class AssetDetail extends HTMLElement {
   }
 
   connectedCallback() {
-    // close panel
     this._closeBtn.addEventListener("click", () =>
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
     );
 
-    // fallback if someone only set asset-id attribute
     const raw = this.getAttribute("asset-id");
     if (raw && !this._data) {
       const id = parseInt(raw, 10);
@@ -58,14 +55,15 @@ class AssetDetail extends HTMLElement {
   _render() {
     if (!this._data) return;
 
-    const { id, energy, destroyCost } = this._data;
+    const { id, type, energy, destroyCost } = this._data;
 
-    // always show energy
+    // expose type for styling
+    this.setAttribute('type', type);
+    this._typeEl.textContent = type;
+
     this._energyEl.textContent      = energy;
-    // set destroy cost
     this._destroyCostEl.textContent = destroyCost;
 
-    // hook up destroy button
     this._destroyBtn.onclick = () => {
       this.dispatchEvent(new CustomEvent("destroy-asset", {
         detail: { assetId: id },

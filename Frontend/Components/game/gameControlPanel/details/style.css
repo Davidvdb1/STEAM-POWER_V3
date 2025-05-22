@@ -2,13 +2,17 @@
   position: absolute;
   top: 16px;
   left: 16px;
-  width: 180px;
-  background: #fff;
+  width: 150px;
+  background: #d2f7d2;
   border: 2px solid #333;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   padding: 12px;
   font-family: "PixelFont", sans-serif;
   z-index: 20;
+}
+
+:host([type=Kerncentrale]) {
+  background: #d3d3d3;
 }
 
 .close {
@@ -31,13 +35,8 @@
   color: #151515;
 }
 
-.info .level,
-.info .energy-cost,
-.info .upgrade-cost {
-  font-weight: bold;
-}
-
-.upgrade {
+.upgrade,
+button.destroy {
   display: block;
   margin: 12px auto 0;
   padding: 6px 10px;
@@ -46,6 +45,6 @@
   cursor: pointer;
 }
 
-.upgrade:hover {
+button.destroy:hover {
   background: #ccc;
 }/*# sourceMappingURL=style.css.map */
