@@ -26,11 +26,19 @@ router.get('/windkracht', async (req, res) => {
         const thresholds = [0.3, 1.5, 3.3, 5.4, 7.9, 10.7, 13.8, 17.1, 20.7, 24.4, 28.4, 32.6];
         const beaufort = thresholds.findIndex(t => windSpeed < t);
 
+        // Windenergie berekenen (in kWh/m²/u)
+        const rho = 1.225;         // kg/m³ (luchtdichtheid)
+        const eta = 0.4;           // rendementsfactor
+        const powerWatts = 0.5 * rho * Math.pow(windSpeed, 3) * eta; // in W/m²
+        const powerKwh = +(powerWatts / 1000).toFixed(2); // in kWh/m²/u
+
         res.json({
             latitude: lat,
             longitude: lon,
             wind_speed_m_s: windSpeed,
-            beaufort: beaufort === -1 ? 12 : beaufort
+            beaufort: beaufort === -1 ? 12 : beaufort,
+            geschatte_energie_kwh_per_m2_per_uur: powerKwh
+
         });
     } catch (error) {
         console.error('Fout bij ophalen windkracht:', error);
@@ -111,19 +119,31 @@ router.get('/regen', async (req, res) => {
             return totaal + (uur.rain?.['1h'] ?? 0);
         }, 0);
 
-        // Simpele intensiteitsclassificatie
+        // Intensiteitsclassificatie
         let intensiteit;
-        if (totaalRegen === 0) intensiteit = 'geen';
-        else if (totaalRegen <= urenAantal) intensiteit = 'licht';
-        else if (totaalRegen <= urenAantal * 2.5) intensiteit = 'matig';
-        else intensiteit = 'hevige regen';
+        let energieKwh = 0;
+
+        if (totaalRegen === 0) {
+            intensiteit = 'geen';
+            energieKwh = 0;
+        } else if (totaalRegen <= urenAantal) {
+            intensiteit = 'licht';
+            energieKwh = 100;
+        } else if (totaalRegen <= urenAantal * 2.5) {
+            intensiteit = 'matig';
+            energieKwh = 400;
+        } else {
+            intensiteit = 'hevige regen';
+            energieKwh = 1000;
+        }
 
         res.json({
             latitude: lat,
             longitude: lon,
             uren: urenAantal,
             regen_mm: parseFloat(totaalRegen.toFixed(1)),
-            intensiteit
+            intensiteit,
+            geschatte_energie_kwh_per_km2_per_uur: energieKwh
         });
     } catch (error) {
         console.error('Fout bij ophalen regen:', error);
