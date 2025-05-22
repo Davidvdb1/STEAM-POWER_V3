@@ -1,4 +1,5 @@
 //#region IMPORTS
+import SunCalc from './solar.js';
 //#endregion IMPORTS
 
 //#region SIMULATION
@@ -173,18 +174,18 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         // Light
         new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), this.scene);
         // Sun
-        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/Sun with beams.glb", this.scene, async (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/sun.glb", this.scene, async (meshes) => {
             console.log("Sun.glb loaded");
 
             const street = "Geldenaaksebaan 335";
             const city = "Leuven";
             const postal = "3001";
-            const date = new Date(); 
-            // date.setHours(0, 0, 0, 0)
+            const date = new Date();
             const { azimuth, altitude } = await SunCalc.getSolarPositionForLocation(street, city, postal, date);
             const x = Math.cos(altitude) * Math.sin(azimuth);
             const y = Math.sin(altitude);
             const z = Math.cos(altitude) * Math.cos(azimuth);
+            console.log(x, y, z);
             
 
             // Find the root mesh
