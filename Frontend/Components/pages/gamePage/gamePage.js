@@ -1,6 +1,6 @@
 //#region IMPORTS
-import "../../game/gameControlPanel/gameControlPanel.js"
-import "../../game/gameAdminPanel/gameAdminPanel.js"
+import "../../game/components/gameControlPanel/gameControlPanel.js"
+import "../../game/components/gameAdminPanel/gameAdminPanel.js"
 //#endregion IMPORTS
 
 //#region GAMEPAGE

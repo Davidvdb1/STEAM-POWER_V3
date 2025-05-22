@@ -1,22 +1,22 @@
-import { createLogoScene } from "../scenes/logoScene.js";
-import { createCityScene } from "../scenes/cityScene.js";
-import { createOuterCityScene } from "../scenes/outerCityScene.js";
+import { createLogoScene } from "../../scenes/logoScene.js";
+import { createCityScene } from "../../scenes/cityScene.js";
+import { createOuterCityScene } from "../../scenes/outerCityScene.js";
 import {
   fetchGameStatistics,
   removeAsset,
   getCurrencyById,
   updateCurrency,
   upgradeBuilding
-} from "../utils/gameService.js";
+} from "../../utils/gameService.js";
 
 // register our detail-panel components
-import "./details/buildingDetail.js";
-import "./details/assetDetail.js";
+import "../../details/buildingDetail.js";
+import "../../details/assetDetail.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
-    @import './Components/game/gameControlPanel/style.css';
+    @import './Components/game/components/gameControlPanel/style.css';
     :host { display: block; position: relative; }
     #detail-container { position: absolute; top: 0; left: -220px; width: 200px; z-index: 10; }
   </style>

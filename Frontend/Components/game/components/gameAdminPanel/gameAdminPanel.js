@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './Components/game/gameAdminPanel/style.css';
+        @import './Components/game/components/gameAdminPanel/style.css';
         .hidden { display: none; }
     </style>
 
