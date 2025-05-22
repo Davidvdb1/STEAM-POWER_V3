@@ -1,4 +1,5 @@
 import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys } from "../utils/phaserSceneUtils.js";
+import { BuildingRegistry } from "../utils/buildingRegistry.js";
 
 export function createCityScene() {
   return class CityScene extends Phaser.Scene {
@@ -34,6 +35,12 @@ export function createCityScene() {
 
       // Set up keyboard input for camera navigation
       setMovementKeys(this);
+
+      // Configure tile selections for buildings
+      this.configureTileSelections();
+
+      // Gray out all buildings at the start of the game
+      this.buildingRegistry.grayoutAllBuildings(1);
 
       // Setup confirmation dialog UI
       const popupWidth = 700;
@@ -185,7 +192,7 @@ export function createCityScene() {
         this.input.keyboard.enabled = true;
       };
 
-      // Begin tile hover functionality
+      // Enable visibly hovering over a selection of tiles
       this.handleTileHover();
     }
 
@@ -260,5 +267,159 @@ export function createCityScene() {
           });
       });
     }
-  };
+
+    configureTileSelections() {
+      // Set up A building registry to define buildings
+      this.buildingRegistry = new BuildingRegistry();
+
+      // Define buildings by specific tile coordinates
+      // Define buildings by specific tile coordinates and layers
+      this.buildingRegistry.createBuilding(
+        "office", 
+        this.map,
+        ["Layer-2", [0, 0], [20, 24]],
+        ["Layer-3", [0, 0], [20, 24]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "apartmentBlockTopLeft", 
+        this.map,
+        ["Layer-2", [21, 0], [52, 24]],
+        ["Layer-3", [21, 0], [52, 24]],
+        ["Layer-4", [21, 0], [52, 24]],
+        ["Layer-5", [30, 5], [40, 9]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "townhall", 
+        this.map,
+        ["Layer-2", [58, 0], [82, 24]],
+        ["Layer-3", [58, 0], [82, 24]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "gasStation", 
+        this.map,
+        ["Layer-2", [88, 0], [103, 13]],
+        ["Layer-2", [88, 14], [90, 14]],
+        ["Layer-3", [88, 0], [103, 13]]
+      );
+      
+      this.buildingRegistry.createBuilding(
+        "hotdogStand", 
+        this.map,
+        ["Layer-2", [90, 15], [102, 22]],
+        ["Layer-3", [90, 15], [102, 22]],
+        ["Layer-3", [100, 14], [101, 14]],
+        ["Layer-4", [90, 15], [102, 22]]
+      );
+      
+      this.buildingRegistry.createBuilding(
+        "hospital", 
+        this.map,
+        ["Layer-2", [104, 0], [139, 24]],
+        ["Layer-3", [104, 0], [139, 24]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "shoppingCenter", 
+        this.map,
+        ["Layer-2", [0, 31], [25, 47]],
+        ["Layer-3", [0, 30], [27, 47]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "school", 
+        this.map,
+        ["Layer-2", [32, 25], [49, 46]],
+        ["Layer-3", [32, 25], [49, 46]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "bakery", 
+        this.map,
+        ["Layer-2", [52, 29], [59, 35]],
+        ["Layer-3", [52, 29], [59, 33]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "fireStation", 
+        this.map,
+        ["Layer-2", [96, 30], [115, 45]],
+        ["Layer-3", [96, 30], [115, 45]]
+      );
+      
+      this.buildingRegistry.createBuilding(
+        "policeStation", 
+        this.map,
+        ["Layer-2", [117, 27], [139, 47]],
+        ["Layer-3", [117, 27], [139, 47]],
+        ["Layer-4", [117, 27], [139, 47]],
+        ["Layer-5", [117, 30], [139, 47]],
+      );
+
+      this.buildingRegistry.createBuilding(
+        "apartmentBlockBottomLeft", 
+        this.map,
+        ["Layer-2", [0, 51], [6, 69]],
+        ["Layer-3", [0, 51], [6, 69]],
+        ["Layer-4", [0, 51], [6, 69]],
+        ["Layer-5", [0, 51], [6, 69]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "hotel", 
+        this.map,
+        ["Layer-2", [7, 51], [25, 69]],
+        ["Layer-3", [7, 51], [23, 69]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "apartmentBlockBottomCenter", 
+        this.map,
+        ["Layer-2", [31, 50], [53, 56]],
+        ["Layer-3", [31, 50], [66, 68]],
+        ["Layer-4", [31, 50], [67, 69]],
+        ["Layer-5", [31, 57], [49, 68]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "postOffice", 
+        this.map,
+        ["Layer-2", [72, 59], [75, 68]],
+        ["Layer-3", [76, 56], [83, 68]],
+        ["Layer-4", [76, 56], [83, 68]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "apartmentBlockBottomRight", 
+        this.map,
+        ["Layer-2", [76, 52], [88, 57]],
+        ["Layer-3", [76, 52], [88, 55]],
+        ["Layer-3", [84, 57], [90, 68]],
+        ["Layer-4", [76, 52], [88, 55]],
+        ["Layer-4", [84, 57], [90, 68]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "constructionSite", 
+        this.map,
+        ["Layer-1", [93, 57], [109, 68]],
+        ["Layer-2", [93, 54], [109, 68]],
+        ["Layer-3", [93, 54], [109, 68]],
+        ["Layer-4", [93, 54], [109, 68]],
+        ["Layer-5", [93, 54], [109, 68]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "trainStation", 
+        this.map,
+        ["Layer-1", [113, 67], [139, 68]],
+        ["Layer-2", [112, 58], [139, 69]],
+        ["Layer-3", [112, 58], [139, 69]],
+        ["Layer-4", [112, 58], [139, 69]],
+        ["Layer-5", [112, 58], [139, 69]]
+      );
+    };
+  }
 }
