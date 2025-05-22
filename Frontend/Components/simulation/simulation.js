@@ -180,10 +180,10 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         this._create3DLabel("W", new BABYLON.Vector3(3, 0, -0.2), this.scene);
 
         // Load environment
-        BABYLON.SceneLoader.Append("", "environment.glb", this.scene, function () {});
+        BABYLON.SceneLoader.Append("", "../Frontend/Assets/GLBs/environment.glb", this.scene, function () {});
 
         // Load House
-        BABYLON.SceneLoader.ImportMesh("", "", "house.glb", this.scene, (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/house.glb", this.scene, (meshes) => {
             const houseRoot = meshes.find(m => m.name === "__root__");
             if (houseRoot) {
                 houseRoot.scaling = new BABYLON.Vector3(0.00009, 0.00009, 0.00009);
@@ -193,7 +193,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         });
 
         // Load Windmill
-        BABYLON.SceneLoader.ImportMesh("", "", "windmill.glb", this.scene, (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/windmill.glb", this.scene, (meshes) => {
             this.windmill = meshes.find(m => m.name === "__root__");
             if (this.windmill) {
                 this.windmill.scaling = new BABYLON.Vector3(0.0022, 0.0022, 0.0022);
@@ -207,7 +207,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         });
 
         // Load Wheel
-        BABYLON.SceneLoader.ImportMesh("", "", "wheel.glb", this.scene, (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/wheel.glb", this.scene, (meshes) => {
             this.wheel = meshes.find(m => m.name === "__root__");
             if (this.wheel) {
                 this.wheel.scaling = new BABYLON.Vector3(0.15, 0.15, 0.15);
@@ -221,7 +221,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         });
 
         // Load Solar Panel
-        BABYLON.SceneLoader.ImportMesh("", "", "solar.glb", this.scene, (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/solar.glb", this.scene, (meshes) => {
             this.solarPanel = meshes.find(m => m.name === "__root__");
             if (this.solarPanel) {
                 this.solarPanel.scaling = new BABYLON.Vector3(0.02, 0.02, 0.02);

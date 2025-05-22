@@ -8,7 +8,7 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/pages/simulationPage/style.css';
     </style>
-    <simulation-れ></simulation-れ>
+    <simulation-れ id="simulation"></simulation-れ>
 `;
 //#endregion SIMULATIONPAGE
 
@@ -18,7 +18,6 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$simulation = this._shadowRoot.querySelector("simulation-れ");
     }
 
     // component attributes
@@ -30,12 +29,26 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
         
     }
 
-    connectedCallback() {
-        //move the simulation from the top of the stack to here
-    }
+    // connectedCallback() {
+    //     console.log("connectedCallback simulationPage");
+    //     document.addEventListener("showSimulation", this.showSimulation.bind(this));
+    //     const fetchSimulationEvent = new CustomEvent("fetchSimulation");
+    //     console.log("sending fetchSimulationEvent");
+    //     document.dispatchEvent(fetchSimulationEvent);
+    // }
 
-    disconnectedCallback() {
-        // move the simulation from here to the top of the stack
-    }
+    // disconnectedCallback() {
+    //     console.log("disconnectedCallback simulationPage");
+    //     const hideSimulationEvent = new CustomEvent("hideSimulation", { detail: { node: this.$simulation } });
+    //     console.log("sending hideSimulationEvent");
+    //     document.dispatchEvent(hideSimulationEvent);
+    // }
+
+    // showSimulation(event) {
+    //     console.log("showSimulation simulationPage");
+    //     event.detail.node.removeAttribute("hidden");
+    //     event.detail.node.setAttribute("style", "display: block;");
+    //     this.moveBefore(event.detail.node, null);
+    // }
 });
 //#endregion CLASS
