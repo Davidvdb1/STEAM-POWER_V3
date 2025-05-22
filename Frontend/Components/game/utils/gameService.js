@@ -15,7 +15,6 @@ export async function fetchGameStatistics(groupId, token) {
 
 export async function getCurrencyById(currencyId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/${currencyId}/currency`;
-  console.log('→ GET Currency URL:', url);
   const res = await fetch(url, {
     method: 'GET',
     headers: { Authorization: `Bearer ${token}` }
@@ -79,5 +78,21 @@ export async function updateCurrency(groupId, currencyData, token) {
     throw new Error(`Failed to remove asset: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
   }
 
+  return res.json();
+}
+
+export async function upgradeBuilding(buildingId, upgradeData, token) {
+  // Make sure this matches router.put('/buildings/:buildingId/upgrade') under /gameStatistics mount
+  const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${buildingId}/upgrade`;
+  console.log('PUT', url);
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(upgradeData)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(`Failed to upgrade building: HTTP ${res.status}` + (err.error ? ` - ${err.error}` : ''));
+  }
   return res.json();
 }
