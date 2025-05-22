@@ -226,7 +226,7 @@ class GameControlPanel extends HTMLElement {
       this._game.currencyId = gs.currency.id;
 
       const cur = gs.currency;
-      this._greenEl.textContent = cur.greenEnergy;
+      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
@@ -439,7 +439,7 @@ class GameControlPanel extends HTMLElement {
       await updateCurrency(currencyId, updatedCurrency, token);
 
       this._coinsEl.textContent = updatedCurrency.coins;
-      this._greenEl.textContent = updatedCurrency.greenEnergy;
+      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
       this._greyEl.textContent  = updatedCurrency.greyEnergy;
 
       const cityScene = this._game.scene.getScene("CityScene");
