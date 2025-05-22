@@ -68,15 +68,6 @@ async findByGroupId(groupId, opts = {}) {
   });
 
   if (!prismaGS) return null;
-
-  console.log('▶️ raw asset types:', prismaGS.assets.map(a => a.type));
-  console.log(
-    '▶️ checkpoint asset types:',
-    prismaGS.checkpoints
-      ? prismaGS.checkpoints.flatMap(cp => cp.assets.map(a => a.type))
-      : []
-  );
-
   return GameStatistics.from(prismaGS);
 }
 
@@ -106,6 +97,50 @@ async findByGroupId(groupId, opts = {}) {
     return Currency.from(updated);
   }
 
+  async incrementCurrency(currencyId, { greenEnergy = 0, greyEnergy = 0, coins = 0 }) {
+    const updated = await this.prisma.currency.update({
+      where: { id: currencyId },
+      data: {
+        greenEnergy: { increment: greenEnergy },
+        greyEnergy:  { increment: greyEnergy },
+        coins:       { increment: coins }
+      }
+    });
+
+    return Currency.from(updated);
+  }
+
+async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
+  const gs = await this.findByGroupId(groupId);
+
+  if (!gs || !gs.currency || !gs.assets) {
+    throw new Error('GameStatistics, currency of assets niet gevonden');
+  }
+
+  const typeMap = {
+    WIND: "windmolen",
+    SOLAR: "zonnepaneel",
+    WATER: "waterrad"
+  };
+
+  const assetType = typeMap[type.toUpperCase()];
+  if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
+
+  const matchingAssets = gs.assets.filter(a => a.type.toLowerCase() === assetType);
+
+  const totalGain = matchingAssets.reduce((sum, asset) => {
+    return sum + (greenEnergy * asset.energy);
+  }, 0);
+
+  const updated = await this.prisma.currency.update({
+    where: { id: gs.currency.id },
+    data: {
+      greenEnergy: { increment: totalGain }
+    }
+  });
+
+  return Currency.from(updated);
+}
 
 
   async addBuilding(statsId, building) {
@@ -124,19 +159,19 @@ async findByGroupId(groupId, opts = {}) {
     return Building.from(created);
   }
 
-  async updateBuilding(buildingId, { xLocation, yLocation, xSize, ySize }) {
-    const data = {};
-    if (typeof xLocation === 'number') data.xLocation = xLocation;
-    if (typeof yLocation === 'number') data.yLocation = yLocation;
-    if (typeof xSize     === 'number') data.xSize     = xSize;
-    if (typeof ySize     === 'number') data.ySize     = ySize;
+  async upgradeBuilding(buildingId, { level }) {
     const updated = await this.prisma.building.update({
       where: { id: buildingId },
-      data,
+      data: {
+        level: {
+          update: { level }
+        }
+      },
       include: { level: true }
     });
     return Building.from(updated);
   }
+
 
   async removeBuilding(buildingId) {
     await this.prisma.building.delete({ where: { id: buildingId } });
@@ -207,6 +242,14 @@ async findByGroupId(groupId, opts = {}) {
 
   async delete(id) {
     await this.prisma.gameStatistics.delete({ where: { id } });
+  }
+
+  async findBuildingById(buildingId) {
+    const building = await this.prisma.building.findUnique({
+      where: { id: buildingId },
+      include: { level: true }
+    });
+    return building ? Building.from(building) : null;
   }
 }
 

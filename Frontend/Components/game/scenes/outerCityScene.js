@@ -1,36 +1,67 @@
-import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys } from "../utils/phaserSceneUtils.js";
-import { addAsset, updateCurrency, getCurrencyById, removeAsset } from "../utils/gameService.js";
+import {
+  setCameraBounds,
+  handleZoom,
+  setMovementKeys,
+  handleMovementKeys,
+} from "../utils/phaserSceneUtils.js";
+import {
+  addAsset,
+  updateCurrency,
+  getCurrencyById,
+  removeAsset,
+} from "../utils/gameService.js";
 
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
     constructor() {
-      super("OuterCityScene" );
+      super("OuterCityScene");
     }
-
 
     preload() {
       // Load the tilemap, tileset image and assets
       this.load.tilemapTiledJSON("outerCityMap", "Assets/json/buitenstad.json");
-      this.load.image("tilesetImage", "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png");
+      this.load.image(
+        "tilesetImage",
+        "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
+      );
       this.load.image("Zonnepaneel", "Assets/images/solar_panel.png");
       this.load.image("Windmolen", "Assets/images/windturbine.png");
       this.load.image("Waterrad", "Assets/images/waterrad.png");
       this.load.image("Kerncentrale", "Assets/images/kerncentrale.png");
     }
 
-
     create() {
+      console.log("OuterCityScene created");
       this.assetObjects = [];
       this.tileAssetMap = {};
+      this.draggedAssetType = null;
+
+      // Define asset sizes and costs at the class level
+      this.assetSizes = {
+        Kerncentrale: { width: 12, height: 10 },
+        Windmolen: { width: 6, height: 10 },
+        Waterrad: { width: 7, height: 8 },
+        Zonnepaneel: { width: 4, height: 6 },
+      };
+
+      this.assetCosts = {
+        Kerncentrale: 20,
+        Windmolen: 20,
+        Waterrad: 20,
+        Zonnepaneel: 20,
+      };
 
       // Set up the tilemap and its layers
       this.map = this.make.tilemap({ key: "outerCityMap" });
-      const tileset = this.map.addTilesetImage("Modern_Exteriors_Complete_Tileset_Custom", "tilesetImage");
+      const tileset = this.map.addTilesetImage(
+        "Modern_Exteriors_Complete_Tileset_Custom",
+        "tilesetImage"
+      );
 
       this.layer1 = this.map.createLayer("Layer-1", tileset);
       this.layer2 = this.map.createLayer("Layer-2", tileset);
 
-      // Set camera boundaries to match the tilemap dimensions 
+      // Set camera boundaries to match the tilemap dimensions
       setCameraBounds(this);
 
       // Enable zooming with mouse wheel
@@ -41,9 +72,7 @@ export function createOuterCityScene() {
 
       this.dragHighlight = this.add.graphics({ depth: 100 });
       this.hoverMarker = this.add.graphics({ depth: 99 });
-
       this.hoverTilesHighlight = this.add.graphics({ depth: 101 });
-
 
       const popupWidth = 700;
       const popupHeight = 300;
@@ -91,29 +120,26 @@ export function createOuterCityScene() {
         .setScrollFactor(0)
         .setVisible(false);
 
-      this.confirmText = this.add.text(
-        centerX,
-        centerY - 40,
-        "",
-        {
-          fontSize: '32px',
-          color: '#ffffff',
-          align: 'center',
-          fontStyle: 'bold',
-          wordWrap: { width: popupWidth - 50 }
-        }
-      )
-      .setOrigin(0.5, 0.5)
-      .setDepth(300)
-      .setScrollFactor(0)
-      .setVisible(false);
+      this.confirmText = this.add
+        .text(centerX, centerY - 40, "", {
+          fontSize: "32px",
+          color: "#ffffff",
+          align: "center",
+          fontStyle: "bold",
+          wordWrap: { width: popupWidth - 50 },
+        })
+        .setOrigin(0.5, 0.5)
+        .setDepth(300)
+        .setScrollFactor(0)
+        .setVisible(false);
 
       const buttonWidth = 180;
       const buttonHeight = 60;
       const padding = 20;
 
-      this.confirmYesButton = this.add.graphics()
-        .fillStyle(0x4CAF50, 1)
+      this.confirmYesButton = this.add
+        .graphics()
+        .fillStyle(0x4caf50, 1)
         .fillRoundedRect(
           centerX - buttonWidth - padding,
           centerY + 40,
@@ -124,31 +150,36 @@ export function createOuterCityScene() {
         .setDepth(300)
         .setScrollFactor(0)
         .setVisible(false)
-        .setInteractive(new Phaser.Geom.Rectangle(
-          centerX - buttonWidth - padding,
-          centerY + 40,
-          buttonWidth,
-          buttonHeight
-        ), Phaser.Geom.Rectangle.Contains);
+        .setInteractive(
+          new Phaser.Geom.Rectangle(
+            centerX - buttonWidth - padding,
+            centerY + 40,
+            buttonWidth,
+            buttonHeight
+          ),
+          Phaser.Geom.Rectangle.Contains
+        );
 
-      this.confirmYesText = this.add.text(
-        centerX - buttonWidth/2 - padding,
-        centerY + 40 + buttonHeight/2,
-        "Ja",
-        {
-          fontSize: '28px',
-          color: '#ffffff',
-          align: 'center',
-          fontStyle: 'bold',
-        }
-      )
-      .setOrigin(0.5, 0.5)
-      .setDepth(301)
-      .setScrollFactor(0)
-      .setVisible(false);
+      this.confirmYesText = this.add
+        .text(
+          centerX - buttonWidth / 2 - padding,
+          centerY + 40 + buttonHeight / 2,
+          "Ja",
+          {
+            fontSize: "28px",
+            color: "#ffffff",
+            align: "center",
+            fontStyle: "bold",
+          }
+        )
+        .setOrigin(0.5, 0.5)
+        .setDepth(301)
+        .setScrollFactor(0)
+        .setVisible(false);
 
-      this.confirmNoButton = this.add.graphics()
-        .fillStyle(0xF44336, 1)
+      this.confirmNoButton = this.add
+        .graphics()
+        .fillStyle(0xf44336, 1)
         .fillRoundedRect(
           centerX + padding,
           centerY + 40,
@@ -159,41 +190,32 @@ export function createOuterCityScene() {
         .setDepth(300)
         .setScrollFactor(0)
         .setVisible(false)
-        .setInteractive(new Phaser.Geom.Rectangle(
-          centerX + padding,
-          centerY + 40,
-          buttonWidth,
-          buttonHeight
-        ), Phaser.Geom.Rectangle.Contains);
+        .setInteractive(
+          new Phaser.Geom.Rectangle(
+            centerX + padding,
+            centerY + 40,
+            buttonWidth,
+            buttonHeight
+          ),
+          Phaser.Geom.Rectangle.Contains
+        );
 
-      this.confirmNoText = this.add.text(
-        centerX + buttonWidth/2 + padding,
-        centerY + 40 + buttonHeight/2,
-        "Nee",
-        {
-          fontSize: '28px',
-          color: '#ffffff',
-          align: 'center',
-          fontStyle: 'bold'
-        }
-      )
-      .setOrigin(0.5, 0.5)
-      .setDepth(301)
-      .setScrollFactor(0)
-      .setVisible(false);
-
-      const assetSizes = {
-        Kerncentrale: { width: 12, height: 10 },
-        Windmolen:    { width:  6, height: 10 },
-        Waterrad:     { width:  7, height:  8 },
-        Zonnepaneel:  { width:  4, height:  6 },
-      };
-      const assetCosts = {
-        Kerncentrale: 20,
-        Windmolen:    20,
-        Waterrad:     20,
-        Zonnepaneel:  20,
-      };
+      this.confirmNoText = this.add
+        .text(
+          centerX + buttonWidth / 2 + padding,
+          centerY + 40 + buttonHeight / 2,
+          "Nee",
+          {
+            fontSize: "28px",
+            color: "#ffffff",
+            align: "center",
+            fontStyle: "bold",
+          }
+        )
+        .setOrigin(0.5, 0.5)
+        .setDepth(301)
+        .setScrollFactor(0)
+        .setVisible(false);
 
       this.showError = (msg) => {
         this.errorBg.setVisible(true).setAlpha(1);
@@ -207,7 +229,7 @@ export function createOuterCityScene() {
           onComplete: () => {
             this.errorBg.setVisible(false).setAlpha(1);
             this.errorText.setVisible(false).setAlpha(1);
-          }
+          },
         });
       };
 
@@ -218,26 +240,26 @@ export function createOuterCityScene() {
         this.confirmYesText.setVisible(true);
         this.confirmNoButton.setVisible(true);
         this.confirmNoText.setVisible(true);
-        
+
         this.input.keyboard.enabled = false;
-        
+
         const onYesClick = () => {
           this.hideConfirmation();
           callback(true);
         };
-        
+
         const onNoClick = () => {
           this.hideConfirmation();
           callback(false);
         };
-        
-        this.confirmYesButton.off('pointerdown');
-        this.confirmNoButton.off('pointerdown');
-        
-        this.confirmYesButton.on('pointerdown', onYesClick);
-        this.confirmNoButton.on('pointerdown', onNoClick);
+
+        this.confirmYesButton.off("pointerdown");
+        this.confirmNoButton.off("pointerdown");
+
+        this.confirmYesButton.on("pointerdown", onYesClick);
+        this.confirmNoButton.on("pointerdown", onNoClick);
       };
-      
+
       this.hideConfirmation = () => {
         this.confirmBg.setVisible(false);
         this.confirmText.setVisible(false);
@@ -245,58 +267,192 @@ export function createOuterCityScene() {
         this.confirmYesText.setVisible(false);
         this.confirmNoButton.setVisible(false);
         this.confirmNoText.setVisible(false);
-        
+
         this.input.keyboard.enabled = true;
       };
 
-      const canvas = this.game.canvas;
+      // Setup event listeners for drag and drop
+      this.setupDragAndDrop();
 
-      canvas.addEventListener('dragenter', e => {
-        e.preventDefault();
-        this.draggedAssetType = e.dataTransfer.getData('text/plain');
+      // Debug info
+      console.log("Game assets data:", this.sys.game.assetData);
+
+      // Load existing assets from game state
+      this.loadExistingAssets();
+    }
+
+    loadExistingAssets() {
+      console.log("Loading existing assets");
+      if (!this.sys.game.assetData || !Array.isArray(this.sys.game.assetData)) {
+        console.log("No assets to load or invalid asset data format");
+        return;
+      }
+
+      this.sys.game.assetData.forEach((a) => {
+        console.log("Loading asset:", a);
+        const wx = a.xLocation * this.map.tileWidth;
+        const wy = a.yLocation * this.map.tileHeight;
+        const asset = this.add
+          .image(wx, wy, a.type)
+          .setOrigin(0)
+          .setDisplaySize(
+            a.xSize * this.map.tileWidth,
+            a.ySize * this.map.tileHeight
+          )
+          .setInteractive()
+          .on("pointerdown", () => {
+            const msg = `Wil je deze ${a.type} verwijderen?`;
+            this.showConfirmation(msg, async (confirmed) => {
+              if (confirmed) {
+                try {
+                  await removeAsset(a.id, this.sys.game.token);
+                  this._removeAsset(a);
+                  this.showError(`${a.type} succesvol verwijderd!`);
+                } catch (err) {
+                  console.error("Fout bij verwijderen:", err);
+                  this.showError("Verwijderen mislukt: " + err.message);
+                }
+              } else {
+                console.log("Actie geannuleerd");
+              }
+            });
+          });
+
+        // Update the tile map to show these tiles as occupied
+        for (let dx = 0; dx < a.xSize; dx++) {
+          for (let dy = 0; dy < a.ySize; dy++) {
+            this.tileAssetMap[`${a.xLocation + dx},${a.yLocation + dy}`] = true;
+          }
+        }
+
+        this.assetObjects.push({
+          id: a.id,
+          image: asset,
+          tx: a.xLocation,
+          ty: a.yLocation,
+          size: { width: a.xSize, height: a.ySize },
+          type: a.type,
+        });
       });
 
-      canvas.addEventListener('dragover', e => {
+      // Log current occupied tiles for debugging
+      console.log("Initialized tileAssetMap:", this.tileAssetMap);
+    }
+
+    setupDragAndDrop() {
+      console.log("Setting up drag and drop");
+      const canvas = this.game.canvas;
+
+      // Variable to remember the asset type
+      let currentAssetType = null;
+
+      canvas.addEventListener("dragstart", (e) => {
+        if (e.dataTransfer && e.dataTransfer.items) {
+          console.log("dragstart event with items:", e.dataTransfer.items);
+        }
+      });
+
+      canvas.addEventListener("dragenter", (e) => {
         e.preventDefault();
-        if (!this.draggedAssetType) return;
-        const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
-        const world = this.cameras.main.getWorldPoint(mx, my);
-        const tx = Math.floor(world.x / this.map.tileWidth);
-        const ty = Math.floor(world.y / this.map.tileHeight);
-        const size = assetSizes[this.draggedAssetType] || { width:1, height:1 };
-        this.dragHighlight.clear().fillStyle(0x00ff00, 0.4);
-        for (let dx=0; dx<size.width; dx++)
-          for (let dy=0; dy<size.height; dy++)
+        try {
+          const transferredType = e.dataTransfer.getData("text/plain");
+          console.log(
+            "dragenter - dataTransfer getData result:",
+            transferredType
+          );
+          if (transferredType) {
+            currentAssetType = transferredType;
+            this.draggedAssetType = transferredType;
+          }
+        } catch (err) {
+          console.warn("Error getting data on dragenter:", err);
+          // Firefox and some browsers don't allow getData during dragenter
+        }
+      });
+
+      canvas.addEventListener("dragover", (e) => {
+        e.preventDefault();
+
+        // Get asset type from class variable or fallback to current asset type
+        const assetType = this.draggedAssetType || currentAssetType;
+
+        if (!assetType) {
+          console.log("No asset type available in dragover");
+          return;
+        }
+
+        // Fix for correct mouse coordinates with scaled canvas:
+        const canvasBounds = canvas.getBoundingClientRect();
+        const scaleX = this.game.config.width / canvasBounds.width;
+        const scaleY = this.game.config.height / canvasBounds.height;
+
+        const x = (e.clientX - canvasBounds.left) * scaleX;
+        const y = (e.clientY - canvasBounds.top) * scaleY;
+
+        const worldPoint = this.cameras.main.getWorldPoint(x, y);
+
+        const tx = Math.floor(worldPoint.x / this.map.tileWidth);
+        const ty = Math.floor(worldPoint.y / this.map.tileHeight);
+        const size = this.assetSizes[assetType] || { width: 1, height: 1 };
+
+        // Check if location is available
+        let canPlace = true;
+        for (let dx = 0; dx < size.width; dx++) {
+          for (let dy = 0; dy < size.height; dy++) {
+            const key = `${tx + dx},${ty + dy}`;
+            if (this.tileAssetMap[key]) {
+              canPlace = false;
+              break;
+            }
+          }
+          if (!canPlace) break;
+        }
+
+        // Update highlight color based on availability
+        this.dragHighlight
+          .clear()
+          .fillStyle(canPlace ? 0x00ff00 : 0xff0000, 0.4);
+
+        for (let dx = 0; dx < size.width; dx++) {
+          for (let dy = 0; dy < size.height; dy++) {
             this.dragHighlight.fillRect(
-              (tx+dx)*this.map.tileWidth,
-              (ty+dy)*this.map.tileHeight,
+              (tx + dx) * this.map.tileWidth,
+              (ty + dy) * this.map.tileHeight,
               this.map.tileWidth,
               this.map.tileHeight
             );
+          }
+        }
       });
 
-      canvas.addEventListener('dragleave', () => {
-        this.draggedAssetType = null;
+      canvas.addEventListener("dragleave", () => {
         this.dragHighlight.clear();
       });
 
-      canvas.addEventListener('drop', e => {
+      canvas.addEventListener("drop", (e) => {
         e.preventDefault();
-        const type = e.dataTransfer.getData('text/plain');
+        const type = e.dataTransfer.getData("text/plain");
+
+        if (!type) {
+          console.log("No asset type in drop event");
+          this.dragHighlight.clear();
+          return;
+        }
+
         const rect = canvas.getBoundingClientRect();
-        const mx = e.clientX - rect.left;
-        const my = e.clientY - rect.top;
+        const scaleX = this.game.config.width / rect.width;
+        const scaleY = this.game.config.height / rect.height;
+        const mx = (e.clientX - rect.left) * scaleX;
+        const my = (e.clientY - rect.top) * scaleY;
         const world = this.cameras.main.getWorldPoint(mx, my);
         const tx = Math.floor(world.x / this.map.tileWidth);
         const ty = Math.floor(world.y / this.map.tileHeight);
-        const size = assetSizes[type] || { width:1, height:1 };
+        const size = this.assetSizes[type] || { width: 1, height: 1 };
 
         let canPlace = true;
-        for (let dx=0; dx<size.width; dx++){
-          for (let dy=0; dy<size.height; dy++){
-            if (this.tileAssetMap[`${tx+dx},${ty+dy}`]){
+        for (let dx = 0; dx < size.width; dx++) {
+          for (let dy = 0; dy < size.height; dy++) {
+            if (this.tileAssetMap[`${tx + dx},${ty + dy}`]) {
               canPlace = false;
               break;
             }
@@ -305,49 +461,64 @@ export function createOuterCityScene() {
         }
 
         if (!canPlace) {
-          this.showError('Kan hier niets plaatsen. Niet genoeg ruimte');
+          this.showError("Kan hier niets plaatsen. Niet genoeg ruimte");
           this.dragHighlight.clear();
           this.draggedAssetType = null;
           return;
         }
 
-        const cost = assetCosts[type] || 0;
+        const cost = this.assetCosts[type] || 0;
         const msg = `Wil je een ${type} hier plaatsen voor ${cost} coins?`;
-        
+
         this.showConfirmation(msg, async (confirmed) => {
           if (confirmed) {
             try {
-              this._placeAsset(type, tx, ty, size);
-
               const gameStatsId = this.sys.game.gameStatisticsId;
-              const groupId = this.sys.game.groupId;
               const token = this.sys.game.token;
               const currencyId = this.sys.game.currencyId;
+
+              if (type === "Kerncentrale") {
+                this.energy = 30;
+              } else if (type === "Windmolen" || type === "Waterrad" || type === "Zonnepaneel") {
+                this.energy = 1;
+              }
 
               const assetData = {
                 buildCost: cost,
                 destroyCost: cost,
-                energy: 10,
+                energy: this.energy,
                 xLocation: tx,
                 yLocation: ty,
                 xSize: size.width,
                 ySize: size.height,
-                type
+                type,
               };
 
-              const currentCurrencyData = await getCurrencyById(currencyId, token)
-              
+              const currentCurrencyData = await getCurrencyById(
+                currencyId,
+                token
+              );
+
               const currencyData = {
                 greenEnergy: currentCurrencyData.greenEnergy,
                 greyEnergy: currentCurrencyData.greyEnergy,
-                coins: currentCurrencyData.coins - cost
+                coins: currentCurrencyData.coins - cost,
               };
 
-              console.log("Hello" + currencyId)
-              await addAsset(gameStatsId, assetData, token);
+              // First add the asset to the database to get an ID
+              const response = await addAsset(gameStatsId, assetData, token);
+              // Get the asset ID from the response
+              const assetId = response.id || Date.now(); // Use timestamp as fallback
+
+              // Place the asset with the obtained ID
+              this._placeAsset(type, tx, ty, size, assetId);
+
               await updateCurrency(currencyId, currencyData, token);
             } catch (err) {
-              this.showError("Plaatsen mislukt: " + err.message);
+              console.error("Error placing asset:", err);
+              this.showError(
+                "Plaatsen mislukt: " + (err.message || "Onbekende fout")
+              );
             }
           }
 
@@ -356,6 +527,7 @@ export function createOuterCityScene() {
         });
       });
 
+      // Set up pointer move event for hover effects
       this.input.on("pointermove", (pointer) => {
         const worldPoint = pointer.positionToCamera(this.cameras.main);
         const tile = this.layer1.getTileAtWorldXY(worldPoint.x, worldPoint.y);
@@ -437,6 +609,10 @@ export function createOuterCityScene() {
           )
           .setInteractive()
           .on("pointerdown", () => {
+            // open detail panel
+            this.game.events.emit("assetClicked", a.id);
+            return;
+
             const msg = `Wil je deze ${a.type} verwijderen?`;
             this.showConfirmation(msg, async (confirmed) => {
               if (confirmed) {
@@ -471,13 +647,11 @@ export function createOuterCityScene() {
       });
     }
 
-
     update(time, delta) {
       handleMovementKeys(this, delta);
     }
 
-
-    _placeAsset(type, tx, ty, size) {
+    _placeAsset(type, tx, ty, size, assetId) {
       const image = this.add
         .image(tx * this.map.tileWidth, ty * this.map.tileHeight, type)
         .setOrigin(0)
@@ -487,23 +661,45 @@ export function createOuterCityScene() {
         )
         .setInteractive()
         .on("pointerdown", () => {
+          // open detail panel for newly placed asset
+          this.game.events.emit("assetClicked", null);
+          return;
+
           const msg = `Wil je deze ${type} verwijderen?`;
-          this.showConfirmation(msg, (confirmed) => {
+          this.showConfirmation(msg, async (confirmed) => {
             if (confirmed) {
-              console.log(`${type} bevestigd geklikt`);
+              try {
+                await removeAsset(assetId, this.sys.game.token);
+
+                this._removeAsset({
+                  id: assetId,
+                  tx: tx,
+                  ty: ty,
+                  type: type,
+                  size: size,
+                });
+
+                this.showError(`${type} succesvol verwijderd!`);
+              } catch (err) {
+                console.error("Fout bij verwijderen:", err);
+                this.showError("Verwijderen mislukt: " + err.message);
+              }
             } else {
               console.log("Actie geannuleerd");
             }
           });
         });
 
+      // Mark all tiles as occupied
       for (let dx = 0; dx < size.width; dx++) {
         for (let dy = 0; dy < size.height; dy++) {
           this.tileAssetMap[`${tx + dx},${ty + dy}`] = true;
         }
       }
 
+      // Add to asset objects array
       this.assetObjects.push({
+        id: assetId,
         image,
         tx,
         ty,
@@ -511,31 +707,41 @@ export function createOuterCityScene() {
         type,
       });
 
+      // Clear highlight
       this.dragHighlight.clear();
       this.draggedAssetType = null;
+
+      // Show success message
+      this.showError(`${type} succesvol geplaatst!`);
     }
-    
+
     _removeAsset(asset) {
-      const assetIndex = this.assetObjects.findIndex(a => {
+      const assetIndex = this.assetObjects.findIndex((a) => {
         if (asset.id && a.id) {
           return a.id === asset.id;
         }
         return a.tx === asset.tx && a.ty === asset.ty && a.type === asset.type;
       });
-      
+
       if (assetIndex !== -1) {
         const assetToRemove = this.assetObjects[assetIndex];
-        
+
+        // Destroy the image
         assetToRemove.image.destroy();
-        
+
+        // Free up the tiles
         for (let dx = 0; dx < assetToRemove.size.width; dx++) {
           for (let dy = 0; dy < assetToRemove.size.height; dy++) {
-            delete this.tileAssetMap[`${assetToRemove.tx + dx},${assetToRemove.ty + dy}`];
+            delete this.tileAssetMap[
+              `${assetToRemove.tx + dx},${assetToRemove.ty + dy}`
+            ];
           }
         }
-        
+
+        // Remove from the array
         this.assetObjects.splice(assetIndex, 1);
-        
+
+        // Clear any highlights
         this.hoverTilesHighlight.clear();
       }
     }
