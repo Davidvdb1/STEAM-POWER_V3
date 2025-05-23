@@ -12,7 +12,6 @@ template.innerHTML = /*html*/`
         <canvas id="renderCanvas"></canvas>
     </div>
 `;
-//#endregion SIMULATION
 
 //#region CLASS 
 window.customElements.define('simulation-れ', class extends HTMLElement {
@@ -26,35 +25,12 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         this.scene = null;
         this.camera = null;
         this.resizeObserver = null;
-        
-        // Draggable objects properties
-        this.solarPanel = null;
-        this.windmill = null;
-        this.wheel = null;
 
-        this.dragBehaviorSolar = null;
-        this.dragBehaviorWind = null;
-        this.dragBehaviorWheel = null;
-
-        this.dragEnabledSolar = false;
-        this.dragEnabledWind = false;
-        this.dragEnabledWheel = false;
-
-        this.isRotatingSolar = false;
-        this.isRotatingWind = false;
-        this.isRotatingWheel = false;
-
-        this.startingX = null;
-        this.advancedTexture = null;
     }
 
     // component attributes
     static get observedAttributes() {
         return [];
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        
     }
 
     connectedCallback() {
@@ -146,17 +122,11 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         // Get the canvas element from shadow DOM
         const canvas = this._shadowRoot.getElementById('renderCanvas');
         
-        // Check if BabylonJS is available
-        if (typeof BABYLON === 'undefined') {
-            console.error('BabylonJS is not loaded. Make sure to include the BabylonJS script.');
-            return;
-        }
-        
         // Initialize the BabylonJS engine with high DPI support
         this.engine = new BABYLON.Engine(canvas, true, {
             preserveDrawingBuffer: true,
             stencil: true,
-            adaptToDeviceRatio: true // Enable high DPI rendering
+            adaptToDeviceRatio: true
         });
         
         // Create scene
@@ -173,10 +143,9 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         
         // Light
         new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), this.scene);
+
         // Sun
         BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/sun3.glb", this.scene, async (meshes) => {
-            console.log("Sun.glb loaded");
-
             const street = "Geldenaaksebaan 335";
             const city = "Leuven";
             const postal = "3001";
@@ -185,10 +154,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             const x = Math.cos(altitude) * Math.sin(azimuth);
             const y = Math.sin(altitude);
             const z = Math.cos(altitude) * Math.cos(azimuth);
-            console.log(x, y, z);
             
-
-            // Find the root mesh
             const sunRoot = meshes.find(m => m.name === "__root__");
 
             if (sunRoot) {
@@ -196,7 +162,6 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
                 sunRoot.scaling = new BABYLON.Vector3(0.05, 0.05, 0.05);
                 sunRoot.position = new BABYLON.Vector3(x * distance, y * distance, z * distance);
                 sunRoot.rotation = new BABYLON.Vector3(0, 0.8, 0);
-                console.log("Applied transform to Sun root");
             }
         });
         
@@ -219,12 +184,12 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             }
         });
 
-        // Load Windmill
-        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/windmill.glb", this.scene, (meshes) => {
+        // Load turbine
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/turbine_4_blades.glb", this.scene, (meshes) => {
             this.windmill = meshes.find(m => m.name === "__root__");
             if (this.windmill) {
-                this.windmill.scaling = new BABYLON.Vector3(0.0022, 0.0022, 0.0022);
-                this.windmill.position = new BABYLON.Vector3(-1.5, -0.05, 0);
+                this.windmill.scaling = new BABYLON.Vector3(5, 5, 5);
+                this.windmill.position = new BABYLON.Vector3(0, 0, 0);
                 this.windmill.rotation = new BABYLON.Vector3(0, 0, 0);
                 this.dragBehaviorWind = new BABYLON.PointerDragBehavior();
                 this.dragBehaviorWind.useObjectOrientationForDragging = false;
@@ -261,20 +226,6 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             }
         });
 
-        // Create GUI
-        this._createGUI();
-
-        // Handle rotation dragging for all objects
-        this.scene.onPointerObservable.add((pointerInfo) => {
-            if (this.isRotatingSolar && this.solarPanel) {
-                this._handleObjectRotation(pointerInfo, this.solarPanel);
-            } else if (this.isRotatingWind && this.windmill) {
-                this._handleObjectRotation(pointerInfo, this.windmill);
-            } else if (this.isRotatingWheel && this.wheel) {
-                this._handleObjectRotation(pointerInfo, this.wheel);
-            }
-        });
-
         // Handle window resize
         window.addEventListener('resize', this._handleResize);
     }
@@ -296,166 +247,6 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
 
         return plane;
     }
-
-    _createGUI() {
-        this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-        const canvas = this._shadowRoot.getElementById('renderCanvas');
-
-        // Solar Panel GUI
-        const panelSolar = this._createInventoryPanel("zonnepaneel", "40px");
-        const moveBtnSolar = this._createInventoryItem("Verplaats", panelSolar);
-        const rotateBtnSolar = this._createInventoryItem("Draai", panelSolar);
-
-        // Windmill GUI
-        const panelWind = this._createInventoryPanel("windmolen", "240px");
-        const moveBtnWind = this._createInventoryItem("Verplaats", panelWind);
-        const rotateBtnWind = this._createInventoryItem("Draai", panelWind);
-
-        // Wheel GUI
-        const panelWheel = this._createInventoryPanel("rad", "400px");
-        const moveBtnWheel = this._createInventoryItem("Verplaats", panelWheel);
-        const rotateBtnWheel = this._createInventoryItem("Draai", panelWheel);
-
-        // Button events: Solar
-        moveBtnSolar.onPointerDownObservable.add(() => {
-            if (!this.solarPanel || !this.dragBehaviorSolar) return;
-            this.dragEnabledSolar = !this.dragEnabledSolar;
-            this.dragBehaviorSolar.enabled = this.dragEnabledSolar;
-            moveBtnSolar.background = this.dragEnabledSolar ? "#555" : "#333";
-            if (this.dragEnabledSolar) {
-                this.isRotatingSolar = false;
-                rotateBtnSolar.background = "#333";
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        rotateBtnSolar.onPointerDownObservable.add(() => {
-            if (!this.solarPanel) return;
-            this.isRotatingSolar = !this.isRotatingSolar;
-            rotateBtnSolar.background = this.isRotatingSolar ? "#555" : "#333";
-            if (this.isRotatingSolar) {
-                this.dragEnabledSolar = false;
-                this.dragBehaviorSolar.enabled = false;
-                moveBtnSolar.background = "#333";
-                this.camera.detachControl(canvas);
-            } else {
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        // Button events: Windmill
-        moveBtnWind.onPointerDownObservable.add(() => {
-            if (!this.windmill || !this.dragBehaviorWind) return;
-            this.dragEnabledWind = !this.dragEnabledWind;
-            this.dragBehaviorWind.enabled = this.dragEnabledWind;
-            moveBtnWind.background = this.dragEnabledWind ? "#555" : "#333";
-            if (this.dragEnabledWind) {
-                this.isRotatingWind = false;
-                rotateBtnWind.background = "#333";
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        rotateBtnWind.onPointerDownObservable.add(() => {
-            if (!this.windmill) return;
-            this.isRotatingWind = !this.isRotatingWind;
-            rotateBtnWind.background = this.isRotatingWind ? "#555" : "#333";
-            if (this.isRotatingWind) {
-                this.dragEnabledWind = false;
-                this.dragBehaviorWind.enabled = false;
-                moveBtnWind.background = "#333";
-                this.camera.detachControl(canvas);
-            } else {
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        // Button events: Wheel
-        moveBtnWheel.onPointerDownObservable.add(() => {
-            if (!this.wheel || !this.dragBehaviorWheel) return;
-            this.dragEnabledWheel = !this.dragEnabledWheel;
-            this.dragBehaviorWheel.enabled = this.dragEnabledWheel;
-            moveBtnWheel.background = this.dragEnabledWheel ? "#555" : "#333";
-            if (this.dragEnabledWheel) {
-                this.isRotatingWheel = false;
-                rotateBtnWheel.background = "#333";
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        rotateBtnWheel.onPointerDownObservable.add(() => {
-            if (!this.wheel) return;
-            this.isRotatingWheel = !this.isRotatingWheel;
-            rotateBtnWheel.background = this.isRotatingWheel ? "#555" : "#333";
-            if (this.isRotatingWheel) {
-                this.dragEnabledWheel = false;
-                this.dragBehaviorWheel.enabled = false;
-                moveBtnWheel.background = "#333";
-                this.camera.detachControl(canvas);
-            } else {
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-    }
-
-    _createInventoryPanel(titleText, topPadding) {
-        const panel = new BABYLON.GUI.StackPanel();
-        panel.width = "300px";
-        panel.isVertical = true;
-        panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-        panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        panel.paddingRight = "10px";
-        panel.paddingTop = topPadding;
-        this.advancedTexture.addControl(panel);
-
-        const title = new BABYLON.GUI.TextBlock();
-        title.text = titleText;
-        title.height = "40px";
-        title.color = "black";
-        title.fontSize = "24px";
-        title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-        panel.addControl(title);
-
-        return panel;
-    }
-
-    _createInventoryItem(labelText, parentPanel) {
-        const box = new BABYLON.GUI.Rectangle();
-        box.width = "180px";
-        box.height = "60px";
-        box.cornerRadius = 10;
-        box.color = "white";
-        box.thickness = 2;
-        box.background = "#333";
-        box.paddingTop = "10px";
-        parentPanel.addControl(box);
-
-        const label = new BABYLON.GUI.TextBlock();
-        label.text = labelText;
-        label.color = "white";
-        label.fontSize = "16px";
-        box.addControl(label);
-
-        return box;
-    }
-
-    _handleObjectRotation(pointerInfo, object) {
-        switch (pointerInfo.type) {
-            case BABYLON.PointerEventTypes.POINTERDOWN:
-                this.startingX = pointerInfo.event.clientX;
-                break;
-            case BABYLON.PointerEventTypes.POINTERUP:
-                this.startingX = null;
-                break;
-            case BABYLON.PointerEventTypes.POINTERMOVE:
-                if (this.startingX !== null) {
-                    const deltaX = pointerInfo.event.clientX - this.startingX;
-                    object.rotation.y += deltaX * 0.005;
-                    this.startingX = pointerInfo.event.clientX;
-                }
-                break;
-        }
-    }
     
     _startRenderLoop() {
         if (this.engine && this.scene) {
@@ -465,4 +256,3 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         }
     }
 });
-//#endregion CLASS
