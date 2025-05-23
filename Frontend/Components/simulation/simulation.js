@@ -174,7 +174,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         // Light
         new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), this.scene);
         // Sun
-        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/sun.glb", this.scene, async (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/sun3.glb", this.scene, async (meshes) => {
             console.log("Sun.glb loaded");
 
             const street = "Geldenaaksebaan 335";
@@ -192,8 +192,8 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             const sunRoot = meshes.find(m => m.name === "__root__");
 
             if (sunRoot) {
-                const distance = 10;
-                sunRoot.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+                const distance = 4;
+                sunRoot.scaling = new BABYLON.Vector3(0.05, 0.05, 0.05);
                 sunRoot.position = new BABYLON.Vector3(x * distance, y * distance, z * distance);
                 sunRoot.rotation = new BABYLON.Vector3(0, 0.8, 0);
                 console.log("Applied transform to Sun root");

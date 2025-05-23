@@ -1,18 +1,27 @@
-#renderCanvas {
-  width: 100%;
-  height: 100%;
-  touch-action: none;
-  display: block;
-  outline: none;
-  image-rendering: high-quality;
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;  /* prevent horizontal scrolling */
+  overflow-y: hidden;  /* if you want to remove vertical scroll too */
 }
 
 .simulation-container {
-  width: 100%;
-  height: 90vh;
-  position: relative;
-  border-radius: 5px;
-  margin: 20px auto;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
-  touch-action: none;
-}/*# sourceMappingURL=style.css.map */
+  position: fixed; /* or absolute, with top:0, left:0 */
+  top: 0;
+  left: 0;
+  border-radius: 0;
+  background: #000; /* optional */
+}
+
+#renderCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
