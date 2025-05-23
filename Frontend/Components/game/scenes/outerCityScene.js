@@ -244,6 +244,27 @@ export function createOuterCityScene() {
       this.showError(`${type} succesvol geplaatst!`);
     }
 
+    _removeAsset(asset) {
+      const idx = this.assetObjects.findIndex(a =>
+        asset.id ? a.id === asset.id :
+        a.tx === asset.tx && a.ty === asset.ty && a.type === asset.type
+      );
+      if (idx === -1) return;
+
+      const toRem = this.assetObjects[idx];
+      toRem.image.destroy();
+
+      for (let dx = 0; dx < toRem.size.width; dx++) {
+        for (let dy = 0; dy < toRem.size.height; dy++) {
+          delete this.tileAssetMap[`${toRem.tx + dx},${toRem.ty + dy}`];
+        }
+      }
+
+      this.assetObjects.splice(idx, 1);
+      this.hoverTilesHighlight.clear();
+    }
+
+
     update(time, delta) {
       handleMovementKeys(this, delta);
     }
