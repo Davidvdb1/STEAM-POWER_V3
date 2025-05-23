@@ -208,6 +208,8 @@ class GameControlPanel extends HTMLElement {
 
   disconnectedCallback() {
     if (this._interval) clearInterval(this._interval);
+    if (this._statsInterval) clearInterval(this._statsInterval);
+    if (this._energyInterval)  clearInterval(this._energyInterval);
   }    
 
   _enableDragFromShop() {
@@ -250,6 +252,7 @@ class GameControlPanel extends HTMLElement {
     window.phaserGame = this._game;
     this._game.events.on("buildingClicked", id => this._showBuildingDetail(id));
     this._game.events.on("assetClicked",    id => this._showAssetDetail(id));
+    
   }
 
     async _updateStatistics() {
@@ -276,6 +279,43 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
+   async _updateEnergy() {
+    try {
+      const user = sessionStorage.getItem("loggedInUser");
+      if (!user) throw new Error("Not logged in");
+      const { token, groupId } = JSON.parse(user);
+      const gs = await fetchGameStatistics(groupId, token);
+
+      const counts = gs.assets.reduce((acc, asset) => {
+        acc[asset.type] = (acc[asset.type] || 0) + 1;
+        return acc;
+    }, {});
+
+      const extra = {
+        greenEnergy: 0,
+        greyEnergy: 0
+      };
+      if (counts["Windmolen"]) extra.greenEnergy += counts["Windmolen"] * 50;
+      if (counts["Waterrad"]) extra.greenEnergy += counts["Waterrad"] * 50;
+      if (counts["Zonnepaneel"]) extra.greenEnergy += counts["Zonnepaneel"] * 50;
+      if (counts["Kerncentrale"]) extra.greyEnergy += counts["Kerncentrale"] * 100;
+
+      const cur = gs.currency;
+      const updated = {
+        greenEnergy: cur.greenEnergy + extra.greenEnergy,
+        greyEnergy:  cur.greyEnergy + extra.greyEnergy,
+        coins:       cur.coins
+      };
+      await updateCurrency(cur.id, updated, token);
+
+      this._greenEl.textContent = updated.greenEnergy;
+      this._greyEl.textContent  = updated.greyEnergy;
+
+    } catch (e) {
+      console.error("Error updating energy:", e);
+    }
+  }
+
   async _onStartClick() {
     this._startButton.classList.add("hidden");
     this._game.scene.start("CityScene");
@@ -283,7 +323,7 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
 
     await this._updateStatistics();
-
+    this._energyInterval = setInterval(() => this._updateEnergy(), 1_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3000);
     try {
       const raw = sessionStorage.getItem("loggedInUser");
@@ -493,7 +533,6 @@ class GameControlPanel extends HTMLElement {
       console.error("Error upgrading building:", err);
     }
   }
-
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
