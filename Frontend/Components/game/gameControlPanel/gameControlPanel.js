@@ -27,51 +27,92 @@ template.innerHTML = /*html*/ `
     <div id="detail-container" class="hidden"></div>
     <div id="inner-container">
       <div class="shop">
-        <div class="card-asset" draggable="true" data-type="Windmolen">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+
+          <div class="card-asset" draggable="true" data-type="Windmolen">
+            <div class="corner-icon">
+              <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+            </div>
+            <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+            <p>Windmolen</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
           </div>
-          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
-          <p>Windmolen</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+
+          <div class="card-asset" draggable="true" data-type="Waterrad">
+            <div class="corner-icon">
+              <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+            </div>
+            <img class="windturbine" src="Assets/images/waterrad.png" alt="">
+            <p>Waterrad</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Zonnepaneel">
+            <div class="corner-icon">
+              <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+            </div>
+            <img class="windturbine" src="Assets/images/solar_panel.png" alt="">
+            <p>Zonnepaneel</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Kerncentrale">
+            <div class="corner-icon">
+              <img class="img-greenEnergy-card" src="Assets/images/greyEnergyTransparent2.png" alt="">
+            </div>
+            <img class="kerncentrale" src="Assets/images/kerncentrale.png" alt="">
+            <p>Kerncentrale</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Eik">
+            <img src="Assets/images/Eik.png" alt="tree1" />
+            <p>Eik</p>
+            <div class="assetCoinDiv">
+              <p>10</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Beuk">
+            <img src="Assets/images/Beuk.png" alt="tree2" />
+            <p>Beuk</p>
+            <div class="assetCoinDiv">
+              <p>10</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Buxus">
+            <img src="Assets/images/Buxus.png" alt="bush1" />
+            <p>Buxus</p>
+            <div class="assetCoinDiv">
+              <p>10</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Hulst">
+            <img src="Assets/images/Hulst.png" alt="bush2" />
+            <p>Hulst</p>
+            <div class="assetCoinDiv">
+              <p>10</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
           </div>
         </div>
-        <div class="card-asset" draggable="true" data-type="Waterrad">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
-          </div>
-          <img class="windturbine" src="Assets/images/waterrad.png" alt="">
-          <p>Waterrad</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-          </div>
-        </div>
-        <div class="card-asset" draggable="true" data-type="Zonnepaneel">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
-          </div>
-          <img class="windturbine" src="Assets/images/solar_panel.png" alt="">
-          <p>Zonnepaneel</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-          </div>
-        </div>
-        <div class="card-asset" draggable="true" data-type="Kerncentrale">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greyEnergyTransparent2.png" alt="">
-          </div>
-          <img class="kerncentrale" src="Assets/images/kerncentrale.png" alt="">
-          <p>Kerncentrale</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-          </div>
-        </div>
-      </div>
+
       <div class="test">
         <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
         <div id="inner-text">Ga naar binnenstad</div>

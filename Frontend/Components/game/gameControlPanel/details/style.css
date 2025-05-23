@@ -1,3 +1,4 @@
+@charset "UTF-8";
 :host {
   position: absolute;
   top: 16px;
@@ -11,8 +12,17 @@
   z-index: 20;
 }
 
+/* Power‐asset backgrounds */
 :host([type=Kerncentrale]) {
   background: #d3d3d3;
+}
+
+/* Nature‐asset backgrounds */
+:host([type=Eik]),
+:host([type=Beuk]),
+:host([type=Buxus]),
+:host([type=Hulst]) {
+  background: #add8e6;
 }
 
 .close {

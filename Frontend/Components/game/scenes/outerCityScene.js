@@ -32,6 +32,10 @@ export function createOuterCityScene() {
       this.load.image("Windmolen", "Assets/images/windturbine.png");
       this.load.image("Waterrad", "Assets/images/waterrad.png");
       this.load.image("Kerncentrale", "Assets/images/kerncentrale.png");
+      this.load.image("Eik", "Assets/images/Eik.png");
+      this.load.image("Beuk", "Assets/images/Beuk.png");
+      this.load.image("Buxus",  "Assets/images/Buxus.png");
+      this.load.image("Hulst",  "Assets/images/Hulst.png");
     }
 
     create() {
@@ -48,12 +52,20 @@ export function createOuterCityScene() {
         Windmolen:    { width: 6,  height: 10 },
         Waterrad:     { width: 7,  height: 8  },
         Zonnepaneel:  { width: 4,  height: 6  },
+        Eik:        { width: 5,  height: 6  }, 
+        Beuk:        { width: 4,  height: 5  },
+        Buxus:        { width: 2,  height: 4  },
+        Hulst:        { width: 3,  height: 3  },
       };
       this.assetCosts = {
         Kerncentrale: 20,
         Windmolen:    20,
         Waterrad:     20,
         Zonnepaneel:  20,
+        Eik:        10,
+        Beuk:        10,
+        Buxus:        10,
+        Hulst:        10,
       };
 
       // Create map layers
