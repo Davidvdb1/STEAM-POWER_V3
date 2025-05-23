@@ -3,30 +3,8 @@ const Asset = require('./asset');
 class Nature extends Asset {
   static allowedTypes = ['bush1', 'bush2', 'tree1', 'tree2'];
 
-  constructor({
-    id = undefined,
-    buildCost,
-    destroyCost,
-    xLocation,
-    yLocation,
-    xSize,
-    ySize,
-    type
-  }, validate = true) {
-    super(
-      {
-        id,
-        buildCost,
-        destroyCost,
-        energy: 0,
-        xLocation,
-        yLocation,
-        xSize,
-        ySize,
-        type
-      },
-      validate
-    );
+  constructor({ id = undefined, buildCost, destroyCost, xLocation, yLocation, xSize, ySize, type }, validate = true) {
+    super({ id, buildCost, destroyCost, energy: 0, xLocation, yLocation, xSize, ySize, type }, validate);
   }
 
   validate() {
@@ -37,7 +15,7 @@ class Nature extends Asset {
   }
 
   static from(prismaNature) {
-    return new this({
+    return new Nature({
       id: prismaNature.id,
       buildCost: prismaNature.buildCost,
       destroyCost: prismaNature.destroyCost,

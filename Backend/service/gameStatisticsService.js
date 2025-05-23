@@ -91,8 +91,14 @@ class GameStatisticsService {
   }
 
   async addAsset(statsId, aData) {
-    const asset = new Asset(aData);
-    return await gameStatisticsRepository.addAsset(statsId, asset);
+    const { type } = aData;
+    let assetInstance;
+    if (Nature.allowedTypes.includes(type)) {
+      assetInstance = new Nature(aData);
+    } else {
+      assetInstance = new Asset(aData);
+    }
+    return await gameStatisticsRepository.addAsset(statsId, assetInstance);
   }
 
   async removeAsset(assetId) {
