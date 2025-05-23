@@ -329,11 +329,13 @@
   background-color: #d3d3d3;
   border-bottom: 2px solid #555;
 }
-#inner-container .shop .card-asset[data-type^=tree],
-#inner-container .shop .card-asset[data-type^=bush] {
+#inner-container .shop .card-asset[data-type=Eik],
+#inner-container .shop .card-asset[data-type=Beuk],
+#inner-container .shop .card-asset[data-type=Buxus],
+#inner-container .shop .card-asset[data-type=Hulst] {
   background-color: #add8e6;
   border-bottom: 2px solid #555;
 }
-#inner-container .shop .card-asset[data-type=bush2] {
+#inner-container .shop .card-asset[data-type=Hulst] {
   border-bottom: none;
 }/*# sourceMappingURL=style.css.map */

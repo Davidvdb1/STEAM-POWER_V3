@@ -1,7 +1,7 @@
 const Asset = require('./asset');
 
 class Nature extends Asset {
-  static allowedTypes = ['bush1', 'bush2', 'tree1', 'tree2'];
+  static allowedTypes = ['Buxus', 'Hulst', 'Eik', 'Beuk'];
 
   constructor({ id = undefined, buildCost, destroyCost, xLocation, yLocation, xSize, ySize, type }, validate = true) {
     super({ id, buildCost, destroyCost, energy: 0, xLocation, yLocation, xSize, ySize, type }, validate);

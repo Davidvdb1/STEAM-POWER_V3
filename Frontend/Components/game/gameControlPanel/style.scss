@@ -329,14 +329,18 @@
     border-bottom: 2px solid #555;
   }
 
-  .card-asset[data-type^="tree"],
-  .card-asset[data-type^="bush"] {
+  .card-asset[data-type="Eik"],
+  .card-asset[data-type="Beuk"],
+  .card-asset[data-type="Buxus"],
+  .card-asset[data-type="Hulst"] {
     background-color: #add8e6;
     border-bottom: 2px solid #555;
   }
 
-  .card-asset[data-type="bush2"] {
+  .card-asset[data-type="Hulst"] {
     border-bottom: none;
   }
-}
+} 
 
+
+ 

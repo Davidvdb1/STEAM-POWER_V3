@@ -76,36 +76,36 @@ template.innerHTML = /*html*/ `
             </div>
           </div>
 
-          <div class="card-asset" draggable="true" data-type="tree1">
-            <img src="Assets/images/tree1.png" alt="tree1" />
-            <p>Boom 1</p>
+          <div class="card-asset" draggable="true" data-type="Eik">
+            <img src="Assets/images/Eik.png" alt="tree1" />
+            <p>Eik</p>
             <div class="assetCoinDiv">
               <p>10</p>
               <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
             </div>
           </div>
 
-          <div class="card-asset" draggable="true" data-type="tree2">
-            <img src="Assets/images/tree2.png" alt="tree2" />
-            <p>Boom 2</p>
+          <div class="card-asset" draggable="true" data-type="Beuk">
+            <img src="Assets/images/Beuk.png" alt="tree2" />
+            <p>Beuk</p>
             <div class="assetCoinDiv">
               <p>10</p>
               <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
             </div>
           </div>
 
-          <div class="card-asset" draggable="true" data-type="bush1">
-            <img src="Assets/images/bush1.png" alt="bush1" />
-            <p>Struik 1</p>
+          <div class="card-asset" draggable="true" data-type="Buxus">
+            <img src="Assets/images/Buxus.png" alt="bush1" />
+            <p>Buxus</p>
             <div class="assetCoinDiv">
               <p>10</p>
               <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
             </div>
           </div>
 
-          <div class="card-asset" draggable="true" data-type="bush2">
-            <img src="Assets/images/bush2.png" alt="bush2" />
-            <p>Struik 2</p>
+          <div class="card-asset" draggable="true" data-type="Hulst">
+            <img src="Assets/images/Hulst.png" alt="bush2" />
+            <p>Hulst</p>
             <div class="assetCoinDiv">
               <p>10</p>
               <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
