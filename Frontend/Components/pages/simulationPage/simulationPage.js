@@ -8,7 +8,6 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/pages/simulationPage/style.css';
     </style>
-    <simulation-れ id="simulation"></simulation-れ>
 `;
 //#endregion SIMULATIONPAGE
 
@@ -29,26 +28,26 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
         
     }
 
-    // connectedCallback() {
-    //     console.log("connectedCallback simulationPage");
-    //     document.addEventListener("showSimulation", this.showSimulation.bind(this));
-    //     const fetchSimulationEvent = new CustomEvent("fetchSimulation");
-    //     console.log("sending fetchSimulationEvent");
-    //     document.dispatchEvent(fetchSimulationEvent);
-    // }
+    connectedCallback() {
+        console.log("connectedCallback simulationPage");
+        document.addEventListener("showSimulation", this.showSimulation.bind(this));
+        const fetchSimulationEvent = new CustomEvent("fetchSimulation");
+        console.log("sending fetchSimulationEvent");
+        document.dispatchEvent(fetchSimulationEvent);
+    }
 
-    // disconnectedCallback() {
-    //     console.log("disconnectedCallback simulationPage");
-    //     const hideSimulationEvent = new CustomEvent("hideSimulation", { detail: { node: this.$simulation } });
-    //     console.log("sending hideSimulationEvent");
-    //     document.dispatchEvent(hideSimulationEvent);
-    // }
+    disconnectedCallback() {
+        console.log("disconnectedCallback simulationPage");
+        const hideSimulationEvent = new CustomEvent("hideSimulation", { detail: { node: this.$simulation } });
+        console.log("sending hideSimulationEvent");
+        document.dispatchEvent(hideSimulationEvent);
+    }
 
-    // showSimulation(event) {
-    //     console.log("showSimulation simulationPage");
-    //     event.detail.node.removeAttribute("hidden");
-    //     event.detail.node.setAttribute("style", "display: block;");
-    //     this.moveBefore(event.detail.node, null);
-    // }
+    showSimulation(event) {
+        console.log("showSimulation simulationPage");
+        event.detail.node.removeAttribute("hidden");
+        event.detail.node.setAttribute("style", "display: block;");
+        this._shadowRoot.moveBefore(event.detail.node, null);
+    }
 });
 //#endregion CLASS
