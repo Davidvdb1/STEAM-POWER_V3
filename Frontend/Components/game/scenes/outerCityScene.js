@@ -435,6 +435,12 @@ export function createOuterCityScene() {
             };
 
             const currentCurrency = await getCurrencyById(currencyId, token);
+            if (this.draggedAssetType == "Kerncentrale") {
+              currentCurrency.greyEnergy = currentCurrency.greyEnergy + 100;
+            }
+            if (this.draggedAssetType == "Windmolen" || this.draggedAssetType == "Waterrad" || this.draggedAssetType == "Zonnepaneel") {
+              currentCurrency.greenEnergy = currentCurrency.greenEnergy + 50;
+            }
             const updatedCurrency = {
               greenEnergy: currentCurrency.greenEnergy,
               greyEnergy:  currentCurrency.greyEnergy,
