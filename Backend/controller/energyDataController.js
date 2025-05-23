@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const energyDataService = require('../service/energyDataService');
 const middleware = require('../util/middleware');
 
@@ -15,6 +16,10 @@ router.post('/', async (req, res) => {
         res.status(statusCode).json({ error: error.message });
     }
 });
+/**
+ * GET /windkracht?lat=...&lon=...
+ * Haalt windsnelheid en windkracht (Beaufort) op voor gegeven coördinaten.
+ */
 
 router.get('/:groupId', async (req, res) => {
     try {
