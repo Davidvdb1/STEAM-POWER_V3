@@ -37,14 +37,14 @@ class BuildingLevel {
     }
   }
 
-  static from(prismaBuilding) {
-    return new Building({
-      id: prismaBuilding.id,
-      building: Building.from(building),
-      level: prismaBuilding.level,
-      energyCost: prismaBuilding.energyCost,
-      upgradeCost: prismaBuilding.upgradeCost,
-      scoreDeduction: prismaBuilding.scoreDeduction,
+  static from(prismaBuildingLevel) {
+    return new BuildingLevel({
+      id: prismaBuildingLevel.id,
+      building: Building.from(prismaBuildingLevel.building),
+      level: prismaBuildingLevel.level,
+      energyCost: prismaBuildingLevel.energyCost,
+      upgradeCost: prismaBuildingLevel.upgradeCost,
+      scoreDeduction: prismaBuildingLevel.scoreDeduction,
     });
   }
 }
