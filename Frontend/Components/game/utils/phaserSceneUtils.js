@@ -80,28 +80,21 @@ export function handleMovementKeys(scene, delta, speed = 750) {
 
 
 export function handleMapDragging(scene) {
-  // Enable camera dragging with mouse
+  // Enable camera dragging with right mouse button only
   scene.isDragging = false;
-      
-  // Create an invisible background for drag detection across the entire map
-  const mapWidth = scene.map.widthInPixels;
-  const mapHeight = scene.map.heightInPixels;
-      
-  scene.input.setDraggable(
-    scene.add.rectangle(0, 0, mapWidth, mapHeight, 0, 0)
-      .setOrigin(0, 0)
-      .setInteractive()
-  );
-
-  scene.input.on('dragstart', (pointer, gameObject) => {
-    scene.isDragging = true;
-    scene.dragStartX = pointer.x;
-    scene.dragStartY = pointer.y;
-    scene.startScrollX = scene.cameras.main.scrollX;
-    scene.startScrollY = scene.cameras.main.scrollY;
+  
+  scene.input.on('pointerdown', (pointer) => {
+    // Only start dragging with right mouse button (button 2)
+    if (pointer.leftButtonDown()) {
+      scene.isDragging = true;
+      scene.dragStartX = pointer.x;
+      scene.dragStartY = pointer.y;
+      scene.startScrollX = scene.cameras.main.scrollX;
+      scene.startScrollY = scene.cameras.main.scrollY;
+    }
   });
-      
-  scene.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+  
+  scene.input.on('pointermove', (pointer) => {
     if (scene.isDragging) {
       const deltaX = scene.dragStartX - pointer.x;
       const deltaY = scene.dragStartY - pointer.y;
@@ -109,8 +102,8 @@ export function handleMapDragging(scene) {
       scene.cameras.main.scrollY = scene.startScrollY + deltaY;
     }
   });
-      
-  scene.input.on('dragend', () => {
+  
+  scene.input.on('pointerup', () => {
     scene.isDragging = false;
   });
 }
