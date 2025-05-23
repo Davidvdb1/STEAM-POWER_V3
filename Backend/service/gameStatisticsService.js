@@ -25,14 +25,14 @@ class GameStatisticsService {
   async getById(
     id,
     includeCurrency = true,
-    includeBuildings = true,
+    includeGameBuildings = true,
     includeAssets = true,
     includeCheckpoints = true,
     includeGroup = false
   ) {
     return await gameStatisticsRepository.findById(id, {
       includeCurrency,
-      includeBuildings,
+      includeGameBuildings,
       includeAssets,
       includeCheckpoints,
       includeGroup,
@@ -42,20 +42,22 @@ class GameStatisticsService {
   async getByGroupId(
     groupId,
     includeCurrency = true,
-    includeBuildings = true,
+    includeGameBuildings = true,
     includeAssets = true,
     includeCheckpoints = true,
     includeGroup = false
   ) {
     return await gameStatisticsRepository.findByGroupId(groupId, {
       includeCurrency,
-      includeBuildings,
+      includeGameBuildings,
       includeAssets,
       includeCheckpoints,
       includeGroup,
     });
   }
 
+
+  // Currency methods
   async getCurrencyById(currencyId) {
     return await gameStatisticsRepository.findCurrencyById(currencyId);
   }
@@ -68,28 +70,44 @@ class GameStatisticsService {
     return gameStatisticsRepository.incrementCurrency(currencyId, payload);
   }
 
-  // async addBuilding(statsId, bData) {
-  //   const building = new Building(bData);
-  //   return await gameStatisticsRepository.addBuilding(statsId, building);
-  // }
 
-  async addBuilding(statsId, bData) {
-    if (bData.level && !(bData.level instanceof Level)) {
-      bData.level = new Level(bData.level);
-    }
-
-    const building = new Building(bData);
-    return await gameStatisticsRepository.addBuilding(statsId, building);
+  // Building methods
+  async getBuildingById(buildingId) {
+    return await gameStatisticsRepository.findBuildingById(buildingId);
   }
 
-  async updateBuilding(buildingId, updates) {
-    return await gameStatisticsRepository.updateBuilding(buildingId, updates);
+  async getAllBuildings() {
+    return await gameStatisticsRepository.getAllBuildings();
   }
 
-  async removeBuilding(buildingId) {
-    return await gameStatisticsRepository.removeBuilding(buildingId);
+
+  // GameBuildings methods (buildings specific to a game)
+  async addBuildingToGame(gameStatisticsId, buildingId, buildingLevelId) {
+    return await gameStatisticsRepository.addBuildingToGame(
+      gameStatisticsId, buildingId, buildingLevelId
+    );
   }
 
+  async getGameBuildingById(gameBuildingId) {
+    return await gameStatisticsRepository.findGameBuildingById(gameBuildingId);
+  }
+
+  async updateGameBuilding(gameBuildingId, updates) {
+    return await gameStatisticsRepository.updateGameBuilding(gameBuildingId, updates);
+  }
+
+  async upgradeBuildingLevel(gameBuildingId, buildingLevelId) {
+    return await gameStatisticsRepository.updateGameBuilding(
+      gameBuildingId, { buildingLevelId }
+    );
+  }
+
+  async removeGameBuilding(gameBuildingId) {
+    return await gameStatisticsRepository.removeGameBuilding(gameBuildingId);
+  }
+
+
+  // Asset methods
   async addAsset(statsId, aData) {
     const asset = new Asset(aData);
     return await gameStatisticsRepository.addAsset(statsId, asset);

@@ -122,14 +122,16 @@ model Currency {
 model BuildingLevel {
   id             String   @id @default(uuid())
   buildingId     String
-  building       Building @relation(fields: [buildingId], references: [id])
   level          Int
   energyCost     Int
   upgradeCost    Int
   scoreDeduction Int
 
-  gameBuildingsId String?
-  gameBuildings   GameBuildings? @relation(fields: [gameBuildingsId], references: [id])
+  // Each level belongs to a specific building
+  building     Building       @relation(fields: [buildingId], references: [id])
+  
+  // Building level can be referenced by multiple GameBuildings
+  gameBuildings GameBuildings[]
 }
 
 model Asset {
@@ -158,10 +160,11 @@ model Building {
   checkpoint   Checkpoint? @relation("CP_Building", fields: [checkpointId], references: [id])
   checkpointId String?
 
-  // Existing relations to other models can stay as they are
-  BuildingLevel    BuildingLevel[]
-  GameStatistics   GameStatistics? @relation(fields: [gameStatisticsId], references: [id])
-  gameStatisticsId String?
+  // Each building has multiple levels
+  buildingLevels BuildingLevel[]
+
+  // Building can be referenced by multiple GameBuildings
+  gameBuildings GameBuildings[]
 }
 
 model Checkpoint {
@@ -188,16 +191,27 @@ model GameStatistics {
   group   Group  @relation(fields: [groupId], references: [id])
   groupId String
 
-  buildings     Building[]
   checkpoints   Checkpoint[]
   assets        Asset[]
-  GameBuildings GameBuildings[]
+
+  // GameStatistics has many GameBuildings
+  gameBuildings GameBuildings[]
 }
 
 model GameBuildings {
   id               String          @id @default(uuid())
+
+  // Relation to GameStatistics
   gameStatisticsId String
-  gameStatistics   GameStatistics  @relation(fields: [gameStatisticsId], references: [id])
-  buildingLevels   BuildingLevel[]
+  gameStatistics   GameStatistics @relation(fields: [gameStatisticsId], references: [id])
+  
+  // Relation to Building
+  buildingId       String
+  building         Building      @relation(fields: [buildingId], references: [id])
+  
+  // Relation to BuildingLevel
+  buildingLevelId  String
+  buildingLevel    BuildingLevel @relation(fields: [buildingLevelId], references: [id])
+  
 }
 

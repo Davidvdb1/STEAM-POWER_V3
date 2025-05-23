@@ -1,6 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 const GameStatistics = require("../model/gameStatistics");
 const Building = require("../model/building");
+const BuildingLevel = require("../model/buildingLevel");
+const GameBuildings = require("../model/gameBuildings");
 const Asset = require("../model/asset");
 const Currency = require("../model/currency");
 const Checkpoint = require("../model/checkpoint");
@@ -34,7 +36,7 @@ class GameStatisticsRepository {
     id,
     {
       includeCurrency = true,
-      includeBuildings = true,
+      includeGameBuildings = true,
       includeAssets = true,
       includeCheckpoints = true,
       includeGroup = false,
@@ -44,7 +46,12 @@ class GameStatisticsRepository {
       where: { id },
       include: {
         currency: includeCurrency,
-        buildings: includeBuildings ? { include: { level: true } } : false,
+        gameBuildings: includeGameBuildings ? {
+          include: {
+            building: true,
+            buildingLevel: true
+          }
+        } : false,
         assets: includeAssets,
         checkpoints: includeCheckpoints
           ? {
@@ -66,7 +73,12 @@ class GameStatisticsRepository {
       where: { groupId },
       include: {
         currency: opts.includeCurrency ?? true,
-        buildings: opts.includeBuildings ?? true,
+        gameBuildings: (opts.includeGameBuildings ?? true) ? {
+          include: {
+            building: true,
+            buildingLevel: true
+          }
+        } : false,
         assets: opts.includeAssets ?? true,
         checkpoints: opts.includeCheckpoints
           ? {
@@ -163,47 +175,78 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
   // Building ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-  async addBuilding(statsId, building) {
-    building.validate();
-    const created = await this.prisma.building.create({
+  async addBuildingToGame(gameStatisticsId, buildingId, buildingLevelId) {
+    const gameBuilding = await this.prisma.gameBuildings.create({
       data: {
-        name: building.name,
+        gameStatistics: { connect: { id: gameStatisticsId } },
+        building: { connect: { id: buildingId } },
+        buildingLevel: { connect: { id: buildingLevelId } }
       },
+      include: {
+        gameStatistics: true,
+        building: true,
+        buildingLevel: true
+      }
     });
-    return Building.from(created);
+    
+    return GameBuildings.from(gameBuilding);
   }
 
 
-  async updateBuilding(buildingId, { xLocation, yLocation, xSize, ySize }) {
-    const data = {};
-    if (typeof xLocation === "number") data.xLocation = xLocation;
-    if (typeof yLocation === "number") data.yLocation = yLocation;
-    if (typeof xSize === "number") data.xSize = xSize;
-    if (typeof ySize === "number") data.ySize = ySize;
-    const updated = await this.prisma.building.update({
-      where: { id: buildingId },
-      data,
-      include: { level: true },
+  async findGameBuildingById(gameBuildingId) {
+    const gameBuilding = await this.prisma.gameBuildings.findUnique({
+      where: { id: gameBuildingId },
+      include: {
+        gameStatistics: true,
+        building: true,
+        buildingLevel: true
+      }
     });
-    return Building.from(updated);
+    
+    return gameBuilding ? GameBuildings.from(gameBuilding) : null;
   }
 
-    async upgradeBuilding(buildingId, { level }) {
-    const updated = await this.prisma.building.update({
-      where: { id: buildingId },
+
+async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
+  // Only update the level connection since GameBuildings shouldn't have location/size fields
+  const data = {};
+  
+  if (buildingLevelId) {
+    data.buildingLevel = { connect: { id: buildingLevelId } };
+  }
+  
+  const updated = await this.prisma.gameBuildings.update({
+    where: { id: gameBuildingId },
+    data,
+    include: {
+      gameStatistics: true,
+      building: true,
+      buildingLevel: true
+    }
+  });
+  
+  return GameBuildings.from(updated);
+}
+
+  async upgradeBuildingLevel(gameBuildingId, buildingLevelId) {
+    // Update the building level connection
+    const updated = await this.prisma.gameBuildings.update({
+      where: { id: gameBuildingId },
       data: {
-        level: {
-          update: { level }
-        }
+        buildingLevel: { connect: { id: buildingLevelId } }
       },
-      include: { level: true }
-
+      include: {
+        gameStatistics: true,
+        building: true,
+        buildingLevel: true
+      }
     });
-    return Building.from(updated);
+    
+    return GameBuildings.from(updated);
   }
 
-  async removeBuilding(buildingId) {
-    await this.prisma.building.delete({ where: { id: buildingId } });
+  async removeGameBuilding(gameBuildingId) {
+    await this.prisma.gameBuildings.delete({ where: { id: gameBuildingId } });
   }
 
   async addAsset(statsId, asset) {
@@ -287,6 +330,65 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
       include: { level: true }
     });
     return building ? Building.from(building) : null;
+  }
+
+
+  // Building operations (base building catalog) ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+  async createBuilding(name) {
+    const created = await this.prisma.building.create({
+      data: { name }
+    });
+    return Building.from(created);
+  }
+
+  async findBuildingById(buildingId) {
+    const building = await this.prisma.building.findUnique({
+      where: { id: buildingId }
+    });
+    return building ? Building.from(building) : null;
+  }
+
+  async getAllBuildings() {
+    const buildings = await this.prisma.building.findMany();
+    return buildings.map(b => Building.from(b));
+  }
+
+
+  // BuildingLevel operations ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+  async createBuildingLevel(buildingId, level, energyCost, upgradeCost, scoreDeduction) {
+    const created = await this.prisma.buildingLevel.create({
+      data: {
+        building: { connect: { id: buildingId } },
+        level,
+        energyCost,
+        upgradeCost,
+        scoreDeduction
+      },
+      include: { building: true }
+    });
+    
+    return BuildingLevel.from(created);
+  }
+
+  async findBuildingLevelById(levelId) {
+    const level = await this.prisma.buildingLevel.findUnique({
+      where: { id: levelId },
+      include: { building: true }
+    });
+    
+    return level ? BuildingLevel.from(level) : null;
+  }
+
+  async getBuildingLevelsForBuilding(buildingId) {
+    const levels = await this.prisma.buildingLevel.findMany({
+      where: { buildingId },
+      include: { building: true },
+      orderBy: { level: 'asc' }
+    });
+    
+    return levels.map(l => BuildingLevel.from(l));
   }
 }
 
