@@ -220,12 +220,17 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         });
 
         // Load Windmill
-        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/windmill.glb", this.scene, (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/windmill.glb", this.scene, async (meshes) => {
             this.windmill = meshes.find(m => m.name === "__root__");
             if (this.windmill) {
                 this.windmill.scaling = new BABYLON.Vector3(0.0022, 0.0022, 0.0022);
                 this.windmill.position = new BABYLON.Vector3(-1.5, -0.05, 0);
                 this.windmill.rotation = new BABYLON.Vector3(0, 0, 0);
+
+                const degrees = await this.fetchWindDirection();  // 👈 windrichting ophalen
+                const radians = BABYLON.Angle.FromDegrees(degrees + 180).radians();
+                this.windmill.rotation = new BABYLON.Vector3(0, radians, 0);  // 👈 draaien naar wind
+
                 this.dragBehaviorWind = new BABYLON.PointerDragBehavior();
                 this.dragBehaviorWind.useObjectOrientationForDragging = false;
                 this.dragBehaviorWind.enabled = false;
@@ -463,6 +468,13 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
                 this.scene.render();
             });
         }
+    }
+    async fetchWindDirection() {
+        const lat = 50.8798;  // Leuven
+        const lon = 4.7005;
+        const response = await fetch(`http://localhost:3000/weather/windrichting?lat=${lat}&lon=${lon}`);
+        const data = await response.json();
+        return data.wind_direction_deg;
     }
 });
 //#endregion CLASS
