@@ -16,6 +16,7 @@ import "../../pages/questionAdminPage/questionAdminPage.js"
 import "../../pages/quizPage/quizPage.js"
 import "../../pages/leaderboardPage/leaderboardPage.js"
 import "../../pages/gamePage/gamePage.js"
+import "../../pages/simulationPage/simulationPage.js"
 //#endregion IMPORTS
 
 //#region TABHANDLER
@@ -79,6 +80,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "campoverviewpage", label: "Home" },
                 { id: "userloginpage", label: "Leerkracht aanmelden" },
                 { id: "grouploginpage", label: "Groep aanmelden" },
+                { id: "simulationpage", label: "Simulatie" },
             ],
             "TEACHER": [
                 { id: "campoverviewpage", label: "Home" },
