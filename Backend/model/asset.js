@@ -1,4 +1,6 @@
 class Asset {
+  static allowedTypes = ['Windmolen', 'Waterrad', 'Zonnepaneel', 'Kerncentrale'];
+
   constructor({
     id = undefined,
     buildCost,
@@ -18,11 +20,11 @@ class Asset {
     this.yLocation = yLocation;
     this.xSize = xSize;
     this.ySize = ySize;
-    this.type = type
+    this.type = type;
     if (validate) this.validate();
   }
 
-  validate() {
+  _validateFields() {
     if (typeof this.buildCost !== 'number') {
       throw new Error('Invalid buildCost');
     }
@@ -49,8 +51,17 @@ class Asset {
     }
   }
 
+  validate() {
+    this._validateFields();
+    if (!Asset.allowedTypes.includes(this.type)) {
+      throw new Error(
+        `Invalid type: ${this.type}. Must be one of: ${Asset.allowedTypes.join(', ')}`
+      );
+    }
+  }
+
   static from(prismaAsset) {
-    return new Asset({
+    return new this({
       id: prismaAsset.id,
       buildCost: prismaAsset.buildCost,
       destroyCost: prismaAsset.destroyCost,
