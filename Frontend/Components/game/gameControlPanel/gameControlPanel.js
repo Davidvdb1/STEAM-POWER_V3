@@ -323,7 +323,7 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
 
     await this._updateStatistics();
-    this._energyInterval = setInterval(() => this._updateEnergy(), 1_000);
+    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3000);
     try {
       const raw = sessionStorage.getItem("loggedInUser");
