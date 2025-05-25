@@ -187,14 +187,26 @@ router.delete('/:id', async (req, res) => {
 
 // upgrade a building
 
-router.put('/buildings/:buildingId/upgrade', async (req, res) => {
-   console.log('→ [PUT /buildings/:buildingId/upgrade] params =', req.params, 'body =', req.body);
+router.put('/buildings/:GameBuildingId/upgrade', async (req, res) => {
+   console.log('→ [PUT /buildings/:gameBuildingId/upgrade] params =', req.params, 'body =', req.body);
   try {
-    const building = await gameStatisticsService.upgradeBuilding(req.params.buildingId, req.body);
+    const building = await gameStatisticsService.upgradeBuilding(req.params.GameBuildingId, req.body);
     res.status(200).json(building);
   } catch (error) {
-    console.error(`Error upgrading building ${req.params.buildingId}:`, error);
+    console.error(`Error upgrading gameBuilding ${req.params.GameBuildingId}:`, error);
     const statusCode = error.statusCode || 400;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+
+router.get('/gameBuildings/getAllGameBuildingsByGroupId/:groupId', async (req, res) => {
+  try {
+    const buildings = await gameStatisticsService.getAllGameBuildingsByGroupId(req.params.groupId);
+    res.status(200).json(buildings);
+  } catch (error) {
+    console.error(`Error fetching buildings for group ${req.params.groupId}:`, error);
+    const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
   }
 });

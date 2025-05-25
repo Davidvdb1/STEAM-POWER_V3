@@ -92,6 +92,10 @@ class GameStatisticsService {
     return await gameStatisticsRepository.findGameBuildingById(gameBuildingId);
   }
 
+  async getAllGameBuildingsByGroupId(groupId) {
+    return await gameStatisticsRepository.findAllGameBuildingsByGroupId(groupId);
+  }
+
   async updateGameBuilding(gameBuildingId, updates) {
     return await gameStatisticsRepository.updateGameBuilding(gameBuildingId, updates);
   }
@@ -154,18 +158,22 @@ class GameStatisticsService {
     return await gameStatisticsRepository.delete(id);
   }
 
-  async upgradeBuilding(buildingId, { level }) {
-    console.log('→ [upgradeBuilding] buildingId=', buildingId, 'new level=', level);
-    const building = await gameStatisticsRepository.findBuildingById(buildingId);
-    console.log('→ [upgradeBuilding] current building:', building);
-
-    if (!building) {
-      throw new Error('Building not found');
+  async upgradeBuilding(GameBuildingId, { level }) {
+    console.log('→ [upgradeBuilding] GameBuildingId=', GameBuildingId, 'new level=', level);
+    const gameBuilding = await gameStatisticsRepository.findGameBuildingById(GameBuildingId);
+    console.log('→ [upgradeBuilding] current GameBuilding:', gameBuilding);
+    if (!gameBuilding) {
+      throw new Error(`GameBuilding with id ${GameBuildingId} not found`);
     }
 
-    const updatedBuilding = await gameStatisticsRepository.upgradeBuilding(buildingId, { level });
-    console.log('→ [upgradeBuilding] updated building:', updatedBuilding);
-    return updatedBuilding;
+    const NextBuildingLevel = await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(gameBuilding.building.id, level);
+    if (!NextBuildingLevel) {
+      throw new Error(`BuildingLevel ${level} for building ${gameBuilding.building.id} not found`);
+    }
+
+    const updatedGameBuilding = await gameStatisticsRepository.upgradeBuildingLevel(GameBuildingId, NextBuildingLevel.id);
+    console.log('→ [upgradeBuilding] updated GameBuilding:', updatedGameBuilding);
+    return updatedGameBuilding;
   }
 
 }

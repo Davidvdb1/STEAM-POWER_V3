@@ -1,10 +1,8 @@
-const Building = require("./building");
-
 class BuildingLevel {
   constructor(
     {
       id = undefined,
-      building,
+      buildingId,
       level,
       energyCost,
       upgradeCost,
@@ -13,7 +11,7 @@ class BuildingLevel {
     validate = true
   ) {
     this.id = id;
-    this.building = building;
+    this.buildingId = buildingId;
     this.level = level;
     this.energyCost = energyCost;
     this.upgradeCost = upgradeCost;
@@ -22,8 +20,8 @@ class BuildingLevel {
   }
 
   validate() {
-    if (this.building && !(this.building instanceof Building)) {
-      throw new Error("Invalid building (must be Building)");
+    if (this.buildingId && typeof this.buildingId !== "string") {
+      throw new Error("Invalid buildingId");
     }
     if (typeof this.level !== "number") {
       throw new Error("Invalid level");
@@ -40,24 +38,31 @@ class BuildingLevel {
   }
 
   static from(prismaBuildingLevel) {
-    // Skip validation during initial creation to avoid circular dependency issues
-    const buildingLevel = new BuildingLevel(
+    return new BuildingLevel(
       {
         id: prismaBuildingLevel.id,
-        // Skip creating Building instance for now
-        building: null,
+        buildingId:
+          prismaBuildingLevel.buildingId ||
+          (prismaBuildingLevel.building ? prismaBuildingLevel.building.id : null),
         level: prismaBuildingLevel.level,
         energyCost: prismaBuildingLevel.energyCost,
         upgradeCost: prismaBuildingLevel.upgradeCost,
         scoreDeduction: prismaBuildingLevel.scoreDeduction,
       },
-      false // Skip validation
-    ); // Add building separately after creation
-    if (prismaBuildingLevel.building) {
-      buildingLevel.building = Building.from(prismaBuildingLevel.building);
-    }
+      true
+    );
+  }
 
-    return buildingLevel;
+  // Helper method to convert to JSON
+  toJSON() {
+    return {
+      id: this.id,
+      buildingId: this.buildingId,
+      level: this.level,
+      energyCost: this.energyCost,
+      upgradeCost: this.upgradeCost,
+      scoreDeduction: this.scoreDeduction,
+    };
   }
 }
 

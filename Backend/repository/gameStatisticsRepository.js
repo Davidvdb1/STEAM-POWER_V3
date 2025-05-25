@@ -172,7 +172,7 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
   return Currency.from(updated);
 }
 
-  // Building ---------------------------------------------------------------------------------------------------------------------------------------------------
+  // GameBuilding ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
   async addBuildingToGame(gameStatisticsId, buildingId, buildingLevelId) {
@@ -205,6 +205,19 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
     
     return gameBuilding ? GameBuildings.from(gameBuilding) : null;
   }
+
+async findAllGameBuildingsByGroupId(groupId) {
+  const gameStatisticsWithGroupId = this.findByGroupId(groupId);
+  const gameBuildings = await this.prisma.gameBuildings.findMany({
+    where: { gameStatisticsId: gameStatisticsWithGroupId.id },
+    include: {
+      gameStatistics: true,
+      building: true,
+      buildingLevel: true
+    }
+  });
+  return gameBuildings.map(gb => GameBuildings.from(gb));
+}
 
 
 async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
@@ -324,14 +337,6 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
     await this.prisma.gameStatistics.delete({ where: { id } });
   }
 
-  async findBuildingById(buildingId) {
-    const building = await this.prisma.building.findUnique({
-      where: { id: buildingId },
-      include: { level: true }
-    });
-    return building ? Building.from(building) : null;
-  }
-
 
   // Building operations (base building catalog) ---------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -380,6 +385,16 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
     
     return level ? BuildingLevel.from(level) : null;
   }
+
+  async findBuildingLevelByBuildingIdAndLevel(buildingId, level) {
+    const buildingLevel = await this.prisma.buildingLevel.findFirst({
+      where: { buildingId: buildingId, level: level },
+      include: { building: true }
+    });
+    
+    return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
+  }
+
 
   async getBuildingLevelsForBuilding(buildingId) {
     const levels = await this.prisma.buildingLevel.findMany({

@@ -3,6 +3,7 @@ import { createCityScene } from "../scenes/cityScene.js";
 import { createOuterCityScene } from "../scenes/outerCityScene.js";
 import {
   fetchGameStatistics,
+  getAllGameBuildingsByGroupId,
   removeAsset,
   getCurrencyById,
   updateCurrency,
@@ -211,16 +212,20 @@ class GameControlPanel extends HTMLElement {
     this._game.events.on("assetClicked",    id => this._showAssetDetail(id));
   }
 
-    async _updateStatistics() {
+  async _updateStatistics() {
     try {
       const raw = sessionStorage.getItem("loggedInUser");
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
       const gs = await fetchGameStatistics(groupId, token);
 
+      // If buildings are included in game statistics, transform them
+      if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
+        this._game.buildingData = this._transformBuildingData(gs.gameBuildings);
+      }
+
       this._game.token = token;
       this._game.groupId = groupId;
-      this._game.buildingData = gs.buildings;
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
@@ -233,6 +238,17 @@ class GameControlPanel extends HTMLElement {
     } catch (e) {
       console.error("Error fetching stats:", e);
     }
+  }
+
+  _transformBuildingData(gameBuildings) {
+    if (!gameBuildings || !Array.isArray(gameBuildings)) return [];
+
+    return gameBuildings.map(gb => ({
+      id: gb.id,
+      name: gb.building ? gb.building.name : 'Unknown Building',
+      building: gb.building,  // Keep original reference if needed
+      level: gb.buildingLevel // Directly use buildingLevel as level
+    }));
   }
 
   async _onStartClick() {
@@ -249,11 +265,11 @@ class GameControlPanel extends HTMLElement {
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
       const gs = await fetchGameStatistics(groupId, token);
-
+      const gameBuildings = await getAllGameBuildingsByGroupId(groupId, token);
 
       this._game.token = token;
       this._game.groupId = groupId;
-      this._game.buildingData = gs.buildings;
+      this._game.buildingData = this._transformBuildingData(gameBuildings);;
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId       = gs.currency.id;
@@ -337,6 +353,7 @@ class GameControlPanel extends HTMLElement {
     const detail   = document.createElement("building-detail");
     const building = this._game.buildingData.find(b => b.id === id);
     if (building) detail.data = building;
+    console.log("Building detail:", building);
     this._detailContainer.appendChild(detail);
     this._detailContainer.classList.remove("hidden");
   }
@@ -416,35 +433,53 @@ class GameControlPanel extends HTMLElement {
 
   async _performUpgradeBuilding(buildingId) {
     try {
-      const token      = this._game.token;
+      const token = this._game.token;
       const currencyId = this._game.currencyId;
-      const building   = this._game.buildingData.find(b => b.id === buildingId);
+      const building = this._game.buildingData.find(b => b.id === buildingId);
+      console.log("Performing upgrade for building:", buildingId);
+      console.log("Performing upgrade for building:", building);
       if (!building) throw new Error("Building not found");
 
-      const nextLevel = building.level.level + 1;
+      // Get level data from either level or buildingLevel property
+      const currentLevel = building.level ? building.level.level : 
+                          (building.buildingLevel ? building.buildingLevel.level : 1);
+      const nextLevel = currentLevel + 1;
 
+      // Call the backend to upgrade the building
       const upgradedBuilding = await upgradeBuilding(
         buildingId,
         { level: nextLevel },
         token
       );
+
+      // Update the local building data with transformed data if needed
+      if (upgradedBuilding.buildingLevel && !upgradedBuilding.level) {
+        // Transform the response to match our expected format
+        upgradedBuilding.level = upgradedBuilding.buildingLevel;
+      }
+
       Object.assign(building, upgradedBuilding);
 
+      // Update currency
       const cur = await getCurrencyById(currencyId, token);
+      const upgCost = building.level ? building.level.upgradeCost : 
+                    (building.buildingLevel ? building.buildingLevel.upgradeCost : 0);
+
       const updatedCurrency = {
         greenEnergy: cur.greenEnergy,
-        greyEnergy:  cur.greyEnergy,
-        coins:       cur.coins - upgradedBuilding.level.upgradeCost
+        greyEnergy: cur.greyEnergy,
+        coins: cur.coins - upgCost
       };
+
       await updateCurrency(currencyId, updatedCurrency, token);
 
       this._coinsEl.textContent = updatedCurrency.coins;
       this._greenEl.textContent = updatedCurrency.greenEnergy;
-      this._greyEl.textContent  = updatedCurrency.greyEnergy;
+      this._greyEl.textContent = updatedCurrency.greyEnergy;
 
       const cityScene = this._game.scene.getScene("CityScene");
       if (typeof cityScene._updateBuildingSprite === "function") {
-        cityScene._updateBuildingSprite(upgradedBuilding);
+        cityScene._updateBuildingSprite(building);
       }
 
       this._showBuildingDetail(buildingId);
