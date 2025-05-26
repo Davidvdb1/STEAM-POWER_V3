@@ -274,7 +274,10 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
         building: true,
         buildingLevel: true
       }
-=======
+    });
+    return GameBuildings.from(updated);
+  }
+      
   async upgradeBuilding(buildingId, { level }) {
     const updated = await this.prisma.building.update({
       where: { id: buildingId },

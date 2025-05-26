@@ -294,6 +294,7 @@ class GameControlPanel extends HTMLElement {
       building: gb.building,  // Keep original reference if needed
       level: gb.buildingLevel // Directly use buildingLevel as level
     }));
+  }
     
    async _updateEnergy() {
     try {
