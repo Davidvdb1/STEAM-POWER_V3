@@ -1,0 +1,43 @@
+:host {
+  display: block;
+}
+
+.currency-display {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  background: #d3d3d3;
+  width: 100%;
+}
+.currency-display.hidden {
+  display: none;
+}
+.currency-display .currency-item {
+  display: flex;
+  align-items: center;
+}
+.currency-display .currency-item.grey-energy img {
+  height: 50px;
+}
+.currency-display .currency-item.grey-energy span {
+  color: #151515;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+.currency-display .currency-item.green-energy img {
+  height: 50px;
+}
+.currency-display .currency-item.green-energy span {
+  color: #9ba143;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+.currency-display .currency-item.coins img {
+  height: 30px;
+  padding: 10px;
+}
+.currency-display .currency-item.coins span {
+  color: #fbac2b;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}/*# sourceMappingURL=style.css.map */
