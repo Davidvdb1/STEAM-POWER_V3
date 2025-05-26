@@ -171,6 +171,8 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         this._create3DLabel("O", new BABYLON.Vector3(-3, 0, -0.2), this.scene);
         this._create3DLabel("W", new BABYLON.Vector3(3, 0, -0.2), this.scene);
 
+        this._createSettings(this.scene);
+
         // Load environment
         BABYLON.SceneLoader.Append("", "../Frontend/Assets/GLBs/environment.glb", this.scene, function () {});
 
@@ -185,18 +187,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         });
 
         // Load turbine
-        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/turbine_4_blades.glb", this.scene, (meshes) => {
-            this.windmill = meshes.find(m => m.name === "__root__");
-            if (this.windmill) {
-                this.windmill.scaling = new BABYLON.Vector3(5, 5, 5);
-                this.windmill.position = new BABYLON.Vector3(0, 0, 0);
-                this.windmill.rotation = new BABYLON.Vector3(0, 0, 0);
-                this.dragBehaviorWind = new BABYLON.PointerDragBehavior();
-                this.dragBehaviorWind.useObjectOrientationForDragging = false;
-                this.dragBehaviorWind.enabled = false;
-                this.windmill.addBehavior(this.dragBehaviorWind);
-            }
-        });
+        this._loadTurbine(3);
 
         // Load Wheel
         BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/wheel.glb", this.scene, (meshes) => {
@@ -229,6 +220,31 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         // Handle window resize
         window.addEventListener('resize', this._handleResize);
     }
+
+    _loadTurbine(bladeCount) {
+        const fileName = `turbine_${bladeCount}_blade${bladeCount === 1 ? '' : 's'}.glb`;
+
+        // Dispose previous turbine if exists
+        if (this.windmill) {
+            this.windmill.dispose();
+            this.windmill = null;
+        }
+
+        // Load new turbine
+        BABYLON.SceneLoader.ImportMesh("", "", `../Frontend/Assets/GLBs/${fileName}`, this.scene, (meshes) => {
+            this.windmill = meshes.find(m => m.name === "__root__");
+            if (this.windmill) {
+                this.windmill.scaling = new BABYLON.Vector3(5, 5, 5);
+                this.windmill.position = new BABYLON.Vector3(-1.1, -0.1, 0.5);
+                this.windmill.rotation = new BABYLON.Vector3(0, -1.1, 0);
+
+                this.dragBehaviorWind = new BABYLON.PointerDragBehavior();
+                this.dragBehaviorWind.useObjectOrientationForDragging = false;
+                this.dragBehaviorWind.enabled = false;
+                this.windmill.addBehavior(this.dragBehaviorWind);
+            }
+        });
+    }
     
     _create3DLabel(text, position, scene) {
         const plane = BABYLON.MeshBuilder.CreatePlane("labelPlane_" + text, { width: 1.5, height: 0.5 }, scene);
@@ -246,6 +262,176 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
 
         return plane;
+    }
+
+    _createLine() {
+        const line = new BABYLON.GUI.Rectangle()
+        line.thickness = 1
+        line.width = "90%"
+        line.color = "white"
+        line.height = "1px"
+        return line
+    }
+
+    _createSettings() {
+        // creates a full-screen 2D GUI layer over the whole 3D scene
+        const GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI")
+
+        // settings container
+        const settingsPanel = new BABYLON.GUI.Rectangle()
+        settingsPanel.background = "rgba(0, 0, 0, 0.5)";
+        settingsPanel.width = "400px"
+        settingsPanel.height = "800px"
+        settingsPanel.color = "gray";
+        settingsPanel.cornerRadius = "10"
+        settingsPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+        settingsPanel.paddingRight = "50px"
+        GUI.addControl(settingsPanel)
+
+        // layout container
+        const layout = new BABYLON.GUI.StackPanel()
+        layout.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        settingsPanel.addControl(layout)
+
+        // settings title
+        const title = new BABYLON.GUI.TextBlock()
+        title.text = "Instellingen"
+        title.fontSize = 30;
+        title.color = "white";
+        title.height = "80px";
+        layout.addControl(title)
+        
+        // line
+        layout.addControl(this._createLine());
+
+        // location title
+        const locationTitle = new BABYLON.GUI.TextBlock()
+        locationTitle.text = "Locatie"
+        locationTitle.fontSize = 25
+        locationTitle.color = "white"
+        locationTitle.height = "50px"
+        layout.addControl(locationTitle)
+        
+        // line
+        layout.addControl(this._createLine());
+
+        // location text
+        const locationText = new BABYLON.GUI.TextBlock()
+        locationText.text = "Verander de huidige locatie."
+        locationText.fontSize = 20
+        locationText.color = "white"
+        locationText.width = "90%"
+        locationText.height = "50px"
+        locationText.paddingTop = "10px"
+        layout.addControl(locationText)
+
+        // street
+        const street = new BABYLON.GUI.InputText()
+        street.width = "90%"
+        street.height = "50px"
+        street.placeholderText = "Straat..."
+        street.background = "white"
+        street.color = "black"
+        street.focusedBackground = "white"
+        street.paddingTop = "10px"
+        layout.addControl(street)
+        
+        // city
+        const city = new BABYLON.GUI.InputText()
+        city.width = "90%"
+        city.height = "50px"
+        city.placeholderText = "Stad..."
+        city.background = "white"
+        city.color = "black"
+        city.focusedBackground = "white"
+        city.paddingTop = "10px"
+        layout.addControl(city)
+
+        // postal code
+        const code = new BABYLON.GUI.InputText()
+        code.width = "90%"
+        code.height = "50px"
+        code.placeholderText = "Postcode..."
+        code.background = "white"
+        code.color = "black"
+        code.focusedBackground = "white"
+        code.paddingTop = "10px"
+        layout.addControl(code)
+
+        // "Change" button
+        const changeButton = BABYLON.GUI.Button.CreateSimpleButton("changeBtn", "Wijzig");
+        changeButton.width = "90%";
+        changeButton.height = "70px";
+        changeButton.color = "black";             
+        changeButton.background = "white"; 
+        changeButton.paddingTop = "10px"
+        changeButton.paddingBottom = "20px"      
+        layout.addControl(changeButton);
+
+        layout.addControl(this._createLine());
+
+        // wind title
+        const windTitle = new BABYLON.GUI.TextBlock()
+        windTitle.text = "Windturbine"
+        windTitle.fontSize = 25
+        windTitle.color = "white"
+        windTitle.height = "50px"
+        layout.addControl(windTitle)
+
+        layout.addControl(this._createLine());
+
+        const windText = new BABYLON.GUI.TextBlock()
+        windText.text = "Pas het aantal wieken aan."
+        windText.fontSize = 20
+        windText.color = "white"
+        windText.width = "90%"
+        windText.height = "50px"
+        layout.addControl(windText)
+
+        // Slider for blade count
+        const bladeSlider = new BABYLON.GUI.Slider();
+        bladeSlider.minimum = 0;
+        bladeSlider.maximum = 5;
+        bladeSlider.step = 1;
+        bladeSlider.value = 3;
+        bladeSlider.height = "20px";
+        bladeSlider.width = "90%";
+        bladeSlider.color = "white";
+        bladeSlider.background = "gray";
+        bladeSlider.thumbColor = "rgba(30, 30, 30, 1.0)";
+        bladeSlider.borderColor = "rgba(30, 30, 30, 1.0)"
+        layout.addControl(bladeSlider)
+
+        bladeSlider.onValueChangedObservable.add((value) => {
+            this._loadTurbine(value);
+        });
+
+        // Grid for tick labels
+        const tickGrid = new BABYLON.GUI.Grid();
+        tickGrid.width = "100%";
+        tickGrid.height = "50px";
+        tickGrid.paddingTop = "10px";
+        tickGrid.paddingBottom = "20px"
+
+        // Create 6 columns (for 0 to 5)
+        for (let i = 0; i <= 5; i++) {
+            tickGrid.addColumnDefinition(1 / 6); // Each column is 1/6th of the width
+        }
+
+        // Add labels to the grid
+        for (let i = 0; i <= 5; i++) {
+            const tick = new BABYLON.GUI.TextBlock();
+            tick.text = i.toString();
+            tick.color = "white";
+            tick.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            tickGrid.addControl(tick, 0, i); // row 0, column i
+        }
+        layout.addControl(tickGrid);
+
+        // line
+        layout.addControl(this._createLine());
+    
+        return GUI;
     }
     
     _startRenderLoop() {
