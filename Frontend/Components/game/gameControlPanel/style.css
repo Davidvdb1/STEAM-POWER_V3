@@ -162,11 +162,6 @@
   margin-left: 6px;
 }
 
-.greenEnergy {
-  display: flex;
-  align-items: center;
-}
-
 .img-greenEnergy {
   height: 50px;
 }
@@ -175,11 +170,6 @@
   color: #9ba143;
   font-family: "PixelFont" !important;
   margin-left: 6px;
-}
-
-.greyEnergy {
-  display: flex;
-  align-items: center;
 }
 
 .img-greyEnergy {
