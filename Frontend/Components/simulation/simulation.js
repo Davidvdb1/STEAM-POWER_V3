@@ -118,7 +118,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         }
     }
     
-    _initializeBabylonJS() {
+    async _initializeBabylonJS() {
         // Get the canvas element from shadow DOM
         const canvas = this._shadowRoot.getElementById('renderCanvas');
         
@@ -186,8 +186,9 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             }
         });
 
+
         // Load turbine
-        this._loadTurbine(3);
+        await this._loadTurbine(3);
 
         // Load Wheel
         BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/wheel.glb", this.scene, (meshes) => {
@@ -204,7 +205,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         });
 
         // Load Solar Panel
-        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/solar.glb", this.scene, (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/solar.glb", this.scene, async (meshes) => {
             this.solarPanel = meshes.find(m => m.name === "__root__");
             if (this.solarPanel) {
                 this.solarPanel.scaling = new BABYLON.Vector3(0.02, 0.02, 0.02);
@@ -214,6 +215,24 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
                 this.dragBehaviorSolar.useObjectOrientationForDragging = false;
                 this.dragBehaviorSolar.enabled = false;
                 this.solarPanel.addBehavior(this.dragBehaviorSolar);
+
+                        // Zonpositie ophalen en zonnepaneel richten
+        const street = "Geldenaaksebaan 335";
+        const city = "Leuven";
+        const postal = "3001";
+        const date = new Date();
+
+        const { azimuth, altitude } = await SunCalc.getSolarPositionForLocation(street, city, postal, date);
+        const x = Math.cos(altitude) * Math.sin(azimuth);
+        const y = Math.sin(altitude);
+        const z = Math.cos(altitude) * Math.cos(azimuth);
+        const target = new BABYLON.Vector3(x * 4, y * 4, z * 4);
+
+        const dir = target.subtract(this.solarPanel.position).normalize();
+        const yaw = Math.atan2(dir.x, dir.z) +1;
+        const pitch = Math.asin(dir.y);
+
+        this.solarPanel.rotation = new BABYLON.Vector3(pitch, yaw, 0);
             }
         });
 
@@ -231,12 +250,16 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         }
 
         // Load new turbine
-        BABYLON.SceneLoader.ImportMesh("", "", `../Frontend/Assets/GLBs/${fileName}`, this.scene, (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", `../Frontend/Assets/GLBs/${fileName}`, this.scene, async (meshes) => {
             this.windmill = meshes.find(m => m.name === "__root__");
             if (this.windmill) {
                 this.windmill.scaling = new BABYLON.Vector3(5, 5, 5);
                 this.windmill.position = new BABYLON.Vector3(-1.1, -0.1, 0.5);
                 this.windmill.rotation = new BABYLON.Vector3(0, -1.1, 0);
+
+                const degrees = await this.fetchWindDirection();  //windrichting ophalen
+                const radians = BABYLON.Angle.FromDegrees(degrees + 180).radians();
+                this.windmill.rotation = new BABYLON.Vector3(0, radians, 0);  //draaien naar wind
 
                 this.dragBehaviorWind = new BABYLON.PointerDragBehavior();
                 this.dragBehaviorWind.useObjectOrientationForDragging = false;
@@ -441,4 +464,13 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             });
         }
     }
+  
+    async fetchWindDirection() {
+        const lat = 50.8798;  // Leuven
+        const lon = 4.7005;
+        const response = await fetch(`http://localhost:3000/weather/windrichting?lat=${lat}&lon=${lon}`);
+        const data = await response.json();
+        return data.wind_direction_deg;
+    }
 });
+//#endregion CLASS
