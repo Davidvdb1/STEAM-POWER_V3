@@ -61,7 +61,15 @@ class BuildingDetail extends HTMLElement {
   _render() {
     if (!this._data) return;
 
-    const lvl     = this._data.level;
+    console.log("BuildingData", this._data);
+
+    // Ensure we have level data
+    const lvl = this._data.level || this._data.buildingLevel;
+    if (!lvl) {
+      console.error('Building has no level data:', this._data);
+      return;
+    }
+
     const num     = lvl.level;        // numeric level
     const cost    = lvl.energyCost;   // kW
     const upgCost = lvl.upgradeCost;  // coins

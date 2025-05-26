@@ -33,10 +33,19 @@ export function createOuterCityScene() {
 
     preload() {
       this.load.tilemapTiledJSON("outerCityMap", "Assets/json/buitenstad.json");
-      this.load.image("tilesetImage", "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png");
-      Object.keys(ASSETS).forEach(asset => {
-        this.load.image(asset, `Assets/images/${asset.toLowerCase()}.png`);
-      });
+      this.load.image(
+        "tilesetImage",
+        "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
+      );
+      // Load asset images
+      this.load.image("Zonnepaneel", "Assets/images/solar_panel.png");
+      this.load.image("Windmolen", "Assets/images/windturbine.png");
+      this.load.image("Waterrad", "Assets/images/waterrad.png");
+      this.load.image("Kerncentrale", "Assets/images/kerncentrale.png");
+      this.load.image("Eik", "Assets/images/Eik.png");
+      this.load.image("Beuk", "Assets/images/Beuk.png");
+      this.load.image("Buxus",  "Assets/images/Buxus.png");
+      this.load.image("Hulst",  "Assets/images/Hulst.png");
     }
 
     create() {
@@ -45,8 +54,34 @@ export function createOuterCityScene() {
       this.tileAssetMap = {};
       this.draggedAssetType = null;
 
-      this.map = this.make.tilemap({ key: "outerCityMap" });
-      const tileset = this.map.addTilesetImage("Modern_Exteriors_Complete_Tileset_Custom", "tilesetImage");
+      // Asset definitions
+      this.assetSizes = {
+        Kerncentrale: { width: 12, height: 10 },
+        Windmolen:    { width: 6,  height: 10 },
+        Waterrad:     { width: 7,  height: 8  },
+        Zonnepaneel:  { width: 4,  height: 6  },
+        Eik:        { width: 5,  height: 6  }, 
+        Beuk:        { width: 4,  height: 5  },
+        Buxus:        { width: 2,  height: 4  },
+        Hulst:        { width: 3,  height: 3  },
+      };
+      this.assetCosts = {
+        Kerncentrale: 20,
+        Windmolen:    20,
+        Waterrad:     20,
+        Zonnepaneel:  20,
+        Eik:        10,
+        Beuk:        10,
+        Buxus:        10,
+        Hulst:        10,
+      };
+
+      // Create map layers
+      this.map   = this.make.tilemap({ key: "outerCityMap" });
+      const tileset = this.map.addTilesetImage(
+        "Modern_Exteriors_Complete_Tileset_Custom",
+        "tilesetImage"
+      );
       this.layer1 = this.map.createLayer("Layer-1", tileset);
       this.layer2 = this.map.createLayer("Layer-2", tileset);
 
@@ -168,6 +203,12 @@ export function createOuterCityScene() {
           try {
             const { gameStatisticsId, token, currencyId } = this.sys.game;
             const currentCurrency = await getCurrencyById(currencyId, token);
+            if (this.draggedAssetType == "Kerncentrale") {
+              currentCurrency.greyEnergy = currentCurrency.greyEnergy + 100;
+            }
+            if (this.draggedAssetType == "Windmolen" || this.draggedAssetType == "Waterrad" || this.draggedAssetType == "Zonnepaneel") {
+              currentCurrency.greenEnergy = currentCurrency.greenEnergy + 50;
+            }
             const updatedCurrency = {
               greenEnergy: currentCurrency.greenEnergy,
               greyEnergy:  currentCurrency.greyEnergy,

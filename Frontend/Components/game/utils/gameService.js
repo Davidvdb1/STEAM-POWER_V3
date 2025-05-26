@@ -13,6 +13,18 @@ export async function fetchGameStatistics(groupId, token) {
   return res.json();
 }
 
+export async function getAllGameBuildingsByGroupId(groupId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/gameBuildings/getAllGameBuildingsByGroupId/${groupId}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to load GameBuildings: HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function getCurrencyById(currencyId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/${currencyId}/currency`;
   const res = await fetch(url, {
@@ -81,9 +93,9 @@ export async function updateCurrency(groupId, currencyData, token) {
   return res.json();
 }
 
-export async function upgradeBuilding(buildingId, upgradeData, token) {
-  // Make sure this matches router.put('/buildings/:buildingId/upgrade') under /gameStatistics mount
-  const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${buildingId}/upgrade`;
+export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
+  // Make sure this matches router.put('/buildings/:GameBuildingId/upgrade') under /gameStatistics mount
+  const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/upgrade`;
   console.log('PUT', url);
   const res = await fetch(url, {
     method: 'PUT',
@@ -92,7 +104,7 @@ export async function upgradeBuilding(buildingId, upgradeData, token) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(`Failed to upgrade building: HTTP ${res.status}` + (err.error ? ` - ${err.error}` : ''));
+    throw new Error(`Failed to upgrade GameBuilding: HTTP ${res.status}` + (err.error ? ` - ${err.error}` : ''));
   }
   return res.json();
 }

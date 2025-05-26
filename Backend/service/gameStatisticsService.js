@@ -3,13 +3,12 @@ const GameStatistics = require("../model/gameStatistics");
 const Currency = require("../model/currency");
 const Building = require("../model/building");
 const Asset = require("../model/asset");
+const Nature = require('../model/nature');
 const Checkpoint = require("../model/checkpoint");
 const Level = require("../model/level");
 
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-
-
 
 class GameStatisticsService {
   async create({ groupId, greenEnergy, greyEnergy, coins }) {
@@ -22,17 +21,24 @@ class GameStatisticsService {
     return gs;
   }
 
+  // Om de backend manueel te testen
+  async getAllGameStatistics() {
+    const gameStatistics =
+      await gameStatisticsRepository.getAllGameStatistics();
+    return gameStatistics.map((gs) => GameStatistics.from(gs));
+  }
+
   async getById(
     id,
     includeCurrency = true,
-    includeBuildings = true,
+    includeGameBuildings = true,
     includeAssets = true,
     includeCheckpoints = true,
     includeGroup = false
   ) {
     return await gameStatisticsRepository.findById(id, {
       includeCurrency,
-      includeBuildings,
+      includeGameBuildings,
       includeAssets,
       includeCheckpoints,
       includeGroup,
@@ -42,20 +48,22 @@ class GameStatisticsService {
   async getByGroupId(
     groupId,
     includeCurrency = true,
-    includeBuildings = true,
+    includeGameBuildings = true,
     includeAssets = true,
     includeCheckpoints = true,
     includeGroup = false
   ) {
     return await gameStatisticsRepository.findByGroupId(groupId, {
       includeCurrency,
-      includeBuildings,
+      includeGameBuildings,
       includeAssets,
       includeCheckpoints,
       includeGroup,
     });
   }
 
+
+  // Currency methods
   async getCurrencyById(currencyId) {
     return await gameStatisticsRepository.findCurrencyById(currencyId);
   }
@@ -68,31 +76,57 @@ class GameStatisticsService {
     return gameStatisticsRepository.incrementCurrency(currencyId, payload);
   }
 
-  // async addBuilding(statsId, bData) {
-  //   const building = new Building(bData);
-  //   return await gameStatisticsRepository.addBuilding(statsId, building);
-  // }
 
-  async addBuilding(statsId, bData) {
-    if (bData.level && !(bData.level instanceof Level)) {
-      bData.level = new Level(bData.level);
-    }
-
-    const building = new Building(bData);
-    return await gameStatisticsRepository.addBuilding(statsId, building);
+  // Building methods
+  async getBuildingById(buildingId) {
+    return await gameStatisticsRepository.findBuildingById(buildingId);
   }
 
-  async updateBuilding(buildingId, updates) {
-    return await gameStatisticsRepository.updateBuilding(buildingId, updates);
+  async getAllBuildings() {
+    return await gameStatisticsRepository.getAllBuildings();
   }
 
-  async removeBuilding(buildingId) {
-    return await gameStatisticsRepository.removeBuilding(buildingId);
+
+  // GameBuildings methods (buildings specific to a game)
+  async addBuildingToGame(gameStatisticsId, buildingId, buildingLevelId) {
+    return await gameStatisticsRepository.addBuildingToGame(
+      gameStatisticsId, buildingId, buildingLevelId
+    );
   }
 
+  async getGameBuildingById(gameBuildingId) {
+    return await gameStatisticsRepository.findGameBuildingById(gameBuildingId);
+  }
+
+  async getAllGameBuildingsByGroupId(groupId) {
+    return await gameStatisticsRepository.findAllGameBuildingsByGroupId(groupId);
+  }
+
+  async updateGameBuilding(gameBuildingId, updates) {
+    return await gameStatisticsRepository.updateGameBuilding(gameBuildingId, updates);
+  }
+
+  async upgradeBuildingLevel(gameBuildingId, buildingLevelId) {
+    return await gameStatisticsRepository.updateGameBuilding(
+      gameBuildingId, { buildingLevelId }
+    );
+  }
+
+  async removeGameBuilding(gameBuildingId) {
+    return await gameStatisticsRepository.removeGameBuilding(gameBuildingId);
+  }
+
+
+  // Asset methods
   async addAsset(statsId, aData) {
-    const asset = new Asset(aData);
-    return await gameStatisticsRepository.addAsset(statsId, asset);
+    const { type } = aData;
+    let assetInstance;
+    if (Nature.allowedTypes.includes(type)) {
+      assetInstance = new Nature(aData);
+    } else {
+      assetInstance = new Asset(aData);
+    }
+    return await gameStatisticsRepository.addAsset(statsId, assetInstance);
   }
 
   async removeAsset(assetId) {
@@ -104,19 +138,8 @@ class GameStatisticsService {
 
     const buildings = await Promise.all(
       cpData.buildings.map(async (b) => {
-        if (b.level && !(b.level instanceof Level)) {
-          // Haal volledige Level data op als nodig
-          if (!b.level.level || !b.level.upgradeCost || !b.level.energyCost) {
-            const fullLevelData = await prisma.level.findUnique({
-              where: { id: b.level.id },
-            });
-            if (!fullLevelData) {
-              throw new Error(`Level with id ${b.level.id} not found`);
-            }
-            b.level = new Level(fullLevelData);
-          } else {
-            b.level = new Level(b.level);
-          }
+        if (!b.name) {
+          throw new Error("Building name is required");
         }
         return new Building(b);
       })
@@ -136,21 +159,23 @@ class GameStatisticsService {
     return await gameStatisticsRepository.delete(id);
   }
 
-  async upgradeBuilding(buildingId, { level }) {
-    console.log('→ [upgradeBuilding] buildingId=', buildingId, 'new level=', level);
-    const building = await gameStatisticsRepository.findBuildingById(buildingId);
-    console.log('→ [upgradeBuilding] current building:', building);
-
-    if (!building) {
-      throw new Error('Building not found');
+  async upgradeBuilding(GameBuildingId, { level }) {
+    console.log('→ [upgradeBuilding] GameBuildingId=', GameBuildingId, 'new level=', level);
+    const gameBuilding = await gameStatisticsRepository.findGameBuildingById(GameBuildingId);
+    console.log('→ [upgradeBuilding] current GameBuilding:', gameBuilding);
+    if (!gameBuilding) {
+      throw new Error(`GameBuilding with id ${GameBuildingId} not found`);
     }
 
-    const updatedBuilding = await gameStatisticsRepository.upgradeBuilding(buildingId, { level });
-    console.log('→ [upgradeBuilding] updated building:', updatedBuilding);
-    return updatedBuilding;
+    const NextBuildingLevel = await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(gameBuilding.building.id, level);
+    if (!NextBuildingLevel) {
+      throw new Error(`BuildingLevel ${level} for building ${gameBuilding.building.id} not found`);
+    }
+
+    const updatedGameBuilding = await gameStatisticsRepository.upgradeBuildingLevel(GameBuildingId, NextBuildingLevel.id);
+    console.log('→ [upgradeBuilding] updated GameBuilding:', updatedGameBuilding);
+    return updatedGameBuilding;
   }
-
 }
-
 
 module.exports = new GameStatisticsService();
