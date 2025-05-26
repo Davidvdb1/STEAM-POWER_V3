@@ -53,19 +53,6 @@ class BuildingLevel {
       true
     );
   }
-
-  // Helper method to convert to JSON
-  toJSON() {
-    return {
-      id: this.id,
-      buildingId: this.buildingId,
-      level: this.level,
-      energyCost: this.energyCost,
-      upgradeCost: this.upgradeCost,
-      scoreDeduction: this.scoreDeduction,
-    };
-
-  }
 }
 
 module.exports = BuildingLevel;

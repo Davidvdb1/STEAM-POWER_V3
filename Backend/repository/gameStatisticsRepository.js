@@ -160,60 +160,8 @@ class GameStatisticsRepository {
     return Currency.from(updated);
   }
 
-  async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
-    const gs = await this.findByGroupId(groupId);
-
-    if (!gs || !gs.currency || !gs.assets) {
-      throw new Error("GameStatistics, currency of assets niet gevonden");
-    }
-
-    const typeMap = {
-      WIND: "windmolen",
-      SOLAR: "zonnepaneel",
-      WATER: "waterrad",
-    };
-
-    const assetType = typeMap[type.toUpperCase()];
-    if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
-
-    const matchingAssets = gs.assets.filter(
-      (a) => a.type.toLowerCase() === assetType
-    );
-
-    const totalGain = matchingAssets.reduce((sum, asset) => {
-      return sum + greenEnergy * asset.energy;
-    }, 0);
-
-    const updated = await this.prisma.currency.update({
-      where: { id: gs.currency.id },
-      data: {
-        greenEnergy: { increment: totalGain },
-      },
-    });
-
-    return Currency.from(updated);
-  }
 
   // GameBuilding ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-  async addBuildingToGame(gameStatisticsId, buildingId, buildingLevelId) {
-    const gameBuilding = await this.prisma.gameBuildings.create({
-      data: {
-        gameStatistics: { connect: { id: gameStatisticsId } },
-        building: { connect: { id: buildingId } },
-        buildingLevel: { connect: { id: buildingLevelId } }
-      },
-      include: {
-        gameStatistics: true,
-        building: true,
-        buildingLevel: true
-      }
-    });
-    
-    return GameBuildings.from(gameBuilding);
-  }
-
   async findGameBuildingById(gameBuildingId) {
     const gameBuilding = await this.prisma.gameBuildings.findUnique({
       where: { id: gameBuildingId },
@@ -227,40 +175,18 @@ class GameStatisticsRepository {
     return gameBuilding ? GameBuildings.from(gameBuilding) : null;
   }
 
-async findAllGameBuildingsByGroupId(groupId) {
-  const gameStatisticsWithGroupId = this.findByGroupId(groupId);
-  const gameBuildings = await this.prisma.gameBuildings.findMany({
-    where: { gameStatisticsId: gameStatisticsWithGroupId.id },
-    include: {
-      gameStatistics: true,
-      building: true,
-      buildingLevel: true
-    }
-  });
-  return gameBuildings.map(gb => GameBuildings.from(gb));
-}
-
-
-async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
-  // Only update the level connection since GameBuildings shouldn't have location/size fields
-  const data = {};
-  
-  if (buildingLevelId) {
-    data.buildingLevel = { connect: { id: buildingLevelId } };
+  async findAllGameBuildingsByGroupId(groupId) {
+    const gameStatisticsWithGroupId = this.findByGroupId(groupId);
+    const gameBuildings = await this.prisma.gameBuildings.findMany({
+      where: { gameStatisticsId: gameStatisticsWithGroupId.id },
+      include: {
+        gameStatistics: true,
+        building: true,
+        buildingLevel: true
+      }
+    });
+    return gameBuildings.map(gb => GameBuildings.from(gb));
   }
-  
-  const updated = await this.prisma.gameBuildings.update({
-    where: { id: gameBuildingId },
-    data,
-    include: {
-      gameStatistics: true,
-      building: true,
-      buildingLevel: true
-    }
-  });
-  
-  return GameBuildings.from(updated);
-}
 
   async upgradeBuildingLevel(gameBuildingId, buildingLevelId) {
     // Update the building level connection
@@ -290,10 +216,6 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
     });
     
     return GameBuildings.from(updated);
-  }
-
-  async removeGameBuilding(gameBuildingId) {
-    await this.prisma.gameBuildings.delete({ where: { id: gameBuildingId } });
   }
 
   async addAsset(statsId, asset) {
@@ -371,54 +293,7 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
   }
 
 
-  // Building operations (base building catalog) ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-  async createBuilding(name) {
-    const created = await this.prisma.building.create({
-      data: { name }
-    });
-    return Building.from(created);
-  }
-
-  async findBuildingById(buildingId) {
-    const building = await this.prisma.building.findUnique({
-      where: { id: buildingId }
-    });
-    return building ? Building.from(building) : null;
-  }
-
-  async getAllBuildings() {
-    const buildings = await this.prisma.building.findMany();
-    return buildings.map(b => Building.from(b));
-  }
-
-
   // BuildingLevel operations ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-  async createBuildingLevel(buildingId, level, energyCost, upgradeCost, scoreDeduction) {
-    const created = await this.prisma.buildingLevel.create({
-      data: {
-        building: { connect: { id: buildingId } },
-        level,
-        energyCost,
-        upgradeCost,
-        scoreDeduction
-      },
-      include: { building: true }
-    });
-    
-    return BuildingLevel.from(created);
-  }
-
-  async findBuildingLevelById(levelId) {
-    const level = await this.prisma.buildingLevel.findUnique({
-      where: { id: levelId },
-      include: { building: true }
-    });
-    
-    return level ? BuildingLevel.from(level) : null;
-  }
-
   async findBuildingLevelByBuildingIdAndLevel(buildingId, level) {
     const buildingLevel = await this.prisma.buildingLevel.findFirst({
       where: { buildingId: buildingId, level: level },
@@ -426,17 +301,6 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
     });
     
     return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
-  }
-
-
-  async getBuildingLevelsForBuilding(buildingId) {
-    const levels = await this.prisma.buildingLevel.findMany({
-      where: { buildingId },
-      include: { building: true },
-      orderBy: { level: 'asc' }
-    });
-    
-    return levels.map(l => BuildingLevel.from(l));
   }
 }
 

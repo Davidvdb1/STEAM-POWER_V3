@@ -76,46 +76,9 @@ class GameStatisticsService {
     return gameStatisticsRepository.incrementCurrency(currencyId, payload);
   }
 
-
-  // Building methods
-  async getBuildingById(buildingId) {
-    return await gameStatisticsRepository.findBuildingById(buildingId);
-  }
-
-  async getAllBuildings() {
-    return await gameStatisticsRepository.getAllBuildings();
-  }
-
-
-  // GameBuildings methods (buildings specific to a game)
-  async addBuildingToGame(gameStatisticsId, buildingId, buildingLevelId) {
-    return await gameStatisticsRepository.addBuildingToGame(
-      gameStatisticsId, buildingId, buildingLevelId
-    );
-  }
-
-  async getGameBuildingById(gameBuildingId) {
-    return await gameStatisticsRepository.findGameBuildingById(gameBuildingId);
-  }
-
   async getAllGameBuildingsByGroupId(groupId) {
     return await gameStatisticsRepository.findAllGameBuildingsByGroupId(groupId);
   }
-
-  async updateGameBuilding(gameBuildingId, updates) {
-    return await gameStatisticsRepository.updateGameBuilding(gameBuildingId, updates);
-  }
-
-  async upgradeBuildingLevel(gameBuildingId, buildingLevelId) {
-    return await gameStatisticsRepository.updateGameBuilding(
-      gameBuildingId, { buildingLevelId }
-    );
-  }
-
-  async removeGameBuilding(gameBuildingId) {
-    return await gameStatisticsRepository.removeGameBuilding(gameBuildingId);
-  }
-
 
   // Asset methods
   async addAsset(statsId, aData) {
