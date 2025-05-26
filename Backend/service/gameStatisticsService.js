@@ -31,14 +31,14 @@ class GameStatisticsService {
   async getById(
     id,
     includeCurrency = true,
-    includeBuildings = true,
+    includeGameBuildings = true,
     includeAssets = true,
     includeCheckpoints = true,
     includeGroup = false
   ) {
     return await gameStatisticsRepository.findById(id, {
       includeCurrency,
-      includeBuildings,
+      includeGameBuildings,
       includeAssets,
       includeCheckpoints,
       includeGroup,
@@ -48,20 +48,22 @@ class GameStatisticsService {
   async getByGroupId(
     groupId,
     includeCurrency = true,
-    includeBuildings = true,
+    includeGameBuildings = true,
     includeAssets = true,
     includeCheckpoints = true,
     includeGroup = false
   ) {
     return await gameStatisticsRepository.findByGroupId(groupId, {
       includeCurrency,
-      includeBuildings,
+      includeGameBuildings,
       includeAssets,
       includeCheckpoints,
       includeGroup,
     });
   }
 
+
+  // Currency methods
   async getCurrencyById(currencyId) {
     return await gameStatisticsRepository.findCurrencyById(currencyId);
   }
@@ -74,24 +76,48 @@ class GameStatisticsService {
     return gameStatisticsRepository.incrementCurrency(currencyId, payload);
   }
 
-  // async addBuilding(statsId, bData) {
-  //   const building = new Building(bData);
-  //   return await gameStatisticsRepository.addBuilding(statsId, building);
-  // }
 
-  async addBuilding(statsId, bData) {
-    if (bData.level && !(bData.level instanceof Level)) {
-      bData.level = new Level(bData.level);
-    }
-
-    const building = new Building(bData);
-    return await gameStatisticsRepository.addBuilding(statsId, building);
+  // Building methods
+  async getBuildingById(buildingId) {
+    return await gameStatisticsRepository.findBuildingById(buildingId);
   }
 
-  async removeBuilding(buildingId) {
-    return await gameStatisticsRepository.removeBuilding(buildingId);
+  async getAllBuildings() {
+    return await gameStatisticsRepository.getAllBuildings();
   }
 
+
+  // GameBuildings methods (buildings specific to a game)
+  async addBuildingToGame(gameStatisticsId, buildingId, buildingLevelId) {
+    return await gameStatisticsRepository.addBuildingToGame(
+      gameStatisticsId, buildingId, buildingLevelId
+    );
+  }
+
+  async getGameBuildingById(gameBuildingId) {
+    return await gameStatisticsRepository.findGameBuildingById(gameBuildingId);
+  }
+
+  async getAllGameBuildingsByGroupId(groupId) {
+    return await gameStatisticsRepository.findAllGameBuildingsByGroupId(groupId);
+  }
+
+  async updateGameBuilding(gameBuildingId, updates) {
+    return await gameStatisticsRepository.updateGameBuilding(gameBuildingId, updates);
+  }
+
+  async upgradeBuildingLevel(gameBuildingId, buildingLevelId) {
+    return await gameStatisticsRepository.updateGameBuilding(
+      gameBuildingId, { buildingLevelId }
+    );
+  }
+
+  async removeGameBuilding(gameBuildingId) {
+    return await gameStatisticsRepository.removeGameBuilding(gameBuildingId);
+  }
+
+
+  // Asset methods
   async addAsset(statsId, aData) {
     const { type } = aData;
     let assetInstance;
@@ -133,28 +159,22 @@ class GameStatisticsService {
     return await gameStatisticsRepository.delete(id);
   }
 
-  async upgradeBuilding(buildingId, { level }) {
-    console.log(
-      "→ [upgradeBuilding] buildingId=",
-      buildingId,
-      "new level=",
-      level
-    );
-    const building = await gameStatisticsRepository.findBuildingById(
-      buildingId
-    );
-    console.log("→ [upgradeBuilding] current building:", building);
-
-    if (!building) {
-      throw new Error("Building not found");
+  async upgradeBuilding(GameBuildingId, { level }) {
+    console.log('→ [upgradeBuilding] GameBuildingId=', GameBuildingId, 'new level=', level);
+    const gameBuilding = await gameStatisticsRepository.findGameBuildingById(GameBuildingId);
+    console.log('→ [upgradeBuilding] current GameBuilding:', gameBuilding);
+    if (!gameBuilding) {
+      throw new Error(`GameBuilding with id ${GameBuildingId} not found`);
     }
 
-    const updatedBuilding = await gameStatisticsRepository.upgradeBuilding(
-      buildingId,
-      { level }
-    );
-    console.log("→ [upgradeBuilding] updated building:", updatedBuilding);
-    return updatedBuilding;
+    const NextBuildingLevel = await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(gameBuilding.building.id, level);
+    if (!NextBuildingLevel) {
+      throw new Error(`BuildingLevel ${level} for building ${gameBuilding.building.id} not found`);
+    }
+
+    const updatedGameBuilding = await gameStatisticsRepository.upgradeBuildingLevel(GameBuildingId, NextBuildingLevel.id);
+    console.log('→ [upgradeBuilding] updated GameBuilding:', updatedGameBuilding);
+    return updatedGameBuilding;
   }
 }
 

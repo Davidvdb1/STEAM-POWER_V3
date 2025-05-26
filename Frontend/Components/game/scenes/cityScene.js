@@ -42,10 +42,12 @@ export function createCityScene() {
       this.buildingRegistry.grayoutAllBuildings(1);
 
       // Enable visibly hovering over a selection of tiles
-      this.handleTileHover();
+      // this.handleTileHover();
 
       // Enable dragging the map with the mouse
       handleMapDragging(this);
+
+      this.makeBuildingsInteractive();
 
 
       // Configure the building info panel and 'upgrade building' dialog
@@ -439,5 +441,62 @@ export function createCityScene() {
         ["Layer-5", [112, 58], [139, 69]]
       );
     };
+
+
+    makeBuildingsInteractive() {
+      for (const [buildingName, tileSelection] of this.buildingRegistry.buildings.entries()) {
+        // Find bounding box for each building
+        const tileW = this.map.tileWidth;
+        const tileH = this.map.tileHeight;
+
+        // For each building, calculate its overall bounds
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+
+        // Process all layers of this building
+        for (const [layerName, data] of tileSelection.originalTiles.entries()) {
+          data.tiles.forEach(tile => {
+            minX = Math.min(minX, tile.x);
+            minY = Math.min(minY, tile.y);
+            maxX = Math.max(maxX, tile.x);
+            maxY = Math.max(maxY, tile.y);
+          });
+        }
+
+        // Create a single interactive rectangle that covers the entire building
+        if (minX !== Infinity) {
+          const rect = this.add
+            .rectangle(
+              minX * tileW, 
+              minY * tileH, 
+              (maxX - minX + 1) * tileW, 
+              (maxY - minY + 1) * tileH, 
+              0x0000ff, 
+              0.0  // Transparent
+            )
+            .setOrigin(0, 0)
+            .setInteractive({ useHandCursor: true })
+            .on("pointerdown", () => {
+              this.isDragging = false;
+              console.log(`Building clicked: ${buildingName}`);
+              
+              // Find the building data by name
+              const buildingData = this.sys.game.buildingData?.find(b => 
+                b.name === buildingName || 
+                (b.building && b.building.name === buildingName)
+              );
+              
+              if (buildingData) {
+                // Emit the building ID instead of name
+                this.game.events.emit("buildingClicked", buildingData.id);
+              } else {
+                console.warn(`No building data found for ${buildingName}`);
+                // Fallback to the original behavior
+                this.game.events.emit("buildingClicked", buildingName);
+              }
+            });
+        }
+      }
+    }
   }
 }

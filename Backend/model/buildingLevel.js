@@ -1,11 +1,8 @@
-const Level = require("./level");
-const Building = require("./building");
-
 class BuildingLevel {
   constructor(
     {
       id = undefined,
-      building,
+      buildingId,
       level,
       energyCost,
       upgradeCost,
@@ -14,7 +11,7 @@ class BuildingLevel {
     validate = true
   ) {
     this.id = id;
-    this.building = building;
+    this.buildingId = buildingId;
     this.level = level;
     this.energyCost = energyCost;
     this.upgradeCost = upgradeCost;
@@ -23,6 +20,9 @@ class BuildingLevel {
   }
 
   validate() {
+    if (this.buildingId && typeof this.buildingId !== "string") {
+      throw new Error("Invalid buildingId");
+    }
     if (typeof this.level !== "number") {
       throw new Error("Invalid level");
     }
@@ -38,14 +38,33 @@ class BuildingLevel {
   }
 
   static from(prismaBuildingLevel) {
-    return new BuildingLevel({
-      id: prismaBuildingLevel.id,
-      building: Building.from(prismaBuildingLevel.building),
-      level: prismaBuildingLevel.level,
-      energyCost: prismaBuildingLevel.energyCost,
-      upgradeCost: prismaBuildingLevel.upgradeCost,
-      scoreDeduction: prismaBuildingLevel.scoreDeduction,
-    });
+
+    return new BuildingLevel(
+      {
+        id: prismaBuildingLevel.id,
+        buildingId:
+          prismaBuildingLevel.buildingId ||
+          (prismaBuildingLevel.building ? prismaBuildingLevel.building.id : null),
+        level: prismaBuildingLevel.level,
+        energyCost: prismaBuildingLevel.energyCost,
+        upgradeCost: prismaBuildingLevel.upgradeCost,
+        scoreDeduction: prismaBuildingLevel.scoreDeduction,
+      },
+      true
+    );
+  }
+
+  // Helper method to convert to JSON
+  toJSON() {
+    return {
+      id: this.id,
+      buildingId: this.buildingId,
+      level: this.level,
+      energyCost: this.energyCost,
+      upgradeCost: this.upgradeCost,
+      scoreDeduction: this.scoreDeduction,
+    };
+
   }
 }
 
