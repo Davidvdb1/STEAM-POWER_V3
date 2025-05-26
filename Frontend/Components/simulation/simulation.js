@@ -264,7 +264,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
                 this.dragBehaviorSolar.enabled = false;
                 this.solarPanel.addBehavior(this.dragBehaviorSolar);
 
-                        // 🌞 Zonpositie ophalen en zonnepaneel richten
+                        // Zonpositie ophalen en zonnepaneel richten
         const street = "Geldenaaksebaan 335";
         const city = "Leuven";
         const postal = "3001";
