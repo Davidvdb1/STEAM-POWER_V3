@@ -1,6 +1,6 @@
-import { createLogoScene } from "../../scenes/logoScene.js";
-import { createCityScene } from "../../scenes/cityScene.js";
-import { createOuterCityScene } from "../../scenes/outerCityScene.js";
+import { createLogoScene } from "../components/scenes/logoScene.js";
+import { createCityScene } from "../components/scenes/cityScene.js";
+import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
 import {
   fetchGameStatistics,
   getAllGameBuildingsByGroupId,
@@ -8,16 +8,16 @@ import {
   getCurrencyById,
   updateCurrency,
   upgradeBuilding
-} from "../../utils/gameService.js";
+} from "../service/gameService.js";
 
 // register our detail-panel components
-import "../../details/buildingDetail.js";
-import "../../details/assetDetail.js";
+import "../components/details/buildingDetail.js";
+import "../components/details/assetDetail.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
-    @import './Components/game/components/gameControlPanel/style.css';
+    @import './Components/game/gameControlPanel/style.css';
     :host { display: block; position: relative; }
     #detail-container { position: absolute; top: 0; left: -220px; width: 200px; z-index: 10; }
   </style>
@@ -194,7 +194,7 @@ class GameControlPanel extends HTMLElement {
     });
 
     this._shadow.addEventListener("upgrade-build", e => {
-      this._confirmUpgradeBuilding(e.detail.buildingId);
+      this._confirmUpgradeBuilding(e.detail.GameBuildingId);
     });
 
     this._loadPhaser().then(() => this._initializeGame());
@@ -496,8 +496,8 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
-  _confirmUpgradeBuilding(buildingId) {
-    const building = this._game.buildingData.find(b => b.id === buildingId);
+  _confirmUpgradeBuilding(GameBuildingId) {
+    const building = this._game.buildingData.find(b => b.id === GameBuildingId);
     if (!building) return;
 
     const currentLevel = building.level.level;
@@ -508,17 +508,17 @@ class GameControlPanel extends HTMLElement {
     const scene = this._game.scene.getScene("CityScene");
     scene.showConfirmation(msg, confirmed => {
       if (confirmed) {
-        this._performUpgradeBuilding(buildingId);
+        this._performUpgradeBuilding(GameBuildingId);
       }
     });
   }
 
-  async _performUpgradeBuilding(buildingId) {
+  async _performUpgradeBuilding(GameBuildingId) {
     try {
       const token = this._game.token;
       const currencyId = this._game.currencyId;
-      const building = this._game.buildingData.find(b => b.id === buildingId);
-      console.log("Performing upgrade for building:", buildingId);
+      const building = this._game.buildingData.find(b => b.id === GameBuildingId);
+      console.log("Performing upgrade for building:", GameBuildingId);
       console.log("Performing upgrade for building:", building);
       if (!building) throw new Error("Building not found");
 
@@ -529,7 +529,7 @@ class GameControlPanel extends HTMLElement {
 
       // Call the backend to upgrade the building
       const upgradedBuilding = await upgradeBuilding(
-        buildingId,
+        GameBuildingId,
         { level: nextLevel },
         token
       );
@@ -564,7 +564,7 @@ class GameControlPanel extends HTMLElement {
         cityScene._updateBuildingSprite(building);
       }
 
-      this._showBuildingDetail(buildingId);
+      this._showBuildingDetail(GameBuildingId);
     } catch (err) {
       console.error("Error upgrading building:", err);
     }

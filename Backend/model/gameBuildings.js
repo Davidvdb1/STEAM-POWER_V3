@@ -1,7 +1,5 @@
 const BuildingLevel = require("./buildingLevel");
 const Building = require("./building");
-// Don't import GameStatistics directly to avoid circular dependency
-// const GameStatistics = require("./gameStatistics");
 
 class GameBuildings {
   constructor(
@@ -48,15 +46,6 @@ class GameBuildings {
     }
     
     return gameBuilding;
-  }
-
-  toJSON() {
-    return {
-      id: this.id,
-      building: this.building,
-      buildingLevel: this.buildingLevel
-      // Intentionally omitting gameStatistics reference
-    };
   }
 }
 

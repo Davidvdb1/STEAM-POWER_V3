@@ -3,7 +3,7 @@
 const template = document.createElement("template");
 template.innerHTML = /*html*/`
   <style>
-    @import './Components/game/details/style.css';
+    @import './Components/game/components/details/style.css';
   </style>
 
   <button class="close">&times;</button>
@@ -84,7 +84,7 @@ class BuildingDetail extends HTMLElement {
       this._upgradeBtn.style.display = "";
       this._upgradeBtn.onclick = () => {
         this.dispatchEvent(new CustomEvent("upgrade-build", {
-          detail: { buildingId: this._data.id },
+          detail: { GameBuildingId: this._data.id },
           bubbles: true
         }));
       };
