@@ -30,7 +30,7 @@ template.innerHTML = /*html*/ `
 
           <div class="card-asset" draggable="true" data-type="Windmolen">
             <div class="corner-icon">
-              <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
             </div>
             <img class="windturbine" src="Assets/images/windturbine.png" alt="">
             <p>Windmolen</p>
@@ -42,7 +42,7 @@ template.innerHTML = /*html*/ `
 
           <div class="card-asset" draggable="true" data-type="Waterrad">
             <div class="corner-icon">
-              <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
             </div>
             <img class="windturbine" src="Assets/images/waterrad.png" alt="">
             <p>Waterrad</p>
@@ -54,7 +54,7 @@ template.innerHTML = /*html*/ `
 
           <div class="card-asset" draggable="true" data-type="Zonnepaneel">
             <div class="corner-icon">
-              <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
             </div>
             <img class="windturbine" src="Assets/images/solar_panel.png" alt="">
             <p>Zonnepaneel</p>
@@ -66,7 +66,7 @@ template.innerHTML = /*html*/ `
 
           <div class="card-asset" draggable="true" data-type="Kerncentrale">
             <div class="corner-icon">
-              <img class="img-greenEnergy-card" src="Assets/images/greyEnergyTransparent2.png" alt="">
+              <img class="img-greenEnergy-card" src="Assets/images/pixelGreyEnergy.svg" alt="">
             </div>
             <img class="kerncentrale" src="Assets/images/kerncentrale.png" alt="">
             <p>Kerncentrale</p>
