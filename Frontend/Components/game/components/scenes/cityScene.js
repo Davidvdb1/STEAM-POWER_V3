@@ -48,7 +48,7 @@ export function createCityScene() {
       // Make buildings clickable
       this.makeBuildingsInteractive();
 
-      // Create the confirmation dialog UI but set it to hidden initially
+      // Create the confirmation dialog UI for upgrading a building but set it to hidden initially
       createConfirmationPopup(this);
     }
 
@@ -59,13 +59,19 @@ export function createCityScene() {
 
 
     /**
-     * Configures the selectable tile regions for various buildings on the city map.
+     * Configures the selectable tile regions for various buildings in the city scene.
+     * 
+     * This method initializes a `BuildingRegistry` and registers multiple buildings by specifying
+     * their names, the map reference, and the tile coordinate ranges for each relevant layer.
+     * Each building is defined by one or more layer and coordinate range tuples, which determine
+     * the tiles that constitute the building's selectable area.
+     *
+     * The method does not return a value and is intended to be called during scene setup.
      */
     configureTileSelections() {
       // Set up A building registry to define buildings
       this.buildingRegistry = new BuildingRegistry();
 
-      // Define buildings by specific tile coordinates
       // Define buildings by specific tile coordinates and layers
       this.buildingRegistry.createBuilding(
         "office", 
@@ -175,15 +181,7 @@ export function createCityScene() {
         ["Layer-4", [31, 50], [67, 69]],
         ["Layer-5", [31, 57], [49, 68]]
       );
-
-      this.buildingRegistry.createBuilding(
-        "postOffice", 
-        this.map,
-        ["Layer-2", [72, 59], [75, 68]],
-        ["Layer-3", [76, 56], [83, 68]],
-        ["Layer-4", [76, 56], [83, 68]]
-      );
-
+      
       this.buildingRegistry.createBuilding(
         "apartmentBlockBottomRight", 
         this.map,
@@ -192,6 +190,14 @@ export function createCityScene() {
         ["Layer-3", [84, 57], [90, 68]],
         ["Layer-4", [76, 52], [88, 55]],
         ["Layer-4", [84, 57], [90, 68]]
+      );
+
+      this.buildingRegistry.createBuilding(
+        "postOffice", 
+        this.map,
+        ["Layer-2", [72, 59], [75, 68]],
+        ["Layer-3", [76, 56], [83, 68]],
+        ["Layer-4", [76, 56], [83, 68]]
       );
 
       this.buildingRegistry.createBuilding(
@@ -216,6 +222,12 @@ export function createCityScene() {
     };
 
 
+    /**
+     * Iterates over all registered buildings and creates a single interactive transparent rectangle
+     * for each building, covering its entire area based on its tiles across all layers.
+     * When a building's rectangle is clicked, emits a "buildingClicked" event with the building's ID
+     * (if found in the global building data), or falls back to emitting the building's name.
+    */
     makeBuildingsInteractive() {
       for (const [buildingName, tileSelection] of this.buildingRegistry.buildings.entries()) {
         // Find bounding box for each building
@@ -249,6 +261,7 @@ export function createCityScene() {
             )
             .setOrigin(0, 0)
             .setInteractive({ useHandCursor: true })
+            // .setStrokeStyle(2, 0x0000ff, 0.5) // Add a green outline with 50% opacity
             .on("pointerdown", () => {
               this.isDragging = false;
               console.log(`Building clicked: ${buildingName}`);
