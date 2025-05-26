@@ -84,7 +84,7 @@ class BuildingDetail extends HTMLElement {
       this._upgradeBtn.style.display = "";
       this._upgradeBtn.onclick = () => {
         this.dispatchEvent(new CustomEvent("upgrade-build", {
-          detail: { buildingId: this._data.id },
+          detail: { GameBuildingId: this._data.id },
           bubbles: true
         }));
       };
