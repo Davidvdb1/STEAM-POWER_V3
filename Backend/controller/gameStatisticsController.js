@@ -3,7 +3,7 @@ const gameStatisticsService = require('../service/gameStatisticsService');
 
 const router = express.Router();
 
-// Create new game statistics
+// Create new game statistics (ok)
 router.post('/', async (req, res) => {
   try {
     const { groupId, greenEnergy, greyEnergy, coins } = req.body;
@@ -16,7 +16,20 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /gameStatistics/group/:groupId
+// Fetch all game statistics (ok)
+router.get('/', async (req, res) => {
+  console.log('→ [gameStatistics] fetching all game statistics');
+  try {
+    const gameStatistics = await gameStatisticsService.getAllGameStatistics();
+    res.status(200).json(gameStatistics);
+  } catch (error) {
+    console.error('✖ [gameStatistics] ERROR in GET / →', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+// GET /gameStatistics/group/:groupId (ok)
 router.get('/group/:groupId', async (req, res) => {
   const { groupId } = req.params;
   console.log('→ [gameStatistics] fetching stats for groupId:', groupId);
@@ -36,7 +49,7 @@ router.get('/group/:groupId', async (req, res) => {
   }
 });
 
-// ——— Fetch by statistics ID ———
+// ——— Fetch by statistics ID ——— (ok)
 router.get('/:id', async (req, res) => {
   try {
     const gs = await gameStatisticsService.getById(req.params.id);
@@ -51,7 +64,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// get currency by id
+// get currency by id (ok)
 router.get('/:id/currency', async (req, res) => {
   console.log(`→ HIT /:id/currency; req.params.id =`, req.params.id);
   try {
@@ -67,7 +80,7 @@ router.get('/:id/currency', async (req, res) => {
   }
 });
 
-// Update currency
+// Update currency (ok)
 router.put('/:id/currency', async (req, res) => {
   try {
     const updated = await gameStatisticsService.updateCurrency(req.params.id, req.body);
@@ -89,7 +102,7 @@ router.post('/:id/currency/increment', async (req, res) => {
 });
 
 
-// Add a building
+// Add a building (ok)
 router.post('/:id/buildings', async (req, res) => {
   try {
     const building = await gameStatisticsService.addBuilding(req.params.id, req.body);
@@ -101,19 +114,8 @@ router.post('/:id/buildings', async (req, res) => {
   }
 });
 
-// Update a building
-router.put('/buildings/:buildingId', async (req, res) => {
-  try {
-    const building = await gameStatisticsService.updateBuilding(req.params.buildingId, req.body);
-    res.status(200).json(building);
-  } catch (error) {
-    console.error(`Error updating building ${req.params.buildingId}:`, error);
-    const statusCode = error.statusCode || 400;
-    res.status(statusCode).json({ error: error.message });
-  }
-});
 
-// Delete a building
+// Delete a building (ok)
 router.delete('/buildings/:buildingId', async (req, res) => {
   try {
     await gameStatisticsService.removeBuilding(req.params.buildingId);
@@ -125,7 +127,7 @@ router.delete('/buildings/:buildingId', async (req, res) => {
   }
 });
 
-// Add an asset
+// Add an asset (ok)
 router.post('/:id/assets', async (req, res) => {
   try {
     const asset = await gameStatisticsService.addAsset(req.params.id, req.body);
@@ -137,7 +139,7 @@ router.post('/:id/assets', async (req, res) => {
   }
 });
 
-// Delete an asset
+// Delete an asset (ok)
 router.delete('/assets/:assetId', async (req, res) => {
   try {
     await gameStatisticsService.removeAsset(req.params.assetId);
@@ -149,7 +151,7 @@ router.delete('/assets/:assetId', async (req, res) => {
   }
 });
 
-// Record a checkpoint
+// Record a checkpoint (ok)
 router.post('/:id/checkpoints', async (req, res) => {
   try {
     const cp = await gameStatisticsService.recordCheckpoint(req.params.id, req.body);
@@ -161,7 +163,7 @@ router.post('/:id/checkpoints', async (req, res) => {
   }
 });
 
-// Delete a checkpoint
+// Delete a checkpoint (ok)
 router.delete('/checkpoints/:checkpointId', async (req, res) => {
   try {
     await gameStatisticsService.removeCheckpoint(req.params.checkpointId);
@@ -173,7 +175,7 @@ router.delete('/checkpoints/:checkpointId', async (req, res) => {
   }
 });
 
-// Delete game statistics
+// Delete game statistics (ok)
 router.delete('/:id', async (req, res) => {
   try {
     await gameStatisticsService.delete(req.params.id);

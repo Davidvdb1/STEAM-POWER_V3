@@ -3,13 +3,12 @@ const GameStatistics = require("../model/gameStatistics");
 const Currency = require("../model/currency");
 const Building = require("../model/building");
 const Asset = require("../model/asset");
+const Nature = require('../model/nature');
 const Checkpoint = require("../model/checkpoint");
 const Level = require("../model/level");
 
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-
-
 
 class GameStatisticsService {
   async create({ groupId, greenEnergy, greyEnergy, coins }) {
@@ -20,6 +19,13 @@ class GameStatisticsService {
     });
     const gs = await gameStatisticsRepository.create({ groupId, currency });
     return gs;
+  }
+
+  // Om de backend manueel te testen
+  async getAllGameStatistics() {
+    const gameStatistics =
+      await gameStatisticsRepository.getAllGameStatistics();
+    return gameStatistics.map((gs) => GameStatistics.from(gs));
   }
 
   async getById(
@@ -113,8 +119,14 @@ class GameStatisticsService {
 
   // Asset methods
   async addAsset(statsId, aData) {
-    const asset = new Asset(aData);
-    return await gameStatisticsRepository.addAsset(statsId, asset);
+    const { type } = aData;
+    let assetInstance;
+    if (Nature.allowedTypes.includes(type)) {
+      assetInstance = new Nature(aData);
+    } else {
+      assetInstance = new Asset(aData);
+    }
+    return await gameStatisticsRepository.addAsset(statsId, assetInstance);
   }
 
   async removeAsset(assetId) {
@@ -126,19 +138,8 @@ class GameStatisticsService {
 
     const buildings = await Promise.all(
       cpData.buildings.map(async (b) => {
-        if (b.level && !(b.level instanceof Level)) {
-          // Haal volledige Level data op als nodig
-          if (!b.level.level || !b.level.upgradeCost || !b.level.energyCost) {
-            const fullLevelData = await prisma.level.findUnique({
-              where: { id: b.level.id },
-            });
-            if (!fullLevelData) {
-              throw new Error(`Level with id ${b.level.id} not found`);
-            }
-            b.level = new Level(fullLevelData);
-          } else {
-            b.level = new Level(b.level);
-          }
+        if (!b.name) {
+          throw new Error("Building name is required");
         }
         return new Building(b);
       })
@@ -175,8 +176,6 @@ class GameStatisticsService {
     console.log('→ [upgradeBuilding] updated GameBuilding:', updatedGameBuilding);
     return updatedGameBuilding;
   }
-
 }
-
 
 module.exports = new GameStatisticsService();

@@ -38,6 +38,7 @@ class BuildingLevel {
   }
 
   static from(prismaBuildingLevel) {
+
     return new BuildingLevel(
       {
         id: prismaBuildingLevel.id,
@@ -63,6 +64,7 @@ class BuildingLevel {
       upgradeCost: this.upgradeCost,
       scoreDeduction: this.scoreDeduction,
     };
+
   }
 }
 

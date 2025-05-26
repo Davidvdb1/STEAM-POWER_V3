@@ -32,6 +32,26 @@ class GameStatisticsRepository {
     return GameStatistics.from(prismaGS);
   }
 
+  // Om de backend manueel te testen
+
+  async getAllGameStatistics() {
+    const gameStatistics = await this.prisma.gameStatistics.findMany({
+      include: {
+        currency: true,
+        buildings: true,
+        assets: true,
+        checkpoints: {
+          include: {
+            currency: true,
+            buildings: true,
+            assets: true,
+          },
+        },
+      },
+    });
+    return gameStatistics.map((gs) => GameStatistics.from(gs));
+  }
+
   async findById(
     id,
     {
@@ -57,7 +77,7 @@ class GameStatisticsRepository {
           ? {
               include: {
                 currency: true,
-                buildings: { include: { level: true } },
+                buildings: true,
                 assets: true,
               },
             }
@@ -97,7 +117,7 @@ class GameStatisticsRepository {
     return GameStatistics.from(prismaGS);
   }
 
-    // Currency ---------------------------------------------------------------------------------------------------------------------------------------------------
+  // Currency ---------------------------------------------------------------------------------------------------------------------------------------------------
 
   async findCurrencyById(id) {
     const prismaCurrency = await this.prisma.currency.findUnique({
@@ -140,37 +160,39 @@ class GameStatisticsRepository {
     return Currency.from(updated);
   }
 
-async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
-  const gs = await this.findByGroupId(groupId);
+  async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
+    const gs = await this.findByGroupId(groupId);
 
-  if (!gs || !gs.currency || !gs.assets) {
-    throw new Error('GameStatistics, currency of assets niet gevonden');
-  }
-
-  const typeMap = {
-    WIND: "windmolen",
-    SOLAR: "zonnepaneel",
-    WATER: "waterrad"
-  };
-
-  const assetType = typeMap[type.toUpperCase()];
-  if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
-
-  const matchingAssets = gs.assets.filter(a => a.type.toLowerCase() === assetType);
-
-  const totalGain = matchingAssets.reduce((sum, asset) => {
-    return sum + (greenEnergy * asset.energy);
-  }, 0);
-
-  const updated = await this.prisma.currency.update({
-    where: { id: gs.currency.id },
-    data: {
-      greenEnergy: { increment: totalGain }
+    if (!gs || !gs.currency || !gs.assets) {
+      throw new Error("GameStatistics, currency of assets niet gevonden");
     }
-  });
 
-  return Currency.from(updated);
-}
+    const typeMap = {
+      WIND: "windmolen",
+      SOLAR: "zonnepaneel",
+      WATER: "waterrad",
+    };
+
+    const assetType = typeMap[type.toUpperCase()];
+    if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
+
+    const matchingAssets = gs.assets.filter(
+      (a) => a.type.toLowerCase() === assetType
+    );
+
+    const totalGain = matchingAssets.reduce((sum, asset) => {
+      return sum + greenEnergy * asset.energy;
+    }, 0);
+
+    const updated = await this.prisma.currency.update({
+      where: { id: gs.currency.id },
+      data: {
+        greenEnergy: { increment: totalGain },
+      },
+    });
+
+    return Currency.from(updated);
+  }
 
   // GameBuilding ---------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -191,7 +213,6 @@ async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
     
     return GameBuildings.from(gameBuilding);
   }
-
 
   async findGameBuildingById(gameBuildingId) {
     const gameBuilding = await this.prisma.gameBuildings.findUnique({
@@ -253,6 +274,16 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
         building: true,
         buildingLevel: true
       }
+=======
+  async upgradeBuilding(buildingId, { level }) {
+    const updated = await this.prisma.building.update({
+      where: { id: buildingId },
+      data: {
+        level: {
+          update: { level },
+        },
+      },
+      include: { level: true },
     });
     
     return GameBuildings.from(updated);
@@ -299,11 +330,7 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
         },
         buildings: {
           create: cp.buildings.map((b) => ({
-            xLocation: b.xLocation,
-            yLocation: b.yLocation,
-            xSize: b.xSize,
-            ySize: b.ySize,
-            level: { connect: { id: b.level.id } }, // connect via id
+            name: b.name,
           })),
         },
         assets: {
@@ -321,7 +348,7 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
       },
       include: {
         currency: true,
-        buildings: { include: { level: true } },
+        buildings: true,
         assets: true,
       },
     });
@@ -334,6 +361,9 @@ async updateGameBuilding(gameBuildingId, { buildingLevelId }) {
   }
 
   async delete(id) {
+    await this.prisma.gameBuildings.deleteMany({
+      where: { gameStatisticsId: id },
+    });
     await this.prisma.gameStatistics.delete({ where: { id } });
   }
 

@@ -28,51 +28,92 @@ template.innerHTML = /*html*/ `
     <div id="detail-container" class="hidden"></div>
     <div id="inner-container">
       <div class="shop">
-        <div class="card-asset" draggable="true" data-type="Windmolen">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
+
+          <div class="card-asset" draggable="true" data-type="Windmolen">
+            <div class="corner-icon">
+              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
+            </div>
+            <img class="windturbine" src="Assets/images/windturbine.png" alt="">
+            <p>Windmolen</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
           </div>
-          <img class="windturbine" src="Assets/images/windturbine.png" alt="">
-          <p>Windmolen</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+
+          <div class="card-asset" draggable="true" data-type="Waterrad">
+            <div class="corner-icon">
+              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
+            </div>
+            <img class="windturbine" src="Assets/images/waterrad.png" alt="">
+            <p>Waterrad</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Zonnepaneel">
+            <div class="corner-icon">
+              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
+            </div>
+            <img class="windturbine" src="Assets/images/solar_panel.png" alt="">
+            <p>Zonnepaneel</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Kerncentrale">
+            <div class="corner-icon">
+              <img class="img-greenEnergy-card" src="Assets/images/pixelGreyEnergy.svg" alt="">
+            </div>
+            <img class="kerncentrale" src="Assets/images/kerncentrale.png" alt="">
+            <p>Kerncentrale</p>
+            <div class="assetCoinDiv">
+              <p>20</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Eik">
+            <img src="Assets/images/Eik.png" alt="tree1" />
+            <p>Eik</p>
+            <div class="assetCoinDiv">
+              <p>10</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Beuk">
+            <img src="Assets/images/Beuk.png" alt="tree2" />
+            <p>Beuk</p>
+            <div class="assetCoinDiv">
+              <p>10</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Buxus">
+            <img src="Assets/images/Buxus.png" alt="bush1" />
+            <p>Buxus</p>
+            <div class="assetCoinDiv">
+              <p>10</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
+          </div>
+
+          <div class="card-asset" draggable="true" data-type="Hulst">
+            <img src="Assets/images/Hulst.png" alt="bush2" />
+            <p>Hulst</p>
+            <div class="assetCoinDiv">
+              <p>10</p>
+              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
+            </div>
           </div>
         </div>
-        <div class="card-asset" draggable="true" data-type="Waterrad">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
-          </div>
-          <img class="windturbine" src="Assets/images/waterrad.png" alt="">
-          <p>Waterrad</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-          </div>
-        </div>
-        <div class="card-asset" draggable="true" data-type="Zonnepaneel">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greenEnergyTransparent2.png" alt="">
-          </div>
-          <img class="windturbine" src="Assets/images/solar_panel.png" alt="">
-          <p>Zonnepaneel</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-          </div>
-        </div>
-        <div class="card-asset" draggable="true" data-type="Kerncentrale">
-          <div class="corner-icon">
-            <img class="img-greenEnergy-card" src="Assets/images/greyEnergyTransparent2.png" alt="">
-          </div>
-          <img class="kerncentrale" src="Assets/images/kerncentrale.png" alt="">
-          <p>Kerncentrale</p>
-          <div class="assetCoinDiv">
-            <p>20</p>
-            <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-          </div>
-        </div>
-      </div>
+
       <div class="test">
         <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
         <div id="inner-text">Ga naar binnenstad</div>
@@ -168,6 +209,8 @@ class GameControlPanel extends HTMLElement {
 
   disconnectedCallback() {
     if (this._interval) clearInterval(this._interval);
+    if (this._statsInterval) clearInterval(this._statsInterval);
+    if (this._energyInterval)  clearInterval(this._energyInterval);
   }    
 
   _enableDragFromShop() {
@@ -210,6 +253,7 @@ class GameControlPanel extends HTMLElement {
     window.phaserGame = this._game;
     this._game.events.on("buildingClicked", id => this._showBuildingDetail(id));
     this._game.events.on("assetClicked",    id => this._showAssetDetail(id));
+    
   }
 
   async _updateStatistics() {
@@ -240,6 +284,7 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
+
   _transformBuildingData(gameBuildings) {
     if (!gameBuildings || !Array.isArray(gameBuildings)) return [];
 
@@ -249,6 +294,42 @@ class GameControlPanel extends HTMLElement {
       building: gb.building,  // Keep original reference if needed
       level: gb.buildingLevel // Directly use buildingLevel as level
     }));
+    
+   async _updateEnergy() {
+    try {
+      const user = sessionStorage.getItem("loggedInUser");
+      if (!user) throw new Error("Not logged in");
+      const { token, groupId } = JSON.parse(user);
+      const gs = await fetchGameStatistics(groupId, token);
+
+      const counts = gs.assets.reduce((acc, asset) => {
+        acc[asset.type] = (acc[asset.type] || 0) + 1;
+        return acc;
+    }, {});
+
+      const extra = {
+        greenEnergy: 0,
+        greyEnergy: 0
+      };
+      if (counts["Windmolen"]) extra.greenEnergy += counts["Windmolen"] * 50;
+      if (counts["Waterrad"]) extra.greenEnergy += counts["Waterrad"] * 50;
+      if (counts["Zonnepaneel"]) extra.greenEnergy += counts["Zonnepaneel"] * 50;
+      if (counts["Kerncentrale"]) extra.greyEnergy += counts["Kerncentrale"] * 100;
+
+      const cur = gs.currency;
+      const updated = {
+        greenEnergy: cur.greenEnergy + extra.greenEnergy,
+        greyEnergy:  cur.greyEnergy + extra.greyEnergy,
+        coins:       cur.coins
+      };
+      await updateCurrency(cur.id, updated, token);
+
+      this._greenEl.textContent = updated.greenEnergy;
+      this._greyEl.textContent  = updated.greyEnergy;
+
+    } catch (e) {
+      console.error("Error updating energy:", e);
+    }
   }
 
   async _onStartClick() {
@@ -258,7 +339,7 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
 
     await this._updateStatistics();
-
+    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3000);
     try {
       const raw = sessionStorage.getItem("loggedInUser");
@@ -487,7 +568,6 @@ class GameControlPanel extends HTMLElement {
       console.error("Error upgrading building:", err);
     }
   }
-
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
