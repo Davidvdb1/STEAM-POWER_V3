@@ -12,7 +12,6 @@ template.innerHTML = /*html*/`
         <canvas id="renderCanvas"></canvas>
     </div>
 `;
-//#endregion SIMULATION
 
 //#region CLASS 
 window.customElements.define('simulation-れ', class extends HTMLElement {
@@ -26,35 +25,12 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         this.scene = null;
         this.camera = null;
         this.resizeObserver = null;
-        
-        // Draggable objects properties
-        this.solarPanel = null;
-        this.windmill = null;
-        this.wheel = null;
 
-        this.dragBehaviorSolar = null;
-        this.dragBehaviorWind = null;
-        this.dragBehaviorWheel = null;
-
-        this.dragEnabledSolar = false;
-        this.dragEnabledWind = false;
-        this.dragEnabledWheel = false;
-
-        this.isRotatingSolar = false;
-        this.isRotatingWind = false;
-        this.isRotatingWheel = false;
-
-        this.startingX = null;
-        this.advancedTexture = null;
     }
 
     // component attributes
     static get observedAttributes() {
         return [];
-    }
-
-    attributeChangedCallback(name, oldValue, newValue) {
-        
     }
 
     connectedCallback() {
@@ -146,17 +122,11 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         // Get the canvas element from shadow DOM
         const canvas = this._shadowRoot.getElementById('renderCanvas');
         
-        // Check if BabylonJS is available
-        if (typeof BABYLON === 'undefined') {
-            console.error('BabylonJS is not loaded. Make sure to include the BabylonJS script.');
-            return;
-        }
-        
         // Initialize the BabylonJS engine with high DPI support
         this.engine = new BABYLON.Engine(canvas, true, {
             preserveDrawingBuffer: true,
             stencil: true,
-            adaptToDeviceRatio: true // Enable high DPI rendering
+            adaptToDeviceRatio: true
         });
         
         // Create scene
@@ -173,10 +143,9 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         
         // Light
         new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), this.scene);
+
         // Sun
         BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/sun3.glb", this.scene, async (meshes) => {
-            console.log("Sun.glb loaded");
-
             const street = "Geldenaaksebaan 335";
             const city = "Leuven";
             const postal = "3001";
@@ -185,10 +154,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             const x = Math.cos(altitude) * Math.sin(azimuth);
             const y = Math.sin(altitude);
             const z = Math.cos(altitude) * Math.cos(azimuth);
-            console.log(x, y, z);
             
-
-            // Find the root mesh
             const sunRoot = meshes.find(m => m.name === "__root__");
 
             if (sunRoot) {
@@ -196,7 +162,6 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
                 sunRoot.scaling = new BABYLON.Vector3(0.05, 0.05, 0.05);
                 sunRoot.position = new BABYLON.Vector3(x * distance, y * distance, z * distance);
                 sunRoot.rotation = new BABYLON.Vector3(0, 0.8, 0);
-                console.log("Applied transform to Sun root");
             }
         });
         
@@ -205,6 +170,8 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         this._create3DLabel("Z", new BABYLON.Vector3(0, 0, 2.8), this.scene);
         this._create3DLabel("O", new BABYLON.Vector3(-3, 0, -0.2), this.scene);
         this._create3DLabel("W", new BABYLON.Vector3(3, 0, -0.2), this.scene);
+
+        this._createSettings(this.scene);
 
         // Load environment
         BABYLON.SceneLoader.Append("", "../Frontend/Assets/GLBs/environment.glb", this.scene, function () {});
@@ -219,19 +186,8 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             }
         });
 
-        // Load Windmill
-        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/windmill.glb", this.scene, (meshes) => {
-            this.windmill = meshes.find(m => m.name === "__root__");
-            if (this.windmill) {
-                this.windmill.scaling = new BABYLON.Vector3(0.0022, 0.0022, 0.0022);
-                this.windmill.position = new BABYLON.Vector3(-1.5, -0.05, 0);
-                this.windmill.rotation = new BABYLON.Vector3(0, 0, 0);
-                this.dragBehaviorWind = new BABYLON.PointerDragBehavior();
-                this.dragBehaviorWind.useObjectOrientationForDragging = false;
-                this.dragBehaviorWind.enabled = false;
-                this.windmill.addBehavior(this.dragBehaviorWind);
-            }
-        });
+        // Load turbine
+        this._loadTurbine(3);
 
         // Load Wheel
         BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/wheel.glb", this.scene, (meshes) => {
@@ -261,22 +217,33 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             }
         });
 
-        // Create GUI
-        this._createGUI();
-
-        // Handle rotation dragging for all objects
-        this.scene.onPointerObservable.add((pointerInfo) => {
-            if (this.isRotatingSolar && this.solarPanel) {
-                this._handleObjectRotation(pointerInfo, this.solarPanel);
-            } else if (this.isRotatingWind && this.windmill) {
-                this._handleObjectRotation(pointerInfo, this.windmill);
-            } else if (this.isRotatingWheel && this.wheel) {
-                this._handleObjectRotation(pointerInfo, this.wheel);
-            }
-        });
-
         // Handle window resize
         window.addEventListener('resize', this._handleResize);
+    }
+
+    _loadTurbine(bladeCount) {
+        const fileName = `turbine_${bladeCount}_blade${bladeCount === 1 ? '' : 's'}.glb`;
+
+        // Dispose previous turbine if exists
+        if (this.windmill) {
+            this.windmill.dispose();
+            this.windmill = null;
+        }
+
+        // Load new turbine
+        BABYLON.SceneLoader.ImportMesh("", "", `../Frontend/Assets/GLBs/${fileName}`, this.scene, (meshes) => {
+            this.windmill = meshes.find(m => m.name === "__root__");
+            if (this.windmill) {
+                this.windmill.scaling = new BABYLON.Vector3(5, 5, 5);
+                this.windmill.position = new BABYLON.Vector3(-1.1, -0.1, 0.5);
+                this.windmill.rotation = new BABYLON.Vector3(0, -1.1, 0);
+
+                this.dragBehaviorWind = new BABYLON.PointerDragBehavior();
+                this.dragBehaviorWind.useObjectOrientationForDragging = false;
+                this.dragBehaviorWind.enabled = false;
+                this.windmill.addBehavior(this.dragBehaviorWind);
+            }
+        });
     }
     
     _create3DLabel(text, position, scene) {
@@ -297,164 +264,174 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         return plane;
     }
 
-    _createGUI() {
-        this.advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-        const canvas = this._shadowRoot.getElementById('renderCanvas');
-
-        // Solar Panel GUI
-        const panelSolar = this._createInventoryPanel("zonnepaneel", "40px");
-        const moveBtnSolar = this._createInventoryItem("Verplaats", panelSolar);
-        const rotateBtnSolar = this._createInventoryItem("Draai", panelSolar);
-
-        // Windmill GUI
-        const panelWind = this._createInventoryPanel("windmolen", "240px");
-        const moveBtnWind = this._createInventoryItem("Verplaats", panelWind);
-        const rotateBtnWind = this._createInventoryItem("Draai", panelWind);
-
-        // Wheel GUI
-        const panelWheel = this._createInventoryPanel("rad", "400px");
-        const moveBtnWheel = this._createInventoryItem("Verplaats", panelWheel);
-        const rotateBtnWheel = this._createInventoryItem("Draai", panelWheel);
-
-        // Button events: Solar
-        moveBtnSolar.onPointerDownObservable.add(() => {
-            if (!this.solarPanel || !this.dragBehaviorSolar) return;
-            this.dragEnabledSolar = !this.dragEnabledSolar;
-            this.dragBehaviorSolar.enabled = this.dragEnabledSolar;
-            moveBtnSolar.background = this.dragEnabledSolar ? "#555" : "#333";
-            if (this.dragEnabledSolar) {
-                this.isRotatingSolar = false;
-                rotateBtnSolar.background = "#333";
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        rotateBtnSolar.onPointerDownObservable.add(() => {
-            if (!this.solarPanel) return;
-            this.isRotatingSolar = !this.isRotatingSolar;
-            rotateBtnSolar.background = this.isRotatingSolar ? "#555" : "#333";
-            if (this.isRotatingSolar) {
-                this.dragEnabledSolar = false;
-                this.dragBehaviorSolar.enabled = false;
-                moveBtnSolar.background = "#333";
-                this.camera.detachControl(canvas);
-            } else {
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        // Button events: Windmill
-        moveBtnWind.onPointerDownObservable.add(() => {
-            if (!this.windmill || !this.dragBehaviorWind) return;
-            this.dragEnabledWind = !this.dragEnabledWind;
-            this.dragBehaviorWind.enabled = this.dragEnabledWind;
-            moveBtnWind.background = this.dragEnabledWind ? "#555" : "#333";
-            if (this.dragEnabledWind) {
-                this.isRotatingWind = false;
-                rotateBtnWind.background = "#333";
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        rotateBtnWind.onPointerDownObservable.add(() => {
-            if (!this.windmill) return;
-            this.isRotatingWind = !this.isRotatingWind;
-            rotateBtnWind.background = this.isRotatingWind ? "#555" : "#333";
-            if (this.isRotatingWind) {
-                this.dragEnabledWind = false;
-                this.dragBehaviorWind.enabled = false;
-                moveBtnWind.background = "#333";
-                this.camera.detachControl(canvas);
-            } else {
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        // Button events: Wheel
-        moveBtnWheel.onPointerDownObservable.add(() => {
-            if (!this.wheel || !this.dragBehaviorWheel) return;
-            this.dragEnabledWheel = !this.dragEnabledWheel;
-            this.dragBehaviorWheel.enabled = this.dragEnabledWheel;
-            moveBtnWheel.background = this.dragEnabledWheel ? "#555" : "#333";
-            if (this.dragEnabledWheel) {
-                this.isRotatingWheel = false;
-                rotateBtnWheel.background = "#333";
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
-
-        rotateBtnWheel.onPointerDownObservable.add(() => {
-            if (!this.wheel) return;
-            this.isRotatingWheel = !this.isRotatingWheel;
-            rotateBtnWheel.background = this.isRotatingWheel ? "#555" : "#333";
-            if (this.isRotatingWheel) {
-                this.dragEnabledWheel = false;
-                this.dragBehaviorWheel.enabled = false;
-                moveBtnWheel.background = "#333";
-                this.camera.detachControl(canvas);
-            } else {
-                this.camera.attachControl(canvas, true, false);
-            }
-        });
+    _createLine() {
+        const line = new BABYLON.GUI.Rectangle()
+        line.thickness = 1
+        line.width = "90%"
+        line.color = "white"
+        line.height = "1px"
+        return line
     }
 
-    _createInventoryPanel(titleText, topPadding) {
-        const panel = new BABYLON.GUI.StackPanel();
-        panel.width = "300px";
-        panel.isVertical = true;
-        panel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
-        panel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        panel.paddingRight = "10px";
-        panel.paddingTop = topPadding;
-        this.advancedTexture.addControl(panel);
+    _createSettings() {
+        // creates a full-screen 2D GUI layer over the whole 3D scene
+        const GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI")
 
-        const title = new BABYLON.GUI.TextBlock();
-        title.text = titleText;
-        title.height = "40px";
-        title.color = "black";
-        title.fontSize = "24px";
-        title.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-        panel.addControl(title);
+        // settings container
+        const settingsPanel = new BABYLON.GUI.Rectangle()
+        settingsPanel.background = "rgba(0, 0, 0, 0.5)";
+        settingsPanel.width = "400px"
+        settingsPanel.height = "800px"
+        settingsPanel.color = "gray";
+        settingsPanel.cornerRadius = "10"
+        settingsPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+        settingsPanel.paddingRight = "50px"
+        GUI.addControl(settingsPanel)
 
-        return panel;
-    }
+        // layout container
+        const layout = new BABYLON.GUI.StackPanel()
+        layout.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        settingsPanel.addControl(layout)
 
-    _createInventoryItem(labelText, parentPanel) {
-        const box = new BABYLON.GUI.Rectangle();
-        box.width = "180px";
-        box.height = "60px";
-        box.cornerRadius = 10;
-        box.color = "white";
-        box.thickness = 2;
-        box.background = "#333";
-        box.paddingTop = "10px";
-        parentPanel.addControl(box);
+        // settings title
+        const title = new BABYLON.GUI.TextBlock()
+        title.text = "Instellingen"
+        title.fontSize = 30;
+        title.color = "white";
+        title.height = "80px";
+        layout.addControl(title)
+        
+        // line
+        layout.addControl(this._createLine());
 
-        const label = new BABYLON.GUI.TextBlock();
-        label.text = labelText;
-        label.color = "white";
-        label.fontSize = "16px";
-        box.addControl(label);
+        // location title
+        const locationTitle = new BABYLON.GUI.TextBlock()
+        locationTitle.text = "Locatie"
+        locationTitle.fontSize = 25
+        locationTitle.color = "white"
+        locationTitle.height = "50px"
+        layout.addControl(locationTitle)
+        
+        // line
+        layout.addControl(this._createLine());
 
-        return box;
-    }
+        // location text
+        const locationText = new BABYLON.GUI.TextBlock()
+        locationText.text = "Verander de huidige locatie."
+        locationText.fontSize = 20
+        locationText.color = "white"
+        locationText.width = "90%"
+        locationText.height = "50px"
+        locationText.paddingTop = "10px"
+        layout.addControl(locationText)
 
-    _handleObjectRotation(pointerInfo, object) {
-        switch (pointerInfo.type) {
-            case BABYLON.PointerEventTypes.POINTERDOWN:
-                this.startingX = pointerInfo.event.clientX;
-                break;
-            case BABYLON.PointerEventTypes.POINTERUP:
-                this.startingX = null;
-                break;
-            case BABYLON.PointerEventTypes.POINTERMOVE:
-                if (this.startingX !== null) {
-                    const deltaX = pointerInfo.event.clientX - this.startingX;
-                    object.rotation.y += deltaX * 0.005;
-                    this.startingX = pointerInfo.event.clientX;
-                }
-                break;
+        // street
+        const street = new BABYLON.GUI.InputText()
+        street.width = "90%"
+        street.height = "50px"
+        street.placeholderText = "Straat..."
+        street.background = "white"
+        street.color = "black"
+        street.focusedBackground = "white"
+        street.paddingTop = "10px"
+        layout.addControl(street)
+        
+        // city
+        const city = new BABYLON.GUI.InputText()
+        city.width = "90%"
+        city.height = "50px"
+        city.placeholderText = "Stad..."
+        city.background = "white"
+        city.color = "black"
+        city.focusedBackground = "white"
+        city.paddingTop = "10px"
+        layout.addControl(city)
+
+        // postal code
+        const code = new BABYLON.GUI.InputText()
+        code.width = "90%"
+        code.height = "50px"
+        code.placeholderText = "Postcode..."
+        code.background = "white"
+        code.color = "black"
+        code.focusedBackground = "white"
+        code.paddingTop = "10px"
+        layout.addControl(code)
+
+        // "Change" button
+        const changeButton = BABYLON.GUI.Button.CreateSimpleButton("changeBtn", "Wijzig");
+        changeButton.width = "90%";
+        changeButton.height = "70px";
+        changeButton.color = "black";             
+        changeButton.background = "white"; 
+        changeButton.paddingTop = "10px"
+        changeButton.paddingBottom = "20px"      
+        layout.addControl(changeButton);
+
+        layout.addControl(this._createLine());
+
+        // wind title
+        const windTitle = new BABYLON.GUI.TextBlock()
+        windTitle.text = "Windturbine"
+        windTitle.fontSize = 25
+        windTitle.color = "white"
+        windTitle.height = "50px"
+        layout.addControl(windTitle)
+
+        layout.addControl(this._createLine());
+
+        const windText = new BABYLON.GUI.TextBlock()
+        windText.text = "Pas het aantal wieken aan."
+        windText.fontSize = 20
+        windText.color = "white"
+        windText.width = "90%"
+        windText.height = "50px"
+        layout.addControl(windText)
+
+        // Slider for blade count
+        const bladeSlider = new BABYLON.GUI.Slider();
+        bladeSlider.minimum = 0;
+        bladeSlider.maximum = 5;
+        bladeSlider.step = 1;
+        bladeSlider.value = 3;
+        bladeSlider.height = "20px";
+        bladeSlider.width = "90%";
+        bladeSlider.color = "white";
+        bladeSlider.background = "gray";
+        bladeSlider.thumbColor = "rgba(30, 30, 30, 1.0)";
+        bladeSlider.borderColor = "rgba(30, 30, 30, 1.0)"
+        layout.addControl(bladeSlider)
+
+        bladeSlider.onValueChangedObservable.add((value) => {
+            this._loadTurbine(value);
+        });
+
+        // Grid for tick labels
+        const tickGrid = new BABYLON.GUI.Grid();
+        tickGrid.width = "100%";
+        tickGrid.height = "50px";
+        tickGrid.paddingTop = "10px";
+        tickGrid.paddingBottom = "20px"
+
+        // Create 6 columns (for 0 to 5)
+        for (let i = 0; i <= 5; i++) {
+            tickGrid.addColumnDefinition(1 / 6); // Each column is 1/6th of the width
         }
+
+        // Add labels to the grid
+        for (let i = 0; i <= 5; i++) {
+            const tick = new BABYLON.GUI.TextBlock();
+            tick.text = i.toString();
+            tick.color = "white";
+            tick.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+            tickGrid.addControl(tick, 0, i); // row 0, column i
+        }
+        layout.addControl(tickGrid);
+
+        // line
+        layout.addControl(this._createLine());
+    
+        return GUI;
     }
     
     _startRenderLoop() {
@@ -465,4 +442,3 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         }
     }
 });
-//#endregion CLASS
