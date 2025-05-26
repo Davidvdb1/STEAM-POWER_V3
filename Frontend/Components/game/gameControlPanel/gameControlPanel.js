@@ -1,5 +1,6 @@
 // src/components/game/GameControlPanel.js
 
+
 import { createLogoScene } from "../components/scenes/logoScene.js";
 import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
@@ -16,6 +17,7 @@ import {
 import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
+import "../components/currencyDisplay/currencyDisplay.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -49,28 +51,7 @@ template.innerHTML = /*html*/ `
     <button id="startButton" class="hidden">Start</button>
   </div>
 
-  <div id="stats" class="hidden">
-    <div class="greyEnergy">
-      <img class="img-greyEnergy" src="Assets/images/pixelGreyEnergy.svg" alt="">
-      <div class="currencyDiv">
-        <p id="greyEnergy" class="p-greyEnergy mr">0</p><p class="p-greyEnergy">kW</p>
-      </div>
-    </div>
-
-    <div class="greenEnergy">
-      <img class="img-greenEnergy" src="Assets/images/pixelGreenEnergy.svg" alt="">
-      <div class="currencyDiv">
-        <p id="greenEnergy" class="p-greenEnergy mr">0</p><p class="p-greenEnergy">kWh</p>
-      </div>
-    </div>
-
-    <div class="euro">
-      <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-      <div class="currencyDiv">
-        <p id="coins" class="p-euro">0</p>
-      </div>
-    </div>
-  </div>
+  <currency-display id="stats" class="hidden"></currency-display>
 `;
 
 class GameControlPanel extends HTMLElement {
@@ -87,9 +68,10 @@ class GameControlPanel extends HTMLElement {
     this._innerButton     = this._shadow.getElementById("inner-button");
     this._outerContainer  = this._shadow.getElementById("outer-container");
     this._outerButton     = this._shadow.getElementById("outer-button");
-    this._greenEl         = this._shadow.getElementById("greenEnergy");
-    this._greyEl          = this._shadow.getElementById("greyEnergy");
-    this._coinsEl         = this._shadow.getElementById("coins");
+
+    this._greyEl  = this._statsContainer.greyEl;
+    this._greenEl = this._statsContainer.greenEl;
+    this._coinsEl = this._statsContainer.coinsEl;
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
@@ -111,9 +93,6 @@ class GameControlPanel extends HTMLElement {
       this._transitionToOuterCity()
     );
     this._innerButton.addEventListener("click", () => this._transitionToCity());
-
-    // (shop-sidebar now self-registers its drag behavior)
-    // no need to call _enableDragFromShop here
 
     this._shadow.addEventListener("close-detail", () => {
       this._detailContainer.classList.add("hidden");
