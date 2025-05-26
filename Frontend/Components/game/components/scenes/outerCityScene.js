@@ -6,24 +6,24 @@ import {
   setMovementKeys,
   handleMovementKeys,
   handleMapDragging
-} from "../utils/phaserSceneUtils.js";
+} from "../../utils/phaserSceneUtils.js";
 
 import {
   addAsset,
   updateCurrency,
   getCurrencyById
-} from "../utils/gameService.js";
+} from "../../service/gameService.js";
 
-import { ASSETS } from "../utils/assetConfig.js";
+import { ASSETS } from "../../utils/assetConfig.js";
 import {
   canPlaceAsset,
   reserveTiles,
   releaseTiles
-} from "../utils/assetPlacer.js";
+} from "../../utils/assetPlacer.js";
 import {
   createErrorPopup,
   createConfirmationPopup
-} from "../utils/uiPopups.js";
+} from "../../utils/uiPopups.js";
 
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {

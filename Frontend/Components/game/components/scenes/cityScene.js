@@ -1,6 +1,6 @@
-import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys, handleMapDragging } from "../utils/phaserSceneUtils.js";
-import { BuildingRegistry } from "../utils/buildingRegistry.js";
-import { createConfirmationPopup } from "../utils/uiPopups.js";
+import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys, handleMapDragging } from "../../utils/phaserSceneUtils.js";
+import { BuildingRegistry } from "../../utils/buildingRegistry.js";
+import { createConfirmationPopup } from "../../utils/uiPopups.js";
 
 export function createCityScene() {
   return class CityScene extends Phaser.Scene {
