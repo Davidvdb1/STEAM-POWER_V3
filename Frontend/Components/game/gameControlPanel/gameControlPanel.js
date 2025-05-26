@@ -1,3 +1,5 @@
+// src/components/game/GameControlPanel.js
+
 import { createLogoScene } from "../components/scenes/logoScene.js";
 import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
@@ -13,6 +15,7 @@ import {
 // register our detail-panel components
 import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
+import "../components/shop/shop.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -27,92 +30,8 @@ template.innerHTML = /*html*/ `
     <!-- DETAIL PANEL: appears when you click a building or asset -->
     <div id="detail-container" class="hidden"></div>
     <div id="inner-container">
-      <div class="shop">
-
-          <div class="card-asset" draggable="true" data-type="Windmolen">
-            <div class="corner-icon">
-              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
-            </div>
-            <img class="windturbine" src="Assets/images/windturbine.png" alt="">
-            <p>Windmolen</p>
-            <div class="assetCoinDiv">
-              <p>20</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-          </div>
-
-          <div class="card-asset" draggable="true" data-type="Waterrad">
-            <div class="corner-icon">
-              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
-            </div>
-            <img class="windturbine" src="Assets/images/waterrad.png" alt="">
-            <p>Waterrad</p>
-            <div class="assetCoinDiv">
-              <p>20</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-          </div>
-
-          <div class="card-asset" draggable="true" data-type="Zonnepaneel">
-            <div class="corner-icon">
-              <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
-            </div>
-            <img class="windturbine" src="Assets/images/solar_panel.png" alt="">
-            <p>Zonnepaneel</p>
-            <div class="assetCoinDiv">
-              <p>20</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-          </div>
-
-          <div class="card-asset" draggable="true" data-type="Kerncentrale">
-            <div class="corner-icon">
-              <img class="img-greenEnergy-card" src="Assets/images/pixelGreyEnergy.svg" alt="">
-            </div>
-            <img class="kerncentrale" src="Assets/images/kerncentrale.png" alt="">
-            <p>Kerncentrale</p>
-            <div class="assetCoinDiv">
-              <p>20</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-          </div>
-
-          <div class="card-asset" draggable="true" data-type="Eik">
-            <img src="Assets/images/Eik.png" alt="tree1" />
-            <p>Eik</p>
-            <div class="assetCoinDiv">
-              <p>10</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-          </div>
-
-          <div class="card-asset" draggable="true" data-type="Beuk">
-            <img src="Assets/images/Beuk.png" alt="tree2" />
-            <p>Beuk</p>
-            <div class="assetCoinDiv">
-              <p>10</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-          </div>
-
-          <div class="card-asset" draggable="true" data-type="Buxus">
-            <img src="Assets/images/Buxus.png" alt="bush1" />
-            <p>Buxus</p>
-            <div class="assetCoinDiv">
-              <p>10</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-          </div>
-
-          <div class="card-asset" draggable="true" data-type="Hulst">
-            <img src="Assets/images/Hulst.png" alt="bush2" />
-            <p>Hulst</p>
-            <div class="assetCoinDiv">
-              <p>10</p>
-              <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
-            </div>
-          </div>
-        </div>
+      <!-- now using our extracted shop-sidebar component -->
+      <shop-sidebar></shop-sidebar>
 
       <div class="test">
         <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
@@ -176,13 +95,25 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
   }
 
+    _loadPhaser() {
+    return new Promise((res) => {
+      if (window.Phaser) return res();
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js";
+      s.onload = () => res();
+      this._shadow.appendChild(s);
+    });
+  }
+
   connectedCallback() {
     this._startButton.addEventListener("click", () => this._onStartClick());
     this._outerButton.addEventListener("click", () =>
       this._transitionToOuterCity()
     );
     this._innerButton.addEventListener("click", () => this._transitionToCity());
-    this._enableDragFromShop();
+
+    // (shop-sidebar now self-registers its drag behavior)
+    // no need to call _enableDragFromShop here
 
     this._shadow.addEventListener("close-detail", () => {
       this._detailContainer.classList.add("hidden");
@@ -205,30 +136,6 @@ class GameControlPanel extends HTMLElement {
         this._updateCurrency();
       }, 2000);
     } 
-  }
-
-  disconnectedCallback() {
-    if (this._interval) clearInterval(this._interval);
-    if (this._statsInterval) clearInterval(this._statsInterval);
-    if (this._energyInterval)  clearInterval(this._energyInterval);
-  }    
-
-  _enableDragFromShop() {
-    this._shadow.querySelectorAll(".card-asset").forEach((card) => {
-      card.addEventListener("dragstart", (e) => {
-        e.dataTransfer.setData("text/plain", card.dataset.type);
-      });
-    });
-  }
-
-  _loadPhaser() {
-    return new Promise((res) => {
-      if (window.Phaser) return res();
-      const s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js";
-      s.onload = () => res();
-      this._shadow.appendChild(s);
-    });
   }
 
   _initializeGame() {
