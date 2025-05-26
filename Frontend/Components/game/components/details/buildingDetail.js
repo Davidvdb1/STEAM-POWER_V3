@@ -1,5 +1,3 @@
-// components/game/gameControlPanel/details/buildingDetail.js
-
 const template = document.createElement("template");
 template.innerHTML = /*html*/`
   <style>
@@ -8,6 +6,7 @@ template.innerHTML = /*html*/`
 
   <button class="close">&times;</button>
   <div class="info">
+    <p><strong><span class="name"></span></strong></p>
     <p>Level: <span class="level"></span></p>
     <p>Energie kost: <span class="energy-cost"></span> kW</p>
     <p class="upgrade-line">
@@ -26,6 +25,7 @@ class BuildingDetail extends HTMLElement {
     shadow.appendChild(template.content.cloneNode(true));
 
     this._closeBtn      = shadow.querySelector("button.close");
+    this._nameEl        = shadow.querySelector(".name");
     this._levelEl       = shadow.querySelector(".level");
     this._energyCostEl  = shadow.querySelector(".energy-cost");
     this._upgradeLine   = shadow.querySelector(".upgrade-line");
@@ -61,8 +61,6 @@ class BuildingDetail extends HTMLElement {
   _render() {
     if (!this._data) return;
 
-    console.log("BuildingData", this._data);
-
     // Ensure we have level data
     const lvl = this._data.level || this._data.buildingLevel;
     if (!lvl) {
@@ -70,11 +68,13 @@ class BuildingDetail extends HTMLElement {
       return;
     }
 
+    const buildingName = this._data.name;
     const num     = lvl.level;        // numeric level
     const cost    = lvl.energyCost;   // kW
     const upgCost = lvl.upgradeCost;  // coins
 
     // populate basics
+    this._nameEl.textContent       = buildingNameTranslations[buildingName] || buildingName; 
     this._levelEl.textContent      = num;
     this._energyCostEl.textContent = cost;
 
@@ -95,5 +95,26 @@ class BuildingDetail extends HTMLElement {
     }
   }
 }
+
+const buildingNameTranslations = {
+  "office": "Kantoorgebouw",
+  "apartmentBlockTopLeft": "Appartementenblok A",
+  "townhall": "Stadhuis",
+  "gasStation": "Tankstation",
+  "hotdogStand": "Hotdogkraam",
+  "hospital": "Ziekenhuis",
+  "shoppingCenter": "Winkelcentrum",
+  "school": "School",
+  "bakery": "Bakkerij",
+  "fireStation": "Brandweerkazerne",
+  "policeStation": "Politiebureau",
+  "apartmentBlockBottomLeft": "Appartementenblok B",
+  "hotel": "Hotel",
+  "apartmentBlockBottomCenter": "Appartementenblok C",
+  "postOffice": "Postkantoor",
+  "apartmentBlockBottomRight": "Appartementenblok D",
+  "constructionSite": "Bouwterrein",
+  "trainStation": "Treinstation"
+};
 
 customElements.define("building-detail", BuildingDetail);

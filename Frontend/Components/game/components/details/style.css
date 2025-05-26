@@ -10,6 +10,7 @@
   padding: 12px;
   font-family: "PixelFont", sans-serif !important;
   z-index: 20;
+  display: flex;
 }
 
 /* Power‐asset backgrounds */
