@@ -25,4 +25,28 @@ export const ASSETS = {
     cost: 20,
     energy: 30,
   },
+  Eik: {
+    width: 5,
+    height: 6,
+    cost: 10,
+    energy: 0,
+  },
+  Beuk: {
+    width: 4,
+    height: 5,
+    cost: 10,
+    energy: 0,
+  },
+  Buxus: {
+    width: 2,
+    height: 4,
+    cost: 10,
+    energy: 0,
+  },
+  Hulst: {
+    width: 3,
+    height: 3,
+    cost: 10,
+    energy: 0,
+  }
 };
