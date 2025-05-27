@@ -361,7 +361,8 @@ class GameControlPanel extends HTMLElement {
       const updated = {
         greenEnergy: cur.greenEnergy,
         greyEnergy:  cur.greyEnergy,
-        coins:       cur.coins - asset.destroyCost
+        coins:       cur.coins - asset.destroyCost,
+        score:       cur.score
       };
       await updateCurrency(currencyId, updated, token);
 
@@ -436,7 +437,8 @@ class GameControlPanel extends HTMLElement {
       const updatedCurrency = {
         greenEnergy: cur.greenEnergy,
         greyEnergy: cur.greyEnergy,
-        coins: cur.coins - upgCost
+        coins: cur.coins - upgCost,
+        score: cur.score,
       };
 
       await updateCurrency(currencyId, updatedCurrency, token);
