@@ -139,6 +139,12 @@ class GameStatisticsService {
     console.log('→ [upgradeBuilding] updated GameBuilding:', updatedGameBuilding);
     return updatedGameBuilding;
   }
+
+
+  // Achievements
+  async addAchievementToGameStatistics(gameStatisticsId, title) {
+    return await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, title);
+  }
 }
 
 module.exports = new GameStatisticsService();

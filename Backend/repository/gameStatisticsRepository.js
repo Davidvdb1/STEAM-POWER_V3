@@ -6,6 +6,7 @@ const GameBuildings = require("../model/gameBuildings");
 const Asset = require("../model/asset");
 const Currency = require("../model/currency");
 const Checkpoint = require("../model/checkpoint");
+const Achievement = require("../model/achievement");
 
 class GameStatisticsRepository {
   constructor() {
@@ -284,14 +285,12 @@ class GameStatisticsRepository {
   async removeCheckpoint(checkpointId) {
     await this.prisma.checkpoint.delete({ where: { id: checkpointId } });
   }
-
   async delete(id) {
     await this.prisma.gameBuildings.deleteMany({
       where: { gameStatisticsId: id },
     });
     await this.prisma.gameStatistics.delete({ where: { id } });
   }
-
 
   // BuildingLevel operations ---------------------------------------------------------------------------------------------------------------------------------------------------
   async findBuildingLevelByBuildingIdAndLevel(buildingId, level) {
@@ -301,6 +300,33 @@ class GameStatisticsRepository {
     });
     
     return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
+  }
+
+  // Achievements ---------------------------------------------------------------------------------------------------------------------------------------------------
+  async findAchievementByTitle(title) {
+    const achievement = await this.prisma.achievement.findMany({
+      where: { title }
+    });
+    return achievement;
+  }
+
+  async addAchievementToGameStatistics(gameStatisticsId, title) {
+    const achievement = await this.findAchievementByTitle(title);
+    if (!achievement || typeof achievement !== Achievement) {
+      throw new Error(`Achievement with title "${title}" not found`);
+    }
+
+    const updatedGameStatistics = await this.prisma.gameStatistics.update({
+      where: { id: gameStatisticsId },
+      data: {
+        achievements: {
+          connect: { id: achievement.id }
+        }
+      },
+      include: {
+        achievements: true
+      }
+    });
   }
 }
 

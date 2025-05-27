@@ -196,6 +196,20 @@ model GameStatistics {
 
   // GameStatistics has many GameBuildings
   gameBuildings GameBuildings[]
+  
+  // GameStatistics can have many achievements
+  achievements Achievement[]
+}
+
+model Achievement {
+  id          String @id @default(uuid())
+  title       String
+  description String
+  reward      Int
+  
+  // Each achievement belongs to a specific GameStatistics
+  gameStatistics   GameStatistics @relation(fields: [gameStatisticsId], references: [id])
+  gameStatisticsId String
 }
 
 model GameBuildings {
