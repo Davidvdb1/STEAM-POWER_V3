@@ -38,12 +38,22 @@ class GameStatisticsRepository {
     const gameStatistics = await this.prisma.gameStatistics.findMany({
       include: {
         currency: true,
-        buildings: true,
+        gameBuildings: {
+          include: {
+            building: true,
+            buildingLevel: true,
+          },
+        },
         assets: true,
         checkpoints: {
           include: {
             currency: true,
-            buildings: true,
+            gameBuildings: {
+              include: {
+                building: true,
+                buildingLevel: true,
+              },
+            },
             assets: true,
           },
         },
@@ -66,18 +76,25 @@ class GameStatisticsRepository {
       where: { id },
       include: {
         currency: includeCurrency,
-        gameBuildings: includeGameBuildings ? {
-          include: {
-            building: true,
-            buildingLevel: true
-          }
-        } : false,
+        gameBuildings: includeGameBuildings
+          ? {
+              include: {
+                building: true,
+                buildingLevel: true,
+              },
+            }
+          : false,
         assets: includeAssets,
         checkpoints: includeCheckpoints
           ? {
               include: {
                 currency: true,
-                buildings: true,
+                gameBuildings: {
+                  include: {
+                    building: true,
+                    buildingLevel: true,
+                  },
+                },
                 assets: true,
               },
             }
@@ -93,18 +110,26 @@ class GameStatisticsRepository {
       where: { groupId },
       include: {
         currency: opts.includeCurrency ?? true,
-        gameBuildings: (opts.includeGameBuildings ?? true) ? {
-          include: {
-            building: true,
-            buildingLevel: true
-          }
-        } : false,
+        gameBuildings:
+          opts.includeGameBuildings ?? true
+            ? {
+                include: {
+                  building: true,
+                  buildingLevel: true,
+                },
+              }
+            : false,
         assets: opts.includeAssets ?? true,
         checkpoints: opts.includeCheckpoints
           ? {
               include: {
                 currency: true,
-                buildings: true,
+                gameBuildings: {
+                  include: {
+                    building: true,
+                    buildingLevel: true,
+                  },
+                },
                 assets: true,
               },
             }
@@ -160,6 +185,13 @@ class GameStatisticsRepository {
     return Currency.from(updated);
   }
 
+  async findCurrencyByGameStatisticsId(gameStatisticsId) {
+    const currency = await this.prisma.currency.findFirst({
+      where: { gameStatisticsId },
+      include: { gameStatistics: true },
+    });
+    return currency ? Currency.from(currency) : null;
+  }
 
   // GameBuilding ---------------------------------------------------------------------------------------------------------------------------------------------------
   async findGameBuildingById(gameBuildingId) {
@@ -168,11 +200,24 @@ class GameStatisticsRepository {
       include: {
         gameStatistics: true,
         building: true,
-        buildingLevel: true
-      }
+        buildingLevel: true,
+      },
     });
-    
+
     return gameBuilding ? GameBuildings.from(gameBuilding) : null;
+  }
+
+  async findAllGameBuildingsByGameStatisticsId(gameStatisticsId) {
+    const gameBuildings = await this.prisma.gameBuildings.findMany({
+      where: { gameStatisticsId },
+      include: {
+        gameStatistics: true,
+        building: true,
+        buildingLevel: true,
+      },
+    });
+
+    return gameBuildings.map((gb) => GameBuildings.from(gb));
   }
 
   async findAllGameBuildingsByGroupId(groupId) {
@@ -182,10 +227,10 @@ class GameStatisticsRepository {
       include: {
         gameStatistics: true,
         building: true,
-        buildingLevel: true
-      }
+        buildingLevel: true,
+      },
     });
-    return gameBuildings.map(gb => GameBuildings.from(gb));
+    return gameBuildings.map((gb) => GameBuildings.from(gb));
   }
 
   async upgradeBuildingLevel(gameBuildingId, buildingLevelId) {
@@ -193,17 +238,17 @@ class GameStatisticsRepository {
     const updated = await this.prisma.gameBuildings.update({
       where: { id: gameBuildingId },
       data: {
-        buildingLevel: { connect: { id: buildingLevelId } }
+        buildingLevel: { connect: { id: buildingLevelId } },
       },
       include: {
         gameStatistics: true,
         building: true,
-        buildingLevel: true
-      }
+        buildingLevel: true,
+      },
     });
     return GameBuildings.from(updated);
   }
-      
+
   async upgradeBuilding(buildingId, { level }) {
     const updated = await this.prisma.building.update({
       where: { id: buildingId },
@@ -214,7 +259,7 @@ class GameStatisticsRepository {
       },
       include: { level: true },
     });
-    
+
     return GameBuildings.from(updated);
   }
 
@@ -240,26 +285,40 @@ class GameStatisticsRepository {
     await this.prisma.asset.delete({ where: { id: assetId } });
   }
 
-  async recordCheckpoint(statsId, cp) {
-    cp.validate();
+  async findAllAssetsByGameStatisticsId(gameStatisticsId) {
+    const assets = await this.prisma.asset.findMany({
+      where: { gameStatisticsId },
+      include: { gameStatistics: true },
+    });
+
+    return assets.map((a) => Asset.from(a));
+  }
+
+  async recordCheckpoint(statsId, currency, gameBuildings, assets) {
+    // Validate input
+    currency.validate();
+    gameBuildings.forEach((gb) => gb.validate());
+    assets.forEach((a) => a.validate());
 
     const prismaCP = await this.prisma.checkpoint.create({
       data: {
         gameStatistics: { connect: { id: statsId } },
         currency: {
           create: {
-            greenEnergy: cp.currency.greenEnergy,
-            greyEnergy: cp.currency.greyEnergy,
-            coins: cp.currency.coins,
+            greenEnergy: currency.greenEnergy,
+            greyEnergy: currency.greyEnergy,
+            coins: currency.coins,
           },
         },
-        buildings: {
-          create: cp.buildings.map((b) => ({
-            name: b.name,
+        gameBuildings: {
+          create: gameBuildings.map((gb) => ({
+            building: { connect: { id: gb.building.id } },
+            buildingLevel: { connect: { id: gb.buildingLevel.id } },
+            gameStatistics: { connect: { id: statsId } }, // required by schema
           })),
         },
         assets: {
-          create: cp.assets.map((a) => ({
+          create: assets.map((a) => ({
             buildCost: a.buildCost,
             destroyCost: a.destroyCost,
             energy: a.energy,
@@ -273,7 +332,12 @@ class GameStatisticsRepository {
       },
       include: {
         currency: true,
-        buildings: true,
+        gameBuildings: {
+          include: {
+            building: true,
+            buildingLevel: true,
+          },
+        },
         assets: true,
       },
     });
@@ -292,14 +356,13 @@ class GameStatisticsRepository {
     await this.prisma.gameStatistics.delete({ where: { id } });
   }
 
-
   // BuildingLevel operations ---------------------------------------------------------------------------------------------------------------------------------------------------
   async findBuildingLevelByBuildingIdAndLevel(buildingId, level) {
     const buildingLevel = await this.prisma.buildingLevel.findFirst({
       where: { buildingId: buildingId, level: level },
-      include: { building: true }
+      include: { building: true },
     });
-    
+
     return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
   }
 }

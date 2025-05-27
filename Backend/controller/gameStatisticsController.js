@@ -154,7 +154,7 @@ router.delete('/assets/:assetId', async (req, res) => {
 // Record a checkpoint (ok)
 router.post('/:id/checkpoints', async (req, res) => {
   try {
-    const cp = await gameStatisticsService.recordCheckpoint(req.params.id, req.body);
+    const cp = await gameStatisticsService.recordCheckpoint(req.params.id);
     res.status(201).json(cp);
   } catch (error) {
     console.error(`Error recording checkpoint for GameStatistics ${req.params.id}:`, error);

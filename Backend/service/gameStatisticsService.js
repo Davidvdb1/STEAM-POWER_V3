@@ -96,22 +96,13 @@ class GameStatisticsService {
     return await gameStatisticsRepository.removeAsset(assetId);
   }
 
-  async recordCheckpoint(statsId, cpData) {
-    const currency = new Currency(cpData.currency);
+  async recordCheckpoint(statsId) {
+    const gameStatistics = await gameStatisticsRepository.findById(statsId);
+    const currency = gameStatistics.currency;
+    const gameBuildings = await gameStatisticsRepository.findAllGameBuildingsByGameStatisticsId(statsId);
+    const assets = await gameStatisticsRepository.findAllAssetsByGameStatisticsId(statsId);
 
-    const buildings = await Promise.all(
-      cpData.buildings.map(async (b) => {
-        if (!b.name) {
-          throw new Error("Building name is required");
-        }
-        return new Building(b);
-      })
-    );
-
-    const assets = cpData.assets.map((a) => new Asset(a));
-
-    const checkpoint = new Checkpoint({ currency, buildings, assets });
-    return await gameStatisticsRepository.recordCheckpoint(statsId, checkpoint);
+    return await gameStatisticsRepository.recordCheckpoint(statsId, currency, gameBuildings, assets);
   }
 
   async removeCheckpoint(checkpointId) {

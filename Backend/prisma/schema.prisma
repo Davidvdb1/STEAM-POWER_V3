@@ -156,10 +156,6 @@ model Building {
   id   String @id @default(uuid())
   name String
 
-  // Add the relation to Checkpoint 
-  checkpoint   Checkpoint? @relation("CP_Building", fields: [checkpointId], references: [id])
-  checkpointId String?
-
   // Each building has multiple levels
   buildingLevels BuildingLevel[]
 
@@ -173,9 +169,7 @@ model Checkpoint {
   currency   Currency @relation("CP_Currency", fields: [currencyId], references: [id])
   currencyId String   @unique
 
-  // Add the relation back to Building
-  buildings Building[] @relation("CP_Building")
-
+  gameBuildings GameBuildings[] @relation("CP_Building")
   assets Asset[]
 
   gameStatistics   GameStatistics? @relation(fields: [gameStatisticsId], references: [id])
@@ -201,17 +195,16 @@ model GameStatistics {
 model GameBuildings {
   id               String          @id @default(uuid())
 
-  // Relation to GameStatistics
   gameStatisticsId String
   gameStatistics   GameStatistics @relation(fields: [gameStatisticsId], references: [id])
+
+  checkpoint   Checkpoint? @relation("CP_Building", fields: [checkpointId], references: [id])
+  checkpointId String?
   
-  // Relation to Building
   buildingId       String
   building         Building      @relation(fields: [buildingId], references: [id])
   
-  // Relation to BuildingLevel
   buildingLevelId  String
   buildingLevel    BuildingLevel @relation(fields: [buildingLevelId], references: [id])
-  
 }
 
