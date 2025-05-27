@@ -117,6 +117,36 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             }
         }
     }
+
+    async _updateSunAndSolarPanel(street, city, postal) {
+        const date = new Date();
+        const { azimuth, altitude } = await SunCalc.getSolarPositionForLocation(street, city, postal, date);
+
+        // Calculate sun direction vector components
+        const x = Math.cos(altitude) * Math.sin(azimuth);
+        const y = Math.sin(altitude);
+        const z = Math.cos(altitude) * Math.cos(azimuth);
+        const distance = 4;
+        const target = new BABYLON.Vector3(x * distance, y * distance, z * distance);
+
+        // Update sun position
+        if (this.sunRoot) {
+            this.sunRoot.position = target;
+        }
+
+        // Update solar panel rotation to face the sun
+        if (this.solarPanel) {
+            const dir = target.subtract(this.solarPanel.position).normalize();
+
+            // Calculate yaw (rotation around y-axis) and pitch (rotation around x-axis)
+            const yaw = Math.atan2(dir.x, dir.z);
+            const pitch = Math.asin(dir.y);
+
+            // Set solar panel rotation (assuming Z rotation remains 0)
+            this.solarPanel.rotation = new BABYLON.Vector3(pitch, yaw, 0);
+        }
+    }
+
     
     async _initializeBabylonJS() {
         // Get the canvas element from shadow DOM
@@ -146,22 +176,21 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
 
         // Sun
         BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/sun3.glb", this.scene, async (meshes) => {
-            const street = "Geldenaaksebaan 335";
-            const city = "Leuven";
-            const postal = "3001";
-            const date = new Date();
-            const { azimuth, altitude } = await SunCalc.getSolarPositionForLocation(street, city, postal, date);
-            const x = Math.cos(altitude) * Math.sin(azimuth);
-            const y = Math.sin(altitude);
-            const z = Math.cos(altitude) * Math.cos(azimuth);
-            
-            const sunRoot = meshes.find(m => m.name === "__root__");
+            this.sunRoot = meshes.find(m => m.name === "__root__");
+            if (this.sunRoot) {
+                const street = "Geldenaaksebaan 335";
+                const city = "Leuven";
+                const postal = "3001";
+                const date = new Date();
+                const { azimuth, altitude } = await SunCalc.getSolarPositionForLocation(street, city, postal, date);
+                const x = Math.cos(altitude) * Math.sin(azimuth);
+                const y = Math.sin(altitude);
+                const z = Math.cos(altitude) * Math.cos(azimuth);
 
-            if (sunRoot) {
                 const distance = 4;
-                sunRoot.scaling = new BABYLON.Vector3(0.05, 0.05, 0.05);
-                sunRoot.position = new BABYLON.Vector3(x * distance, y * distance, z * distance);
-                sunRoot.rotation = new BABYLON.Vector3(0, 0.8, 0);
+                this.sunRoot.scaling = new BABYLON.Vector3(0.05, 0.05, 0.05);
+                this.sunRoot.position = new BABYLON.Vector3(x * distance, y * distance, z * distance);
+                this.sunRoot.rotation = new BABYLON.Vector3(0, 0.8, 0);
             }
         });
         
@@ -381,6 +410,10 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         code.paddingTop = "10px"
         layout.addControl(code)
 
+        this.streetInput = street;
+        this.cityInput = city;
+        this.postalInput = code;
+
         // "Change" button
         const changeButton = BABYLON.GUI.Button.CreateSimpleButton("changeBtn", "Wijzig");
         changeButton.width = "90%";
@@ -390,6 +423,14 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
         changeButton.paddingTop = "10px"
         changeButton.paddingBottom = "20px"      
         layout.addControl(changeButton);
+
+        changeButton.onPointerUpObservable.add(() => {
+            const street = this.streetInput.text;
+            const city = this.cityInput.text;
+            const postal = this.postalInput.text;
+
+            this._updateSunAndSolarPanel(street, city, postal);
+        });
 
         layout.addControl(this._createLine());
 
