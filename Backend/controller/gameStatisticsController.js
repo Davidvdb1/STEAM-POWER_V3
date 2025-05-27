@@ -227,7 +227,7 @@ router.post('/achievements/add/:gameStatisticsId/:title', async (req, res) => {
   }
 });
 
-// Get all achievements for a specific GameStatistics
+// Get all achievements associated to a specific GameStatistics instance, referenced by its id
 router.get('/:gameStatisticsId/achievements', async (req, res) => {
   try {
     const achievements = await gameStatisticsService.getGameStatisticsAchievements(req.params.gameStatisticsId);
