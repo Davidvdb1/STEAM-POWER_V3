@@ -232,6 +232,9 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
     
     disconnectedCallback() {
         document.removeEventListener('energydatareading', this.updateEnergyData.bind(this));
+        if (this.groupPollInterval) {
+            clearInterval(this.groupPollInterval);
+        }
     }
 
     startBluetoothConnection() {
