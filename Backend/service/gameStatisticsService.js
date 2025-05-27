@@ -11,11 +11,12 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 class GameStatisticsService {
-  async create({ groupId, greenEnergy, greyEnergy, coins }) {
+  async create({ groupId, greenEnergy, greyEnergy, coins, score }) {
     const currency = new Currency({
       greenEnergy: greenEnergy ?? undefined,
       greyEnergy: greyEnergy ?? undefined,
       coins: coins ?? undefined,
+      score: score ?? undefined,
     });
     const gs = await gameStatisticsRepository.create({ groupId, currency });
     return gs;

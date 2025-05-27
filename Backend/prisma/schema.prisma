@@ -114,6 +114,7 @@ model Currency {
   greenEnergy Float
   greyEnergy  Float
   coins       Float
+  score       Int
 
   gameStatistics GameStatistics? @relation("GS_Currency")
   checkpoint     Checkpoint?     @relation("CP_Currency")

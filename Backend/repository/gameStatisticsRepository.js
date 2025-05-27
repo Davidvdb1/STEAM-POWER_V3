@@ -24,6 +24,7 @@ class GameStatisticsRepository {
             greenEnergy: currency.greenEnergy,
             greyEnergy: currency.greyEnergy,
             coins: currency.coins,
+            score: currency.score,
           },
         },
       },
@@ -127,18 +128,19 @@ class GameStatisticsRepository {
     return prismaCurrency ? Currency.from(prismaCurrency) : null;
   }
 
-  async updateCurrency(currencyId, { greenEnergy, greyEnergy, coins }) {
+  async updateCurrency(currencyId, { greenEnergy, greyEnergy, coins, score }) {
     if (
       typeof greenEnergy !== "number" ||
       typeof greyEnergy !== "number" ||
-      typeof coins !== "number"
+      typeof coins !== "number" ||
+      typeof score !== "number"
     ) {
       throw new Error("Invalid currency values");
     }
 
     const updated = await this.prisma.currency.update({
       where: { id: currencyId },
-      data: { greenEnergy, greyEnergy, coins },
+      data: { greenEnergy, greyEnergy, coins, score },
     });
 
     return Currency.from(updated);
@@ -146,7 +148,7 @@ class GameStatisticsRepository {
 
   async incrementCurrency(
     currencyId,
-    { greenEnergy = 0, greyEnergy = 0, coins = 0 }
+    { greenEnergy = 0, greyEnergy = 0, coins = 0, score = 0 }
   ) {
     const updated = await this.prisma.currency.update({
       where: { id: currencyId },
@@ -154,6 +156,7 @@ class GameStatisticsRepository {
         greenEnergy: { increment: greenEnergy },
         greyEnergy: { increment: greyEnergy },
         coins: { increment: coins },
+        score: { increment: score },
       },
     });
 
@@ -251,6 +254,7 @@ class GameStatisticsRepository {
             greenEnergy: cp.currency.greenEnergy,
             greyEnergy: cp.currency.greyEnergy,
             coins: cp.currency.coins,
+            score: cp.currency.score,
           },
         },
         buildings: {
