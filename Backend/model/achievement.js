@@ -3,12 +3,14 @@ class Achievement {
     id = undefined,
     title,
     description,
-    reward
+    reward,
+    score
   }, validate = true) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.reward = reward;
+    this.score = score;
     if (validate) this.validate();
   }
 
@@ -19,8 +21,11 @@ class Achievement {
     if (!this.description || typeof this.description !== 'string') {
       throw new Error('Invalid description');
     }
-    if (typeof this.reward !== 'number' || this.reward < 0) {
+    if (!this.reward || typeof this.reward !== 'number' || this.reward < 0) {
       throw new Error('Invalid reward');
+    }
+    if (!this.score || typeof this.score !== 'number') {
+      throw new Error('Invalid score');
     }
   }
 
@@ -29,7 +34,8 @@ class Achievement {
       id: prismaAchievement.id,
       title: prismaAchievement.title,
       description: prismaAchievement.description,
-      reward: prismaAchievement.reward
+      reward: prismaAchievement.reward,
+      score: prismaAchievement.score
     });
   }
 }

@@ -205,12 +205,12 @@ async function main() {
 
   // ACHIEVEMENTS
   const achievements = [
-    { title: "Eerste stap", description: "Schakel een gebouw om naar groene energie", reward: 10 },
-    { title: "Efficiëntie-expert", description: "Schakel alle gebouwen om naar groene energie", reward: 100 },
-    { title: "Bouwassistent", description: "Upgrade een gebouw naar niveau 2", reward: 20 },
-    { title: "Bouwmeester", description: "Upgrade een gebouw naar het maximum level (5)", reward: 50 },
-    { title: "Milieuheld", description: "Gebruik alleen groene energie voor 3 rondes", reward: 100 },
-    { title: "EU gemiddelde", description: "Laat meer dan 25% van de totale stroom van groene energiebronnen komen (gemiddelde in de EU)", reward: 100 }
+    { title: "Eerste stap", description: "Schakel een gebouw om naar groene energie", reward: 10, score: 1 },
+    { title: "Efficiëntie-expert", description: "Schakel alle gebouwen om naar groene energie", reward: 100, score: 1 },
+    { title: "Bouwassistent", description: "Upgrade een gebouw naar niveau 2", reward: 20, score: 1 },
+    { title: "Bouwmeester", description: "Upgrade een gebouw naar het maximum level (5)", reward: 50, score: 1 },
+    { title: "Milieuheld", description: "Gebruik alleen groene energie voor 3 rondes", reward: 100, score: 1 },
+    { title: "EU gemiddelde", description: "Laat meer dan 25% van de totale stroom van groene energiebronnen komen (gemiddelde in de EU)", reward: 100, score: 1 }
   ];
 
   const createdAchievements = [];
@@ -233,7 +233,7 @@ async function main() {
   // const currency2 = await prisma.currency.create({ data: { greyEnergy: 9.0, greenEnergy: 1.0, coins: 25.0 } });
   // const checkpoint2 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency2.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset3.id }] } } });
 
-  const currency3 = await prisma.currency.create({ data: { greyEnergy: 8.0, greenEnergy: 2.5, coins: 50.0, score: 5} });
+  const currency3 = await prisma.currency.create({ data: { greyEnergy: 8.0, greenEnergy: 2.5, coins: 50.0, score: 0 } });
   // const checkpoint3 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency3.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }, { id: buildingLevels[2].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset2.id }, { id: asset3.id }] } } });
 
 
