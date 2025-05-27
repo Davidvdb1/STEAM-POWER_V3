@@ -63,8 +63,7 @@ class GameStatistics {
         throw new Error('Invalid achievement (must be Achievement)');
       }
     }
-  }
-  // Add this method to break circular references when serializing
+  }  // Add this method to break circular references when serializing
   toJSON() {
     return {
       id: this.id,

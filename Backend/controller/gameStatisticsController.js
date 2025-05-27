@@ -215,13 +215,25 @@ router.get('/gameBuildings/getAllGameBuildingsByGroupId/:groupId', async (req, r
 
 
 // Achievements
-router.get('/achievements/add/:gameStatisticsId/:title', async (req, res) => {
+router.post('/achievements/add/:gameStatisticsId/:title', async (req, res) => {
   try {
     const { gameStatisticsId, title } = req.params;
-    const achievement = await gameStatisticsService.addAchievementToGameStatistics(gameStatisticsId, title);
-    res.status(200).json(achievement);
+    const gameStatistics = await gameStatisticsService.addAchievementToGameStatistics(gameStatisticsId, title);
+    res.status(200).json(gameStatistics);
   } catch (error) {
-    console.error(`Error adding achievement ${title} to GameStatistics ${req.params.gameStatisticsId}:`, error);
+    console.error(`Error adding achievement ${req.params.title} to GameStatistics ${req.params.gameStatisticsId}:`, error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+// Get all achievements for a specific GameStatistics
+router.get('/:gameStatisticsId/achievements', async (req, res) => {
+  try {
+    const achievements = await gameStatisticsService.getGameStatisticsAchievements(req.params.gameStatisticsId);
+    res.status(200).json(achievements);
+  } catch (error) {
+    console.error(`Error fetching achievements for GameStatistics ${req.params.gameStatisticsId}:`, error);
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
   }

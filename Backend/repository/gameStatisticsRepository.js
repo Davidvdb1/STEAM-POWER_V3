@@ -39,12 +39,10 @@ class GameStatisticsRepository {
     const gameStatistics = await this.prisma.gameStatistics.findMany({
       include: {
         currency: true,
-        buildings: true,
         assets: true,
         checkpoints: {
           include: {
             currency: true,
-            buildings: true,
             assets: true,
           },
         },
@@ -301,10 +299,9 @@ class GameStatisticsRepository {
     
     return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
   }
-
   // Achievements ---------------------------------------------------------------------------------------------------------------------------------------------------
   async findAchievementByTitle(title) {
-    const achievement = await this.prisma.achievement.findMany({
+    const achievement = await this.prisma.achievement.findUnique({
       where: { title }
     });
     return achievement;
@@ -312,7 +309,7 @@ class GameStatisticsRepository {
 
   async addAchievementToGameStatistics(gameStatisticsId, title) {
     const achievement = await this.findAchievementByTitle(title);
-    if (!achievement || typeof achievement !== Achievement) {
+    if (!achievement) {
       throw new Error(`Achievement with title "${title}" not found`);
     }
 
@@ -327,6 +324,23 @@ class GameStatisticsRepository {
         achievements: true
       }
     });
+    
+    return updatedGameStatistics;
+  }
+  
+  async getGameStatisticsAchievements(gameStatisticsId) {
+    const gameStatistics = await this.prisma.gameStatistics.findUnique({
+      where: { id: gameStatisticsId },
+      include: {
+        achievements: true
+      }
+    });
+    
+    if (!gameStatistics) {
+      throw new Error(`GameStatistics with id "${gameStatisticsId}" not found`);
+    }
+    
+    return gameStatistics.achievements.map(Achievement.from);
   }
 }
 

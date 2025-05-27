@@ -140,10 +140,13 @@ class GameStatisticsService {
     return updatedGameBuilding;
   }
 
-
   // Achievements
   async addAchievementToGameStatistics(gameStatisticsId, title) {
     return await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, title);
+  }
+  
+  async getGameStatisticsAchievements(gameStatisticsId) {
+    return await gameStatisticsRepository.getGameStatisticsAchievements(gameStatisticsId);
   }
 }
 
