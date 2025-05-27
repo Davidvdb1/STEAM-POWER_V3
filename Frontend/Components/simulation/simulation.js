@@ -188,7 +188,7 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
 
 
         // Load turbine
-        await this._loadTurbine(3);
+        this._loadTurbine(3);
 
         // Load Wheel
         BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/wheel.glb", this.scene, (meshes) => {
