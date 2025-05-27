@@ -197,6 +197,19 @@ model GameStatistics {
 
   // GameStatistics has many GameBuildings
   gameBuildings GameBuildings[]
+  
+  // GameStatistics can have many achievements (many-to-many)
+  achievements Achievement[]
+}
+
+model Achievement {
+  id          String @id @default(uuid())
+  title       String @unique
+  description String
+  reward      Int
+  
+  // Achievement can be earned by multiple GameStatistics
+  gameStatistics GameStatistics[]
 }
 
 model GameBuildings {

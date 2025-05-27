@@ -6,6 +6,7 @@ const GameBuildings = require("../model/gameBuildings");
 const Asset = require("../model/asset");
 const Currency = require("../model/currency");
 const Checkpoint = require("../model/checkpoint");
+const Achievement = require("../model/achievement");
 
 class GameStatisticsRepository {
   constructor() {
@@ -39,12 +40,10 @@ class GameStatisticsRepository {
     const gameStatistics = await this.prisma.gameStatistics.findMany({
       include: {
         currency: true,
-        buildings: true,
         assets: true,
         checkpoints: {
           include: {
             currency: true,
-            buildings: true,
             assets: true,
           },
         },
@@ -288,14 +287,12 @@ class GameStatisticsRepository {
   async removeCheckpoint(checkpointId) {
     await this.prisma.checkpoint.delete({ where: { id: checkpointId } });
   }
-
   async delete(id) {
     await this.prisma.gameBuildings.deleteMany({
       where: { gameStatisticsId: id },
     });
     await this.prisma.gameStatistics.delete({ where: { id } });
   }
-
 
   // BuildingLevel operations ---------------------------------------------------------------------------------------------------------------------------------------------------
   async findBuildingLevelByBuildingIdAndLevel(buildingId, level) {
@@ -305,6 +302,87 @@ class GameStatisticsRepository {
     });
     
     return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
+  }
+
+  // Achievements ---------------------------------------------------------------------------------------------------------------------------------------------------
+  /**
+   * Finds an achievement by its title.
+   *
+   * @param {string} title - The title of the achievement to find.
+   * @returns {Promise<Object|null>} The achievement object if found, otherwise null.
+   */
+  async findAchievementByTitle(title) {
+    return await this.prisma.achievement.findUnique({ where: { title }});
+  }
+  
+
+  /**
+   * Adds an achievement to the specified GameStatistics entry by its ID and achievement title and updates the coins.
+   *
+   * @param {string} gameStatisticsId - The unique identifier of the GameStatistics entry.
+   * @param {string} title - The title of the achievement to add.
+   * @returns {Promise<Object>} The updated GameStatistics entry with the updated currency and achievements included.
+   * @throws {Error} If the achievement does not exist or is already associated with the GameStatistics entry.
+   */
+  async addAchievementToGameStatistics(gameStatisticsId, title) {
+    // Get the achievement instance by title and ensure it exists
+    const achievement = await this.findAchievementByTitle(title);
+    if (!achievement) {
+      throw new Error(`Achievement with title "${title}" not found`);
+    }
+
+    // Get current achievements and check if this achievement already exists by ID
+    const currentAchievements = await this.getGameStatisticsAchievements(gameStatisticsId);
+    const achievementExists = currentAchievements.some(a => a.id === achievement.id);
+    
+    // If the achievement already exists, throw an error
+    if (achievementExists) {
+      throw new Error(`Achievement "${title}" already exists in GameStatistics with id "${gameStatisticsId}"`);
+    }
+
+    // Update the GameStatistics entry to add the achievement and increment the coins
+    const updatedGameStatistics = await this.prisma.gameStatistics.update({
+      where: { id: gameStatisticsId },
+      data: {
+        currency: {
+          update: {
+            coins: { increment: achievement.reward },
+          }
+        },
+        achievements: {
+          connect: { id: achievement.id }
+        }
+      },
+      include: {
+        currency: true,
+        achievements: true
+      }
+    });
+    
+    return updatedGameStatistics;
+  }
+  
+
+  /**
+   * Retrieves the achievements associated with a specific GameStatistics entry.
+   *
+   * @param {string} gameStatisticsId - The unique identifier of the GameStatistics entry.
+   * @returns {Promise<Array>} A promise that resolves to an array of Achievement instances.
+   * @throws {Error} If no GameStatistics entry is found with the provided id.
+   */
+  async getGameStatisticsAchievements(gameStatisticsId) {
+    const gameStatistics = await this.prisma.gameStatistics.findUnique({
+      where: { id: gameStatisticsId },
+      include: {
+        achievements: true
+      }
+    });
+    
+    if (!gameStatistics) {
+      throw new Error(`GameStatistics with id "${gameStatisticsId}" not found`);
+    }
+    
+    return gameStatistics.achievements.map(Achievement.from);
   }
 }
 

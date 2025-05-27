@@ -2,6 +2,7 @@ const Currency = require('./currency');
 const GameBuildings = require('./gameBuildings');
 const Asset = require('./asset');
 const Checkpoint = require('./checkpoint');
+const Achievement = require('./achievement');
 
 class GameStatistics {
   constructor(
@@ -12,6 +13,7 @@ class GameStatistics {
       groupId,             
       checkpoints = [],    
       assets = [], 
+      achievements = [],
     },
     validate = true
   ) {
@@ -21,10 +23,10 @@ class GameStatistics {
     this.groupId = groupId;
     this.checkpoints = checkpoints;
     this.assets = assets;
+    this.achievements = achievements;
 
     if (validate) this.validate();
   }
-
   validate() {
     if (this.currency && !(this.currency instanceof Currency)) {
       throw new Error('Invalid currency (must be Currency)');
@@ -51,9 +53,17 @@ class GameStatistics {
     if (!Array.isArray(this.assets)) {
       throw new Error('Invalid assets (must be an array)');
     }
-  }
-
-  // Add this method to break circular references when serializing
+    
+    if (!Array.isArray(this.achievements)) {
+      throw new Error('Invalid achievements (must be an array)');
+    }
+    
+    for (const achievement of this.achievements) {
+      if (!(achievement instanceof Achievement)) {
+        throw new Error('Invalid achievement (must be Achievement)');
+      }
+    }
+  }  // Add this method to break circular references when serializing
   toJSON() {
     return {
       id: this.id,
@@ -66,10 +76,10 @@ class GameStatistics {
       })),
       groupId: this.groupId,
       checkpoints: this.checkpoints,
-      assets: this.assets
+      assets: this.assets,
+      achievements: this.achievements
     };
   }
-
   static from(prismaGS) {
     // Create without validation first
     const gs = new GameStatistics({
@@ -79,6 +89,7 @@ class GameStatistics {
       groupId: prismaGS.groupId,
       checkpoints: [],  // Start with empty array
       assets: [],       // Start with empty array
+      achievements: [], // Start with empty array
     }, false); // Skip validation
     
     // Populate arrays separately
@@ -97,6 +108,10 @@ class GameStatistics {
     
     if (prismaGS.assets) {
       gs.assets = prismaGS.assets.map(a => Asset.from(a));
+    }
+    
+    if (prismaGS.achievements) {
+      gs.achievements = prismaGS.achievements.map(a => Achievement.from(a));
     }
     
     return gs;

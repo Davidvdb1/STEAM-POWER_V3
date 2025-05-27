@@ -213,4 +213,30 @@ router.get('/gameBuildings/getAllGameBuildingsByGroupId/:groupId', async (req, r
   }
 });
 
+
+// Achievements
+router.post('/achievements/add/:gameStatisticsId/:title', async (req, res) => {
+  try {
+    const { gameStatisticsId, title } = req.params;
+    const gameStatistics = await gameStatisticsService.addAchievementToGameStatistics(gameStatisticsId, title);
+    res.status(200).json(gameStatistics);
+  } catch (error) {
+    console.error(`Error adding achievement ${req.params.title} to GameStatistics ${req.params.gameStatisticsId}:`, error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+// Get all achievements associated to a specific GameStatistics instance, referenced by its id
+router.get('/:gameStatisticsId/achievements', async (req, res) => {
+  try {
+    const achievements = await gameStatisticsService.getGameStatisticsAchievements(req.params.gameStatisticsId);
+    res.status(200).json(achievements);
+  } catch (error) {
+    console.error(`Error fetching achievements for GameStatistics ${req.params.gameStatisticsId}:`, error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
 module.exports = router;

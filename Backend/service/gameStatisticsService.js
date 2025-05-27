@@ -140,6 +140,32 @@ class GameStatisticsService {
     console.log('→ [upgradeBuilding] updated GameBuilding:', updatedGameBuilding);
     return updatedGameBuilding;
   }
+
+  // Achievements
+  /**
+   * Adds an achievement to the game statistics for a given gameStatisticsId.
+   *
+   * @async
+   * @param {string} gameStatisticsId - The unique identifier of the game statistics record.
+   * @param {string} title - The title of the achievement to add.
+   * @returns {Promise<Object>} The updated game statistics object.
+   */
+  async addAchievementToGameStatistics(gameStatisticsId, title) {
+    const updatedGameStatistics = await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, title);
+    return updatedGameStatistics;
+  }
+  
+
+  /**
+   * Retrieves the achievements associated with a specific game statistics record.
+   *
+   * @async
+   * @param {string|number} gameStatisticsId - The unique identifier of the game statistics record.
+   * @returns {Promise<Array>} A promise that resolves to an array of achievements for the given game statistics.
+   */
+  async getGameStatisticsAchievements(gameStatisticsId) {
+    return await gameStatisticsRepository.getGameStatisticsAchievements(gameStatisticsId);
+  }
 }
 
 module.exports = new GameStatisticsService();
