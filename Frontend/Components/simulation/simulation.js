@@ -236,6 +236,20 @@ window.customElements.define('simulation-れ', class extends HTMLElement {
             }
         });
 
+        // 4. Calculate estimated solar power output
+        const panelNormal = new BABYLON.Vector3(0, 0, 1);
+        const worldMatrix = this.solarPanel.getWorldMatrix();
+        const worldNormal = BABYLON.Vector3.TransformNormal(panelNormal, worldMatrix).normalize();
+        const sunDirection = dir.negate(); 
+
+        const angleFactor = BABYLON.Vector3.Dot(worldNormal, sunDirection); 
+        const irradiance = 1000;
+        const area = 1.6;
+        const efficiency = 0.2;
+
+        const powerOutput = Math.max(0, irradiance * area * efficiency * angleFactor);
+        console.log("Estimated solar power output (W):", powerOutput.toFixed(2));
+        
         // Handle window resize
         window.addEventListener('resize', this._handleResize);
     }
