@@ -306,16 +306,28 @@ class GameStatisticsRepository {
     });
     return achievement;
   }
-
   async addAchievementToGameStatistics(gameStatisticsId, title) {
     const achievement = await this.findAchievementByTitle(title);
     if (!achievement) {
       throw new Error(`Achievement with title "${title}" not found`);
     }
 
+    // Get current achievements and check if this achievement already exists by ID
+    const currentAchievements = await this.getGameStatisticsAchievements(gameStatisticsId);
+    const achievementExists = currentAchievements.some(a => a.id === achievement.id);
+    
+    if (achievementExists) {
+      throw new Error(`Achievement "${title}" already exists in GameStatistics with id "${gameStatisticsId}"`);
+    }
+
     const updatedGameStatistics = await this.prisma.gameStatistics.update({
       where: { id: gameStatisticsId },
       data: {
+        currency: {
+          update: {
+            coins: { increment: achievement.reward },
+          }
+        },
         achievements: {
           connect: { id: achievement.id }
         }

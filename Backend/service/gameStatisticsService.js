@@ -142,7 +142,8 @@ class GameStatisticsService {
 
   // Achievements
   async addAchievementToGameStatistics(gameStatisticsId, title) {
-    return await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, title);
+    const updatedGameStatistics = await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, title);
+    return updatedGameStatistics;
   }
   
   async getGameStatisticsAchievements(gameStatisticsId) {
