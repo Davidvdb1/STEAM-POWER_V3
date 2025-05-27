@@ -233,7 +233,7 @@ async function main() {
   // const currency2 = await prisma.currency.create({ data: { greyEnergy: 9.0, greenEnergy: 1.0, coins: 25.0 } });
   // const checkpoint2 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency2.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset3.id }] } } });
 
-  const currency3 = await prisma.currency.create({ data: { greyEnergy: 8.0, greenEnergy: 2.5, coins: 50.0 } });
+  const currency3 = await prisma.currency.create({ data: { greyEnergy: 8.0, greenEnergy: 2.5, coins: 50.0, score: 5} });
   // const checkpoint3 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency3.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }, { id: buildingLevels[2].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset2.id }, { id: asset3.id }] } } });
 
 
