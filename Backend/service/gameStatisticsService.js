@@ -21,6 +21,13 @@ class GameStatisticsService {
     return gs;
   }
 
+  async refactorGameStatistics({checkpointId}) {
+    const checkpoint = await gameStatisticsRepository.findCheckpointById(checkpointId);
+
+    const gs = await gameStatisticsRepository.refactorGameStatistics({checkpoint})
+    return gs;
+  }
+
   // Om de backend manueel te testen
   async getAllGameStatistics() {
     const gameStatistics =

@@ -32,6 +32,64 @@ class GameStatisticsRepository {
     return GameStatistics.from(prismaGS);
   }
 
+  async refactorGameStatistics({ checkpoint }) {
+    checkpoint.validate();
+
+    // 1. Delete existing gameBuildings and assets for this gameStatistics
+    await this.prisma.gameBuildings.deleteMany({
+      where: { gameStatisticsId: checkpoint.gameStatisticsId },
+    });
+    await this.prisma.asset.deleteMany({
+      where: { gameStatisticsId: checkpoint.gameStatisticsId },
+    });
+
+    // 2. Update currency and create new gameBuildings and assets
+    const prismaGS = await this.prisma.gameStatistics.update({
+      where: { id: checkpoint.gameStatisticsId },
+      data: {
+        currency: {
+          update: {
+            greenEnergy: checkpoint.currency.greenEnergy,
+            greyEnergy: checkpoint.currency.greyEnergy,
+            coins: checkpoint.currency.coins,
+          },
+        },
+        gameBuildings: {
+          create: checkpoint.gameBuildings.map((gb) => ({
+            building: { connect: { id: gb.building.id } },
+            buildingLevel: { connect: { id: gb.buildingLevel.id } },
+            // REMOVE gameStatistics: { connect: ... }
+          })),
+        },
+        assets: {
+          create: checkpoint.assets.map((a) => ({
+            buildCost: a.buildCost,
+            destroyCost: a.destroyCost,
+            energy: a.energy,
+            xLocation: a.xLocation,
+            yLocation: a.yLocation,
+            xSize: a.xSize,
+            ySize: a.ySize,
+            type: a.type,
+            // REMOVE gameStatistics: { connect: ... }
+          })),
+        },
+      },
+      include: {
+        currency: true,
+        gameBuildings: {
+          include: {
+            building: true,
+            buildingLevel: true,
+          },
+        },
+        assets: true,
+      },
+    });
+
+    return GameStatistics.from(prismaGS);
+  }
+
   // Om de backend manueel te testen
 
   async getAllGameStatistics() {
@@ -343,6 +401,24 @@ class GameStatisticsRepository {
     });
 
     return Checkpoint.from(prismaCP);
+  }
+
+  async findCheckpointById(checkpointId) {
+    const checkpoint = await this.prisma.checkpoint.findUnique({
+      where: { id: checkpointId },
+      include: {
+        currency: true,
+        gameBuildings: {
+          include: {
+            building: true,
+            buildingLevel: true,
+          },
+        },
+        assets: true,
+      },
+    });
+    if (!checkpoint) throw new Error("Checkpoint not found");
+    return Checkpoint.from(checkpoint);
   }
 
   async removeCheckpoint(checkpointId) {

@@ -16,6 +16,20 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Refactor game statistics (ok)
+router.post('/refactor/:checkpointId', async (req, res) => {
+  const { checkpointId } = req.params;
+  console.log('→ [gameStatistics] refactoring game statistics for checkpointId:', checkpointId);
+  try {
+    const gs = await gameStatisticsService.refactorGameStatistics({ checkpointId });
+    res.status(200).json(gs);
+  } catch (error) {
+    console.error('✖ [gameStatistics] ERROR in PUT /refactor/:checkpointId →', error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
 // Fetch all game statistics (ok)
 router.get('/', async (req, res) => {
   console.log('→ [gameStatistics] fetching all game statistics');
