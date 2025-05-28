@@ -510,37 +510,58 @@ class GameControlPanel extends HTMLElement {
     console.log("Currency saved successfully!");
   }
 
-  _onLoadCheckpoint() {
-    const activeScene = this._game.scene.getScene("CityScene").scene.isActive()
-      ? this._game.scene.getScene("CityScene")
-      : this._game.scene.getScene("OuterCityScene");
+_onLoadCheckpoint() {
+ const active = this._game.scene.isActive("CityScene")
+    ? this._game.scene.getScene("CityScene")
+    : this._game.scene.getScene("OuterCityScene");
 
-    activeScene.showCheckpointList(
-      "Wil je je voortgang laden?",
-      (confirmed) => {
+  active.showCheckpointList(selectedId => {
+    active.showConfirmation(
+      `Wil je checkpoint ${selectedId} laden?`,
+      confirmed => {
         if (confirmed) {
-          this._performLoadCheckpoint();
+          this._performLoadCheckpoint(selectedId);
         }
       }
     );
+  });
+}
+
+
+async _performLoadCheckpoint(selectedCheckpointId) {
+  // 1) grab your credentials
+  const raw = sessionStorage.getItem("loggedInUser");
+  if (!raw) {
+    console.error("No user in sessionStorage!");
+    return;
+  }
+  const { groupId, token } = JSON.parse(raw);
+
+  // 2) re-fetch your gameStatistics so you get a valid ID
+  const stats = await fetchGameStatistics(groupId, token);
+  const gameStatsId = stats.id;
+
+  // 3) fetch all checkpoints for that statistics record
+  const checkpoints = await getCheckpointsByGameStatisticsId(
+    gameStatsId,
+    token
+  );
+
+  // 4) find the one the user clicked
+  const cp = checkpoints.find(c => c.id === selectedCheckpointId);
+  if (!cp) {
+    console.error("Checkpoint not found:", selectedCheckpointId);
+    return;
   }
 
-  async _performLoadCheckpoint() {
-    const raw = sessionStorage.getItem("loggedInUser");
-    if (!raw) {
-      console.error("No user in sessionStorage!");
-      return;
-    }
-    const { groupId, token } = JSON.parse(raw);
+  // 5) now actually *apply* the checkpoint.
+  //    (you’ll need a backend call or local logic here; 
+  //     e.g. recordCheckpoint or a custom loadCheckpoint call)
+  await loadGameStateFromCheckpoint(cp, token);
 
-    console.log("groupId:", groupId, "token:", token);
+  console.log("Loaded checkpoint:", cp);
+}
 
-    const stats = await fetchGameStatistics(groupId, token);
-    const gameStatisticsId = stats.id;
-
-    await getCheckpointsByGameStatisticsId(gameStatisticsId, token);
-    console.log("Checkpoints loaded successfully!");
-  }
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);

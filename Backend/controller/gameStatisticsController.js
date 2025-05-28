@@ -179,15 +179,18 @@ router.post('/:id/checkpoints', async (req, res) => {
 
 // Fetch all checkpoints for a game statistics (ok)
 router.get('/:id/checkpoints', async (req, res) => {
+  console.log(`→ HIT GET /gameStatistics/${req.params.id}/checkpoints`);
   try {
     const checkpoints = await gameStatisticsService.findAllCheckpointsByGameStatisticsId(req.params.id);
-    res.status(200).json(checkpoints);
+    console.log(`   → Service returned ${checkpoints.length} checkpoint(s)`);
+    return res.status(200).json(checkpoints);
   } catch (error) {
-    console.error(`Error fetching checkpoints for GameStatistics ${req.params.id}:`, error);
+    console.error(`   ✖ Error in GET checkpoints for ${req.params.id}:`, error);
     const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ error: error.message });
+    return res.status(statusCode).json({ error: error.message });
   }
 });
+
 
 // Delete a checkpoint (ok)
 router.delete('/checkpoints/:checkpointId', async (req, res) => {

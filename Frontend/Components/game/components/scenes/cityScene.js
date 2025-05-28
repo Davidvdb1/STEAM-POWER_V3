@@ -1,6 +1,7 @@
 import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys, handleMapDragging } from "../../utils/phaserSceneUtils.js";
 import { BuildingRegistry } from "../../utils/buildingRegistry.js";
 import { createConfirmationPopup } from "../../utils/uiPopups.js";
+import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
 
 export function createCityScene() {
   return class CityScene extends Phaser.Scene {
@@ -50,6 +51,9 @@ export function createCityScene() {
 
       // Create the confirmation dialog UI for upgrading a building but set it to hidden initially
       createConfirmationPopup(this);
+
+      // Create the checkpoint load popup UI
+      createCheckpointLoadPopup(this);
     }
 
 

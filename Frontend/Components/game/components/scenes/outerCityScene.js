@@ -25,6 +25,8 @@ import {
   createConfirmationPopup
 } from "../../utils/uiPopups.js";
 
+import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
+
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
     constructor() {
@@ -96,6 +98,8 @@ export function createOuterCityScene() {
 
       createErrorPopup(this);
       createConfirmationPopup(this);
+      // Create the checkpoint load popup UI
+      createCheckpointLoadPopup(this);
 
       this.setupDragAndDrop();
       this.loadExistingAssets();
