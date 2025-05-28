@@ -239,7 +239,7 @@ class GameStatisticsRepository {
   }
 
   async removeAsset(assetId) {
-    await this.prisma.asset.delete({ where: { id: assetId } });
+    return await this.prisma.asset.delete({ where: { id: assetId } });
   }
 
   async recordCheckpoint(statsId, cp) {
@@ -334,10 +334,9 @@ class GameStatisticsRepository {
     // Get current achievements and check if this achievement already exists by ID
     const currentAchievements = await this.getGameStatisticsAchievements(gameStatisticsId);
     const achievementExists = currentAchievements.some(a => a.id === achievement.id);
-    
-    // If the achievement already exists, throw an error
     if (achievementExists) {
-      throw new Error(`Achievement "${title}" already exists in GameStatistics with id "${gameStatisticsId}"`);
+      // If the achievement already exists, do nothing and return
+      return;
     }
 
     // Update the GameStatistics entry to add the achievement and increment the coins

@@ -206,11 +206,15 @@ async function main() {
   // ACHIEVEMENTS
   const achievements = [
     { title: "Eerste stap", description: "Schakel een gebouw om naar groene energie", reward: 10, score: 1 },
-    { title: "Efficiëntie-expert", description: "Schakel alle gebouwen om naar groene energie", reward: 100, score: 1 },
-    { title: "Bouwassistent", description: "Upgrade een gebouw naar niveau 2", reward: 20, score: 1 },
-    { title: "Bouwmeester", description: "Upgrade een gebouw naar het maximum level (5)", reward: 50, score: 1 },
-    { title: "Milieuheld", description: "Gebruik alleen groene energie voor 3 rondes", reward: 100, score: 1 },
-    { title: "EU gemiddelde", description: "Laat meer dan 25% van de totale stroom van groene energiebronnen komen (gemiddelde in de EU)", reward: 100, score: 1 }
+    { title: "Efficiëntie-expert", description: "Schakel alle gebouwen om naar groene energie", reward: 10, score: 1 },
+    { title: "Bouwassistent", description: "Upgrade een gebouw naar niveau 2", reward: 10, score: 1 },
+    { title: "Bouwmeester", description: "Upgrade een gebouw naar het maximum level (5)", reward: 25, score: 1 },
+    { title: "Bouwkampioen", description: "Upgrade alle gebouwen naar het maximum level (5)", reward: 50, score: 1 },
+    { title: "Energie-ingenieur", description: "Plaats een groene energiebron", reward: 10, score: 1 },
+    { title: "Energie-architect", description: "Heb 10 groene energiebronnen tegelijkertijd", reward: 25, score: 1 },
+    { title: "Groene vingers", description: "Plaats een natuurelement", reward: 10, score: 1 },
+    { title: "Milieuheld", description: "Sloop een grijze energiebron", reward: 10, score: 1 },
+    { title: "EU gemiddelde", description: "Laat meer dan 25% van de totale stroom van groene energiebronnen komen (gemiddelde in de EU)", reward: 10, score: 1 }
   ];
 
   const createdAchievements = [];
