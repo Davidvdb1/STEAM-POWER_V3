@@ -1,5 +1,3 @@
-// scenes/outerCityScene.js
-
 import {
   setCameraBounds,
   handleZoom,
@@ -33,37 +31,55 @@ export function createOuterCityScene() {
       super("OuterCityScene");
     }
 
+
+    init(data) {
+      // 1) Pre-shutdown hook:
+      this.events.once("shutdown", () => {
+        if (this.layer1) this.layer1.destroy();
+        if (this.layer2) this.layer2.destroy();
+        if (this.map)    this.map.destroy();
+        ["dragHighlight","hoverMarker","hoverTilesHighlight"]
+          .forEach(p => this[p] && this[p].destroy());
+      });
+
+      // 2) Clear and inject checkpoint data:
+      this.assetObjects = [];
+      this.tileAssetMap = {};
+      if (data.assets) {
+        this.checkpointAssets        = data.assets;
+        this.sys.game.gameStatisticsId = data.gameStatisticsId;
+        this.sys.game.token            = data.token;
+      }
+    }
+
+
     preload() {
       this.load.tilemapTiledJSON("outerCityMap", "Assets/json/buitenstad.json");
       this.load.image(
         "tilesetImage",
         "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
       );
-      // Load asset images
       this.load.image("Zonnepaneel", "Assets/images/solar_panel.png");
       this.load.image("Windmolen", "Assets/images/windturbine.png");
       this.load.image("Waterrad", "Assets/images/waterrad.png");
       this.load.image("Kerncentrale", "Assets/images/kerncentrale.png");
       this.load.image("Eik", "Assets/images/Eik.png");
       this.load.image("Beuk", "Assets/images/Beuk.png");
-      this.load.image("Buxus",  "Assets/images/Buxus.png");
-      this.load.image("Hulst",  "Assets/images/Hulst.png");
+      this.load.image("Buxus", "Assets/images/Buxus.png");
+      this.load.image("Hulst", "Assets/images/Hulst.png");
     }
 
     create() {
       console.log("OuterCityScene created");
-      this.assetObjects = [];
-      this.tileAssetMap = {};
-      this.draggedAssetType = null;
 
-      // Asset definitions
+      // definitions & map setup
       this.assetSizes = {
         Kerncentrale: { width: 12, height: 10 },
         Windmolen:    { width: 6,  height: 10 },
         Waterrad:     { width: 7,  height: 8  },
         Zonnepaneel:  { width: 4,  height: 6  },
-        Eik:        { width: 5,  height: 6  }, 
-        Beuk:        { width: 4,  height: 5  },
+        Eik:          { width: 5,  height: 6  },
+        Beuk:         { width: 4,  height: 5  },
         Buxus:        { width: 2,  height: 4  },
         Hulst:        { width: 3,  height: 3  },
       };
@@ -72,13 +88,12 @@ export function createOuterCityScene() {
         Windmolen:    20,
         Waterrad:     20,
         Zonnepaneel:  20,
-        Eik:        10,
-        Beuk:        10,
+        Eik:          10,
+        Beuk:         10,
         Buxus:        10,
         Hulst:        10,
       };
 
-      // Create map layers
       this.map   = this.make.tilemap({ key: "outerCityMap" });
       const tileset = this.map.addTilesetImage(
         "Modern_Exteriors_Complete_Tileset_Custom",
@@ -98,15 +113,53 @@ export function createOuterCityScene() {
 
       createErrorPopup(this);
       createConfirmationPopup(this);
-      // Create the checkpoint load popup UI
       createCheckpointLoadPopup(this);
 
       this.setupDragAndDrop();
       this.loadExistingAssets();
     }
 
+    // call this to completely wipe out your old assets (sprites & tile reservations)
+clearAllAssets() {
+  // destroy each sprite
+  this.assetObjects.forEach(o => o.image.destroy());
+  // reset arrays/maps
+  this.assetObjects = [];
+  this.tileAssetMap = {};
+}
+
+// call this *after* setting checkpointAssets; it simply draws them on the existing map
+reloadCheckpointAssets() {
+  const assets = Array.isArray(this.checkpointAssets)
+    ? this.checkpointAssets
+    : this.sys.game.assetData;
+  if (!Array.isArray(assets)) return;
+  assets.forEach(a => {
+    const wx = a.xLocation * this.map.tileWidth;
+    const wy = a.yLocation * this.map.tileHeight;
+    const sprite = this.add.image(wx, wy, a.type)
+      .setOrigin(0)
+      .setDisplaySize(a.xSize * this.map.tileWidth, a.ySize * this.map.tileHeight)
+      .setInteractive()
+      .on("pointerdown", () => {
+        this.isDragging = false;
+        this.game.events.emit("assetClicked", a.id);
+      });
+    reserveTiles(this.tileAssetMap, a.xLocation, a.yLocation, {
+      width: a.xSize,
+      height: a.ySize
+    });
+    this.assetObjects.push({ id: a.id, image: sprite, tx: a.xLocation, ty: a.yLocation, size: { width: a.xSize, height: a.ySize }, type: a.type });
+  });
+}
+
+
     loadExistingAssets() {
-      const assets = this.sys.game.assetData;
+      // prefer checkpointAssets if provided, else fallback
+      const assets = Array.isArray(this.checkpointAssets)
+        ? this.checkpointAssets
+        : this.sys.game.assetData;
+
       if (!Array.isArray(assets)) return;
 
       assets.forEach(a => {
@@ -131,10 +184,10 @@ export function createOuterCityScene() {
         });
 
         this.assetObjects.push({
-          id: a.id,
+          id:   a.id,
           image: sprite,
-          tx: a.xLocation,
-          ty: a.yLocation,
+          tx:   a.xLocation,
+          ty:   a.yLocation,
           size: { width: a.xSize, height: a.ySize },
           type: a.type
         });
@@ -160,10 +213,12 @@ export function createOuterCityScene() {
 
         const [tx, ty] = this._getTileFromEvent(e);
         const size = ASSETS[type];
-
         const canPlace = canPlaceAsset(this.tileAssetMap, tx, ty, size);
 
-        this.dragHighlight.clear().fillStyle(canPlace ? 0x00ff00 : 0xff0000, 0.4);
+        this.dragHighlight
+          .clear()
+          .fillStyle(canPlace ? 0x00ff00 : 0xff0000, 0.4);
+
         for (let dx = 0; dx < size.width; dx++) {
           for (let dy = 0; dy < size.height; dy++) {
             this.dragHighlight.fillRect(
@@ -188,8 +243,8 @@ export function createOuterCityScene() {
         const [tx, ty] = this._getTileFromEvent(e);
         const size = ASSETS[type];
         const cost = size.cost;
-
         const canPlace = canPlaceAsset(this.tileAssetMap, tx, ty, size);
+
         if (!canPlace) {
           this.showError("Kan hier niets plaatsen. Niet genoeg ruimte");
           this.dragHighlight.clear();
@@ -207,28 +262,34 @@ export function createOuterCityScene() {
           try {
             const { gameStatisticsId, token, currencyId } = this.sys.game;
             const currentCurrency = await getCurrencyById(currencyId, token);
-            if (this.draggedAssetType == "Kerncentrale") {
-              currentCurrency.greyEnergy = currentCurrency.greyEnergy + 100;
+
+            if (this.draggedAssetType === "Kerncentrale") {
+              currentCurrency.greyEnergy += 100;
             }
-            if (this.draggedAssetType == "Windmolen" || this.draggedAssetType == "Waterrad" || this.draggedAssetType == "Zonnepaneel") {
-              currentCurrency.greenEnergy = currentCurrency.greenEnergy + 50;
+            if (["Windmolen", "Waterrad", "Zonnepaneel"].includes(this.draggedAssetType)) {
+              currentCurrency.greenEnergy += 50;
             }
+
             const updatedCurrency = {
               greenEnergy: currentCurrency.greenEnergy,
               greyEnergy:  currentCurrency.greyEnergy,
               coins:       currentCurrency.coins - cost
             };
 
-            const response = await addAsset(gameStatisticsId, {
-              buildCost: cost,
-              destroyCost: cost,
-              energy: size.energy,
-              xLocation: tx,
-              yLocation: ty,
-              xSize: size.width,
-              ySize: size.height,
-              type
-            }, token);
+            const response = await addAsset(
+              gameStatisticsId,
+              {
+                buildCost:   cost,
+                destroyCost: cost,
+                energy:      size.energy,
+                xLocation:   tx,
+                yLocation:   ty,
+                xSize:       size.width,
+                ySize:       size.height,
+                type
+              },
+              token
+            );
 
             this._placeAsset(type, tx, ty, size, response.id);
             await updateCurrency(currencyId, updatedCurrency, token);
@@ -244,17 +305,18 @@ export function createOuterCityScene() {
 
       this.input.on("pointermove", pointer => {
         const world = pointer.positionToCamera(this.cameras.main);
-        const tile = this.layer1.getTileAtWorldXY(world.x, world.y);
+        const tile  = this.layer1.getTileAtWorldXY(world.x, world.y);
         this.hoverMarker.clear();
         if (!tile || this.isDragging) return;
 
         const { tileWidth: tw, tileHeight: th } = this.map;
         const startX = tile.x - 1, startY = tile.y - 1;
 
-        this.hoverMarker.lineStyle(1, 0x0000ff, 1)
+        this.hoverMarker
+          .lineStyle(1, 0x0000ff, 1)
           .fillStyle(0x0000ff, 0.3)
           .strokeRect(startX*tw, startY*th, tw*3, th*3)
-          .fillRect(startX*tw, startY*th, tw*3, th*3);
+          .fillRect(  startX*tw, startY*th, tw*3, th*3);
 
         const under = this.assetObjects.find(a =>
           tile.x >= a.tx && tile.x < a.tx + a.size.width &&
@@ -267,8 +329,8 @@ export function createOuterCityScene() {
           for (let dx = 0; dx < under.size.width; dx++) {
             for (let dy = 0; dy < under.size.height; dy++) {
               this.hoverTilesHighlight.fillRect(
-                (under.tx+dx)*tw,
-                (under.ty+dy)*th,
+                (under.tx + dx)*tw,
+                (under.ty + dy)*th,
                 tw, th
               );
             }
@@ -278,9 +340,16 @@ export function createOuterCityScene() {
     }
 
     _placeAsset(type, tx, ty, size, assetId) {
-      const sprite = this.add.image(tx * this.map.tileWidth, ty * this.map.tileHeight, type)
+      const sprite = this.add.image(
+        tx * this.map.tileWidth,
+        ty * this.map.tileHeight,
+        type
+      )
         .setOrigin(0)
-        .setDisplaySize(size.width * this.map.tileWidth, size.height * this.map.tileHeight)
+        .setDisplaySize(
+          size.width * this.map.tileWidth,
+          size.height * this.map.tileHeight
+        )
         .setInteractive()
         .on("pointerdown", () => this.game.events.emit("assetClicked", assetId));
 
@@ -291,8 +360,11 @@ export function createOuterCityScene() {
 
     _removeAsset(asset) {
       const idx = this.assetObjects.findIndex(a =>
-        asset.id ? a.id === asset.id :
-        a.tx === asset.tx && a.ty === asset.ty && a.type === asset.type
+        asset.id
+          ? a.id === asset.id
+          : a.tx === asset.tx &&
+            a.ty === asset.ty &&
+            a.type === asset.type
       );
       if (idx === -1) return;
 
@@ -309,22 +381,25 @@ export function createOuterCityScene() {
       this.hoverTilesHighlight.clear();
     }
 
-
     update(time, delta) {
       handleMovementKeys(this, delta);
     }
 
     _getTileFromEvent(e) {
-      const rect = this.game.canvas.getBoundingClientRect();
-      const scaleX = this.game.config.width / rect.width;
+      const rect   = this.game.canvas.getBoundingClientRect();
+      const scaleX = this.game.config.width  / rect.width;
       const scaleY = this.game.config.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
-      const world = this.cameras.main.getWorldPoint(x, y);
+      const x      = (e.clientX - rect.left) * scaleX;
+      const y      = (e.clientY - rect.top)  * scaleY;
+      const world  = this.cameras.main.getWorldPoint(x, y);
       return [
         Math.floor(world.x / this.map.tileWidth),
         Math.floor(world.y / this.map.tileHeight)
       ];
     }
   };
+
+  
 }
+
+

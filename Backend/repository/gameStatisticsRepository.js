@@ -459,6 +459,14 @@ class GameStatisticsRepository {
 
     return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
   }
+
+  async findAllAssetsByGameStatisticsId(gameStatisticsId) {
+    const assets = await this.prisma.asset.findMany({
+      where: { gameStatisticsId },
+      include: { gameStatistics: true },
+    });
+    return assets.map((a) => Asset.from(a));
+  }
 }
 
 module.exports = new GameStatisticsRepository();

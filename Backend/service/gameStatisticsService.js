@@ -141,6 +141,10 @@ class GameStatisticsService {
     console.log('→ [upgradeBuilding] updated GameBuilding:', updatedGameBuilding);
     return updatedGameBuilding;
   }
+
+  async findAllAssetsByGameStatisticsId(gameStatisticsId) {
+    return await gameStatisticsRepository.findAllAssetsByGameStatisticsId(gameStatisticsId);
+  }
 }
 
 module.exports = new GameStatisticsService();

@@ -529,39 +529,40 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
-  async _performLoadCheckpoint(selectedCheckpointId) {
-    // 1) grab your credentials
-    const raw = sessionStorage.getItem("loggedInUser");
-    if (!raw) {
-      console.error("No user in sessionStorage!");
-      return;
-    }
-    const { groupId, token } = JSON.parse(raw);
+async _performLoadCheckpoint(selectedCheckpointId) {
+  const raw = sessionStorage.getItem("loggedInUser");
+  if (!raw) return console.error("No user in sessionStorage!");
+  const { token } = JSON.parse(raw);
+  try {
+    const { gameStatistics, assets } = await refactorGameStatistics(selectedCheckpointId, token);
+    this._game.gameStatisticsId = gameStatistics.id;
+    this._game.assetData = assets;
+    clearInterval(this._energyInterval);
+    clearInterval(this._statsInterval);
 
-    // 2) re-fetch your gameStatistics so you get a valid ID
-    const stats = await fetchGameStatistics(groupId, token);
-    const gameStatsId = stats.id;
+    // 1) grab the already‐running outer scene
+    const outer = this._game.scene.getScene("OuterCityScene");
+    // 2) clear out every old sprite & reservation
+    outer.clearAllAssets();
+    // 3) stash the checkpoint’s assets on the scene
+    outer.checkpointAssets = assets;
+    // 4) draw them back into place on the existing map
+    outer.reloadCheckpointAssets();
 
-    // 3) fetch all checkpoints for that statistics record
-    const checkpoints = await getCheckpointsByGameStatisticsId(
-      gameStatsId,
-      token
-    );
-
-    // 4) find the one the user clicked
-    const cp = checkpoints.find((c) => c.id === selectedCheckpointId);
-    if (!cp) {
-      console.error("Checkpoint not found:", selectedCheckpointId);
-      return;
-    }
-
-    // 5) now actually *apply* the checkpoint.
-    //    (you’ll need a backend call or local logic here;
-    //     e.g. recordCheckpoint or a custom loadCheckpoint call)
-    await refactorGameStatistics(selectedCheckpointId, token);
-
-    console.log("Loaded checkpoint:", cp);
+    // rebind your click event just in case
+    this._game.events.off("assetClicked");
+    this._game.events.on("assetClicked", id => this._showAssetDetail(id));
+  } catch (err) {
+    console.error("Error loading checkpoint:", err);
+    const outer = this._game.scene.getScene("OuterCityScene");
+    if (outer?.showError) outer.showError("Kon checkpoint niet laden: " + err.message);
   }
+}
+
+
+
+
+
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
