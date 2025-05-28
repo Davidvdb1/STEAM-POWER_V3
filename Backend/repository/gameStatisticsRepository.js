@@ -421,6 +421,24 @@ class GameStatisticsRepository {
     return Checkpoint.from(checkpoint);
   }
 
+  async findAllCheckpointsByGameStatisticsId(gameStatisticsId) {
+    const checkpoints = await this.prisma.checkpoint.findMany({
+      where: { gameStatisticsId },
+      include: {
+        currency: true,
+        gameBuildings: {
+          include: {
+            building: true,
+            buildingLevel: true,
+          },
+        },
+        assets: true,
+      },
+    });
+
+    return checkpoints.map((cp) => Checkpoint.from(cp));
+  }
+
   async removeCheckpoint(checkpointId) {
     await this.prisma.checkpoint.delete({ where: { id: checkpointId } });
   }

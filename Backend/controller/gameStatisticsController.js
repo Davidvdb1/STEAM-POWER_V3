@@ -177,6 +177,18 @@ router.post('/:id/checkpoints', async (req, res) => {
   }
 });
 
+// Fetch all checkpoints for a game statistics (ok)
+router.get('/:id/checkpoints', async (req, res) => {
+  try {
+    const checkpoints = await gameStatisticsService.findAllCheckpointsByGameStatisticsId(req.params.id);
+    res.status(200).json(checkpoints);
+  } catch (error) {
+    console.error(`Error fetching checkpoints for GameStatistics ${req.params.id}:`, error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
 // Delete a checkpoint (ok)
 router.delete('/checkpoints/:checkpointId', async (req, res) => {
   try {

@@ -135,3 +135,16 @@ export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
   }
   return res.json();
 }
+
+export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/checkpoints`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch checkpoints: HTTP ${res.status}`);
+  }
+
+  return res.json();
+}

@@ -49,11 +49,11 @@ class CurrencyDisplay extends HTMLElement {
   }
 
   _onLoad() {
-    this.dispatchEvent(new CustomEvent('loadCurrency', { bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('loadCheckpoint', { bubbles: true, composed: true }));
   }
 
   _onSave() {
-    this.dispatchEvent(new CustomEvent('saveCurrency', { bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent('saveCheckpoint', { bubbles: true, composed: true }));
   }
 }
 

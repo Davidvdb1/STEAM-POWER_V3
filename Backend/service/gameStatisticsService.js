@@ -112,6 +112,10 @@ class GameStatisticsService {
     return await gameStatisticsRepository.recordCheckpoint(statsId, currency, gameBuildings, assets);
   }
 
+  async findAllCheckpointsByGameStatisticsId(gameStatisticsId) {
+    return await gameStatisticsRepository.findAllCheckpointsByGameStatisticsId(gameStatisticsId);
+  }
+
   async removeCheckpoint(checkpointId) {
     return await gameStatisticsRepository.removeCheckpoint(checkpointId);
   }

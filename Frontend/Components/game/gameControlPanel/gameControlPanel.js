@@ -1,6 +1,5 @@
 // src/components/game/GameControlPanel.js
 
-
 import { createLogoScene } from "../components/scenes/logoScene.js";
 import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
@@ -11,7 +10,8 @@ import {
   getCurrencyById,
   updateCurrency,
   upgradeBuilding,
-  recordCheckpoint
+  recordCheckpoint,
+  getCheckpointsByGameStatisticsId
 } from "../service/gameService.js";
 
 // register our detail-panel components
@@ -19,6 +19,7 @@ import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
+import { createCheckpointLoadPopup } from "../utils/checkpointLoadPopup.js"
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -62,15 +63,15 @@ class GameControlPanel extends HTMLElement {
     this._shadow.appendChild(template.content.cloneNode(true));
 
     this._detailContainer = this._shadow.getElementById("detail-container");
-    this._wrapper         = this._shadow.getElementById("wrapper");
-    this._statsContainer  = this._shadow.getElementById("stats");
-    this._startButton     = this._shadow.getElementById("startButton");
-    this._innerContainer  = this._shadow.getElementById("inner-container");
-    this._innerButton     = this._shadow.getElementById("inner-button");
-    this._outerContainer  = this._shadow.getElementById("outer-container");
-    this._outerButton     = this._shadow.getElementById("outer-button");
+    this._wrapper = this._shadow.getElementById("wrapper");
+    this._statsContainer = this._shadow.getElementById("stats");
+    this._startButton = this._shadow.getElementById("startButton");
+    this._innerContainer = this._shadow.getElementById("inner-container");
+    this._innerButton = this._shadow.getElementById("inner-button");
+    this._outerContainer = this._shadow.getElementById("outer-container");
+    this._outerButton = this._shadow.getElementById("outer-button");
 
-    this._greyEl  = this._statsContainer.greyEl;
+    this._greyEl = this._statsContainer.greyEl;
     this._greenEl = this._statsContainer.greenEl;
     this._coinsEl = this._statsContainer.coinsEl;
 
@@ -78,7 +79,7 @@ class GameControlPanel extends HTMLElement {
     this._innerContainer.style.display = "none";
   }
 
-    _loadPhaser() {
+  _loadPhaser() {
     return new Promise((res) => {
       if (window.Phaser) return res();
       const s = document.createElement("script");
@@ -100,37 +101,40 @@ class GameControlPanel extends HTMLElement {
       this._detailContainer.innerHTML = "";
     });
 
-    this._shadow.addEventListener("destroy-asset", e => {
+    this._shadow.addEventListener("destroy-asset", (e) => {
       this._confirmDestroyAsset(e.detail.assetId);
     });
 
-    this._shadow.addEventListener("upgrade-build", e => {
+    this._shadow.addEventListener("upgrade-build", (e) => {
       this._confirmUpgradeBuilding(e.detail.GameBuildingId);
     });
-    this._statsContainer.addEventListener('saveCurrency', () => this._onSaveCurrency());
-    this._statsContainer.addEventListener('loadCurrency', () => this._onLoadCurrency());
-    
+    this._statsContainer.addEventListener("saveCheckpoint", () =>
+      this._onSaveCheckpoint()
+    );
+    this._statsContainer.addEventListener("loadCheckpoint", () =>
+      this._onLoadCheckpoint()
+    );
 
     this._loadPhaser().then(() => this._initializeGame());
 
-    const bluetooth = JSON.parse(sessionStorage.getItem('bluetoothEnabled')); 
+    const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
     if (bluetooth) {
       this._interval = setInterval(() => {
         this._updateCurrency();
       }, 2000);
-    } 
+    }
   }
 
   _initializeGame() {
-    const LogoScene      = createLogoScene(this._startButton);
-    const CityScene      = createCityScene();
+    const LogoScene = createLogoScene(this._startButton);
+    const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();
 
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: this._shadow.getElementById("game-container"),
       width: 140 * 16,
-      height: 70  * 16,
+      height: 70 * 16,
       scene: [LogoScene, CityScene, OuterCityScene],
       backgroundColor: "#9bd5e4",
       pixelArt: true,
@@ -141,9 +145,10 @@ class GameControlPanel extends HTMLElement {
     });
 
     window.phaserGame = this._game;
-    this._game.events.on("buildingClicked", id => this._showBuildingDetail(id));
-    this._game.events.on("assetClicked",    id => this._showAssetDetail(id));
-    
+    this._game.events.on("buildingClicked", (id) =>
+      this._showBuildingDetail(id)
+    );
+    this._game.events.on("assetClicked", (id) => this._showAssetDetail(id));
   }
 
   async _updateStatistics() {
@@ -165,7 +170,7 @@ class GameControlPanel extends HTMLElement {
       this._game.currencyId = gs.currency.id;
 
       const cur = gs.currency;
-      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
+      this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
@@ -174,19 +179,18 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
-
   _transformBuildingData(gameBuildings) {
     if (!gameBuildings || !Array.isArray(gameBuildings)) return [];
 
-    return gameBuildings.map(gb => ({
+    return gameBuildings.map((gb) => ({
       id: gb.id,
-      name: gb.building ? gb.building.name : 'Unknown Building',
-      building: gb.building,  // Keep original reference if needed
-      level: gb.buildingLevel // Directly use buildingLevel as level
+      name: gb.building ? gb.building.name : "Unknown Building",
+      building: gb.building, // Keep original reference if needed
+      level: gb.buildingLevel, // Directly use buildingLevel as level
     }));
   }
-    
-   async _updateEnergy() {
+
+  async _updateEnergy() {
     try {
       const user = sessionStorage.getItem("loggedInUser");
       if (!user) throw new Error("Not logged in");
@@ -196,28 +200,29 @@ class GameControlPanel extends HTMLElement {
       const counts = gs.assets.reduce((acc, asset) => {
         acc[asset.type] = (acc[asset.type] || 0) + 1;
         return acc;
-    }, {});
+      }, {});
 
       const extra = {
         greenEnergy: 0,
-        greyEnergy: 0
+        greyEnergy: 0,
       };
       if (counts["Windmolen"]) extra.greenEnergy += counts["Windmolen"] * 50;
       if (counts["Waterrad"]) extra.greenEnergy += counts["Waterrad"] * 50;
-      if (counts["Zonnepaneel"]) extra.greenEnergy += counts["Zonnepaneel"] * 50;
-      if (counts["Kerncentrale"]) extra.greyEnergy += counts["Kerncentrale"] * 100;
+      if (counts["Zonnepaneel"])
+        extra.greenEnergy += counts["Zonnepaneel"] * 50;
+      if (counts["Kerncentrale"])
+        extra.greyEnergy += counts["Kerncentrale"] * 100;
 
       const cur = gs.currency;
       const updated = {
         greenEnergy: cur.greenEnergy + extra.greenEnergy,
-        greyEnergy:  cur.greyEnergy + extra.greyEnergy,
-        coins:       cur.coins
+        greyEnergy: cur.greyEnergy + extra.greyEnergy,
+        coins: cur.coins,
       };
       await updateCurrency(cur.id, updated, token);
 
       this._greenEl.textContent = updated.greenEnergy;
-      this._greyEl.textContent  = updated.greyEnergy;
-
+      this._greyEl.textContent = updated.greyEnergy;
     } catch (e) {
       console.error("Error updating energy:", e);
     }
@@ -241,13 +246,13 @@ class GameControlPanel extends HTMLElement {
 
       this._game.token = token;
       this._game.groupId = groupId;
-      this._game.buildingData = this._transformBuildingData(gameBuildings);;
+      this._game.buildingData = this._transformBuildingData(gameBuildings);
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
-      this._game.currencyId       = gs.currency.id;
+      this._game.currencyId = gs.currency.id;
 
       const cur = gs.currency;
-      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
+      this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
@@ -258,8 +263,11 @@ class GameControlPanel extends HTMLElement {
 
   async _updateCurrency() {
     try {
-      const cur = await gameService.getCurrencyById(this._game.currencyId, this._game.token);
-      this._greenEl.textContent = (Number(cur.greenEnergy)).toFixed(3);
+      const cur = await gameService.getCurrencyById(
+        this._game.currencyId,
+        this._game.token
+      );
+      this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
     } catch (e) {
@@ -295,7 +303,7 @@ class GameControlPanel extends HTMLElement {
     const els = [this._wrapper, this._statsContainer];
     els.forEach((el) => {
       el.style.transition = "transform 0.5s ease";
-      el.style.transform  = `translateX(${offsetX}px)`;
+      el.style.transform = `translateX(${offsetX}px)`;
     });
 
     let done = 0;
@@ -322,8 +330,8 @@ class GameControlPanel extends HTMLElement {
 
   _showBuildingDetail(id) {
     this._detailContainer.innerHTML = "";
-    const detail   = document.createElement("building-detail");
-    const building = this._game.buildingData.find(b => b.id === id);
+    const detail = document.createElement("building-detail");
+    const building = this._game.buildingData.find((b) => b.id === id);
     if (building) detail.data = building;
     console.log("Building detail:", building);
     this._detailContainer.appendChild(detail);
@@ -333,28 +341,28 @@ class GameControlPanel extends HTMLElement {
   _showAssetDetail(id) {
     this._detailContainer.innerHTML = "";
     const detail = document.createElement("asset-detail");
-    const asset  = this._game.assetData.find(a => a.id === id);
+    const asset = this._game.assetData.find((a) => a.id === id);
     if (asset) detail.data = asset;
     this._detailContainer.appendChild(detail);
     this._detailContainer.classList.remove("hidden");
   }
 
   _confirmDestroyAsset(assetId) {
-    const asset = this._game.assetData.find(a => a.id === assetId);
+    const asset = this._game.assetData.find((a) => a.id === assetId);
     if (!asset) return;
 
     const msg = `Wil je deze ${asset.type} slopen voor ${asset.destroyCost} coins?`;
     const outer = this._game.scene.getScene("OuterCityScene");
-    outer.showConfirmation(msg, confirmed => {
+    outer.showConfirmation(msg, (confirmed) => {
       if (confirmed) this._performDestroyAsset(assetId);
     });
   }
 
   async _performDestroyAsset(assetId) {
     try {
-      const token      = this._game.token;
+      const token = this._game.token;
       const currencyId = this._game.currencyId;
-      const asset      = this._game.assetData.find(a => a.id === assetId);
+      const asset = this._game.assetData.find((a) => a.id === assetId);
       if (!asset) throw new Error("Asset not found");
 
       // remove on backend
@@ -364,8 +372,8 @@ class GameControlPanel extends HTMLElement {
       const cur = await getCurrencyById(currencyId, token);
       const updated = {
         greenEnergy: cur.greenEnergy,
-        greyEnergy:  cur.greyEnergy,
-        coins:       cur.coins - asset.destroyCost
+        greyEnergy: cur.greyEnergy,
+        coins: cur.coins - asset.destroyCost,
       };
       await updateCurrency(currencyId, updated, token);
 
@@ -373,10 +381,10 @@ class GameControlPanel extends HTMLElement {
 
       const outer = this._game.scene.getScene("OuterCityScene");
       outer._removeAsset({
-        id:  assetId,
-        tx:  asset.xLocation,
-        ty:  asset.yLocation,
-        size:{ width: asset.xSize, height: asset.ySize }
+        id: assetId,
+        tx: asset.xLocation,
+        ty: asset.yLocation,
+        size: { width: asset.xSize, height: asset.ySize },
       });
 
       this._detailContainer.classList.add("hidden");
@@ -387,16 +395,18 @@ class GameControlPanel extends HTMLElement {
   }
 
   _confirmUpgradeBuilding(GameBuildingId) {
-    const building = this._game.buildingData.find(b => b.id === GameBuildingId);
+    const building = this._game.buildingData.find(
+      (b) => b.id === GameBuildingId
+    );
     if (!building) return;
 
     const currentLevel = building.level.level;
-    const nextLevel    = currentLevel + 1;
-    const cost         = building.level.upgradeCost;
+    const nextLevel = currentLevel + 1;
+    const cost = building.level.upgradeCost;
     const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${cost} coins?`;
 
     const scene = this._game.scene.getScene("CityScene");
-    scene.showConfirmation(msg, confirmed => {
+    scene.showConfirmation(msg, (confirmed) => {
       if (confirmed) {
         this._performUpgradeBuilding(GameBuildingId);
       }
@@ -407,14 +417,19 @@ class GameControlPanel extends HTMLElement {
     try {
       const token = this._game.token;
       const currencyId = this._game.currencyId;
-      const building = this._game.buildingData.find(b => b.id === GameBuildingId);
+      const building = this._game.buildingData.find(
+        (b) => b.id === GameBuildingId
+      );
       console.log("Performing upgrade for building:", GameBuildingId);
       console.log("Performing upgrade for building:", building);
       if (!building) throw new Error("Building not found");
 
       // Get level data from either level or buildingLevel property
-      const currentLevel = building.level ? building.level.level : 
-                          (building.buildingLevel ? building.buildingLevel.level : 1);
+      const currentLevel = building.level
+        ? building.level.level
+        : building.buildingLevel
+        ? building.buildingLevel.level
+        : 1;
       const nextLevel = currentLevel + 1;
 
       // Call the backend to upgrade the building
@@ -434,13 +449,16 @@ class GameControlPanel extends HTMLElement {
 
       // Update currency
       const cur = await getCurrencyById(currencyId, token);
-      const upgCost = building.level ? building.level.upgradeCost : 
-                    (building.buildingLevel ? building.buildingLevel.upgradeCost : 0);
+      const upgCost = building.level
+        ? building.level.upgradeCost
+        : building.buildingLevel
+        ? building.buildingLevel.upgradeCost
+        : 0;
 
       const updatedCurrency = {
         greenEnergy: cur.greenEnergy,
         greyEnergy: cur.greyEnergy,
-        coins: cur.coins - upgCost
+        coins: cur.coins - upgCost,
       };
 
       await updateCurrency(currencyId, updatedCurrency, token);
@@ -460,51 +478,69 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
-  _onSaveCurrency() {
-  const scene = this._game.scene.getScene("CityScene");
-  scene.showConfirmation(
-    "Wil je je voortgang opslaan?",  
-    confirmed => {
-      if (confirmed) {
-        this._performSaveCurrency();
-      }
-    }
-  );
-}
+  _onSaveCheckpoint() {
+    const activeScene = this._game.scene.getScene("CityScene").scene.isActive()
+      ? this._game.scene.getScene("CityScene")
+      : this._game.scene.getScene("OuterCityScene");
 
-async _performSaveCurrency() {
-  const raw = sessionStorage.getItem("loggedInUser");
-  if (!raw) {
-    console.error("No user in sessionStorage!");
-    return;
+    activeScene.showConfirmation(
+      "Wil je je voortgang opslaan?",
+      (confirmed) => {
+        if (confirmed) {
+          this._performSaveCheckpoint();
+        }
+      }
+    );
   }
-  const { groupId, token } = JSON.parse(raw);
 
-  console.log("groupId:", groupId, "token:", token);
-
-  const stats = await fetchGameStatistics(groupId, token);
-  const gameStatisticsId = stats.id;
-
-  await recordCheckpoint(gameStatisticsId, token);
-  console.log("Currency saved successfully!");
-}
-
-
-_onLoadCurrency() {
-  const scene = this._game.scene.getScene("CityScene");
-  scene.showConfirmation(
-    "Wil je je voortgang laden?",  
-    confirmed => {
-      if (confirmed) {
-        this._performLoadCurrency();
-      }
+  async _performSaveCheckpoint() {
+    const raw = sessionStorage.getItem("loggedInUser");
+    if (!raw) {
+      console.error("No user in sessionStorage!");
+      return;
     }
-  );
-}
+    const { groupId, token } = JSON.parse(raw);
 
-_performLoadCurrency() {
-  console.log("Loading currency!");
-}
+    console.log("groupId:", groupId, "token:", token);
+
+    const stats = await fetchGameStatistics(groupId, token);
+    const gameStatisticsId = stats.id;
+
+    await recordCheckpoint(gameStatisticsId, token);
+    console.log("Currency saved successfully!");
+  }
+
+  _onLoadCheckpoint() {
+    const activeScene = this._game.scene.getScene("CityScene").scene.isActive()
+      ? this._game.scene.getScene("CityScene")
+      : this._game.scene.getScene("OuterCityScene");
+
+    activeScene.showCheckpointList(
+      "Wil je je voortgang laden?",
+      (confirmed) => {
+        if (confirmed) {
+          this._performLoadCheckpoint();
+        }
+      }
+    );
+  }
+
+  async _performLoadCheckpoint() {
+    const raw = sessionStorage.getItem("loggedInUser");
+    if (!raw) {
+      console.error("No user in sessionStorage!");
+      return;
+    }
+    const { groupId, token } = JSON.parse(raw);
+
+    console.log("groupId:", groupId, "token:", token);
+
+    const stats = await fetchGameStatistics(groupId, token);
+    const gameStatisticsId = stats.id;
+
+    await getCheckpointsByGameStatisticsId(gameStatisticsId, token);
+    console.log("Checkpoints loaded successfully!");
+  }
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
