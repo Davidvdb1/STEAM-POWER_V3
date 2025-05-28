@@ -10,7 +10,8 @@ import {
   removeAsset,
   getCurrencyById,
   updateCurrency,
-  upgradeBuilding
+  upgradeBuilding,
+  recordCheckpoint
 } from "../service/gameService.js";
 
 // register our detail-panel components
@@ -106,6 +107,9 @@ class GameControlPanel extends HTMLElement {
     this._shadow.addEventListener("upgrade-build", e => {
       this._confirmUpgradeBuilding(e.detail.GameBuildingId);
     });
+    this._statsContainer.addEventListener('saveCurrency', () => this._onSaveCurrency());
+    this._statsContainer.addEventListener('loadCurrency', () => this._onLoadCurrency());
+    
 
     this._loadPhaser().then(() => this._initializeGame());
 
@@ -455,6 +459,52 @@ class GameControlPanel extends HTMLElement {
       console.error("Error upgrading building:", err);
     }
   }
+
+  _onSaveCurrency() {
+  const scene = this._game.scene.getScene("CityScene");
+  scene.showConfirmation(
+    "Wil je je voortgang opslaan?",  
+    confirmed => {
+      if (confirmed) {
+        this._performSaveCurrency();
+      }
+    }
+  );
+}
+
+async _performSaveCurrency() {
+  const raw = sessionStorage.getItem("loggedInUser");
+  if (!raw) {
+    console.error("No user in sessionStorage!");
+    return;
+  }
+  const { groupId, token } = JSON.parse(raw);
+
+  console.log("groupId:", groupId, "token:", token);
+
+  const stats = await fetchGameStatistics(groupId, token);
+  const gameStatisticsId = stats.id;
+
+  await recordCheckpoint(gameStatisticsId, token);
+  console.log("Currency saved successfully!");
+}
+
+
+_onLoadCurrency() {
+  const scene = this._game.scene.getScene("CityScene");
+  scene.showConfirmation(
+    "Wil je je voortgang laden?",  
+    confirmed => {
+      if (confirmed) {
+        this._performLoadCurrency();
+      }
+    }
+  );
+}
+
+_performLoadCurrency() {
+  console.log("Loading currency!");
+}
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
