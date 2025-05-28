@@ -1,4 +1,10 @@
-import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys, handleMapDragging } from "../../utils/phaserSceneUtils.js";
+import {
+  setCameraBounds,
+  handleZoom,
+  setMovementKeys,
+  handleMovementKeys,
+  handleMapDragging,
+} from "../../utils/phaserSceneUtils.js";
 import { BuildingRegistry } from "../../utils/buildingRegistry.js";
 import { createConfirmationPopup } from "../../utils/uiPopups.js";
 import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
@@ -9,18 +15,41 @@ export function createCityScene() {
       super("CityScene");
     }
 
+    init(data) {
+      // 1) Pre-shutdown hook:
+      this.events.once("shutdown", () => {
+        if (this.layer1) this.layer1.destroy();
+        if (this.layer2) this.layer2.destroy();
+        if (this.layer3) this.layer3.destroy();
+        if (this.layer4) this.layer4.destroy();
+        if (this.layer5) this.layer5.destroy();
+        if (this.map) this.map.destroy();
+      });
+
+      // 2) Clear and inject checkpoint data:
+      if (data.buildings) {
+        this.checkpointBuildings = data.buildings;
+        this.sys.game.gameStatisticsId = data.gameStatisticsId;
+        this.sys.game.token = data.token;
+      }
+    }
 
     preload() {
       // Load the tilemap and tileset image
       this.load.tilemapTiledJSON("innerCityMap", "Assets/json/binnenstad.json");
-      this.load.image("tilesetImage", "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png");
+      this.load.image(
+        "tilesetImage",
+        "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
+      );
     }
-
 
     create() {
       // Set up the tilemap and its layers
       this.map = this.make.tilemap({ key: "innerCityMap" });
-      const tileset = this.map.addTilesetImage("Modern_Exteriors_Complete_Tileset_Custom", "tilesetImage");
+      const tileset = this.map.addTilesetImage(
+        "Modern_Exteriors_Complete_Tileset_Custom",
+        "tilesetImage"
+      );
 
       this.layer1 = this.map.createLayer("Layer-1", tileset);
       this.layer2 = this.map.createLayer("Layer-2", tileset);
@@ -49,6 +78,9 @@ export function createCityScene() {
       // Make buildings clickable
       this.makeBuildingsInteractive();
 
+      // Load existing buildings (checkpoint or regular game data)
+      this.loadExistingBuildings();
+
       // Create the confirmation dialog UI for upgrading a building but set it to hidden initially
       createConfirmationPopup(this);
 
@@ -56,15 +88,13 @@ export function createCityScene() {
       createCheckpointLoadPopup(this);
     }
 
-
     update(time, delta) {
       handleMovementKeys(this, delta);
     }
 
-
     /**
      * Configures the selectable tile regions for various buildings in the city scene.
-     * 
+     *
      * This method initializes a `BuildingRegistry` and registers multiple buildings by specifying
      * their names, the map reference, and the tile coordinate ranges for each relevant layer.
      * Each building is defined by one or more layer and coordinate range tuples, which determine
@@ -78,14 +108,14 @@ export function createCityScene() {
 
       // Define buildings by specific tile coordinates and layers
       this.buildingRegistry.createBuilding(
-        "office", 
+        "office",
         this.map,
         ["Layer-2", [0, 0], [20, 24]],
         ["Layer-3", [0, 0], [20, 24]]
       );
 
       this.buildingRegistry.createBuilding(
-        "apartmentBlockTopLeft", 
+        "apartmentBlockTopLeft",
         this.map,
         ["Layer-2", [21, 0], [52, 24]],
         ["Layer-3", [21, 0], [52, 24]],
@@ -94,75 +124,75 @@ export function createCityScene() {
       );
 
       this.buildingRegistry.createBuilding(
-        "townhall", 
+        "townhall",
         this.map,
         ["Layer-2", [58, 0], [82, 24]],
         ["Layer-3", [58, 0], [82, 24]]
       );
 
       this.buildingRegistry.createBuilding(
-        "gasStation", 
+        "gasStation",
         this.map,
         ["Layer-2", [88, 0], [103, 13]],
         ["Layer-2", [88, 14], [90, 14]],
         ["Layer-3", [88, 0], [103, 13]]
       );
-      
+
       this.buildingRegistry.createBuilding(
-        "hotdogStand", 
+        "hotdogStand",
         this.map,
         ["Layer-2", [90, 15], [102, 22]],
         ["Layer-3", [90, 15], [102, 22]],
         ["Layer-3", [100, 14], [101, 14]],
         ["Layer-4", [90, 15], [102, 22]]
       );
-      
+
       this.buildingRegistry.createBuilding(
-        "hospital", 
+        "hospital",
         this.map,
         ["Layer-2", [104, 0], [139, 24]],
         ["Layer-3", [104, 0], [139, 24]]
       );
 
       this.buildingRegistry.createBuilding(
-        "shoppingCenter", 
+        "shoppingCenter",
         this.map,
         ["Layer-2", [0, 31], [25, 47]],
         ["Layer-3", [0, 30], [27, 47]]
       );
 
       this.buildingRegistry.createBuilding(
-        "school", 
+        "school",
         this.map,
         ["Layer-2", [32, 25], [49, 46]],
         ["Layer-3", [32, 25], [49, 46]]
       );
 
       this.buildingRegistry.createBuilding(
-        "bakery", 
+        "bakery",
         this.map,
         ["Layer-2", [52, 29], [59, 35]],
         ["Layer-3", [52, 29], [59, 33]]
       );
 
       this.buildingRegistry.createBuilding(
-        "fireStation", 
+        "fireStation",
         this.map,
         ["Layer-2", [96, 30], [115, 45]],
         ["Layer-3", [96, 30], [115, 45]]
       );
-      
+
       this.buildingRegistry.createBuilding(
-        "policeStation", 
+        "policeStation",
         this.map,
         ["Layer-2", [117, 27], [139, 47]],
         ["Layer-3", [117, 27], [139, 47]],
         ["Layer-4", [117, 27], [139, 47]],
-        ["Layer-5", [117, 30], [139, 47]],
+        ["Layer-5", [117, 30], [139, 47]]
       );
 
       this.buildingRegistry.createBuilding(
-        "apartmentBlockBottomLeft", 
+        "apartmentBlockBottomLeft",
         this.map,
         ["Layer-2", [0, 51], [6, 69]],
         ["Layer-3", [0, 51], [6, 69]],
@@ -171,23 +201,23 @@ export function createCityScene() {
       );
 
       this.buildingRegistry.createBuilding(
-        "hotel", 
+        "hotel",
         this.map,
         ["Layer-2", [7, 51], [25, 69]],
         ["Layer-3", [7, 51], [23, 69]]
       );
 
       this.buildingRegistry.createBuilding(
-        "apartmentBlockBottomCenter", 
+        "apartmentBlockBottomCenter",
         this.map,
         ["Layer-2", [31, 50], [53, 56]],
         ["Layer-3", [31, 50], [66, 68]],
         ["Layer-4", [31, 50], [67, 69]],
         ["Layer-5", [31, 57], [49, 68]]
       );
-      
+
       this.buildingRegistry.createBuilding(
-        "apartmentBlockBottomRight", 
+        "apartmentBlockBottomRight",
         this.map,
         ["Layer-2", [76, 52], [88, 57]],
         ["Layer-3", [76, 52], [88, 55]],
@@ -197,7 +227,7 @@ export function createCityScene() {
       );
 
       this.buildingRegistry.createBuilding(
-        "postOffice", 
+        "postOffice",
         this.map,
         ["Layer-2", [72, 59], [75, 68]],
         ["Layer-3", [76, 56], [83, 68]],
@@ -205,7 +235,7 @@ export function createCityScene() {
       );
 
       this.buildingRegistry.createBuilding(
-        "constructionSite", 
+        "constructionSite",
         this.map,
         ["Layer-1", [93, 57], [109, 68]],
         ["Layer-2", [93, 54], [109, 68]],
@@ -215,7 +245,7 @@ export function createCityScene() {
       );
 
       this.buildingRegistry.createBuilding(
-        "trainStation", 
+        "trainStation",
         this.map,
         ["Layer-1", [113, 67], [139, 68]],
         ["Layer-2", [112, 58], [139, 69]],
@@ -223,28 +253,32 @@ export function createCityScene() {
         ["Layer-4", [112, 58], [139, 69]],
         ["Layer-5", [112, 58], [139, 69]]
       );
-    };
-
+    }
 
     /**
      * Iterates over all registered buildings and creates a single interactive transparent rectangle
      * for each building, covering its entire area based on its tiles across all layers.
      * When a building's rectangle is clicked, emits a "buildingClicked" event with the building's ID
      * (if found in the global building data), or falls back to emitting the building's name.
-    */
+     */
     makeBuildingsInteractive() {
-      for (const [buildingName, tileSelection] of this.buildingRegistry.buildings.entries()) {
+      for (const [
+        buildingName,
+        tileSelection,
+      ] of this.buildingRegistry.buildings.entries()) {
         // Find bounding box for each building
         const tileW = this.map.tileWidth;
         const tileH = this.map.tileHeight;
 
         // For each building, calculate its overall bounds
-        let minX = Infinity, minY = Infinity;
-        let maxX = -Infinity, maxY = -Infinity;
+        let minX = Infinity,
+          minY = Infinity;
+        let maxX = -Infinity,
+          maxY = -Infinity;
 
         // Process all layers of this building
         for (const [layerName, data] of tileSelection.originalTiles.entries()) {
-          data.tiles.forEach(tile => {
+          data.tiles.forEach((tile) => {
             minX = Math.min(minX, tile.x);
             minY = Math.min(minY, tile.y);
             maxX = Math.max(maxX, tile.x);
@@ -256,12 +290,12 @@ export function createCityScene() {
         if (minX !== Infinity) {
           const rect = this.add
             .rectangle(
-              minX * tileW, 
-              minY * tileH, 
-              (maxX - minX + 1) * tileW, 
-              (maxY - minY + 1) * tileH, 
-              0x0000ff, 
-              0.0  // Transparent
+              minX * tileW,
+              minY * tileH,
+              (maxX - minX + 1) * tileW,
+              (maxY - minY + 1) * tileH,
+              0x0000ff,
+              0.0 // Transparent
             )
             .setOrigin(0, 0)
             .setInteractive({ useHandCursor: true })
@@ -269,13 +303,14 @@ export function createCityScene() {
             .on("pointerdown", () => {
               this.isDragging = false;
               console.log(`Building clicked: ${buildingName}`);
-              
+
               // Find the building data by name
-              const buildingData = this.sys.game.buildingData?.find(b => 
-                b.name === buildingName || 
-                (b.building && b.building.name === buildingName)
+              const buildingData = this.sys.game.buildingData?.find(
+                (b) =>
+                  b.name === buildingName ||
+                  (b.building && b.building.name === buildingName)
               );
-              
+
               if (buildingData) {
                 // Emit the building ID instead of name
                 this.game.events.emit("buildingClicked", buildingData.id);
@@ -288,5 +323,56 @@ export function createCityScene() {
         }
       }
     }
-  }
+
+    // call this to reset all buildings to their initial state (level 1, grayed out)
+    clearAllBuildings() {
+      // Reset all buildings to level 1 (grayed out)
+      this.buildingRegistry.grayoutAllBuildings(1);
+    }
+
+    // call this *after* setting checkpointBuildings; it updates building states on the existing map
+    reloadCheckpointGameBuildings() {
+      const buildings = Array.isArray(this.checkpointBuildings)
+        ? this.checkpointBuildings
+        : this.sys.game.buildingData;
+
+      if (!Array.isArray(buildings)) return;
+
+      // Reset all buildings to level 1 (grayed out) first
+      this.buildingRegistry.grayoutAllBuildings(1);
+
+      buildings.forEach((buildingData) => {
+        // Find the building name from the data
+        const buildingName =
+          buildingData.name ||
+          (buildingData.building && buildingData.building.name);
+
+        if (buildingName && this.buildingRegistry.buildings.has(buildingName)) {
+          // Update the building to its checkpoint level
+          const level = buildingData.level || buildingData.building?.level || 1;
+          this.buildingRegistry.grayoutAllBuildings(level, buildingName);
+        }
+      });
+    }
+
+    loadExistingBuildings() {
+      // prefer checkpointBuildings if provided, else fallback
+      const buildings = Array.isArray(this.checkpointBuildings)
+        ? this.checkpointBuildings
+        : this.sys.game.buildingData;
+
+      if (!Array.isArray(buildings)) return;
+
+      buildings.forEach((buildingData) => {
+        const buildingName =
+          buildingData.name ||
+          (buildingData.building && buildingData.building.name);
+
+        if (buildingName && this.buildingRegistry.buildings.has(buildingName)) {
+          const level = buildingData.level || buildingData.building?.level || 1;
+          this.buildingRegistry.grayoutAllBuildings(level, buildingName);
+        }
+      });
+    }
+  };
 }

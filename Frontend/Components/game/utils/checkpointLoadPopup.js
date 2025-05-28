@@ -1,40 +1,76 @@
-import { fetchGameStatistics, getCheckpointsByGameStatisticsId } from "../service/gameService.js";
+import {
+  fetchGameStatistics,
+  getCheckpointsByGameStatisticsId,
+} from "../service/gameService.js";
 
 export function createCheckpointLoadPopup(scene) {
   const { width, height } = scene.cameras.main;
-  const popupWidth = 700, popupHeight = 300;
-  const centerX = width / 2, centerY = height / 2;
+  const popupWidth = 700,
+    popupHeight = 300;
+  const centerX = width / 2,
+    centerY = height / 2;
 
-  const bg = scene.add.graphics()
+  const bg = scene.add
+    .graphics()
     .fillStyle(0x000000, 0.9)
-    .fillRoundedRect(centerX - popupWidth / 2, centerY - popupHeight / 2, popupWidth, popupHeight, 20)
-    .setDepth(1000).setScrollFactor(0).setVisible(false);
+    .fillRoundedRect(
+      centerX - popupWidth / 2,
+      centerY - popupHeight / 2,
+      popupWidth,
+      popupHeight,
+      20
+    )
+    .setDepth(1000)
+    .setScrollFactor(0)
+    .setVisible(false);
 
-  const title = scene.add.text(centerX, centerY - 100, "Selecteer een checkpoint om te laden:", {
-    fontSize: '28px',
-    color: '#ffffff',
-    fontStyle: 'bold',
-    align: 'center',
-    wordWrap: { width: popupWidth - 40 }
-  }).setOrigin(0.5).setDepth(1001).setScrollFactor(0).setVisible(false);
+  const title = scene.add
+    .text(centerX, centerY - 100, "Selecteer een checkpoint om te laden:", {
+      fontSize: "28px",
+      color: "#ffffff",
+      fontStyle: "bold",
+      align: "center",
+      wordWrap: { width: popupWidth - 40 },
+    })
+    .setOrigin(0.5)
+    .setDepth(1001)
+    .setScrollFactor(0)
+    .setVisible(false);
 
   // Dropdown
-  const dropdownWidth = 500, dropdownHeight = 50;
+  const dropdownWidth = 500,
+    dropdownHeight = 50;
   const dropdownX = centerX - dropdownWidth / 2;
   const dropdownY = centerY - 20;
 
-  const dropdownBg = scene.add.graphics()
+  const dropdownBg = scene.add
+    .graphics()
     .fillStyle(0x444444, 1)
     .fillRoundedRect(dropdownX, dropdownY, dropdownWidth, dropdownHeight, 10)
-    .setDepth(1002).setScrollFactor(0).setVisible(false)
-    .setInteractive(new Phaser.Geom.Rectangle(dropdownX, dropdownY, dropdownWidth, dropdownHeight), Phaser.Geom.Rectangle.Contains);
+    .setDepth(1002)
+    .setScrollFactor(0)
+    .setVisible(false)
+    .setInteractive(
+      new Phaser.Geom.Rectangle(
+        dropdownX,
+        dropdownY,
+        dropdownWidth,
+        dropdownHeight
+      ),
+      Phaser.Geom.Rectangle.Contains
+    );
 
-  const selectedText = scene.add.text(centerX, dropdownY + dropdownHeight / 2, 'Kies checkpoint', {
-    fontSize: '26px',
-    color: '#ffffff',
-    align: 'center',
-    fontStyle: 'bold'
-  }).setOrigin(0.5).setDepth(1003).setScrollFactor(0).setVisible(false);
+  const selectedText = scene.add
+    .text(centerX, dropdownY + dropdownHeight / 2, "Kies checkpoint", {
+      fontSize: "26px",
+      color: "#ffffff",
+      align: "center",
+      fontStyle: "bold",
+    })
+    .setOrigin(0.5)
+    .setDepth(1003)
+    .setScrollFactor(0)
+    .setVisible(false);
 
   const optionItems = [];
 
@@ -79,31 +115,42 @@ export function createCheckpointLoadPopup(scene) {
     selectedText.setVisible(true);
 
     // Toggle dropdown
-    dropdownBg.on('pointerdown', () => {
+    dropdownBg.on("pointerdown", () => {
       isDropdownOpen = !isDropdownOpen;
-      optionItems.forEach(opt => opt.setVisible(isDropdownOpen));
+      optionItems.forEach((opt) => opt.setVisible(isDropdownOpen));
     });
 
     // Create dropdown options
     let startY = dropdownY + dropdownHeight + 10;
     const optionH = 40;
 
-    checkpoints.forEach(cp => {
-      const optBg = scene.add.graphics()
+    checkpoints.forEach((cp) => {
+      const optBg = scene.add
+        .graphics()
         .fillStyle(0x666666, 1)
         .fillRoundedRect(dropdownX, startY, dropdownWidth, optionH, 5)
-        .setDepth(1002).setScrollFactor(0).setVisible(false)
-        .setInteractive(new Phaser.Geom.Rectangle(dropdownX, startY, dropdownWidth, optionH), Phaser.Geom.Rectangle.Contains);
+        .setDepth(1002)
+        .setScrollFactor(0)
+        .setVisible(false)
+        .setInteractive(
+          new Phaser.Geom.Rectangle(dropdownX, startY, dropdownWidth, optionH),
+          Phaser.Geom.Rectangle.Contains
+        );
 
-      const optText = scene.add.text(centerX, startY + optionH / 2, cp.name || cp.id, {
-        fontSize: '30px',
-        color: '#ffffff',
-        align: 'center',
-      }).setOrigin(0.5).setDepth(1003).setScrollFactor(0).setVisible(false);
+      const optText = scene.add
+        .text(centerX, startY + optionH / 2, cp.name || cp.id, {
+          fontSize: "30px",
+          color: "#ffffff",
+          align: "center",
+        })
+        .setOrigin(0.5)
+        .setDepth(1003)
+        .setScrollFactor(0)
+        .setVisible(false);
 
-      optBg.on('pointerdown', () => {
+      optBg.on("pointerdown", () => {
         selectedText.setText(cp.name || cp.id);
-        optionItems.forEach(opt => opt.setVisible(false));
+        optionItems.forEach((opt) => opt.setVisible(false));
         isDropdownOpen = false;
         hideAll();
         callback(cp.id);
@@ -125,7 +172,10 @@ export function createCheckpointLoadPopup(scene) {
     title.setVisible(false);
     dropdownBg.setVisible(false);
     selectedText.setVisible(false);
-    optionItems.forEach(item => item.setVisible(false).destroy());
+    optionItems.forEach((item) => {
+      item.removeInteractive();
+      item.destroy();
+    });
     optionItems.length = 0;
   }
 }

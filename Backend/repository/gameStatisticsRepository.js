@@ -58,7 +58,6 @@ class GameStatisticsRepository {
           create: checkpoint.gameBuildings.map((gb) => ({
             building: { connect: { id: gb.building.id } },
             buildingLevel: { connect: { id: gb.buildingLevel.id } },
-            // REMOVE gameStatistics: { connect: ... }
           })),
         },
         assets: {
@@ -71,7 +70,6 @@ class GameStatisticsRepository {
             xSize: a.xSize,
             ySize: a.ySize,
             type: a.type,
-            // REMOVE gameStatistics: { connect: ... }
           })),
         },
       },
