@@ -558,11 +558,6 @@ async _performLoadCheckpoint(selectedCheckpointId) {
     if (outer?.showError) outer.showError("Kon checkpoint niet laden: " + err.message);
   }
 }
-
-
-
-
-
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
