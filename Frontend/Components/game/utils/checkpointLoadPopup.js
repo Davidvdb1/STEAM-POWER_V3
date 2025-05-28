@@ -1,111 +1,131 @@
-// src/utils/checkpointLoadPopup.js
-
 import { fetchGameStatistics, getCheckpointsByGameStatisticsId } from "../service/gameService.js";
 
 export function createCheckpointLoadPopup(scene) {
-  // 1) create the overlay container
-  const container = document.createElement("div");
-  Object.assign(container.style, {
-    position:    "absolute",
-    zIndex:      1000,
-    top:         "50%",
-    left:        "50%",
-    transform:   "translate(-50%, -50%)",
-    background:  "rgba(0, 0, 0, 0.9)",
-    padding:     "20px",
-    borderRadius:"8px",
-    display:     "none",
-    color:       "#fff",
-    maxHeight:   "60%",
-    overflowY:   "auto",
-    minWidth:    "300px",
-  });
-  document.body.appendChild(container);
+  const { width, height } = scene.cameras.main;
+  const popupWidth = 700, popupHeight = 300;
+  const centerX = width / 2, centerY = height / 2;
 
-  /**
-   * Shows a list of checkpoints as buttons.
-   * @param {(selectedId: string) => void} callback 
-   */
-  scene.showCheckpointList = async function(callback) {
-    container.innerHTML = "";  // clear previous
+  const bg = scene.add.graphics()
+    .fillStyle(0x000000, 0.9)
+    .fillRoundedRect(centerX - popupWidth / 2, centerY - popupHeight / 2, popupWidth, popupHeight, 20)
+    .setDepth(1000).setScrollFactor(0).setVisible(false);
 
-    // Title
-    const title = document.createElement("p");
-    title.textContent = "Selecteer een checkpoint om te laden:";
-    title.style.marginBottom = "12px";
-    container.appendChild(title);
+  const title = scene.add.text(centerX, centerY - 100, "Selecteer een checkpoint om te laden:", {
+    fontSize: '28px',
+    color: '#ffffff',
+    fontStyle: 'bold',
+    align: 'center',
+    wordWrap: { width: popupWidth - 40 }
+  }).setOrigin(0.5).setDepth(1001).setScrollFactor(0).setVisible(false);
 
-    // 2) load credentials & statsId
+  // Dropdown
+  const dropdownWidth = 500, dropdownHeight = 50;
+  const dropdownX = centerX - dropdownWidth / 2;
+  const dropdownY = centerY - 20;
+
+  const dropdownBg = scene.add.graphics()
+    .fillStyle(0x444444, 1)
+    .fillRoundedRect(dropdownX, dropdownY, dropdownWidth, dropdownHeight, 10)
+    .setDepth(1002).setScrollFactor(0).setVisible(false)
+    .setInteractive(new Phaser.Geom.Rectangle(dropdownX, dropdownY, dropdownWidth, dropdownHeight), Phaser.Geom.Rectangle.Contains);
+
+  const selectedText = scene.add.text(centerX, dropdownY + dropdownHeight / 2, 'Kies checkpoint', {
+    fontSize: '26px',
+    color: '#ffffff',
+    align: 'center',
+    fontStyle: 'bold'
+  }).setOrigin(0.5).setDepth(1003).setScrollFactor(0).setVisible(false);
+
+  const optionItems = [];
+
+  let isDropdownOpen = false;
+
+  scene.showCheckpointList = async (callback) => {
+    hideAll();
+
     const raw = sessionStorage.getItem("loggedInUser");
-    if (!raw) {
-      container.appendChild(createMessage("Niet ingelogd", "red"));
-      container.style.display = "block";
-      return;
-    }
+    if (!raw) return showMessage("Niet ingelogd");
+
     let creds;
     try {
       creds = JSON.parse(raw);
-    } catch (err) {
-      container.appendChild(createMessage("Fout bij inlezen gebruiker", "red"));
-      container.style.display = "block";
-      return;
+    } catch {
+      return showMessage("Fout bij inlezen gebruiker");
     }
+
     const { groupId, token } = creds;
 
-    // 3) re-fetch statistics to get the up-to-date stats ID
     let stats;
     try {
       stats = await fetchGameStatistics(groupId, token);
-    } catch (err) {
-      container.appendChild(createMessage("Fout bij ophalen gameStats", "red"));
-      container.style.display = "block";
-      return;
+    } catch {
+      return showMessage("Fout bij ophalen gameStats");
     }
-    const statsId = stats.id;
 
-    // 4) fetch checkpoints
     let checkpoints;
     try {
-      checkpoints = await getCheckpointsByGameStatisticsId(statsId, token);
-    } catch (err) {
-      container.appendChild(createMessage("Fout bij laden van checkpoints", "red"));
-      container.style.display = "block";
-      return;
+      checkpoints = await getCheckpointsByGameStatisticsId(stats.id, token);
+    } catch {
+      return showMessage("Fout bij laden van checkpoints");
     }
 
-    if (!Array.isArray(checkpoints) || checkpoints.length === 0) {
-      container.appendChild(createMessage("Geen checkpoints gevonden", "#ccc"));
-      container.style.display = "block";
-      return;
-    }
+    if (!Array.isArray(checkpoints) || checkpoints.length === 0)
+      return showMessage("Geen checkpoints gevonden");
 
-    // 5) render buttons
-    checkpoints.forEach(cp => {
-      const btn = document.createElement("button");
-      btn.textContent = cp.name || cp.id;
-      Object.assign(btn.style, {
-        display: "block",
-        width:   "100%",
-        padding: "8px",
-        margin:  "6px 0",
-        fontSize:"16px",
-        cursor:  "pointer",
-      });
-      btn.onclick = () => {
-        container.style.display = "none";
-        callback(cp.id);
-      };
-      container.appendChild(btn);
+    // Show UI
+    bg.setVisible(true);
+    title.setVisible(true);
+    dropdownBg.setVisible(true);
+    selectedText.setVisible(true);
+
+    // Toggle dropdown
+    dropdownBg.on('pointerdown', () => {
+      isDropdownOpen = !isDropdownOpen;
+      optionItems.forEach(opt => opt.setVisible(isDropdownOpen));
     });
 
-    container.style.display = "block";
+    // Create dropdown options
+    let startY = dropdownY + dropdownHeight + 10;
+    const optionH = 40;
+
+    checkpoints.forEach(cp => {
+      const optBg = scene.add.graphics()
+        .fillStyle(0x666666, 1)
+        .fillRoundedRect(dropdownX, startY, dropdownWidth, optionH, 5)
+        .setDepth(1002).setScrollFactor(0).setVisible(false)
+        .setInteractive(new Phaser.Geom.Rectangle(dropdownX, startY, dropdownWidth, optionH), Phaser.Geom.Rectangle.Contains);
+
+      const optText = scene.add.text(centerX, startY + optionH / 2, cp.name || cp.id, {
+        fontSize: '30px',
+        color: '#ffffff',
+        align: 'center',
+      }).setOrigin(0.5).setDepth(1003).setScrollFactor(0).setVisible(false);
+
+      optBg.on('pointerdown', () => {
+        selectedText.setText(cp.name || cp.id);
+        optionItems.forEach(opt => opt.setVisible(false));
+        isDropdownOpen = false;
+        hideAll();
+        callback(cp.id);
+      });
+
+      optionItems.push(optBg, optText);
+      startY += optionH + 4;
+    });
   };
 
-  function createMessage(text, color) {
-    const p = document.createElement("p");
-    p.textContent = text;
-    p.style.color = color;
-    p.style.margin = "8px 0";
-    return p;
+  function showMessage(text) {
+    hideAll();
+    title.setText(text).setVisible(true);
+    bg.setVisible(true);
+  }
+
+  function hideAll() {
+    bg.setVisible(false);
+    title.setVisible(false);
+    dropdownBg.setVisible(false);
+    selectedText.setVisible(false);
+    optionItems.forEach(item => item.setVisible(false).destroy());
+    optionItems.length = 0;
   }
 }

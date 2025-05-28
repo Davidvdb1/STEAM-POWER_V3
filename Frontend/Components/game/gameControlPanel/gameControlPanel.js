@@ -11,7 +11,8 @@ import {
   updateCurrency,
   upgradeBuilding,
   recordCheckpoint,
-  getCheckpointsByGameStatisticsId
+  getCheckpointsByGameStatisticsId,
+  refactorGameStatistics,
 } from "../service/gameService.js";
 
 // register our detail-panel components
@@ -19,7 +20,7 @@ import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
-import { createCheckpointLoadPopup } from "../utils/checkpointLoadPopup.js"
+import { createCheckpointLoadPopup } from "../utils/checkpointLoadPopup.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -510,58 +511,57 @@ class GameControlPanel extends HTMLElement {
     console.log("Currency saved successfully!");
   }
 
-_onLoadCheckpoint() {
- const active = this._game.scene.isActive("CityScene")
-    ? this._game.scene.getScene("CityScene")
-    : this._game.scene.getScene("OuterCityScene");
+  _onLoadCheckpoint() {
+    const active = this._game.scene.isActive("CityScene")
+      ? this._game.scene.getScene("CityScene")
+      : this._game.scene.getScene("OuterCityScene");
 
-  active.showCheckpointList(selectedId => {
-    active.showConfirmation(
-      `Wil je checkpoint ${selectedId} laden?`,
-      confirmed => {
-        if (confirmed) {
-          this._performLoadCheckpoint(selectedId);
+    active.showCheckpointList((selectedId) => {
+      active.showConfirmation(
+        `Wil je checkpoint ${selectedId} laden?`,
+        (confirmed) => {
+          if (confirmed) {
+            this._performLoadCheckpoint(selectedId);
+            
+          }
         }
-      }
+      );
+    });
+  }
+
+  async _performLoadCheckpoint(selectedCheckpointId) {
+    // 1) grab your credentials
+    const raw = sessionStorage.getItem("loggedInUser");
+    if (!raw) {
+      console.error("No user in sessionStorage!");
+      return;
+    }
+    const { groupId, token } = JSON.parse(raw);
+
+    // 2) re-fetch your gameStatistics so you get a valid ID
+    const stats = await fetchGameStatistics(groupId, token);
+    const gameStatsId = stats.id;
+
+    // 3) fetch all checkpoints for that statistics record
+    const checkpoints = await getCheckpointsByGameStatisticsId(
+      gameStatsId,
+      token
     );
-  });
-}
 
+    // 4) find the one the user clicked
+    const cp = checkpoints.find((c) => c.id === selectedCheckpointId);
+    if (!cp) {
+      console.error("Checkpoint not found:", selectedCheckpointId);
+      return;
+    }
 
-async _performLoadCheckpoint(selectedCheckpointId) {
-  // 1) grab your credentials
-  const raw = sessionStorage.getItem("loggedInUser");
-  if (!raw) {
-    console.error("No user in sessionStorage!");
-    return;
+    // 5) now actually *apply* the checkpoint.
+    //    (you’ll need a backend call or local logic here;
+    //     e.g. recordCheckpoint or a custom loadCheckpoint call)
+    await refactorGameStatistics(selectedCheckpointId, token);
+
+    console.log("Loaded checkpoint:", cp);
   }
-  const { groupId, token } = JSON.parse(raw);
-
-  // 2) re-fetch your gameStatistics so you get a valid ID
-  const stats = await fetchGameStatistics(groupId, token);
-  const gameStatsId = stats.id;
-
-  // 3) fetch all checkpoints for that statistics record
-  const checkpoints = await getCheckpointsByGameStatisticsId(
-    gameStatsId,
-    token
-  );
-
-  // 4) find the one the user clicked
-  const cp = checkpoints.find(c => c.id === selectedCheckpointId);
-  if (!cp) {
-    console.error("Checkpoint not found:", selectedCheckpointId);
-    return;
-  }
-
-  // 5) now actually *apply* the checkpoint.
-  //    (you’ll need a backend call or local logic here; 
-  //     e.g. recordCheckpoint or a custom loadCheckpoint call)
-  await loadGameStateFromCheckpoint(cp, token);
-
-  console.log("Loaded checkpoint:", cp);
-}
-
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
