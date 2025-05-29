@@ -334,7 +334,6 @@ class GameStatisticsRepository {
         assets: true
       }
     });
-
     return Checkpoint.from(prismaCP);
   }
 
@@ -369,7 +368,6 @@ class GameStatisticsRepository {
       where: { buildingId_level: { buildingId: buildingId, level: level} },
       include: { building: true }
     });
-    
     return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
   }
 
@@ -465,27 +463,13 @@ class GameStatisticsRepository {
    * Adds an achievement to the specified GameStatistics entry by its id and achievement title and updates the coins.
    *
    * @param {string} gameStatisticsId - The id of the GameStatistics entry.
-   * @param {string} title - The title of the achievement to add.
+   * @param {Achievement} achievement - The achievement to add.
    * @returns {Promise<GameStatistics>} The updated GameStatistics entry with the updated currency and achievements included.
    * @throws {Error} If the achievement does not exist or is already associated with the GameStatistics entry.
    */
-  async addAchievementToGameStatistics(gameStatisticsId, title) {
-    // Get the achievement instance by title and ensure it exists
-    const achievement = await this.findAchievementByTitle(title);
-    if (!achievement) {
-      throw new Error(`Achievement with title "${title}" not found`);
-    }
-
-    // Get current achievements and check if this achievement already exists by id
-    const currentAchievements = await this.getGameStatisticsAchievements(gameStatisticsId);
-    const achievementExists = currentAchievements.some(a => a.id === achievement.id);
-    if (achievementExists) {
-      // If the achievement already exists, do nothing and return
-      return;
-    }
-
+  async addAchievementToGameStatistics(gameStatisticsId, achievement) {
     // Update the GameStatistics entry to add the achievement and increment the coins
-    const updatedGameStatistics = await this.prisma.gameStatistics.update({
+    return await this.prisma.gameStatistics.update({
       where: { id: gameStatisticsId },
       data: {
         currency: {
@@ -503,8 +487,6 @@ class GameStatisticsRepository {
         achievements: true
       }
     });
-    
-    return updatedGameStatistics;
   }
 
 
@@ -522,12 +504,7 @@ class GameStatisticsRepository {
         achievements: true
       }
     });
-    
-    if (!gameStatistics) {
-      throw new Error(`GameStatistics with id "${gameStatisticsId}" not found`);
-    }
-    
-    return gameStatistics.achievements.map(Achievement.from);
+    return gameStatistics ? gameStatistics.achievements.map(Achievement.from) : null;
   }
 }
 

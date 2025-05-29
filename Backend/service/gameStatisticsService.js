@@ -343,10 +343,22 @@ class GameStatisticsService {
    * @returns {Promise<GameStatistics>} The updated game statistics object.
    */
   async addAchievementToGameStatistics(gameStatisticsId, title) {
-    const updatedGameStatistics = await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, title);
-    return updatedGameStatistics;
+    const achievement = await gameStatisticsRepository.findAchievementByTitle(title);
+    if (!achievement) {
+      throw new Error(`Achievement with title "${title}" not found`);
+    }
+    
+    // Get current achievements and check if this achievement already exists by id
+    const currentAchievements = await gameStatisticsRepository.getGameStatisticsAchievements(gameStatisticsId);
+    const achievementExists = currentAchievements.some(a => a.id === achievement.id);
+    if (achievementExists) {
+      // If the achievement already exists, do nothing and return
+      return;
+    }
+    
+    return await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, achievement);
   }
-  
+
 
   /**
    * Retrieves the achievements associated with a specific game statistics record.
