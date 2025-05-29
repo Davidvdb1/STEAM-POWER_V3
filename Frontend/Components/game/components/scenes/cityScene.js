@@ -325,59 +325,95 @@ export function createCityScene() {
     }
 
     // call this to reset all buildings to their initial state (level 1, grayed out)
-    clearAllBuildings() {
-      // Reset all buildings to level 1 (grayed out)
-      this.buildingRegistry.grayoutAllBuildings(1);
-    }
+// inside your CityScene class
 
-    // call this *after* setting checkpointBuildings; it updates building states on the existing map
-    reloadCheckpointGameBuildings() {
-      const buildings = Array.isArray(this.checkpointBuildings)
-        ? this.checkpointBuildings
-        : this.sys.game.buildingData;
-
-      if (!Array.isArray(buildings)) return;
-
-      // Reset all buildings to level 1 (grayed out) first
-      this.buildingRegistry.grayoutAllBuildings(1);
-
-      buildings.forEach((buildingData) => {
-        // Find the building name from the data
-        const buildingName =
-          buildingData.name ||
-          (buildingData.building && buildingData.building.name);
-
-        if (buildingName && this.buildingRegistry.buildings.has(buildingName)) {
-          // Update the building to its checkpoint level
-          const level = buildingData.level || buildingData.building?.level || 1;
-          this.buildingRegistry.grayoutAllBuildings(level, buildingName);
-        }
-      });
-    }
-
-    loadExistingBuildings() {
-      // prefer checkpointBuildings if provided, else fallback
-      const buildings = Array.isArray(this.checkpointBuildings)
-        ? this.checkpointBuildings
-        : this.sys.game.buildingData;
-
-      if (!Array.isArray(buildings)) return;
-
-buildings.forEach((buildingData) => {
-  const buildingName =
-    buildingData.name ||
-    (buildingData.building && buildingData.building.name);
-  
-  console.log("Processing building:", buildingName, "with data:", buildingData);
-  
-  if (buildingName && this.buildingRegistry.buildings.has(buildingName)) {
-    const level = buildingData.level?.level || buildingData.building?.level || 1;
-    console.log("Setting building", buildingName, "to level", level);
-    this.buildingRegistry.grayoutAllBuildings(level, buildingName);
-  } else {
-    console.log("Building not found in registry:", buildingName);
+clearAllGameBuildings() {
+  if (this.buildingSprites) {
+    this.buildingSprites.forEach(sprite => sprite.destroy());
   }
-});
-    }
-  };
+  this.buildingSprites = [];
 }
+
+reloadCheckpointGameBuildings() {
+  const buildings = Array.isArray(this.checkpointBuildings)
+    ? this.checkpointBuildings
+    : this.sys.game.buildingData;
+  if (!Array.isArray(buildings)) return;
+
+  this.clearAllGameBuildings();
+
+  buildings.forEach(buildingData => {
+    const name = buildingData.name || buildingData.building?.name;
+    if (!this.buildingRegistry.buildings.has(name)) return;
+
+    const lvl =
+      buildingData.buildingLevel?.level ??
+      buildingData.level?.level ??
+      buildingData.level ??
+      1;
+    this.buildingRegistry.grayoutAllBuildings(lvl, name);
+
+    const rect = this._makeBuildingRect(name);
+    this.buildingSprites.push(rect);
+  });
+}
+
+_makeBuildingRect(buildingName) {
+  const tileSelection = this.buildingRegistry.buildings.get(buildingName);
+
+  // compute min/max tile coords across all layers
+  let minX = Infinity, minY = Infinity;
+  let maxX = -Infinity, maxY = -Infinity;
+  for (const [, { tiles }] of tileSelection.originalTiles.entries()) {
+    tiles.forEach(tile => {
+      minX = Math.min(minX, tile.x);
+      minY = Math.min(minY, tile.y);
+      maxX = Math.max(maxX, tile.x);
+      maxY = Math.max(maxY, tile.y);
+    });
+  }
+
+  const tileW = this.map.tileWidth, tileH = this.map.tileHeight;
+  return this.add
+    .rectangle(
+      minX * tileW,
+      minY * tileH,
+      (maxX - minX + 1) * tileW,
+      (maxY - minY + 1) * tileH,
+      0x0000ff,
+      0.0
+    )
+    .setOrigin(0)
+    .setInteractive();
+}
+
+
+loadExistingBuildings() {
+  const buildings = Array.isArray(this.checkpointBuildings)
+    ? this.checkpointBuildings
+    : this.sys.game.buildingData;
+  if (!Array.isArray(buildings)) return;
+
+  console.log("loadExistingBuildings drawing", buildings.length, "buildings");
+  this.clearAllGameBuildings();
+
+  buildings.forEach(buildingData => {
+    const name = buildingData.name
+      || buildingData.building?.name;
+    if (!this.buildingRegistry.buildings.has(name)) return;
+
+    // extract numeric level
+    const lvl =
+      buildingData.buildingLevel?.level   // if you have buildingLevel object
+      ?? buildingData.level?.level        // or if your API uses level object
+      ?? buildingData.level               // or if it's already a number
+      ?? 1;
+
+    this.buildingRegistry.grayoutAllBuildings(lvl, name);
+
+    // store the sprite if you need it elsewhere:
+    const rect = this._makeBuildingRect(name);
+    this.buildingSprites.push(rect);
+  });
+}
+  }}
