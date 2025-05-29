@@ -1,3 +1,5 @@
+import { BUILDING_NAME_TRANSLATIONS } from "../../utils/buildingDefinitions.js";
+
 const template = document.createElement("template");
 template.innerHTML = /*html*/`
   <style>
@@ -74,7 +76,7 @@ class BuildingDetail extends HTMLElement {
     const upgCost = lvl.upgradeCost;  // coins
 
     // populate basics
-    this._nameEl.textContent       = buildingNameTranslations[buildingName] || buildingName; 
+    this._nameEl.textContent       = BUILDING_NAME_TRANSLATIONS[buildingName] || buildingName; 
     this._levelEl.textContent      = num;
     this._energyCostEl.textContent = cost;
 
@@ -95,26 +97,5 @@ class BuildingDetail extends HTMLElement {
     }
   }
 }
-
-const buildingNameTranslations = {
-  "office": "Kantoorgebouw",
-  "apartmentBlockTopLeft": "Appartementenblok A",
-  "townhall": "Stadhuis",
-  "gasStation": "Tankstation",
-  "hotdogStand": "Hotdogkraam",
-  "hospital": "Ziekenhuis",
-  "shoppingCenter": "Winkelcentrum",
-  "school": "School",
-  "bakery": "Bakkerij",
-  "fireStation": "Brandweerkazerne",
-  "policeStation": "Politiebureau",
-  "apartmentBlockBottomLeft": "Appartementenblok B",
-  "hotel": "Hotel",
-  "apartmentBlockBottomCenter": "Appartementenblok C",
-  "postOffice": "Postkantoor",
-  "apartmentBlockBottomRight": "Appartementenblok D",
-  "constructionSite": "Bouwterrein",
-  "trainStation": "Treinstation"
-};
 
 customElements.define("building-detail", BuildingDetail);

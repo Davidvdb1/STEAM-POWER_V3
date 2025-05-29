@@ -1,5 +1,3 @@
-// utils/buildingDefinitions.js
-
 export const BUILDING_DEFINITIONS = [
   {
     name: "office",
@@ -111,14 +109,6 @@ export const BUILDING_DEFINITIONS = [
     ],
   },
   {
-    name: "postOffice",
-    layers: [
-      ["Layer-2", [72, 59], [75, 68]],
-      ["Layer-3", [76, 56], [83, 68]],
-      ["Layer-4", [76, 56], [83, 68]],
-    ],
-  },
-  {
     name: "apartmentBlockBottomRight",
     layers: [
       ["Layer-2", [76, 52], [88, 57]],
@@ -126,6 +116,14 @@ export const BUILDING_DEFINITIONS = [
       ["Layer-3", [84, 57], [90, 68]],
       ["Layer-4", [76, 52], [88, 55]],
       ["Layer-4", [84, 57], [90, 68]],
+    ],
+  },
+  {
+    name: "postOffice",
+    layers: [
+      ["Layer-2", [72, 59], [75, 68]],
+      ["Layer-3", [76, 56], [83, 68]],
+      ["Layer-4", [76, 56], [83, 68]],
     ],
   },
   {
@@ -149,3 +147,25 @@ export const BUILDING_DEFINITIONS = [
     ],
   },
 ];
+
+
+export const BUILDING_NAME_TRANSLATIONS = {
+  "office": "Kantoorgebouw",
+  "apartmentBlockTopLeft": "Appartementenblok A",
+  "townhall": "Stadhuis",
+  "gasStation": "Tankstation",
+  "hotdogStand": "Hotdogkraam",
+  "hospital": "Ziekenhuis",
+  "shoppingCenter": "Winkelcentrum",
+  "school": "School",
+  "bakery": "Bakkerij",
+  "fireStation": "Brandweerkazerne",
+  "policeStation": "Politiebureau",
+  "apartmentBlockBottomLeft": "Appartementenblok B",
+  "hotel": "Hotel",
+  "apartmentBlockBottomCenter": "Appartementenblok C",
+  "apartmentBlockBottomRight": "Appartementenblok D",
+  "postOffice": "Postkantoor",
+  "constructionSite": "Bouwterrein",
+  "trainStation": "Treinstation"
+};
