@@ -27,10 +27,10 @@ class GameStatisticsService {
    */
   async create({ groupId, greenEnergy, greyEnergy, coins, score }) {
     const currency = new Currency({
-      greenEnergy: greenEnergy ?? undefined,
-      greyEnergy: greyEnergy ?? undefined,
-      coins: coins ?? undefined,
-      score: score ?? undefined
+      greenEnergy: greenEnergy ?? Currency.DEFAULT_GREEN_ENERGY,
+      greyEnergy: greyEnergy ?? Currency.DEFAULT_GREY_ENERGY,
+      coins: coins ?? Currency.STARTING_COINS,
+      score: score ?? Currency.STARTING_SCORE
     });
     return await gameStatisticsRepository.create({ groupId, currency });
   }
