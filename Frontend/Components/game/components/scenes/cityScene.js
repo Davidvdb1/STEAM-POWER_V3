@@ -264,7 +264,6 @@ export function createCityScene() {
             // .setStrokeStyle(2, 0x0000ff, 0.5) // Add a green outline with 50% opacity
             .on("pointerdown", () => {
               this.isDragging = false;
-              console.log(`Building clicked: ${buildingName}`);
               
               // Find the building data by name
               const buildingData = this.sys.game.buildingData?.find(b => 
