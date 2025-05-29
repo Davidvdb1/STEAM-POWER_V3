@@ -534,31 +534,46 @@ async _performLoadCheckpoint(selectedCheckpointId) {
   const raw = sessionStorage.getItem("loggedInUser");
   if (!raw) return console.error("No user in sessionStorage!");
   const { token } = JSON.parse(raw);
+
   try {
-    const { gameStatistics, assets } = await refactorGameStatistics(selectedCheckpointId, token);
-    this._game.gameStatisticsId = gameStatistics.id;
-    this._game.assetData = assets;
+    // fetch gameStatistics, assets and gameBuildings
+    const { gameStatistics, assets, gameBuildings } =
+      await refactorGameStatistics(selectedCheckpointId, token);
+
+    // stash into the game state
+    this._game.gameStatisticsId   = gameStatistics.id;
+    this._game.assetData          = assets;
+    this._game.gameBuildingsData  = gameBuildings;
+
     clearInterval(this._energyInterval);
     clearInterval(this._statsInterval);
 
-    // 1) grab the already‐running outer scene
+    // handle assets in OuterCityScene
     const outer = this._game.scene.getScene("OuterCityScene");
-    // 2) clear out every old sprite & reservation
     outer.clearAllAssets();
-    // 3) stash the checkpoint’s assets on the scene
     outer.checkpointAssets = assets;
-    // 4) draw them back into place on the existing map
     outer.reloadCheckpointAssets();
 
-    // rebind your click event just in case
+    // handle buildings in CityScene
+    const city = this._game.scene.getScene("CityScene");
+    city.clearAllGameBuildings();
+    city.checkpointGameBuildings = gameBuildings;
+    city.reloadCheckpointGameBuildings();
+
+    // rebind your click events
     this._game.events.off("assetClicked");
     this._game.events.on("assetClicked", id => this._showAssetDetail(id));
+
+    this._game.events.off("buildingClicked");
+    this._game.events.on("buildingClicked", id => this._showBuildingDetail(id));
   } catch (err) {
     console.error("Error loading checkpoint:", err);
     const outer = this._game.scene.getScene("OuterCityScene");
     if (outer?.showError) outer.showError("Kon checkpoint niet laden: " + err.message);
   }
 }
+
+
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
