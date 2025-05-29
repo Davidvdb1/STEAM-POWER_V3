@@ -244,6 +244,7 @@ class GameControlPanel extends HTMLElement {
       const { token, groupId } = JSON.parse(raw);
       const gs = await fetchGameStatistics(groupId, token);
       const gameBuildings = await getAllGameBuildingsByGroupId(groupId, token);
+      console.log("Game buildings:", gameBuildings);
 
       this._game.token = token;
       this._game.groupId = groupId;
