@@ -13,7 +13,7 @@ router.post('/', async (req, res) => {
   try {
     const { groupId, greenEnergy, greyEnergy, coins } = req.body;
     const gs = await gameStatisticsService.create({ groupId, greenEnergy, greyEnergy, coins });
-    res.status(200).json(gs);
+    res.status(201).json(gs);
   } catch (error) {
     console.error('Error creating game statistics:', error);
     const statusCode = error.statusCode || 500;
@@ -131,7 +131,7 @@ router.post('/:id/currency/increment', async (req, res) => {
 router.post('/:id/assets', async (req, res) => {
   try {
     const asset = await gameStatisticsService.addAsset(req.params.id, req.body);
-    res.status(200).json(asset);
+    res.status(201).json(asset);
   } catch (error) {
     console.error(`Error adding asset to GameStatistics ${req.params.id}:`, error);
     const statusCode = error.statusCode || 400;
@@ -164,7 +164,7 @@ router.delete('/assets/:assetId', async (req, res) => {
 router.post('/:id/checkpoints', async (req, res) => {
   try {
     const cp = await gameStatisticsService.recordCheckpoint(req.params.id, req.body);
-    res.status(200).json(cp);
+    res.status(201).json(cp);
   } catch (error) {
     console.error(`Error recording checkpoint for GameStatistics ${req.params.id}:`, error);
     const statusCode = error.statusCode || 400;
