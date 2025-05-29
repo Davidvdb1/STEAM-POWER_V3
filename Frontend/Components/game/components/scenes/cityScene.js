@@ -363,16 +363,21 @@ export function createCityScene() {
 
       if (!Array.isArray(buildings)) return;
 
-      buildings.forEach((buildingData) => {
-        const buildingName =
-          buildingData.name ||
-          (buildingData.building && buildingData.building.name);
-
-        if (buildingName && this.buildingRegistry.buildings.has(buildingName)) {
-          const level = buildingData.level || buildingData.building?.level || 1;
-          this.buildingRegistry.grayoutAllBuildings(level, buildingName);
-        }
-      });
+buildings.forEach((buildingData) => {
+  const buildingName =
+    buildingData.name ||
+    (buildingData.building && buildingData.building.name);
+  
+  console.log("Processing building:", buildingName, "with data:", buildingData);
+  
+  if (buildingName && this.buildingRegistry.buildings.has(buildingName)) {
+    const level = buildingData.level?.level || buildingData.building?.level || 1;
+    console.log("Setting building", buildingName, "to level", level);
+    this.buildingRegistry.grayoutAllBuildings(level, buildingName);
+  } else {
+    console.log("Building not found in registry:", buildingName);
+  }
+});
     }
   };
 }
