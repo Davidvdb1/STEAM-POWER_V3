@@ -97,7 +97,7 @@ class GameStatistics {
       gs.gameBuildings = prismaGS.gameBuildings.map(gb => {
         const gameBuildingObj = GameBuildings.from(gb);
         // Set the game statistics reference after creation
-        gameBuildingObj.gameStatistics = gs;
+        gameBuildingObj.gameStatisticsId = gs.id;
         return gameBuildingObj;
       });
     }

@@ -50,7 +50,7 @@ export async function addAsset(gameStatsId, assetData, token) {
     body: JSON.stringify(assetData)
   });
 
-  if (res.status !== 201) {
+  if (res.status !== 200) {
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(`Failed to add asset: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
   }
@@ -94,9 +94,7 @@ export async function updateCurrency(groupId, currencyData, token) {
 }
 
 export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
-  // Make sure this matches router.put('/buildings/:GameBuildingId/upgrade') under /gameStatistics mount
   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/upgrade`;
-  console.log('PUT', url);
   const res = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

@@ -1,7 +1,7 @@
 class Asset {
   static allowedTypes = ['Windmolen', 'Waterrad', 'Zonnepaneel', 'Kerncentrale'];
 
-  constructor({ id = undefined, buildCost, destroyCost, energy, xLocation, yLocation, xSize, ySize, type }, validate = true) {
+  constructor({ id = undefined, buildCost, destroyCost, energy, xLocation, yLocation, xSize, ySize, type, gameStatisticsId }, validate = true) {
     this.id = id;
     this.buildCost = buildCost;
     this.destroyCost = destroyCost;
@@ -11,6 +11,7 @@ class Asset {
     this.xSize = xSize;
     this.ySize = ySize;
     this.type = type;
+    this.gameStatisticsId = gameStatisticsId;
     if (validate) this.validate();
   }
 
@@ -46,7 +47,8 @@ class Asset {
       yLocation: prismaAsset.yLocation,
       xSize: prismaAsset.xSize,
       ySize: prismaAsset.ySize,
-      type: prismaAsset.type
+      type: prismaAsset.type,
+      gameStatisticsId: prismaAsset.gameStatisticsId
     });
   }
 }
