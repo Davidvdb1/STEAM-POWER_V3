@@ -50,7 +50,7 @@ export async function addAsset(gameStatsId, assetData, token) {
     body: JSON.stringify(assetData)
   });
 
-  if (res.status !== 201) {
+  if (res.status !== 200) {
     const errorBody = await res.json().catch(() => ({}));
     throw new Error(`Failed to add asset: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
   }

@@ -133,6 +133,9 @@ model BuildingLevel {
   
   // Building level can be referenced by multiple GameBuildings
   gameBuildings GameBuildings[]
+
+  // Composite unique restraint (this combination will always identify a unique BuildingLevel instance)
+  @@unique([buildingId, level])
 }
 
 model Asset {
@@ -227,6 +230,4 @@ model GameBuildings {
   // Relation to BuildingLevel
   buildingLevelId  String
   buildingLevel    BuildingLevel @relation(fields: [buildingLevelId], references: [id])
-  
 }
-

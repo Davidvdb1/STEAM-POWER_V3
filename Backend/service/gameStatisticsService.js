@@ -1,3 +1,4 @@
+require("@prisma/client");
 const gameStatisticsRepository = require("../repository/gameStatisticsRepository");
 const GameStatistics = require("../model/gameStatistics");
 const Currency = require("../model/currency");
@@ -7,28 +8,58 @@ const Nature = require('../model/nature');
 const Checkpoint = require("../model/checkpoint");
 const GameBuildings = require("../model/gameBuildings");
 
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
 
 class GameStatisticsService {
+  //########################################################################
+  //                            GAME STATISTICS
+  //########################################################################
+  /**
+   * Creates a new game statistics object for a specific group with the provided currency data.
+   *
+   * @async
+   * @param {Object} params - The parameters for creating game statistics.
+   * @param {string} params.groupId - The id of the group to associate with the game statistics.
+   * @param {number} [params.greenEnergy] - The amount of green energy (optional).
+   * @param {number} [params.greyEnergy] - The amount of grey energy (optional).
+   * @param {number} [params.coins] - The number of coins (optional).
+   * @param {number} [params.score] - The score value (optional).
+   * @returns {Promise<GameStatistics>} The created game statistics object.
+   */
   async create({ groupId, greenEnergy, greyEnergy, coins, score }) {
     const currency = new Currency({
       greenEnergy: greenEnergy ?? undefined,
       greyEnergy: greyEnergy ?? undefined,
       coins: coins ?? undefined,
-      score: score ?? undefined,
+      score: score ?? undefined
     });
-    const gs = await gameStatisticsRepository.create({ groupId, currency });
-    return gs;
+    return await gameStatisticsRepository.create({ groupId, currency });
   }
 
-  // Om de backend manueel te testen
+
+  // USED FOR MANUAL TESTING
+  /**
+   * Retrieves all game statistics objects from the repository.
+   *
+   * @async
+   * @returns {Promise<GameStatistics[]>} A promise that resolves to an array of GameStatistics objects.
+   */
   async getAllGameStatistics() {
-    const gameStatistics =
-      await gameStatisticsRepository.getAllGameStatistics();
-    return gameStatistics.map((gs) => GameStatistics.from(gs));
+    return await gameStatisticsRepository.getAllGameStatistics();
   }
 
+
+  /**
+   * Retrieves a GameStatistics object by its id with optional related data.
+   *
+   * @async
+   * @param {string} id - The id of the GameStatistics record.
+   * @param {boolean} [includeCurrency=true] - Whether to include currency data.
+   * @param {boolean} [includeGameBuildings=true] - Whether to include game buildings data.
+   * @param {boolean} [includeAssets=true] - Whether to include assets data.
+   * @param {boolean} [includeCheckpoints=true] - Whether to include checkpoints data.
+   * @param {boolean} [includeGroup=false] - Whether to include group data.
+   * @returns {Promise<GameStatistics|null>} The found GameStatistics instance or null if not found.
+   */
   async getById(
     id,
     includeCurrency = true,
@@ -42,10 +73,23 @@ class GameStatisticsService {
       includeGameBuildings,
       includeAssets,
       includeCheckpoints,
-      includeGroup,
+      includeGroup
     });
   }
 
+  
+  /**
+   * Retrieves a game statistics record by group id with optional related data.
+   *
+   * @async
+   * @param {string} groupId - The id of the group to search for.
+   * @param {boolean} [includeCurrency=true] - Whether to include currency information in the result.
+   * @param {boolean} [includeGameBuildings=true] - Whether to include game buildings in the result.
+   * @param {boolean} [includeAssets=true] - Whether to include assets in the result.
+   * @param {boolean} [includeCheckpoints=true] - Whether to include checkpoints in the result.
+   * @param {boolean} [includeGroup=false] - Whether to include group details in the result.
+   * @returns {Promise<GameStatistics|null>} The found GameStatistics instance or null if not found.
+   */
   async getByGroupId(
     groupId,
     includeCurrency = true,
@@ -59,29 +103,86 @@ class GameStatisticsService {
       includeGameBuildings,
       includeAssets,
       includeCheckpoints,
-      includeGroup,
+      includeGroup
     });
   }
 
 
-  // Currency methods
+
+
+  //########################################################################
+  //                                CURRENCY
+  //########################################################################
+  /**
+   * Retrieves a Currency object by its id.
+   *
+   * @async
+   * @param {string} currencyId - The id of the currency to retrieve.
+   * @returns {Promise<Currency|null>} A promise that resolves to a Currency instance if found, or null if not found.
+   */
   async getCurrencyById(currencyId) {
     return await gameStatisticsRepository.findCurrencyById(currencyId);
   }
 
+  
+  /**
+   * Updates the currency values for a given currency id with the given payload.
+   *
+   * @async
+   * @param {string} currencyId - The id of the currency to update.
+   * @param {Object} payload - The new currency values.
+   * @param {number} payload.greenEnergy - The updated amount of green energy.
+   * @param {number} payload.greyEnergy - The updated amount of grey energy.
+   * @param {number} payload.coins - The updated amount of coins.
+   * @param {number} payload.score - The updated score value.
+   * @returns {Promise<Currency>} The updated Currency instance.
+   */
   async updateCurrency(currencyId, payload) {
     return gameStatisticsRepository.updateCurrency(currencyId, payload);
   }
 
+
+  /**
+   * Increments the specified currency fields for a given currency id.
+   *
+   * @async
+   * @param {string} currencyId - The id of the currency to update.
+   * @param {Object} payload - The amounts to increment for each currency field.
+   * @param {number} [payload.greenEnergy=0] - The amount to increment greenEnergy by.
+   * @param {number} [payload.greyEnergy=0] - The amount to increment greyEnergy by.
+   * @param {number} [payload.coins=0] - The amount to increment coins by.
+   * @param {number} [payload.score=0] - The amount to increment score by.
+   * @returns {Promise<Currency>} The updated Currency instance.
+   */
   async incrementCurrency(currencyId, payload) {
     return gameStatisticsRepository.incrementCurrency(currencyId, payload);
   }
 
-  async getAllGameBuildingsByGroupId(groupId) {
-    return await gameStatisticsRepository.findAllGameBuildingsByGroupId(groupId);
-  }
 
-  // Asset methods
+
+
+  //########################################################################
+  //                                 ASSETS
+  //########################################################################
+  /**
+   * Adds an asset to the game statistics for the given statsId.
+   * Determines the asset type (Nature or Asset), creates an instance, and adds it via the repository.
+   * After adding, checks if any asset-related achievements have been achieved and adds them to the game statistics if so.
+   *
+   * @async
+   * @param {string} statsId - The id of the game statistics object to associate the asset with.
+   * @param {Object} aData - The data for the asset to be added.
+   * @param {number} aData.buildCost - The cost to build the asset.
+   * @param {number} aData.destroyCost - The cost to destroy the asset.
+   * @param {number} aData.energy - The energy produced by the asset.
+   * @param {number} aData.xLocation - The x-coordinate location of the asset.
+   * @param {number} aData.yLocation - The y-coordinate location of the asset.
+   * @param {number} aData.xSize - The width of the asset.
+   * @param {number} aData.ySize - The height of the asset.
+   * @param {string} aData.type - The type of the asset.
+   * @param {string} aData.gameStatisticsId - The id for the game statistics to which the asset belongs.
+   * @returns {Promise<Asset>} The added asset instance.
+   */
   async addAsset(statsId, aData) {
     const { type } = aData;
     let assetInstance;
@@ -103,6 +204,15 @@ class GameStatisticsService {
     return addedAsset;
   }
 
+
+  /**
+   * Removes an asset by its id and checks if the "Milieuheld" achievement has been achieved as a result.
+   * If the achievement is achieved, it is added to the game statistics.
+   *
+   * @async
+   * @param {string} assetId - The id of the asset to remove.
+   * @returns {Promise<Asset>} The removed asset object.
+   */
   async removeAsset(assetId) {
     const removedAsset = await gameStatisticsRepository.removeAsset(assetId);
 
@@ -114,6 +224,24 @@ class GameStatisticsService {
     return removedAsset;
   }
 
+
+
+
+  //########################################################################
+  //                              CHECKPOINTS
+  //########################################################################
+  /**
+   * Creates a checkpoint for a given game statistics id.
+   *
+   * @async
+   * @param {string} statsId - The id of the game statistics to associate with the checkpoint.
+   * @param {Object} cpData - The checkpoint data to record.
+   * @param {Currency} cpData.currency - The currency instance for the checkpoint.
+   * @param {Array<Building>} cpData.buildings - An array of building instances.
+   * @param {Array<Asset>} cpData.assets - An array of asset instances.
+   * @returns {Promise<Checkpoint>} The created checkpoint instance.
+   * @throws {Error} If a building name is missing in the provided data.
+   */
   async recordCheckpoint(statsId, cpData) {
     const currency = new Currency(cpData.currency);
 
@@ -132,29 +260,48 @@ class GameStatisticsService {
     return await gameStatisticsRepository.recordCheckpoint(statsId, checkpoint);
   }
 
+  
+  /**
+   * Removes a checkpoint from the game statistics repository by its id.
+   *
+   * @async
+   * @param {string} checkpointId - The id of the checkpoint to remove.
+   * @returns {Promise<Checkpoint>} The removed checkpoint object.
+   */
   async removeCheckpoint(checkpointId) {
     return await gameStatisticsRepository.removeCheckpoint(checkpointId);
   }
 
-  async delete(id) {
-    return await gameStatisticsRepository.delete(id);
+
+
+
+  //########################################################################
+  //                             GAME BUILDINGS
+  //########################################################################
+  /**
+   * Retrieves all game buildings associated with a specific group id.
+   *
+   * @async
+   * @param {string} groupId - The id of the group to fetch game buildings for.
+   * @returns {Promise<GameBuildings[]>} A promise that resolves to an array of GameBuildings instances.
+   */
+  async getAllGameBuildingsByGroupId(groupId) {
+    return await gameStatisticsRepository.findAllGameBuildingsByGroupId(groupId);
   }
 
 
-  // BUILDINGS
   /**
-   * Upgrades the level of a GameBuilding by its ID.
-   * 
+   * Upgrades the level of a GameBuilding by its id.
    * Retrieves the GameBuilding and updates the GameBuilding's BuildingLevel object.
    * Checks for and awards any relevant achievements after the upgrade.
    *
    * @async
-   * @param {string} gameBuildingId - The unique identifier of the GameBuilding to upgrade.
+   * @param {string} gameBuildingId - The id of the GameBuilding to upgrade.
    * @param {number} level - The new level to upgrade the building to.
    * @returns {Promise<GameBuildings>} The updated GameBuilding object.
    * @throws {Error} If the GameBuilding or the next BuildingLevel is not found.
    */
-  async upgradeBuilding(gameBuildingId, { level }) {
+  async upgradeGameBuilding(gameBuildingId, { level }) {
     // Get the GameBuilding by its ID
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(gameBuildingId);
     if (!gameBuilding) {
@@ -168,7 +315,7 @@ class GameStatisticsService {
     }
 
     // Call the upgrade method in the repository to update the GameBuilding's BuildingLevel
-    const updatedGameBuilding = await gameStatisticsRepository.upgradeBuildingLevel(gameBuildingId, NextBuildingLevel.id);
+    const updatedGameBuilding = await gameStatisticsRepository.upgradeGameBuildingLevel(gameBuildingId, NextBuildingLevel.id);
 
     // Check if any achievement for upgrading a building has been achieved
     const buildingAchievements = ["Bouwassistent", "Bouwmeester", "Bouwkampioen"];
@@ -182,12 +329,16 @@ class GameStatisticsService {
   }
 
 
-  // ACHIEVEMENTS
+
+
+  //########################################################################
+  //                              ACHIEVEMENTS
+  //########################################################################
   /**
    * Adds an achievement to the game statistics for a given gameStatisticsId.
    *
    * @async
-   * @param {string} gameStatisticsId - The unique identifier of the game statistics record.
+   * @param {string} gameStatisticsId - The id of the game statistics record.
    * @param {string} title - The title of the achievement to add.
    * @returns {Promise<GameStatistics>} The updated game statistics object.
    */
@@ -201,8 +352,8 @@ class GameStatisticsService {
    * Retrieves the achievements associated with a specific game statistics record.
    *
    * @async
-   * @param {string|number} gameStatisticsId - The unique identifier of the game statistics record.
-   * @returns {Promise<Array>} A promise that resolves to an array of achievements for the given game statistics.
+   * @param {string} gameStatisticsId - The id of the game statistics record.
+   * @returns {Promise<Achievement[]>} A promise that resolves to an array of achievements for the given game statistics.
    */
   async getGameStatisticsAchievements(gameStatisticsId) {
     return await gameStatisticsRepository.getGameStatisticsAchievements(gameStatisticsId);
@@ -272,5 +423,6 @@ class GameStatisticsService {
     }
   }
 }
+
 
 module.exports = new GameStatisticsService();
