@@ -55,9 +55,17 @@ class GameStatisticsRepository {
           },
         },
         gameBuildings: {
-          create: checkpoint.gameBuildings.map((gb) => ({
-            building: { connect: { id: gb.building.id } },
-            buildingLevel: { connect: { id: gb.buildingLevel.id } },
+          upsert: checkpoint.gameBuildings.map((gb) => ({
+            where: { id: gb.id }, // Je moet gb.id hebben
+            update: {
+              id: gb.id,
+              building: { connect: { id: gb.building.id } },
+              buildingLevel: { connect: { id: gb.buildingLevel.id } },
+            },
+            create: {
+              building: { connect: { id: gb.building.id } },
+              buildingLevel: { connect: { id: gb.buildingLevel.id } },
+            },
           })),
         },
         assets: {
@@ -370,7 +378,7 @@ class GameStatisticsRepository {
           create: gameBuildings.map((gb) => ({
             building: { connect: { id: gb.building.id } },
             buildingLevel: { connect: { id: gb.buildingLevel.id } },
-            gameStatistics: { connect: { id: statsId } }, // required by schema
+            // gameStatistics: { connect: { id: statsId } }, // required by schema
           })),
         },
         assets: {

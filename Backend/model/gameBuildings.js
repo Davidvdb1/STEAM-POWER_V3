@@ -3,11 +3,11 @@ const Building = require("./building");
 
 class GameBuildings {
   constructor(
-    { id = undefined, gameStatistics, building, buildingLevel },
+    { id = undefined, building, buildingLevel },
     validate = true
   ) {
     this.id = id;
-    this.gameStatistics = gameStatistics;
+    // this.gameStatistics = gameStatistics;
     this.building = building;
     this.buildingLevel = buildingLevel;
     
@@ -16,9 +16,9 @@ class GameBuildings {
 
   validate() {
     // Check type without using instanceof for GameStatistics to avoid circular dependency
-    if (this.gameStatistics && typeof this.gameStatistics !== 'object') {
-      throw new Error('Invalid gameStatistics (must be an object)');
-    }
+    // if (this.gameStatistics && typeof this.gameStatistics !== 'object') {
+    //   throw new Error('Invalid gameStatistics (must be an object)');
+    // }
     if (this.building && !(this.building instanceof Building)) {
       throw new Error('Invalid building (must be Building)');
     }
@@ -31,7 +31,7 @@ class GameBuildings {
     // Skip validation during initial creation
     const gameBuilding = new GameBuildings({
       id: prismaGameBuilding.id,
-      gameStatistics: null, // Don't convert GameStatistics to avoid circular dependency
+      // gameStatistics: null, // Don't convert GameStatistics to avoid circular dependency
       building: null,
       buildingLevel: null
     }, false);
