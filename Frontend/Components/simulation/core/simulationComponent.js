@@ -37,6 +37,9 @@ export class SimulationComponent extends HTMLElement {
     }
 
     connectedCallback() {
+        if (this._initialized) return;  // Prevent re-initializing
+        this._initialized = true;
+
         // Initialize the BabylonJS scene
         this._initializeBabylonJS();
         
