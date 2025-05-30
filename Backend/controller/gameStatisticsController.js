@@ -163,12 +163,28 @@ router.delete('/assets/:assetId', async (req, res) => {
 // Creates a checkpoint for a GameStatistics object
 router.post('/:id/checkpoints', async (req, res) => {
   try {
-    const cp = await gameStatisticsService.recordCheckpoint(req.params.id, req.body);
+    const cp = await gameStatisticsService.recordCheckpoint(req.params.id);
     res.status(201).json(cp);
   } catch (error) {
     console.error(`Error recording checkpoint for GameStatistics ${req.params.id}:`, error);
     const statusCode = error.statusCode || 400;
     res.status(statusCode).json({ error: error.message });
+  }
+});
+
+
+// GET /gameStatistics/:id/checkpoints
+// Fetches all checkpoints for a GameStatistics object
+router.get('/:id/checkpoints', async (req, res) => {
+  console.log(`→ HIT GET /gameStatistics/${req.params.id}/checkpoints`);
+  try {
+    const checkpoints = await gameStatisticsService.findAllCheckpointsByGameStatisticsId(req.params.id);
+    console.log(`   → Service returned ${checkpoints.length} checkpoint(s)`);
+    return res.status(200).json(checkpoints);
+  } catch (error) {
+    console.error(`   ✖ Error in GET checkpoints for ${req.params.id}:`, error);
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message });
   }
 });
 
@@ -181,6 +197,36 @@ router.delete('/checkpoints/:checkpointId', async (req, res) => {
     res.status(200).json({ message: 'Checkpoint removed' });
   } catch (error) {
     console.error(`Error removing checkpoint ${req.params.checkpointId}:`, error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+
+// POST /gameStatistics/refactor/:checkpointId
+// Update GameStatistics object
+router.put('/refactor/:checkpointId', async (req, res) => {
+  const { checkpointId } = req.params;
+  console.log('→ [gameStatistics] refactoring game statistics for checkpointId:', checkpointId);
+
+  try {
+    // 1) restore the GameStatistics record to that checkpoint
+    const gs = await gameStatisticsService.refactorGameStatistics({ checkpointId });
+
+    // 2) fetch the assets now attached to that GameStatistics
+    const assets = await gameStatisticsService.findAllAssetsByGameStatisticsId(gs.id);
+
+    // 3) grab the gameBuildings right off the updated GameStatistics
+    const gameBuildings = gs.gameBuildings;
+
+    // 4) respond with gameStatistics, assets and gameBuildings
+    res.status(200).json({
+      gameStatistics: gs,
+      assets,
+      gameBuildings
+    });
+  } catch (error) {
+    console.error('✖ [gameStatistics] ERROR in PUT /refactor/:checkpointId →', error);
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
   }

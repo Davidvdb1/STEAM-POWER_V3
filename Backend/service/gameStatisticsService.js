@@ -223,7 +223,11 @@ class GameStatisticsService {
     }
     return removedAsset;
   }
-
+  
+  
+  async findAllAssetsByGameStatisticsId(gameStatisticsId) {
+    return await gameStatisticsRepository.findAllAssetsByGameStatisticsId(gameStatisticsId);
+  }
 
 
 
@@ -242,22 +246,18 @@ class GameStatisticsService {
    * @returns {Promise<Checkpoint>} The created checkpoint instance.
    * @throws {Error} If a building name is missing in the provided data.
    */
-  async recordCheckpoint(statsId, cpData) {
-    const currency = new Currency(cpData.currency);
+  async recordCheckpoint(statsId) {
+    const gameStatistics = await gameStatisticsRepository.findById(statsId);
+    const currency = gameStatistics.currency;
+    const gameBuildings = await gameStatisticsRepository.findAllGameBuildingsByGameStatisticsId(statsId);
+    const assets = await gameStatisticsRepository.findAllAssetsByGameStatisticsId(statsId);
 
-    const buildings = await Promise.all(
-      cpData.buildings.map(async (b) => {
-        if (!b.name) {
-          throw new Error("Building name is required");
-        }
-        return new Building(b);
-      })
-    );
+    return await gameStatisticsRepository.recordCheckpoint(statsId, currency, gameBuildings, assets);
+  }
 
-    const assets = cpData.assets.map((a) => new Asset(a));
 
-    const checkpoint = new Checkpoint({ currency, buildings, assets });
-    return await gameStatisticsRepository.recordCheckpoint(statsId, checkpoint);
+  async findAllCheckpointsByGameStatisticsId(gameStatisticsId) {
+    return await gameStatisticsRepository.findAllCheckpointsByGameStatisticsId(gameStatisticsId);
   }
 
   
@@ -270,6 +270,12 @@ class GameStatisticsService {
    */
   async removeCheckpoint(checkpointId) {
     return await gameStatisticsRepository.removeCheckpoint(checkpointId);
+  }
+    
+    
+  async refactorGameStatistics({checkpointId}) {
+    const checkpoint = await gameStatisticsRepository.findCheckpointById(checkpointId);
+    return await gameStatisticsRepository.refactorGameStatistics({checkpoint});
   }
 
 

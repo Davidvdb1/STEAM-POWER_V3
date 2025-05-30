@@ -1,16 +1,19 @@
 const Currency = require('./currency');
 const Building = require('./building');
 const Asset    = require('./asset');
+const GameBuildings = require('./gameBuildings');
+const GameStatistics = require('./gameStatistics');
 
 class Checkpoint {
   constructor(
-    { id = undefined, currency, buildings = [], assets = [] },
+    { id = undefined, currency, gameBuildings = [], assets = [], gameStatisticsId = undefined },
     validate = true
   ) {
     this.id        = id;
     this.currency  = currency;
-    this.buildings = buildings;
+    this.gameBuildings = gameBuildings;
     this.assets    = assets;
+    this.gameStatisticsId = gameStatisticsId;
 
     if (validate) this.validate();
   }
@@ -20,10 +23,10 @@ class Checkpoint {
       throw new Error('Invalid currency (must be Currency)');
     }
     if (
-      !Array.isArray(this.buildings) ||
-      !this.buildings.every(b => b instanceof Building)
+      !Array.isArray(this.gameBuildings) ||
+      !this.gameBuildings.every(b => b instanceof GameBuildings)
     ) {
-      throw new Error('Invalid buildings (must be Building[])');
+      throw new Error('Invalid gameBuildings (must be GameBuildings[])');
     }
     if (
       !Array.isArray(this.assets) ||
@@ -37,8 +40,9 @@ class Checkpoint {
     return new Checkpoint({
       id:        prismaCp.id,
       currency:  Currency.from(prismaCp.currency),
-      buildings: prismaCp.buildings.map(Building.from),
-      assets:    prismaCp.assets.map(Asset.from),
+      gameBuildings: (prismaCp.gameBuildings || []).map(GameBuildings.from),
+      assets:    (prismaCp.assets || []).map(Asset.from),
+      gameStatisticsId: prismaCp.gameStatisticsId,
     });
   }
 }

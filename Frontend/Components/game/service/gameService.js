@@ -106,3 +106,43 @@ export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
   }
   return res.json();
 }
+
+  export async function recordCheckpoint(gameStatsId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/checkpoints`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(`Failed to record checkpoint: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
+  }
+  return res.json();
+}
+  
+
+  export async function refactorGameStatistics(checkpointId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/refactor/${checkpointId}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(`Failed to refactor game statistics: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
+  }
+  return res.json();
+}
+
+export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/checkpoints`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch checkpoints: HTTP ${res.status}`);
+  }
+
+  return res.json();
+}
