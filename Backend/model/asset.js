@@ -2,31 +2,18 @@
 class Asset {
   static allowedTypes = ['Windmolen', 'Waterrad', 'Zonnepaneel', 'Kerncentrale'];
 
-  constructor({
-    id = undefined,
-    buildCost,
-    destroyCost,
-    energy,
-    xLocation,
-    yLocation,
-    xSize,
-    ySize,
-    type,
-    gameStatisticsId = null,
-    checkpointId = null,
-  }, validate = true) {
-    this.id               = id;
-    this.buildCost        = buildCost;
-    this.destroyCost      = destroyCost;
-    this.energy           = energy;
-    this.xLocation        = xLocation;
-    this.yLocation        = yLocation;
-    this.xSize            = xSize;
-    this.ySize            = ySize;
-    this.type             = type;
+  constructor({ id = undefined, buildCost, destroyCost, energy, xLocation, yLocation, xSize, ySize, type, gameStatisticsId = null, checkpointId = null}, validate = true) {
+    this.id = id;
+    this.buildCost = buildCost;
+    this.destroyCost = destroyCost;
+    this.energy = energy;
+    this.xLocation = xLocation;
+    this.yLocation = yLocation;
+    this.xSize = xSize;
+    this.ySize = ySize;
+    this.type = type;
     this.gameStatisticsId = gameStatisticsId;
     this.checkpointId     = checkpointId;
-
     if (validate) this.validate();
   }
 

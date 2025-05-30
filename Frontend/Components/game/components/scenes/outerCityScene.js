@@ -273,7 +273,8 @@ reloadCheckpointAssets() {
             const updatedCurrency = {
               greenEnergy: currentCurrency.greenEnergy,
               greyEnergy:  currentCurrency.greyEnergy,
-              coins:       currentCurrency.coins - cost
+              coins:       currentCurrency.coins - cost,
+              score:       currentCurrency.score
             };
 
             const response = await addAsset(

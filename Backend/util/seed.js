@@ -54,6 +54,7 @@ async function main() {
   await prisma.group.create({ data: { name: "Groep 4", members: "Jasper en Joris", microbitId: "pavot" } });
 
   // ──────────────── GAME DATA FOR GROUP 1 ────────────────
+  // BUILDINGS
   const buildings = [
     "office",
     "apartmentBlockTopLeft",
@@ -82,6 +83,8 @@ async function main() {
     createdBuildings.push(building);
   }
   
+
+  // BUILDING LEVELS
   const levels = [
     { buildingId: createdBuildings[0].id, level: 1, upgradeCost: 10, energyCost: 80, scoreDeduction: 4 },
     { buildingId: createdBuildings[0].id, level: 2, upgradeCost: 5, energyCost: 70, scoreDeduction: 3 },
@@ -198,21 +201,47 @@ async function main() {
     const buildingLevel = await prisma.buildingLevel.create({ data: lvl });
     buildingLevels.push(buildingLevel);
   }
+
+
+  // ACHIEVEMENTS
+  const achievements = [
+    { title: "Eerste stap", description: "Schakel een gebouw om naar groene energie", reward: 10, score: 1 },
+    { title: "Efficiëntie-expert", description: "Schakel alle gebouwen om naar groene energie", reward: 10, score: 1 },
+    { title: "Bouwassistent", description: "Upgrade een gebouw naar niveau 2", reward: 10, score: 1 },
+    { title: "Bouwmeester", description: "Upgrade een gebouw naar het maximum level (5)", reward: 25, score: 1 },
+    { title: "Bouwkampioen", description: "Upgrade alle gebouwen naar het maximum level (5)", reward: 50, score: 1 },
+    { title: "Energie-ingenieur", description: "Plaats een groene energiebron", reward: 10, score: 1 },
+    { title: "Energie-architect", description: "Heb 10 groene energiebronnen tegelijkertijd", reward: 25, score: 1 },
+    { title: "Groene vingers", description: "Plaats een natuurelement", reward: 10, score: 1 },
+    { title: "Milieuheld", description: "Sloop een grijze energiebron", reward: 10, score: 1 },
+    { title: "EU gemiddelde", description: "Laat meer dan 25% van de totale stroom van groene energiebronnen komen (gemiddelde in de EU)", reward: 10, score: 1 }
+  ];
+
+  const createdAchievements = [];
+  for (const achievement of achievements) {
+    const createdAchievement = await prisma.achievement.create({ data: achievement });
+    createdAchievements.push(createdAchievement);
+  }
   
 
+  // ASSETS
   const asset1 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 4, yLocation: 5, xSize: 6, ySize: 7, type: "windmolen" } });
   const asset2 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 5, yLocation: 6, xSize: 3, ySize: 3, type: "waterrad" } });
   const asset3 = await prisma.asset.create({ data: { buildCost: 2, destroyCost: 1, energy: 2, xLocation: 8, yLocation: 2, xSize: 1, ySize: 1, type: "kernreactor" } });
 
+
+  // CURRENCIES
   // const currency1 = await prisma.currency.create({ data: { greyEnergy: 10.6, greenEnergy: 0.0, coins: 0.0 } });
   // const checkpoint1 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency1.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }] }, assets: { connect: [{ id: asset1.id }] } } });
 
   // const currency2 = await prisma.currency.create({ data: { greyEnergy: 9.0, greenEnergy: 1.0, coins: 25.0 } });
   // const checkpoint2 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency2.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset3.id }] } } });
 
-  const currency3 = await prisma.currency.create({ data: { greyEnergy: 8.0, greenEnergy: 2.5, coins: 50.0 } });
+  const currency3 = await prisma.currency.create({ data: { greyEnergy: 8.0, greenEnergy: 2.5, coins: 50.0, score: 0 } });
   // const checkpoint3 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency3.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }, { id: buildingLevels[2].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset2.id }, { id: asset3.id }] } } });
 
+
+  // GAME STATISTICS
   const gameStats = await prisma.gameStatistics.create({
     data: {
       group: { connect: { id: group1.id } },
@@ -221,7 +250,7 @@ async function main() {
   });
 
 
-
+  // GAME BUILDINGS
   const gameBuildings = []
   for (let i = 0; i < createdBuildings.length; i++) {
     const gameBuilding = await prisma.gameBuildings.create({
@@ -233,16 +262,6 @@ async function main() {
     });
     gameBuildings.push(gameBuilding);
   }
-
-  // for (let i = 0; i < gameBuildings.length; i++) {
-  //   await prisma.gameStatistics.update({
-  //     where: { id: gameStats.id },
-  //     data: {
-  //       gameBuildings: { connect: { id: gameBuildings[i].id } }
-  //     }
-  //   });
-  // }
-
 
 
   // ──────────────── QUESTIONS ────────────────

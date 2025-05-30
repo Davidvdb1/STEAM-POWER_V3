@@ -1,6 +1,7 @@
 //#region IMPORTS
 import "../../game/gameControlPanel/gameControlPanel.js"
 import "../../game/gameAdminPanel/gameAdminPanel.js"
+import {ScoreCalculations} from "../../game/utils/scoreCalculations.js";
 //#endregion IMPORTS
 
 //#region GAMEPAGE
@@ -34,12 +35,32 @@ window.customElements.define('gamepage-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+
         const user = JSON.parse(sessionStorage.getItem('loggedInUser')) || {};
         const isAdmin = user.role === 'ADMIN';
         const isTeacher = user.role === 'TEACHER'
         
         if (!isAdmin && !isTeacher) {
             this.$adminPanel?.remove();
+        }
+
+        // Start score calculations
+        const groupId = user.groupId;
+        const token = user.token;
+        if (groupId && token) {
+            this.scoreInterval = setInterval(() => {
+            ScoreCalculations(groupId, token)
+                .then(() => console.log("Score calculations completed"))
+                .catch(err => console.error("Error in score calculations:", err));
+            }, 1000);
+        } else {
+            console.warn("Group ID or token is missing, skipping score calculations.");
+        }
+    }
+
+    disconnectedCallback() {
+        if (this.scoreInterval) {
+            clearInterval(this.scoreInterval);
         }
     }
 });

@@ -335,7 +335,6 @@ class GameControlPanel extends HTMLElement {
     const detail = document.createElement("building-detail");
     const building = this._game.buildingData.find((b) => b.id === id);
     if (building) detail.data = building;
-    console.log("Building detail:", building);
     this._detailContainer.appendChild(detail);
     this._detailContainer.classList.remove("hidden");
   }
@@ -374,8 +373,9 @@ class GameControlPanel extends HTMLElement {
       const cur = await getCurrencyById(currencyId, token);
       const updated = {
         greenEnergy: cur.greenEnergy,
-        greyEnergy: cur.greyEnergy,
-        coins: cur.coins - asset.destroyCost,
+        greyEnergy:  cur.greyEnergy,
+        coins:       cur.coins - asset.destroyCost,
+        score:       cur.score
       };
       await updateCurrency(currencyId, updated, token);
 
@@ -419,11 +419,8 @@ class GameControlPanel extends HTMLElement {
     try {
       const token = this._game.token;
       const currencyId = this._game.currencyId;
-      const building = this._game.buildingData.find(
-        (b) => b.id === GameBuildingId
-      );
-      console.log("Performing upgrade for building:", GameBuildingId);
-      console.log("Performing upgrade for building:", building);
+      const building = this._game.buildingData.find(b => b.id === GameBuildingId);
+
       if (!building) throw new Error("Building not found");
 
       // Get level data from either level or buildingLevel property
@@ -461,6 +458,7 @@ class GameControlPanel extends HTMLElement {
         greenEnergy: cur.greenEnergy,
         greyEnergy: cur.greyEnergy,
         coins: cur.coins - upgCost,
+        score: cur.score,
       };
 
       await updateCurrency(currencyId, updatedCurrency, token);

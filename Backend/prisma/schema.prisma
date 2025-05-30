@@ -114,6 +114,7 @@ model Currency {
   greenEnergy Float
   greyEnergy  Float
   coins       Float
+  score       Int
 
   gameStatistics GameStatistics? @relation("GS_Currency")
   checkpoint     Checkpoint?     @relation("CP_Currency")
@@ -132,6 +133,9 @@ model BuildingLevel {
   
   // Building level can be referenced by multiple GameBuildings
   gameBuildings GameBuildings[]
+
+  // Composite unique restraint (this combination will always identify a unique BuildingLevel instance)
+  @@unique([buildingId, level])
 }
 
 model Asset {
@@ -190,6 +194,20 @@ model GameStatistics {
 
   // GameStatistics has many GameBuildings
   gameBuildings GameBuildings[]
+  
+  // GameStatistics can have many achievements (many-to-many)
+  achievements Achievement[]
+}
+
+model Achievement {
+  id          String @id @default(uuid())
+  title       String @unique
+  description String
+  reward      Int
+  score       Int
+  
+  // Achievement can be earned by multiple GameStatistics
+  gameStatistics GameStatistics[]
 }
 
 model GameBuildings {
@@ -207,4 +225,3 @@ model GameBuildings {
   buildingLevelId  String
   buildingLevel    BuildingLevel @relation(fields: [buildingLevelId], references: [id])
 }
-

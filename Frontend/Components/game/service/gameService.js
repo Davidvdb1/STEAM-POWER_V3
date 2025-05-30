@@ -94,9 +94,7 @@ export async function updateCurrency(groupId, currencyData, token) {
 }
 
 export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
-  // Make sure this matches router.put('/buildings/:GameBuildingId/upgrade') under /gameStatistics mount
   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/upgrade`;
-  console.log('PUT', url);
   const res = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },

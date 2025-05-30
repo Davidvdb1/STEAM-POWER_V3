@@ -3,24 +3,24 @@ const Building      = require('./building');
 const BuildingLevel = require('./buildingLevel');
 
 class GameBuildings {
-  constructor({
-    id = undefined,
-    gameStatisticsId = null,
-    checkpointId     = null,
-    building,
-    buildingLevel,
-  }, validate = true) {
-    this.id               = id;
+  constructor(
+    { id = undefined, gameStatisticsId = null, checkpointId = null, building, buildingLevel },
+    validate = true
+  ) {
+    this.id = id;
     this.gameStatisticsId = gameStatisticsId;
     this.checkpointId     = checkpointId;
-    this.building         = building;
-    this.buildingLevel    = buildingLevel;
-
+    this.building = building;
+    this.buildingLevel = buildingLevel;
     if (validate) this.validate();
   }
 
   validate() {
-    if (!(this.building instanceof Building)) {
+    // Check type without using instanceof for GameStatistics to avoid circular dependency
+    if (this.gameStatisticsId && typeof this.gameStatisticsId !== 'string') {
+      throw new Error('Invalid gameStatistics (must be a string)');
+    }
+    if (this.building && !(this.building instanceof Building)) {
       throw new Error('Invalid building (must be Building)');
     }
     if (!(this.buildingLevel instanceof BuildingLevel)) {
