@@ -548,12 +548,10 @@ async _performLoadCheckpoint(selectedCheckpointId) {
     clearInterval(this._statsInterval);
 
     // handle assets in OuterCityScene
-    if (this._game.scene.isActive("OuterCityScene")) {
-      const outer = this._game.scene.getScene("OuterCityScene");
-      outer.clearAllAssets();
-      outer.checkpointAssets = assets;
-      outer.reloadCheckpointAssets();
-    }
+    const outer = this._game.scene.getScene("OuterCityScene");
+    outer.clearAllAssets();
+    outer.checkpointAssets = assets;
+    outer.reloadCheckpointAssets();
     
     // Fetch newly updated GameStatistics object
     this._updateStatistics();
