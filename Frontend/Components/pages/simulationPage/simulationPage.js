@@ -8,6 +8,7 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/pages/simulationPage/style.css';
     </style>
+    <div class="simulation-container"></div>
 `;
 //#endregion SIMULATIONPAGE
 
@@ -17,6 +18,7 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
+        this.$simulationContainer = this._shadowRoot.querySelector(".simulation-container");
     }
 
     // component attributes
@@ -30,7 +32,9 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
 
     connectedCallback() {
         console.log("connectedCallback simulationPage");
+
         document.addEventListener("showSimulation", this.showSimulation.bind(this));
+
         const fetchSimulationEvent = new CustomEvent("fetchSimulation");
         console.log("sending fetchSimulationEvent");
         document.dispatchEvent(fetchSimulationEvent);
@@ -38,6 +42,7 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
 
     disconnectedCallback() {
         console.log("disconnectedCallback simulationPage");
+
         const hideSimulationEvent = new CustomEvent("hideSimulation", { detail: { node: this.$simulation } });
         console.log("sending hideSimulationEvent");
         document.dispatchEvent(hideSimulationEvent);
@@ -45,9 +50,14 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
 
     showSimulation(event) {
         console.log("showSimulation simulationPage");
-        event.detail.node.removeAttribute("hidden");
-        event.detail.node.setAttribute("style", "display: block;");
-        this._shadowRoot.moveBefore(event.detail.node, null);
+
+        const node = event.detail.node;
+        node.parentNode.removeChild(node);
+
+        this.$simulationContainer.appendChild(node);
+        this.$simulation = this._shadowRoot.querySelector("simulation-れ");
+        this.$simulation.removeAttribute("hidden");
+        this.$simulation.setAttribute("style", "display: block;");
     }
 });
 //#endregion CLASS
