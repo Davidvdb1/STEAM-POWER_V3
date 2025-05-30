@@ -71,6 +71,8 @@ export function createCheckpointLoadPopup(scene) {
     .setDepth(1003)
     .setScrollFactor(0)
     .setVisible(false);
+  
+  const dropdownArrow = createDropdownArrow();
 
   const optionItems = [];
 
@@ -113,18 +115,21 @@ export function createCheckpointLoadPopup(scene) {
     title.setVisible(true);
     dropdownBg.setVisible(true);
     selectedText.setVisible(true);
+    dropdownArrow.setVisible(true);
+    updateArrowDirection(false); 
 
     // Toggle dropdown
     dropdownBg.on("pointerdown", () => {
       isDropdownOpen = !isDropdownOpen;
       optionItems.forEach((opt) => opt.setVisible(isDropdownOpen));
+      updateArrowDirection(isDropdownOpen);
     });
 
     // Create dropdown options
     let startY = dropdownY + dropdownHeight + 10;
     const optionH = 40;
 
-    checkpoints.forEach((cp) => {
+    checkpoints.forEach((cp, index) => {
       const optBg = scene.add
         .graphics()
         .fillStyle(0x666666, 1)
@@ -138,7 +143,7 @@ export function createCheckpointLoadPopup(scene) {
         );
 
       const optText = scene.add
-        .text(centerX, startY + optionH / 2, cp.name || cp.id, {
+        .text(centerX, startY + optionH / 2, `Checkpoint ${index + 1}`, {
           fontSize: "30px",
           color: "#ffffff",
           align: "center",
@@ -149,7 +154,6 @@ export function createCheckpointLoadPopup(scene) {
         .setVisible(false);
 
       optBg.on("pointerdown", () => {
-        selectedText.setText(cp.name || cp.id);
         optionItems.forEach((opt) => opt.setVisible(false));
         isDropdownOpen = false;
         hideAll();
@@ -172,10 +176,65 @@ export function createCheckpointLoadPopup(scene) {
     title.setVisible(false);
     dropdownBg.setVisible(false);
     selectedText.setVisible(false);
+    dropdownArrow.setVisible(false);
     optionItems.forEach((item) => {
       item.removeInteractive();
       item.destroy();
     });
     optionItems.length = 0;
+  }
+
+
+  /**
+   * Creates a dropdown arrow graphic using Phaser's graphics API.
+   *
+   * The arrow is positioned relative to the center X coordinate and dropdown Y/height,
+   * styled as a white filled triangle, and configured with a high depth, no scroll factor,
+   * and initially hidden.
+   *
+   * @returns {Phaser.GameObjects.Graphics} The created dropdown arrow graphic object.
+   */
+  function createDropdownArrow() {
+    const dropdownArrow = scene.add
+    .graphics()
+    .fillStyle(0xFFFFFF, 1)
+    .fillTriangle(
+      centerX + 200, dropdownY + dropdownHeight/2 - 5,  // Top left
+      centerX + 210, dropdownY + dropdownHeight/2 - 5,  // Top right
+      centerX + 205, dropdownY + dropdownHeight/2 + 5   // Bottom center
+    )
+    .setDepth(1003)
+    .setScrollFactor(0)
+    .setVisible(false);
+
+    return dropdownArrow;
+  }
+
+
+  /**
+   * Updates the direction of the dropdown arrow based on the open/closed state.
+   * Draws an upward-pointing arrow when open, and a downward-pointing arrow when closed.
+   *
+   * @param {boolean} isOpen - Indicates whether the dropdown is open (true) or closed (false).
+   */
+  function updateArrowDirection(isOpen) {
+    dropdownArrow.clear();
+    dropdownArrow.fillStyle(0xFFFFFF, 1);
+    
+    if (isOpen) {
+      // Up arrow when open
+      dropdownArrow.fillTriangle(
+        centerX + 200, dropdownY + dropdownHeight/2 + 5,  // Bottom left
+        centerX + 210, dropdownY + dropdownHeight/2 + 5,  // Bottom right
+        centerX + 205, dropdownY + dropdownHeight/2 - 5   // Top center
+      );
+    } else {
+      // Down arrow when closed
+      dropdownArrow.fillTriangle(
+        centerX + 200, dropdownY + dropdownHeight/2 - 5,  // Top left
+        centerX + 210, dropdownY + dropdownHeight/2 - 5,  // Top right
+        centerX + 205, dropdownY + dropdownHeight/2 + 5   // Bottom center
+      );
+    }
   }
 }

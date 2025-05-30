@@ -327,65 +327,65 @@ export function createCityScene() {
     // call this to reset all buildings to their initial state (level 1, grayed out)
 // inside your CityScene class
 
-clearAllGameBuildings() {
-  if (this.buildingSprites) {
-    this.buildingSprites.forEach(sprite => sprite.destroy());
-  }
-  this.buildingSprites = [];
-}
+// clearAllGameBuildings() {
+//   if (this.buildingSprites) {
+//     this.buildingSprites.forEach(sprite => sprite.destroy());
+//   }
+//   this.buildingSprites = [];
+// }
 
-reloadCheckpointGameBuildings() {
-  const buildings = Array.isArray(this.checkpointBuildings)
-    ? this.checkpointBuildings
-    : this.sys.game.buildingData;
-  if (!Array.isArray(buildings)) return;
+// reloadCheckpointGameBuildings() {
+//   const buildings = Array.isArray(this.checkpointBuildings)
+//     ? this.checkpointBuildings
+//     : this.sys.game.buildingData;
+//   if (!Array.isArray(buildings)) return;
 
-  this.clearAllGameBuildings();
+//   this.clearAllGameBuildings();
 
-  buildings.forEach(buildingData => {
-    const name = buildingData.name || buildingData.building?.name;
-    if (!this.buildingRegistry.buildings.has(name)) return;
+//   buildings.forEach(buildingData => {
+//     const name = buildingData.name || buildingData.building?.name;
+//     if (!this.buildingRegistry.buildings.has(name)) return;
 
-    const lvl =
-      buildingData.buildingLevel?.level ??
-      buildingData.level?.level ??
-      buildingData.level ??
-      1;
-    this.buildingRegistry.grayoutAllBuildings(lvl, name);
+//     const lvl =
+//       buildingData.buildingLevel?.level ??
+//       buildingData.level?.level ??
+//       buildingData.level ??
+//       1;
+//     this.buildingRegistry.grayoutAllBuildings(lvl, name);
 
-    const rect = this._makeBuildingRect(name);
-    this.buildingSprites.push(rect);
-  });
-}
+//     const rect = this._makeBuildingRect(name);
+//     this.buildingSprites.push(rect);
+//   });
+// }
 
-_makeBuildingRect(buildingName) {
-  const tileSelection = this.buildingRegistry.buildings.get(buildingName);
+// _makeBuildingRect(buildingName) {
+//   const tileSelection = this.buildingRegistry.buildings.get(buildingName);
 
-  // compute min/max tile coords across all layers
-  let minX = Infinity, minY = Infinity;
-  let maxX = -Infinity, maxY = -Infinity;
-  for (const [, { tiles }] of tileSelection.originalTiles.entries()) {
-    tiles.forEach(tile => {
-      minX = Math.min(minX, tile.x);
-      minY = Math.min(minY, tile.y);
-      maxX = Math.max(maxX, tile.x);
-      maxY = Math.max(maxY, tile.y);
-    });
-  }
+//   // compute min/max tile coords across all layers
+//   let minX = Infinity, minY = Infinity;
+//   let maxX = -Infinity, maxY = -Infinity;
+//   for (const [, { tiles }] of tileSelection.originalTiles.entries()) {
+//     tiles.forEach(tile => {
+//       minX = Math.min(minX, tile.x);
+//       minY = Math.min(minY, tile.y);
+//       maxX = Math.max(maxX, tile.x);
+//       maxY = Math.max(maxY, tile.y);
+//     });
+//   }
 
-  const tileW = this.map.tileWidth, tileH = this.map.tileHeight;
-  return this.add
-    .rectangle(
-      minX * tileW,
-      minY * tileH,
-      (maxX - minX + 1) * tileW,
-      (maxY - minY + 1) * tileH,
-      0x0000ff,
-      0.0
-    )
-    .setOrigin(0)
-    .setInteractive();
-}
+//   const tileW = this.map.tileWidth, tileH = this.map.tileHeight;
+//   return this.add
+//     .rectangle(
+//       minX * tileW,
+//       minY * tileH,
+//       (maxX - minX + 1) * tileW,
+//       (maxY - minY + 1) * tileH,
+//       0x0000ff,
+//       0.0
+//     )
+//     .setOrigin(0)
+//     .setInteractive();
+// }
 
 
 // loadExistingBuildings() {
