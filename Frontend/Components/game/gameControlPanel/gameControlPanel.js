@@ -549,17 +549,16 @@ async _performLoadCheckpoint(selectedCheckpointId) {
     clearInterval(this._statsInterval);
 
     // handle assets in OuterCityScene
-    const outer = this._game.scene.getScene("OuterCityScene");
-    outer.clearAllAssets();
-    outer.checkpointAssets = assets;
-    outer.reloadCheckpointAssets();
-
-    // handle buildings in CityScene
-    const city = this._game.scene.getScene("CityScene");
-    city.clearAllGameBuildings();
-    city.checkpointGameBuildings = gameBuildings;
-    city.reloadCheckpointGameBuildings();
-
+    if (this._game.scene.isActive("OuterCityScene")) {
+      const outer = this._game.scene.getScene("OuterCityScene");
+      outer.clearAllAssets();
+      outer.checkpointAssets = assets;
+      outer.reloadCheckpointAssets();
+    }
+    
+    // Fetch newly updated GameStatistics object
+    this._updateStatistics();
+    
     // rebind your click events
     this._game.events.off("assetClicked");
     this._game.events.on("assetClicked", id => this._showAssetDetail(id));
