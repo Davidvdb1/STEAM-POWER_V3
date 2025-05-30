@@ -1,8 +1,28 @@
 // asset.js
 class Asset {
-  static allowedTypes = ['Windmolen', 'Waterrad', 'Zonnepaneel', 'Kerncentrale'];
+  static allowedTypes = [
+    "Windmolen",
+    "Waterrad",
+    "Zonnepaneel",
+    "Kerncentrale",
+  ];
 
-  constructor({ id = undefined, buildCost, destroyCost, energy, xLocation, yLocation, xSize, ySize, type, gameStatisticsId = null, checkpointId = null}, validate = true) {
+  constructor(
+    {
+      id = undefined,
+      buildCost,
+      destroyCost,
+      energy,
+      xLocation,
+      yLocation,
+      xSize,
+      ySize,
+      type,
+      gameStatisticsId = null,
+      checkpointId = null,
+    },
+    validate = true
+  ) {
     this.id = id;
     this.buildCost = buildCost;
     this.destroyCost = destroyCost;
@@ -13,21 +33,28 @@ class Asset {
     this.ySize = ySize;
     this.type = type;
     this.gameStatisticsId = gameStatisticsId;
-    this.checkpointId     = checkpointId;
+    this.checkpointId = checkpointId;
     if (validate) this.validate();
   }
 
   _validateFields() {
-    if (typeof this.buildCost !== 'number')   throw new Error('Invalid buildCost');
-    if (typeof this.destroyCost !== 'number') throw new Error('Invalid destroyCost');
-    if (typeof this.energy !== 'number')      throw new Error('Invalid energy');
-    if (typeof this.xLocation !== 'number')   throw new Error('Invalid xLocation');
-    if (typeof this.yLocation !== 'number')   throw new Error('Invalid yLocation');
-    if (typeof this.xSize !== 'number')       throw new Error('Invalid xSize');
-    if (typeof this.ySize !== 'number')       throw new Error('Invalid ySize');
-    if (typeof this.type !== 'string')        throw new Error('Invalid type');
-    if (!Asset.allowedTypes.includes(this.type)) {
-      throw new Error(`Invalid type: ${this.type}. Allowed: ${Asset.allowedTypes.join(', ')}`);
+    if (typeof this.buildCost !== "number")
+      throw new Error("Invalid buildCost");
+    if (typeof this.destroyCost !== "number")
+      throw new Error("Invalid destroyCost");
+    if (typeof this.energy !== "number") throw new Error("Invalid energy");
+    if (typeof this.xLocation !== "number")
+      throw new Error("Invalid xLocation");
+    if (typeof this.yLocation !== "number")
+      throw new Error("Invalid yLocation");
+    if (typeof this.xSize !== "number") throw new Error("Invalid xSize");
+    if (typeof this.ySize !== "number") throw new Error("Invalid ySize");
+    if (typeof this.type !== "string") throw new Error("Invalid type");
+    const allowed = this.constructor.allowedTypes;
+    if (!allowed.includes(this.type)) {
+      throw new Error(
+        `Invalid type: ${this.type}. Allowed: ${allowed.join(", ")}`
+      );
     }
   }
 
@@ -36,18 +63,23 @@ class Asset {
   }
 
   static from(prismaAsset) {
+    const Nature = require("./nature");
+    if (Nature.allowedTypes.includes(prismaAsset.type)) {
+      return Nature.from(prismaAsset);
+    }
+
     return new Asset({
-      id:               prismaAsset.id,
-      buildCost:        prismaAsset.buildCost,
-      destroyCost:      prismaAsset.destroyCost,
-      energy:           prismaAsset.energy,
-      xLocation:        prismaAsset.xLocation,
-      yLocation:        prismaAsset.yLocation,
-      xSize:            prismaAsset.xSize,
-      ySize:            prismaAsset.ySize,
-      type:             prismaAsset.type,
+      id: prismaAsset.id,
+      buildCost: prismaAsset.buildCost,
+      destroyCost: prismaAsset.destroyCost,
+      energy: prismaAsset.energy,
+      xLocation: prismaAsset.xLocation,
+      yLocation: prismaAsset.yLocation,
+      xSize: prismaAsset.xSize,
+      ySize: prismaAsset.ySize,
+      type: prismaAsset.type,
       gameStatisticsId: prismaAsset.gameStatisticsId,
-      checkpointId:     prismaAsset.checkpointId,
+      checkpointId: prismaAsset.checkpointId,
     });
   }
 }
