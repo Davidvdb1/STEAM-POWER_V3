@@ -3,7 +3,7 @@
 export async function fetchGameStatistics(groupId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/group/${groupId}`;
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!res.ok) {
@@ -16,7 +16,7 @@ export async function fetchGameStatistics(groupId, token) {
 export async function getAllGameBuildingsByGroupId(groupId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/gameBuildings/getAllGameBuildingsByGroupId/${groupId}`;
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!res.ok) {
@@ -28,8 +28,8 @@ export async function getAllGameBuildingsByGroupId(groupId, token) {
 export async function getCurrencyById(currencyId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/${currencyId}/currency`;
   const res = await fetch(url, {
-    method: 'GET',
-    headers: { Authorization: `Bearer ${token}` }
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!res.ok) {
@@ -42,17 +42,20 @@ export async function getCurrencyById(currencyId, token) {
 export async function addAsset(gameStatsId, assetData, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/assets`;
   const res = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(assetData)
+    body: JSON.stringify(assetData),
   });
 
   if (res.status !== 201) {
     const errorBody = await res.json().catch(() => ({}));
-    throw new Error(`Failed to add asset: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
+    throw new Error(
+      `Failed to add asset: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
   }
 
   return res.json();
@@ -61,33 +64,38 @@ export async function addAsset(gameStatsId, assetData, token) {
 export async function removeAsset(assetId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/assets/${assetId}`;
   const res = await fetch(url, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` }
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
-    throw new Error(`Failed to remove asset: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
+    throw new Error(
+      `Failed to remove asset: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
   }
 
   return res.json();
 }
 
-
 export async function updateCurrency(groupId, currencyData, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/${groupId}/currency`;
   const res = await fetch(url, {
-    method: 'PUT',
+    method: "PUT",
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(currencyData)
-});
+    body: JSON.stringify(currencyData),
+  });
 
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
-    throw new Error(`Failed to remove asset: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
+    throw new Error(
+      `Failed to remove asset: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
   }
 
   return res.json();
@@ -96,40 +104,51 @@ export async function updateCurrency(groupId, currencyData, token) {
 export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/upgrade`;
   const res = await fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-    body: JSON.stringify(upgradeData)
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(upgradeData),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(`Failed to upgrade GameBuilding: HTTP ${res.status}` + (err.error ? ` - ${err.error}` : ''));
+    throw new Error(
+      `Failed to upgrade GameBuilding: HTTP ${res.status}` +
+        (err.error ? ` - ${err.error}` : "")
+    );
   }
   return res.json();
 }
 
-  export async function recordCheckpoint(gameStatsId, token) {
+export async function recordCheckpoint(gameStatsId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/checkpoints`;
   const res = await fetch(url, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` }
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
   });
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
-    throw new Error(`Failed to record checkpoint: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
+    throw new Error(
+      `Failed to record checkpoint: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
   }
   return res.json();
 }
-  
 
-  export async function refactorGameStatistics(checkpointId, token) {
+export async function refactorGameStatistics(checkpointId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/refactor/${checkpointId}`;
   const res = await fetch(url, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` }
-  })
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+  });
   if (!res.ok) {
     const errorBody = await res.json().catch(() => ({}));
-    throw new Error(`Failed to refactor game statistics: HTTP ${res.status}` + (errorBody.error ? ` - ${errorBody.error}` : ''));
+    throw new Error(
+      `Failed to refactor game statistics: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
   }
   return res.json();
 }
@@ -137,7 +156,7 @@ export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
 export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/checkpoints`;
   const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { Authorization: `Bearer ${token}` },
   });
 
   if (!res.ok) {
