@@ -219,6 +219,7 @@ class GameControlPanel extends HTMLElement {
         greenEnergy: cur.greenEnergy + extra.greenEnergy,
         greyEnergy: cur.greyEnergy + extra.greyEnergy,
         coins: cur.coins,
+        score: cur.score
       };
       await updateCurrency(cur.id, updated, token);
 
