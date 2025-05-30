@@ -4,10 +4,9 @@ const GameStatistics = require("../model/gameStatistics");
 const Currency = require("../model/currency");
 const Building = require("../model/building");
 const Asset = require("../model/asset");
-const Nature = require('../model/nature');
+const Nature = require("../model/nature");
 const Checkpoint = require("../model/checkpoint");
 const GameBuildings = require("../model/gameBuildings");
-
 
 class GameStatisticsService {
   //########################################################################
@@ -30,11 +29,10 @@ class GameStatisticsService {
       greenEnergy: greenEnergy ?? Currency.DEFAULT_GREEN_ENERGY,
       greyEnergy: greyEnergy ?? Currency.DEFAULT_GREY_ENERGY,
       coins: coins ?? Currency.STARTING_COINS,
-      score: score ?? Currency.STARTING_SCORE
+      score: score ?? Currency.STARTING_SCORE,
     });
     return await gameStatisticsRepository.create({ groupId, currency });
   }
-
 
   // USED FOR MANUAL TESTING
   /**
@@ -46,7 +44,6 @@ class GameStatisticsService {
   async getAllGameStatistics() {
     return await gameStatisticsRepository.getAllGameStatistics();
   }
-
 
   /**
    * Retrieves a GameStatistics object by its id with optional related data.
@@ -73,11 +70,10 @@ class GameStatisticsService {
       includeGameBuildings,
       includeAssets,
       includeCheckpoints,
-      includeGroup
+      includeGroup,
     });
   }
 
-  
   /**
    * Retrieves a game statistics record by group id with optional related data.
    *
@@ -103,12 +99,9 @@ class GameStatisticsService {
       includeGameBuildings,
       includeAssets,
       includeCheckpoints,
-      includeGroup
+      includeGroup,
     });
   }
-
-
-
 
   //########################################################################
   //                                CURRENCY
@@ -124,7 +117,6 @@ class GameStatisticsService {
     return await gameStatisticsRepository.findCurrencyById(currencyId);
   }
 
-  
   /**
    * Updates the currency values for a given currency id with the given payload.
    *
@@ -141,7 +133,6 @@ class GameStatisticsService {
     return gameStatisticsRepository.updateCurrency(currencyId, payload);
   }
 
-
   /**
    * Increments the specified currency fields for a given currency id.
    *
@@ -157,9 +148,6 @@ class GameStatisticsService {
   async incrementCurrency(currencyId, payload) {
     return gameStatisticsRepository.incrementCurrency(currencyId, payload);
   }
-
-
-
 
   //########################################################################
   //                                 ASSETS
@@ -191,10 +179,17 @@ class GameStatisticsService {
     } else {
       assetInstance = new Asset(aData);
     }
-    const addedAsset = await gameStatisticsRepository.addAsset(statsId, assetInstance);
+    const addedAsset = await gameStatisticsRepository.addAsset(
+      statsId,
+      assetInstance
+    );
 
     // Check if any achievement for building an asset has been achieved
-    const assetAchievements = ["Energie-ingenieur", "Energie-architect", "Groene vingers"];
+    const assetAchievements = [
+      "Energie-ingenieur",
+      "Energie-architect",
+      "Groene vingers",
+    ];
     for (const achievement of assetAchievements) {
       if (await this.hasAchievementBeenAchieved(statsId, achievement)) {
         // If so, add the achievement to the game statistics
@@ -203,7 +198,6 @@ class GameStatisticsService {
     }
     return addedAsset;
   }
-
 
   /**
    * Removes an asset by its id and checks if the "Milieuheld" achievement has been achieved as a result.
@@ -217,19 +211,34 @@ class GameStatisticsService {
     const removedAsset = await gameStatisticsRepository.removeAsset(assetId);
 
     // Check if any achievement for destroying an asset has been achieved
-    if (await this.hasAchievementBeenAchieved(removedAsset.gameStatisticsId, "Milieuheld", removedAsset)) {
+    if (
+      await this.hasAchievementBeenAchieved(
+        removedAsset.gameStatisticsId,
+        "Milieuheld",
+        removedAsset
+      )
+    ) {
       // If so, add the achievement to the game statistics
-      await this.addAchievementToGameStatistics(removedAsset.gameStatisticsId, "Milieuheld");
+      await this.addAchievementToGameStatistics(
+        removedAsset.gameStatisticsId,
+        "Milieuheld"
+      );
     }
     return removedAsset;
   }
-  
-  
+
+  /**
+   * Retrieves all assets associated with a specific game statistics ID.
+   *
+   * @async
+   * @param {string} gameStatisticsId - The unique identifier of the game statistics.
+   * @returns {Promise<Array>} A promise that resolves to an array of assets related to the given game statistics ID.
+   */
   async findAllAssetsByGameStatisticsId(gameStatisticsId) {
-    return await gameStatisticsRepository.findAllAssetsByGameStatisticsId(gameStatisticsId);
+    return await gameStatisticsRepository.findAllAssetsByGameStatisticsId(
+      gameStatisticsId
+    );
   }
-
-
 
   //########################################################################
   //                              CHECKPOINTS
@@ -249,18 +258,34 @@ class GameStatisticsService {
   async recordCheckpoint(statsId) {
     const gameStatistics = await gameStatisticsRepository.findById(statsId);
     const currency = gameStatistics.currency;
-    const gameBuildings = await gameStatisticsRepository.findAllGameBuildingsByGameStatisticsId(statsId);
-    const assets = await gameStatisticsRepository.findAllAssetsByGameStatisticsId(statsId);
+    const gameBuildings =
+      await gameStatisticsRepository.findAllGameBuildingsByGameStatisticsId(
+        statsId
+      );
+    const assets =
+      await gameStatisticsRepository.findAllAssetsByGameStatisticsId(statsId);
 
-    return await gameStatisticsRepository.recordCheckpoint(statsId, currency, gameBuildings, assets);
+    return await gameStatisticsRepository.recordCheckpoint(
+      statsId,
+      currency,
+      gameBuildings,
+      assets
+    );
   }
 
-
+  /**
+   * Retrieves all checkpoints associated with a specific game statistics ID.
+   *
+   * @async
+   * @param {string|number} gameStatisticsId - The unique identifier of the game statistics.
+   * @returns {Promise<Array<Object>>} A promise that resolves to an array of checkpoint objects.
+   */
   async findAllCheckpointsByGameStatisticsId(gameStatisticsId) {
-    return await gameStatisticsRepository.findAllCheckpointsByGameStatisticsId(gameStatisticsId);
+    return await gameStatisticsRepository.findAllCheckpointsByGameStatisticsId(
+      gameStatisticsId
+    );
   }
 
-  
   /**
    * Removes a checkpoint from the game statistics repository by its id.
    *
@@ -271,15 +296,24 @@ class GameStatisticsService {
   async removeCheckpoint(checkpointId) {
     return await gameStatisticsRepository.removeCheckpoint(checkpointId);
   }
-    
-    
-  async refactorGameStatistics({checkpointId}) {
-    const checkpoint = await gameStatisticsRepository.findCheckpointById(checkpointId);
-    return await gameStatisticsRepository.refactorGameStatistics({checkpoint});
+
+  /**
+   * Refactors game statistics for a given checkpoint.
+   *
+   * @async
+   * @function
+   * @param {Object} params - The parameters object.
+   * @param {string} params.checkpointId - The ID of the checkpoint to refactor statistics for.
+   * @returns {Promise<any>} The result of the refactored game statistics operation.
+   */
+  async refactorGameStatistics({ checkpointId }) {
+    const checkpoint = await gameStatisticsRepository.findCheckpointById(
+      checkpointId
+    );
+    return await gameStatisticsRepository.refactorGameStatistics({
+      checkpoint,
+    });
   }
-
-
-
 
   //########################################################################
   //                             GAME BUILDINGS
@@ -292,9 +326,10 @@ class GameStatisticsService {
    * @returns {Promise<GameBuildings[]>} A promise that resolves to an array of GameBuildings instances.
    */
   async getAllGameBuildingsByGroupId(groupId) {
-    return await gameStatisticsRepository.findAllGameBuildingsByGroupId(groupId);
+    return await gameStatisticsRepository.findAllGameBuildingsByGroupId(
+      groupId
+    );
   }
-
 
   /**
    * Upgrades the level of a GameBuilding by its id.
@@ -309,33 +344,54 @@ class GameStatisticsService {
    */
   async upgradeGameBuilding(gameBuildingId, { level }) {
     // Get the GameBuilding by its ID
-    const gameBuilding = await gameStatisticsRepository.findGameBuildingById(gameBuildingId);
+    const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
+      gameBuildingId
+    );
     if (!gameBuilding) {
       throw new Error(`GameBuilding with id ${gameBuildingId} not found`);
     }
 
     // Get the BuildingLevel for the next level of the selected building
-    const NextBuildingLevel = await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(gameBuilding.building.id, level);
+    const NextBuildingLevel =
+      await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(
+        gameBuilding.building.id,
+        level
+      );
     if (!NextBuildingLevel) {
-      throw new Error(`BuildingLevel ${level} for building ${gameBuilding.building.id} not found`);
+      throw new Error(
+        `BuildingLevel ${level} for building ${gameBuilding.building.id} not found`
+      );
     }
 
     // Call the upgrade method in the repository to update the GameBuilding's BuildingLevel
-    const updatedGameBuilding = await gameStatisticsRepository.upgradeGameBuildingLevel(gameBuildingId, NextBuildingLevel.id);
+    const updatedGameBuilding =
+      await gameStatisticsRepository.upgradeGameBuildingLevel(
+        gameBuildingId,
+        NextBuildingLevel.id
+      );
 
     // Check if any achievement for upgrading a building has been achieved
-    const buildingAchievements = ["Bouwassistent", "Bouwmeester", "Bouwkampioen"];
+    const buildingAchievements = [
+      "Bouwassistent",
+      "Bouwmeester",
+      "Bouwkampioen",
+    ];
     for (const achievement of buildingAchievements) {
-      if (await this.hasAchievementBeenAchieved(gameBuilding.gameStatisticsId, achievement)) {
+      if (
+        await this.hasAchievementBeenAchieved(
+          gameBuilding.gameStatisticsId,
+          achievement
+        )
+      ) {
         // If so, add the achievement to the game statistics
-        await this.addAchievementToGameStatistics(gameBuilding.gameStatisticsId, achievement);
+        await this.addAchievementToGameStatistics(
+          gameBuilding.gameStatisticsId,
+          achievement
+        );
       }
     }
     return updatedGameBuilding;
   }
-
-
-
 
   //########################################################################
   //                              ACHIEVEMENTS
@@ -349,22 +405,31 @@ class GameStatisticsService {
    * @returns {Promise<GameStatistics>} The updated game statistics object.
    */
   async addAchievementToGameStatistics(gameStatisticsId, title) {
-    const achievement = await gameStatisticsRepository.findAchievementByTitle(title);
+    const achievement = await gameStatisticsRepository.findAchievementByTitle(
+      title
+    );
     if (!achievement) {
       throw new Error(`Achievement with title "${title}" not found`);
     }
-    
+
     // Get current achievements and check if this achievement already exists by id
-    const currentAchievements = await gameStatisticsRepository.getGameStatisticsAchievements(gameStatisticsId);
-    const achievementExists = currentAchievements.some(a => a.id === achievement.id);
+    const currentAchievements =
+      await gameStatisticsRepository.getGameStatisticsAchievements(
+        gameStatisticsId
+      );
+    const achievementExists = currentAchievements.some(
+      (a) => a.id === achievement.id
+    );
     if (achievementExists) {
       // If the achievement already exists, do nothing and return
       return;
     }
-    
-    return await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, achievement);
-  }
 
+    return await gameStatisticsRepository.addAchievementToGameStatistics(
+      gameStatisticsId,
+      achievement
+    );
+  }
 
   /**
    * Retrieves the achievements associated with a specific game statistics record.
@@ -374,9 +439,10 @@ class GameStatisticsService {
    * @returns {Promise<Achievement[]>} A promise that resolves to an array of achievements for the given game statistics.
    */
   async getGameStatisticsAchievements(gameStatisticsId) {
-    return await gameStatisticsRepository.getGameStatisticsAchievements(gameStatisticsId);
+    return await gameStatisticsRepository.getGameStatisticsAchievements(
+      gameStatisticsId
+    );
   }
-
 
   /**
    * Checks if a specific achievement has been achieved based on the provided game statistics and achievement title.
@@ -386,43 +452,68 @@ class GameStatisticsService {
    * @param {string} title - The title of the achievement to check.
    * @returns {Promise<boolean>} - Returns a promise that resolves to true if the achievement has been achieved, otherwise false.
    */
-  async hasAchievementBeenAchieved(gameStatisticsId, title, removedAsset = null) {
-    const gameStatistics = await this.getById(gameStatisticsId, true, true, true, false, false);
+  async hasAchievementBeenAchieved(
+    gameStatisticsId,
+    title,
+    removedAsset = null
+  ) {
+    const gameStatistics = await this.getById(
+      gameStatisticsId,
+      true,
+      true,
+      true,
+      false,
+      false
+    );
 
     // Cases and logic depend on the existing achievements and their requirements
     switch (title) {
       case "Eerste stap":
-        // Check if at least one building uses green energy
-        // To be implemented
+      // Check if at least one building uses green energy
+      // To be implemented
 
       case "Efficiëntie-expert":
-        // Check if all buildings use green energy
-        // To be implemented
+      // Check if all buildings use green energy
+      // To be implemented
 
       case "Bouwassistent":
         // Check if any building has been upgraded to level 2
-        return gameStatistics.gameBuildings.some(gameBuilding => gameBuilding.buildingLevel.level >= 2);
+        return gameStatistics.gameBuildings.some(
+          (gameBuilding) => gameBuilding.buildingLevel.level >= 2
+        );
 
       case "Bouwmeester":
         // Check if any building has been upgraded to level 5 (maximum)
-        return gameStatistics.gameBuildings.some(gameBuilding => gameBuilding.buildingLevel.level === 5);
+        return gameStatistics.gameBuildings.some(
+          (gameBuilding) => gameBuilding.buildingLevel.level === 5
+        );
 
       case "Bouwkampioen":
         // Check if all buildings have been upgraded to level 5 (maximum)
-        return gameStatistics.gameBuildings.every(gameBuilding => gameBuilding.buildingLevel.level === 5);
+        return gameStatistics.gameBuildings.every(
+          (gameBuilding) => gameBuilding.buildingLevel.level === 5
+        );
 
       case "Energie-ingenieur":
         // Check if at least one renewable energy source has been built
         const renewableTypes = ["Windmolen", "Zonnepaneel", "Waterrad"];
-        return gameStatistics.assets.some(asset => renewableTypes.includes(asset.type));
+        return gameStatistics.assets.some((asset) =>
+          renewableTypes.includes(asset.type)
+        );
 
       case "Energie-architect":
         // Check if at least 10 renewable energy sources have been built
-        return gameStatistics.assets.filter(asset => ["Windmolen", "Zonnepaneel", "Waterrad"].includes(asset.type)).length >=10;
+        return (
+          gameStatistics.assets.filter((asset) =>
+            ["Windmolen", "Zonnepaneel", "Waterrad"].includes(asset.type)
+          ).length >= 10
+        );
 
       case "Groene vingers":
         // Check if a nature asset has been built
-        return gameStatistics.assets.some(asset => Nature.allowedTypes.includes(asset.type));
+        return gameStatistics.assets.some((asset) =>
+          Nature.allowedTypes.includes(asset.type)
+        );
 
       case "Milieuheld":
         // Check if a gray energy source has been destroyed
@@ -441,6 +532,5 @@ class GameStatisticsService {
     }
   }
 }
-
 
 module.exports = new GameStatisticsService();
