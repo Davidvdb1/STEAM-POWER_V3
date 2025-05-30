@@ -37,7 +37,7 @@ export class SimulationComponent extends HTMLElement {
     }
 
     connectedCallback() {
-        if (this._initialized) return;  // Prevent re-initializing
+        if (this._initialized) return; // Prevent re-initialization
         this._initialized = true;
 
         // Initialize the BabylonJS scene
@@ -59,23 +59,23 @@ export class SimulationComponent extends HTMLElement {
     
     disconnectedCallback() {
         // Clean up resources when component is removed
-        const canvas = this._shadowRoot.getElementById('renderCanvas');
-        if (canvas) {
-            canvas.removeEventListener('wheel', this._preventScroll);
-            canvas.removeEventListener('touchmove', this._preventScroll);
-        }
+        // const canvas = this._shadowRoot.getElementById('renderCanvas');
+        // if (canvas) {
+        //     canvas.removeEventListener('wheel', this._preventScroll);
+        //     canvas.removeEventListener('touchmove', this._preventScroll);
+        // }
         
-        if (this.engine) {
-            this.engine.dispose();
-        }
+        // if (this.engine) {
+        //     this.engine.dispose();
+        // }
         
-        // Remove resize listener
-        window.removeEventListener('resize', this._handleResize);
+        // // Remove resize listener
+        // window.removeEventListener('resize', this._handleResize);
         
-        // Disconnect the resize observer
-        if (this.resizeObserver) {
-            this.resizeObserver.disconnect();
-        }
+        // // Disconnect the resize observer
+        // if (this.resizeObserver) {
+        //     this.resizeObserver.disconnect();
+        // }
     }
     
     _preventScroll(event) {
