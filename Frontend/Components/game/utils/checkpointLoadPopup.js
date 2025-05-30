@@ -110,6 +110,8 @@ export function createCheckpointLoadPopup(scene) {
   let isDropdownOpen = false;
 
   scene.showCheckpointList = async (callback) => {
+    // Reset state so the popup works correctly on multiple calls
+    dropdownBg.removeAllListeners('pointerdown');
     hideAll();
 
     const raw = sessionStorage.getItem("loggedInUser");
@@ -191,7 +193,7 @@ export function createCheckpointLoadPopup(scene) {
         optionItems.forEach((opt) => opt.setVisible(false));
         isDropdownOpen = false;
         hideAll();
-        callback(cp.id);
+        callback(cp.id, `Checkpoint ${index + 1}`);
       });
 
       optionItems.push(optBg, optText);
@@ -220,6 +222,7 @@ export function createCheckpointLoadPopup(scene) {
       item.destroy();
     });
     optionItems.length = 0;
+    isDropdownOpen = false;
   }
 
   /**
