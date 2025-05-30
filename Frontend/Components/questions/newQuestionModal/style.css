@@ -1,97 +1,200 @@
+/* Updated new question modal style to match groupList design */
 :host {
   position: fixed;
-  z-index: 1;
+  z-index: 1000;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: Verdana, sans-serif;
 }
 
 .modal-content {
-  background-color: #fefefe;
-  padding: 20px;
-  border: 1px solid #888;
+  background-color: white;
+  padding: 25px;
+  border: none;
   width: 80%;
-  max-width: 500px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  max-width: 600px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   animation: fadeIn 0.3s;
   border-radius: 10px;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Modal title */
+#modal-title {
+  color: #002757;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+/* Close button */
+.close {
+  color: #002757;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: -10px;
+  margin-right: -10px;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.close:hover,
+.close:focus {
+  color: #9FDAF9;
+  text-decoration: none;
+}
+
+/* Form styling */
 form {
   display: flex;
   flex-direction: column;
 }
 
 label {
-  margin-top: 10px;
+  margin-top: 15px;
   font-weight: bold;
+  color: #002757;
+  font-size: 1rem;
 }
 
+label:first-of-type {
+  margin-top: 0;
+}
+
+/* Input styling */
 input[type=text],
 input[type=number],
 input[type=file],
 textarea {
   margin-top: 5px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 10px 15px;
+  border: 2px solid #9FDAF9;
+  border-radius: 6px;
   width: 100%;
   box-sizing: border-box;
+  font-size: 1rem;
+  font-family: Verdana, sans-serif;
 }
 
+input[type=text]:focus,
+input[type=number]:focus,
+input[type=file]:focus,
+textarea:focus {
+  outline: none;
+  border-color: #002757;
+  box-shadow: 0 0 0 2px rgba(159, 218, 249, 0.2);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Picture box styling */
+.picture-box {
+  width: 120px;
+  height: 120px;
+  border: 2px solid #9FDAF9;
+  border-radius: 6px;
+  margin: 15px auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9f9f9;
+}
+
+.picture-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Button styling to match groupList */
 button {
   margin-top: 20px;
-  padding: 10px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
+  padding: 12px 20px;
+  background-color: #f2f2f2;
+  color: #002757;
+  border: 1px solid #9FDAF9;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: Verdana, sans-serif;
+  transition: all 0.2s ease-in-out;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: #9FDAF9;
+  color: #002757;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
+/* Submit button special styling */
+#submit-button {
+  background-color: #9FDAF9;
+  color: #002757;
+  border: 1px solid #002757;
+  margin-top: 25px;
+}
+
+#submit-button:hover {
+  background-color: #002757;
+  color: white;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .modal-content {
+    width: 90vw;
+    padding: 20px;
+    max-height: 95vh;
   }
-  to {
-    opacity: 1;
+  
+  #modal-title {
+    font-size: 1.3rem;
   }
-}
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  margin-top: -10px;
-  margin-right: -10px;
-}
-
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.picture-box {
-  width: 80px;
-  height: 80px;
-  border: 2px solid black;
-  margin: auto;
-  margin-top: 10px;
-}
-
-img {
-  width: 100%;
+  
+  .close {
+    font-size: 24px;
+  }
+  
+  input[type=text],
+  input[type=number],
+  input[type=file],
+  textarea {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  button {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .picture-box {
+    width: 100px;
+    height: 100px;
+  }
 }/*# sourceMappingURL=style.css.map */

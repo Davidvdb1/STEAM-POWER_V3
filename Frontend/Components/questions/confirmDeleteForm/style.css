@@ -1,27 +1,61 @@
-button {
-  background-color: #9FDAF9;
-  margin: 10px;
-  white-space: nowrap;
-  font-size: 1.1rem;
-  color: #002757;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  font-weight: bold;
-  border-style: solid;
-  border-color: #9FDAF9;
-}
-button:hover {
-  border-color: #002757;
+/* Updated confirm delete form style to match groupList design */
+:host {
+  font-family: Verdana, sans-serif;
 }
 
-button#confirm {
-  background-color: #F9A9A9;
-  border-color: #F9A9A9;
-  color: #570000;
+#button-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
 }
+
+/* Button styling to match groupList */
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  font-family: Verdana, sans-serif;
+  transition: all 0.2s ease-in-out;
+  min-width: 100px;
+}
+
+/* Cancel button (default style) */
+button {
+  background-color: #f2f2f2;
+  color: #002757;
+  border: 1px solid #9FDAF9;
+}
+
+button:hover {
+  background-color: #9FDAF9;
+  color: #002757;
+}
+
+/* Confirm button (delete style) */
+button#confirm {
+  background-color: #f2f2f2;
+  color: #E30147;
+  border: 1px solid #E30147;
+}
+
 button#confirm:hover {
-  border-color: #570000;
+  background-color: #E30147;
+  color: white;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  #button-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  button {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
 }/*# sourceMappingURL=style.css.map */

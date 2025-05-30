@@ -1,5 +1,8 @@
+/* Updated admin question component style to match groupList design */
 :host {
   display: block;
+  margin-bottom: 20px;
+  font-family: Verdana, sans-serif;
 }
 
 .container {
@@ -7,94 +10,175 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 120px;
-  box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 50px; /* Rounded edges */
-  padding: 15px;
-  transition: box-shadow 0.1s linear;
+  min-height: 120px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 10px;
+  background-color: white;
+  transition: box-shadow 0.2s ease-in-out;
 }
 
 .container:hover {
-  box-shadow: 5px 15px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
+/* Image box styling */
 .image-box {
   width: 80px;
   height: 80px;
-  border: 2px solid black;
-  margin-left: 15px;
+  border-radius: 6px;
+  margin-right: 20px;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
+.image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Text content styling */
 .text-content {
   flex-grow: 1;
   padding: 0 20px;
 }
 
 .title {
-  font-size: 18px;
+  font-size: 1.2rem;
   font-weight: bold;
+  color: #002757;
+  margin-bottom: 8px;
 }
 
 .description {
-  font-size: 12px;
+  font-size: 0.9rem;
   color: #444;
   line-height: 1.4;
+  margin-bottom: 4px;
 }
 
-.power {
-  font-size: 32px;
-  font-weight: bold;
-  margin-right: 20px;
+.description b {
+  color: #002757;
 }
 
-.button-container {
-  margin-left: 3rem;
-  display: flex;
-}
-
-#toggle-control {
+/* Power and stats section */
+.container > div:nth-child(3) {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  margin: 10px;
-}
-#toggle-control label {
-  text-align: center;
-}
-#toggle-control label input {
-  display: block;
-  margin: auto;
+  align-items: left;
+  padding: 0 15px;
+  color: #002757;
+  font-weight: bold;
+  min-width: 120px;
 }
 
-button {
-  background-color: #9FDAF9;
-  margin: 10px;
-  white-space: nowrap;
-  font-size: 1.1rem;
-  color: #002757;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  font-weight: bold;
-  border-style: solid;
-  border-color: #9FDAF9;
+.container > div:nth-child(3) div {
+  margin-bottom: 5px;
+  font-size: 0.9rem;
 }
+
+/* Button container */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-left: 20px;
+  min-width: 120px;
+}
+
+/* Button styling to match groupList */
+button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  font-family: Verdana, sans-serif;
+  transition: all 0.2s ease-in-out;
+  background-color: #f2f2f2;
+  color: #002757;
+  border: 1px solid #9FDAF9;
+  white-space: nowrap;
+}
+
 button:hover {
-  border-color: #002757;
+  background-color: #9FDAF9;
+  color: #002757;
 }
 
 button#delete {
-  background-color: #F9A9A9;
-  border-color: #F9A9A9;
-  color: #570000;
-}
-button#delete:hover {
-  border-color: #570000;
+  background-color: #f2f2f2;
+  color: #E30147;
+  border: 1px solid #E30147;
 }
 
-img {
-  width: 100%;
-  height: auto;
+button#delete:hover {
+  background-color: #E30147;
+  color: white;
+}
+
+/* Toggle control styling */
+#toggle-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid #9FDAF9;
+}
+
+#toggle-control label {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #002757;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+#toggle-control input[type="checkbox"] {
+  transform: scale(1.2);
+  accent-color: #9FDAF9;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    padding: 15px;
+    gap: 15px;
+  }
+  
+  .image-box {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  
+  .text-content {
+    padding: 0;
+    text-align: center;
+  }
+  
+  .button-container {
+    flex-direction: row;
+    justify-content: center;
+    margin-left: 0;
+    min-width: auto;
+  }
+  
+  button {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+  
+  .title {
+    font-size: 1.1rem;
+  }
+  
+  .description {
+    font-size: 0.85rem;
+  }
 }/*# sourceMappingURL=style.css.map */

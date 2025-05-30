@@ -21,11 +21,13 @@ answer-feedback-component-れ {
 }
 
 #energy-context-select-container {
-  width: 30%;
+background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
   display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  padding: 2rem;
-  border: 2px dashed #ccc;
-  margin: auto;
-}/*# sourceMappingURL=style.css.map */
+  justify-content: center;
+  gap: 10px;
+}
+/*# sourceMappingURL=style.css.map */

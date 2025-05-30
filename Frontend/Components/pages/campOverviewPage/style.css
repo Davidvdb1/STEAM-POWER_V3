@@ -3,6 +3,7 @@
   display: block;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
   padding: 20px;
   font-family: Verdana, sans-serif;
 }
@@ -41,8 +42,7 @@ grouplist-れ {
 /* Background styling */
 :host {
   position: relative;
-  background-color: #f5f9fc;
-}
+  }
 
 /* Animation for the background elements (optional) */
 @keyframes backgroundFade {
