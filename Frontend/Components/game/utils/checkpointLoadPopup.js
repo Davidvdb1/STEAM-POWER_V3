@@ -189,7 +189,6 @@ export function createCheckpointLoadPopup(scene) {
         .setVisible(false);
 
       optBg.on("pointerdown", () => {
-        selectedText.setText(cp.name || cp.id);
         optionItems.forEach((opt) => opt.setVisible(false));
         isDropdownOpen = false;
         hideAll();
