@@ -10,6 +10,7 @@ export function createCheckpointLoadPopup(scene) {
   const centerX = width / 2,
     centerY = height / 2;
 
+  // background
   const bg = scene.add
     .graphics()
     .fillStyle(0x000000, 0.9)
@@ -24,6 +25,7 @@ export function createCheckpointLoadPopup(scene) {
     .setScrollFactor(0)
     .setVisible(false);
 
+  // title
   const title = scene.add
     .text(centerX, centerY - 100, "Selecteer een checkpoint om te laden:", {
       fontSize: "28px",
@@ -37,7 +39,37 @@ export function createCheckpointLoadPopup(scene) {
     .setScrollFactor(0)
     .setVisible(false);
 
-  // Dropdown
+  // ✖ CLOSE BUTTON (tiny square)
+  const btnSize = 36;
+  const btnRadius = 6;
+  // position at popup top-right with margin
+  const btnX = centerX + popupWidth / 2 - btnSize - 10;
+  const btnY = centerY - popupHeight / 2 + 10;
+
+  const closeBtnBg = scene.add
+    .graphics()
+    .fillStyle(0x444444, 1)
+    .fillRoundedRect(btnX, btnY, btnSize, btnSize, btnRadius)
+    .setDepth(1001)
+    .setScrollFactor(0)
+    .setInteractive(
+      new Phaser.Geom.Rectangle(btnX, btnY, btnSize, btnSize),
+      Phaser.Geom.Rectangle.Contains
+    )
+    .setVisible(false)
+    .on("pointerdown", hideAll);
+
+  const closeBtnText = scene.add
+    .text(btnX + btnSize / 2, btnY + btnSize / 2, "✖", {
+      fontSize: "24px",
+      color: "#ffffff",
+    })
+    .setOrigin(0.5)
+    .setDepth(1002)
+    .setScrollFactor(0)
+    .setVisible(false);
+
+  // Dropdown config
   const dropdownWidth = 500,
     dropdownHeight = 50;
   const dropdownX = centerX - dropdownWidth / 2;
@@ -71,11 +103,10 @@ export function createCheckpointLoadPopup(scene) {
     .setDepth(1003)
     .setScrollFactor(0)
     .setVisible(false);
-  
+
   const dropdownArrow = createDropdownArrow();
 
   const optionItems = [];
-
   let isDropdownOpen = false;
 
   scene.showCheckpointList = async (callback) => {
@@ -112,22 +143,24 @@ export function createCheckpointLoadPopup(scene) {
     if (!Array.isArray(checkpoints) || checkpoints.length === 0)
       return showMessage("Geen checkpoints gevonden");
 
-    // Show UI
+    // show all UI
     bg.setVisible(true);
     title.setVisible(true);
+    closeBtnBg.setVisible(true);
+    closeBtnText.setVisible(true);
     dropdownBg.setVisible(true);
     selectedText.setVisible(true);
     dropdownArrow.setVisible(true);
-    updateArrowDirection(false); 
+    updateArrowDirection(false);
 
-    // Toggle dropdown
+    // toggle dropdown
     dropdownBg.on("pointerdown", () => {
       isDropdownOpen = !isDropdownOpen;
       optionItems.forEach((opt) => opt.setVisible(isDropdownOpen));
       updateArrowDirection(isDropdownOpen);
     });
 
-    // Create dropdown options
+    // build options
     let startY = dropdownY + dropdownHeight + 10;
     const optionH = 40;
 
@@ -171,11 +204,15 @@ export function createCheckpointLoadPopup(scene) {
     hideAll();
     title.setText(text).setVisible(true);
     bg.setVisible(true);
+    closeBtnBg.setVisible(true);
+    closeBtnText.setVisible(true);
   }
 
   function hideAll() {
     bg.setVisible(false);
     title.setVisible(false);
+    closeBtnBg.setVisible(false);
+    closeBtnText.setVisible(false);
     dropdownBg.setVisible(false);
     selectedText.setVisible(false);
     dropdownArrow.setVisible(false);
@@ -186,7 +223,6 @@ export function createCheckpointLoadPopup(scene) {
     optionItems.length = 0;
     isDropdownOpen = false;
   }
-
 
   /**
    * Creates a dropdown arrow graphic using Phaser's graphics API.
@@ -199,20 +235,22 @@ export function createCheckpointLoadPopup(scene) {
    */
   function createDropdownArrow() {
     const dropdownArrow = scene.add
-    .graphics()
-    .fillStyle(0xFFFFFF, 1)
-    .fillTriangle(
-      centerX + 200, dropdownY + dropdownHeight/2 - 5,  // Top left
-      centerX + 210, dropdownY + dropdownHeight/2 - 5,  // Top right
-      centerX + 205, dropdownY + dropdownHeight/2 + 5   // Bottom center
-    )
-    .setDepth(1003)
-    .setScrollFactor(0)
-    .setVisible(false);
+      .graphics()
+      .fillStyle(0xffffff, 1)
+      .fillTriangle(
+        centerX + 200,
+        dropdownY + dropdownHeight / 2 - 5, // Top left
+        centerX + 210,
+        dropdownY + dropdownHeight / 2 - 5, // Top right
+        centerX + 205,
+        dropdownY + dropdownHeight / 2 + 5 // Bottom center
+      )
+      .setDepth(1003)
+      .setScrollFactor(0)
+      .setVisible(false);
 
     return dropdownArrow;
   }
-
 
   /**
    * Updates the direction of the dropdown arrow based on the open/closed state.
@@ -222,21 +260,27 @@ export function createCheckpointLoadPopup(scene) {
    */
   function updateArrowDirection(isOpen) {
     dropdownArrow.clear();
-    dropdownArrow.fillStyle(0xFFFFFF, 1);
-    
+    dropdownArrow.fillStyle(0xffffff, 1);
+
     if (isOpen) {
       // Up arrow when open
       dropdownArrow.fillTriangle(
-        centerX + 200, dropdownY + dropdownHeight/2 + 5,  // Bottom left
-        centerX + 210, dropdownY + dropdownHeight/2 + 5,  // Bottom right
-        centerX + 205, dropdownY + dropdownHeight/2 - 5   // Top center
+        centerX + 200,
+        dropdownY + dropdownHeight / 2 + 5, // Bottom left
+        centerX + 210,
+        dropdownY + dropdownHeight / 2 + 5, // Bottom right
+        centerX + 205,
+        dropdownY + dropdownHeight / 2 - 5 // Top center
       );
     } else {
       // Down arrow when closed
       dropdownArrow.fillTriangle(
-        centerX + 200, dropdownY + dropdownHeight/2 - 5,  // Top left
-        centerX + 210, dropdownY + dropdownHeight/2 - 5,  // Top right
-        centerX + 205, dropdownY + dropdownHeight/2 + 5   // Bottom center
+        centerX + 200,
+        dropdownY + dropdownHeight / 2 - 5, // Top left
+        centerX + 210,
+        dropdownY + dropdownHeight / 2 - 5, // Top right
+        centerX + 205,
+        dropdownY + dropdownHeight / 2 + 5 // Bottom center
       );
     }
   }
