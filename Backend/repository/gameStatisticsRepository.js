@@ -266,14 +266,6 @@ class GameStatisticsRepository {
     return Currency.from(updated);
   }
 
-  async findCurrencyByGameStatisticsId(gameStatisticsId) {
-    const currency = await this.prisma.currency.findFirst({
-      where: { gameStatisticsId },
-      include: { gameStatistics: true },
-    });
-    return currency ? Currency.from(currency) : null;
-  }
-
 
 
  

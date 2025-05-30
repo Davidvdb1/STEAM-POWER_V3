@@ -219,6 +219,7 @@ class GameControlPanel extends HTMLElement {
         greenEnergy: cur.greenEnergy + extra.greenEnergy,
         greyEnergy: cur.greyEnergy + extra.greyEnergy,
         coins: cur.coins,
+        score: cur.score
       };
       await updateCurrency(cur.id, updated, token);
 
@@ -415,66 +416,33 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+
+  /**
+   * Upgrades a GameBuilding to the next level by calling the backend API, updates local building data,
+   * refreshes game statistics, and updates the building detail panel in the UI.
+   *
+   * @async
+   * @param {string} GameBuildingId - The id of the building to upgrade.
+   * @throws {Error} Throws an error if the building is not found or if the upgrade process fails.
+   */
   async _performUpgradeBuilding(GameBuildingId) {
     try {
-      const token = this._game.token;
-      const currencyId = this._game.currencyId;
       const building = this._game.buildingData.find(b => b.id === GameBuildingId);
-
       if (!building) throw new Error("Building not found");
 
-      // Get level data from either level or buildingLevel property
-      const currentLevel = building.level
-        ? building.level.level
-        : building.buildingLevel
-        ? building.buildingLevel.level
-        : 1;
-      const nextLevel = currentLevel + 1;
+      // Call the backend to upgrade the building to the next level
+      const upgradedBuilding = await upgradeBuilding( GameBuildingId, {nextLevel: building.level.level + 1 }, this._game.token);
 
-      // Call the backend to upgrade the building
-      const upgradedBuilding = await upgradeBuilding(
-        GameBuildingId,
-        { level: nextLevel },
-        token
-      );
-
-      // Update the local building data with transformed data if needed
-      if (upgradedBuilding.buildingLevel && !upgradedBuilding.level) {
-        // Transform the response to match our expected format
-        upgradedBuilding.level = upgradedBuilding.buildingLevel;
-      }
-
+      // Update the local building data to avoid data inconsistency
       Object.assign(building, upgradedBuilding);
 
-      // Update currency
-      const cur = await getCurrencyById(currencyId, token);
-      const upgCost = building.level
-        ? building.level.upgradeCost
-        : building.buildingLevel
-        ? building.buildingLevel.upgradeCost
-        : 0;
+      // Refetch the game statistics to update the UI with the updated currency values
+      this._updateStatistics();
 
-      const updatedCurrency = {
-        greenEnergy: cur.greenEnergy,
-        greyEnergy: cur.greyEnergy,
-        coins: cur.coins - upgCost,
-        score: cur.score,
-      };
-
-      await updateCurrency(currencyId, updatedCurrency, token);
-
-      this._coinsEl.textContent = updatedCurrency.coins;
-      this._greenEl.textContent = updatedCurrency.greenEnergy;
-      this._greyEl.textContent = updatedCurrency.greyEnergy;
-
-      const cityScene = this._game.scene.getScene("CityScene");
-      if (typeof cityScene._updateBuildingSprite === "function") {
-        cityScene._updateBuildingSprite(building);
-      }
-
-      this._showBuildingDetail(GameBuildingId);
+      // Update the detail panel with the new building data
+      this._detailContainer.querySelector("building-detail").data = building;
     } catch (err) {
-      console.error("Error upgrading building:", err);
+      throw new Error("Error upgrading building:", err);
     }
   }
 
