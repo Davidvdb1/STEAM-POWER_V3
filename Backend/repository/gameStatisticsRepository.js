@@ -357,6 +357,7 @@ class GameStatisticsRepository {
             greenEnergy: currency.greenEnergy,
             greyEnergy: currency.greyEnergy,
             coins: currency.coins,
+            score: currency.score
           },
         },
         gameBuildings: {
@@ -567,6 +568,19 @@ class GameStatisticsRepository {
     const gameStatisticsWithGroupId = this.findByGroupId(groupId);
     const gameBuildings = await this.prisma.gameBuildings.findMany({
       where: { gameStatisticsId: gameStatisticsWithGroupId.id },
+      include: {
+        gameStatistics: true,
+        building: true,
+        buildingLevel: true
+      }
+    });
+    return gameBuildings.map(gb => GameBuildings.from(gb));
+  }
+
+
+  async findAllGameBuildingsByGameStatisticsId(gameStatisticsId) {
+    const gameBuildings = await this.prisma.gameBuildings.findMany({
+      where: { gameStatisticsId },
       include: {
         gameStatistics: true,
         building: true,
