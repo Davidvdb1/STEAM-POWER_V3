@@ -524,7 +524,7 @@ class GameControlPanel extends HTMLElement {
         (confirmed) => {
           if (confirmed) {
             this._performLoadCheckpoint(selectedCheckpointId);
-            
+            active.showSavedConfirmation(`Spel geladen van ${selectedChekpointName}!`);
           }
         }
       );
