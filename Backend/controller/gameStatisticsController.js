@@ -134,7 +134,7 @@ router.post("/:id/currency/increment", async (req, res) => {
 // POST /gameStatistics/:id/assets
 // Adds an asset to a GameStatistics object
 router.post("/:id/assets", async (req, res) => {
-  console.log(res.body);
+  console.log(req.body);
   try {
     const asset = await gameStatisticsService.addAsset(req.params.id, req.body);
     res.status(201).json(asset);
