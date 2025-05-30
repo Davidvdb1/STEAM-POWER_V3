@@ -8,7 +8,6 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/pages/simulationPage/style.css';
     </style>
-    <div class="simulation-container"></div>
 `;
 //#endregion SIMULATIONPAGE
 
@@ -18,7 +17,6 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$simulationContainer = this._shadowRoot.querySelector(".simulation-container");
     }
 
     // component attributes
@@ -54,7 +52,7 @@ window.customElements.define('simulationpage-れ', class extends HTMLElement {
         const node = event.detail.node;
         node.parentNode.removeChild(node);
 
-        this.$simulationContainer.appendChild(node);
+        this._shadowRoot.appendChild(node);
         this.$simulation = this._shadowRoot.querySelector("simulation-れ");
         this.$simulation.removeAttribute("hidden");
         this.$simulation.setAttribute("style", "display: block;");

@@ -10,9 +10,7 @@
     template.innerHTML = /*html*/`
         <microbitbasicbluetoothconnection-れ></microbitbasicbluetoothconnection-れ>
         <tabhandler-れ></tabhandler-れ>
-        <div class="simulation-container">
-            <simulation-れ id="simulation" hidden display="none"></simulation-れ>
-        </div>
+        <simulation-れ id="simulation" hidden display="none"></simulation-れ>
     `;
     //#endregion HOME
 
@@ -23,7 +21,6 @@
             this._shadowRoot = this.attachShadow({ 'mode': 'open' });
             this._shadowRoot.appendChild(template.content.cloneNode(true));
             this.$example = this._shadowRoot.querySelector(".example");
-            this.$simulationContainer = this._shadowRoot.querySelector(".simulation-container");
             this.$simulation = this._shadowRoot.querySelector("simulation-れ");
         }
 
@@ -50,7 +47,7 @@
             const node = event.detail.node;
             node.parentNode.removeChild(node);
     
-            this.$simulationContainer.appendChild(node);
+            this._shadowRoot.appendChild(node);
             this.$simulation = this._shadowRoot.querySelector("simulation-れ");
             this.$simulation.setAttribute("hidden", true);
             this.$simulation.setAttribute("style", "display: none;");
