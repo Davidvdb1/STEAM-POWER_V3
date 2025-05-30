@@ -9,11 +9,11 @@ template.innerHTML = /*html*/ `
   <div class="currency-display">
     <div class="currency-item grey-energy">
       <img src="Assets/images/pixelGreyEnergy.svg" alt="Grey Energy" />
-      <span id="greyEnergy">0</span>
+      <span id="greyEnergy">0</span><span class="unit">kW</span>
     </div>
     <div class="currency-item green-energy">
       <img src="Assets/images/pixelGreenEnergy.svg" alt="Green Energy" />
-      <span id="greenEnergy">0.000</span>
+      <span id="greenEnergy">0.000</span><span class="unit">kWh</span>
     </div>
     <div class="currency-item coins">
       <img src="Assets/images/pixelCoin.png" alt="Coins" />
