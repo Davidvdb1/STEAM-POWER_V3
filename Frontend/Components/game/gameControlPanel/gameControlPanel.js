@@ -490,6 +490,7 @@ class GameControlPanel extends HTMLElement {
       (confirmed) => {
         if (confirmed) {
           this._performSaveCheckpoint();
+          activeScene.showSavedConfirmation(`Checkpoint opgeslagen!`);
         }
       }
     );
