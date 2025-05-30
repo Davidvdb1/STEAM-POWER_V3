@@ -1,11 +1,10 @@
-import { createEngine, startRenderLoop } from './simulationEngine.js';
-import { setupScene } from './simulationScene.js';
-import { loadModels } from '../models/modelLoader.js';
-import { create3DLabel, createSettings } from '../utils/uiElements.js';
-import { fetchWindDirection } from '../utils/weatherData.js';
+import { createSettingsPanel } from '../ui/settingsPanel.js';
+import { loadModels, updateSunAndSolarPanel } from '../models/modelLoader.js';
+import { updateWindmillBlades } from '../models/windmill.js';
+import { getSunPosition } from '../utils/sunCalculator.js';
 
-// Component template
-const template = document.createElement('template');
+//#region TEMPLATE
+let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
         @import './Components/simulation/style.css';
@@ -14,7 +13,9 @@ template.innerHTML = /*html*/`
         <canvas id="renderCanvas"></canvas>
     </div>
 `;
+//#endregion TEMPLATE
 
+//#region CLASS
 export class SimulationComponent extends HTMLElement {
     constructor() {
         super();
@@ -26,9 +27,12 @@ export class SimulationComponent extends HTMLElement {
         this.scene = null;
         this.camera = null;
         this.resizeObserver = null;
-        this.windmill = null;
-        this.wheel = null;
+        
+        // Component models
         this.solarPanel = null;
+        this.windmill = null;
+        this.sunRoot = null;
+        this.wheel = null;
     }
 
     // component attributes
@@ -37,8 +41,8 @@ export class SimulationComponent extends HTMLElement {
     }
 
     connectedCallback() {
-        if (this._initialized) return; // Prevent re-initialization
-        this._initialized = true;
+        if (this.initialized) return; // Prevent re-initialization
+        this.initialized = true;
 
         // Initialize the BabylonJS scene
         this._initializeBabylonJS();
@@ -46,40 +50,33 @@ export class SimulationComponent extends HTMLElement {
         // Start the render loop
         this._startRenderLoop();
         
-        // Prevent wheel events from propagating to prevent page scrolling
-        const canvas = this._shadowRoot.getElementById('renderCanvas');
-        canvas.addEventListener('wheel', this._preventScroll);
-        
-        // Also prevent touch events from scrolling
-        canvas.addEventListener('touchmove', this._preventScroll);
-        
         // Set up resize observer for high resolution rendering
         this._setupResizeObserver();
     }
     
     disconnectedCallback() {
-        // Clean up resources when component is removed
-        // const canvas = this._shadowRoot.getElementById('renderCanvas');
-        // if (canvas) {
-        //     canvas.removeEventListener('wheel', this._preventScroll);
-        //     canvas.removeEventListener('touchmove', this._preventScroll);
-        // }
-        
-        // if (this.engine) {
-        //     this.engine.dispose();
-        // }
-        
-        // // Remove resize listener
-        // window.removeEventListener('resize', this._handleResize);
-        
-        // // Disconnect the resize observer
-        // if (this.resizeObserver) {
-        //     this.resizeObserver.disconnect();
-        // }
+
     }
     
-    _preventScroll(event) {
+    _preventScroll = (event) => {
         event.preventDefault();
+    }
+    
+    // Custom wheel handler for gentler scrolling
+    _customWheelHandler = (event) => {
+        event.preventDefault();
+        
+        // Apply a much smaller delta value to reduce zoom speed
+        const delta = event.deltaY * 0.0005;
+        this.camera.radius += delta * this.camera.radius;
+        
+        // Ensure radius stays within limits
+        if (this.camera.radius > this.camera.upperRadiusLimit) {
+            this.camera.radius = this.camera.upperRadiusLimit;
+        }
+        if (this.camera.radius < this.camera.lowerRadiusLimit) {
+            this.camera.radius = this.camera.lowerRadiusLimit;
+        }
     }
     
     _handleResize = () => {
@@ -91,7 +88,6 @@ export class SimulationComponent extends HTMLElement {
     
     _setupResizeObserver() {
         const container = this._shadowRoot.querySelector('.simulation-container');
-        const canvas = this._shadowRoot.getElementById('renderCanvas');
         
         // Use ResizeObserver to detect size changes with higher precision
         this.resizeObserver = new ResizeObserver(() => {
@@ -123,67 +119,99 @@ export class SimulationComponent extends HTMLElement {
             }
         }
     }
+
+    async _updateSunAndSolarPanel(street, city, postal) {
+        await updateSunAndSolarPanel(this, street, city, postal);
+    }
     
     async _initializeBabylonJS() {
         // Get the canvas element from shadow DOM
         const canvas = this._shadowRoot.getElementById('renderCanvas');
         
-        // Initialize the BabylonJS engine
-        this.engine = createEngine(canvas);
+        // Initialize the BabylonJS engine with high DPI support
+        this.engine = new BABYLON.Engine(canvas, true, {
+            preserveDrawingBuffer: true,
+            stencil: true,
+            adaptToDeviceRatio: true
+        });
         
-        // Create and setup scene using the dedicated module
-        this.scene = setupScene(this.engine, canvas);
-        
-        // Get camera reference from the scene (needed for later use)
-        this.camera = this.scene.getCameraByName("Camera");
+        // Create scene
+        this.scene = new BABYLON.Scene(this.engine);
+        this.scene.clearColor = new BABYLON.Color4(0.529, 0.808, 0.922, 1);
 
+        // Camera with gentler scrolling settings
+        this.camera = new BABYLON.ArcRotateCamera("Camera", 
+            Math.PI / 2, Math.PI / 4, 10, 
+            new BABYLON.Vector3(0, 0, 0), this.scene);
+            
+        // Make scrolling more gentle by adjusting camera properties
+        this.camera.wheelPrecision = 50; // Higher values make zooming more gentle (default is 3)
+        this.camera.inertia = 0.8; // Higher values (0-1) create smoother camera movement
+        this.camera.panningSensibility = 1000; // Higher values reduce panning speed
+        this.camera.angularSensibilityX = 1000; // Lower rotation sensitivity
+        this.camera.angularSensibilityY = 1000; // Lower rotation sensitivity
+        
+        this.camera.attachControl(canvas, true);
+        this.camera.upperRadiusLimit = 10;
+        this.camera.lowerRadiusLimit = 3;
+        
+        // Light
+        new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), this.scene);
+        
         // Create 3D labels for directions
-        create3DLabel("N", new BABYLON.Vector3(0, 0.5, -2.8), this.scene);
-        create3DLabel("Z", new BABYLON.Vector3(0, 0, 2.8), this.scene);
-        create3DLabel("O", new BABYLON.Vector3(-3, 0, -0.2), this.scene);
-        create3DLabel("W", new BABYLON.Vector3(3, 0, -0.2), this.scene);
+        this._create3DCompass(this.scene);
 
-        // Create settings panel
-        createSettings(this.scene, (value) => this._loadTurbine(value));
-        
+        // Create settings UI
+        createSettingsPanel(
+            this.scene, 
+            (bladeCount) => this._handleBladeCountChange(bladeCount),
+            (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal)
+        );
+
         // Load all models
         await loadModels(this.scene, this);
         
-        // Handle window resize
-        window.addEventListener('resize', this._handleResize);
+        // Add custom wheel handler for even gentler scrolling
+        canvas.removeEventListener('wheel', this._preventScroll);
+        canvas.addEventListener('wheel', this._customWheelHandler, { passive: false });
+        canvas.addEventListener('touchmove', this._preventScroll, { passive: false });
     }
 
-    async _loadTurbine(bladeCount) {
-        // This function is now imported from windmill.js through modelLoader.js
-        const fileName = `turbine_${bladeCount}_blade${bladeCount === 1 ? '' : 's'}.glb`;
+    _create3DCompass(scene) {
+        this._create3DLabel("N", new BABYLON.Vector3(0, 0.5, -2.8), scene);
+        this._create3DLabel("Z", new BABYLON.Vector3(0, 0, 2.8), scene);
+        this._create3DLabel("O", new BABYLON.Vector3(-3, 0, -0.2), scene);
+        this._create3DLabel("W", new BABYLON.Vector3(3, 0, -0.2), scene);
+    }
+    
+    _create3DLabel(text, position, scene) {
+        const plane = BABYLON.MeshBuilder.CreatePlane("labelPlane_" + text, { width: 1.5, height: 0.5 }, scene);
+        plane.position = position;
 
-        // Dispose previous turbine if exists
-        if (this.windmill) {
-            this.windmill.dispose();
-            this.windmill = null;
-        }
+        const dynamicTexture = new BABYLON.DynamicTexture("dt_" + text, { width: 512, height: 256 }, scene);
+        dynamicTexture.hasAlpha = true;
+        dynamicTexture.drawText(text, null, 140, "bold 80px Arial", "black", "transparent", true);
 
-        // Load new turbine
-        BABYLON.SceneLoader.ImportMesh("", "", `../Frontend/Assets/GLBs/${fileName}`, this.scene, async (meshes) => {
-            this.windmill = meshes.find(m => m.name === "__root__");
-            if (this.windmill) {
-                this.windmill.scaling = new BABYLON.Vector3(5, 5, 5);
-                this.windmill.position = new BABYLON.Vector3(-1.1, -0.1, 0.5);
-                this.windmill.rotation = new BABYLON.Vector3(0, -1.1, 0);
+        const material = new BABYLON.StandardMaterial("mat_" + text, scene);
+        material.diffuseTexture = dynamicTexture;
+        material.emissiveColor = new BABYLON.Color3(1, 1, 1);
+        material.backFaceCulling = false;
+        plane.material = material;
+        plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
 
-                const degrees = await fetchWindDirection();  //windrichting ophalen
-                const radians = BABYLON.Angle.FromDegrees(degrees + 180).radians();
-                this.windmill.rotation = new BABYLON.Vector3(0, radians, 0);  //draaien naar wind
-
-                this.dragBehaviorWind = new BABYLON.PointerDragBehavior();
-                this.dragBehaviorWind.useObjectOrientationForDragging = false;
-                this.dragBehaviorWind.enabled = false;
-                this.windmill.addBehavior(this.dragBehaviorWind);
-            }
-        });
+        return plane;
     }
     
     _startRenderLoop() {
-        startRenderLoop(this.engine, this.scene);
+        if (this.engine && this.scene) {
+            this.engine.runRenderLoop(() => {
+                this.scene.render();
+            });
+        }
+    }
+  
+    async _handleBladeCountChange(bladeCount) {
+        await updateWindmillBlades(this.scene, this, bladeCount);
     }
 }
+//#endregion CLASS

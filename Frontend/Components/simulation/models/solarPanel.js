@@ -1,4 +1,5 @@
 import SunCalc from '../solar.js';
+import { getSunPosition, sunPositionToCartesian } from '../utils/sunCalculator.js';
 
 /**
  * Loads and positions the solar panel model
@@ -20,7 +21,7 @@ export async function loadSolarPanel(scene, component) {
                 component.solarPanel.addBehavior(component.dragBehaviorSolar);
 
                 // Position solar panel towards the sun
-                await orientSolarPanelTowardsSun(component.solarPanel);
+                await orientSolarPanelTowardsSun(component.solarPanel, "Geldenaaksebaan 335", "Leuven", "3001");
                 
                 // Calculate power output
                 calculateSolarPowerOutput(component.solarPanel);
@@ -36,24 +37,26 @@ export async function loadSolarPanel(scene, component) {
 /**
  * Orients the solar panel to face the sun based on current location and time
  * @param {BABYLON.Mesh} solarPanel - The solar panel mesh
+ * @param {string} street - Street address
+ * @param {string} city - City name
+ * @param {string} postal - Postal code
  */
-async function orientSolarPanelTowardsSun(solarPanel) {
+export async function orientSolarPanelTowardsSun(solarPanel, street, city, postal) {
     try {
-        const street = "Geldenaaksebaan 335";
-        const city = "Leuven";
-        const postal = "3001";
-        const date = new Date();
+        const { azimuth, altitude } = await getSunPosition(street, city, postal);
+        
+        // Calculate the sun position in 3D space
+        const distance = 4;
+        const target = sunPositionToCartesian(azimuth, altitude, distance);
 
-        const { azimuth, altitude } = await SunCalc.getSolarPositionForLocation(street, city, postal, date);
-        const x = Math.cos(altitude) * Math.sin(azimuth);
-        const y = Math.sin(altitude);
-        const z = Math.cos(altitude) * Math.cos(azimuth);
-        const target = new BABYLON.Vector3(x * 4, y * 4, z * 4);
-
+        // Calculate the direction from the solar panel to the sun
         const dir = target.subtract(solarPanel.position).normalize();
-        const yaw = Math.atan2(dir.x, dir.z) + 1;
+        
+        // Calculate yaw (rotation around y-axis) and pitch (rotation around x-axis)
+        const yaw = Math.atan2(dir.x, dir.z) + 1; // +1 is an adjustment for the model orientation
         const pitch = Math.asin(dir.y);
 
+        // Set solar panel rotation
         solarPanel.rotation = new BABYLON.Vector3(pitch, yaw, 0);
     } catch (error) {
         console.error("Error orienting solar panel:", error);
