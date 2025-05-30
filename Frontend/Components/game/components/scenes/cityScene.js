@@ -79,7 +79,7 @@ export function createCityScene() {
       this.makeBuildingsInteractive();
 
       // Load existing buildings (checkpoint or regular game data)
-      this.loadExistingBuildings();
+      // this.loadExistingBuildings();
 
       // Create the confirmation dialog UI for upgrading a building but set it to hidden initially
       createConfirmationPopup(this);
@@ -388,32 +388,33 @@ _makeBuildingRect(buildingName) {
 }
 
 
-loadExistingBuildings() {
-  const buildings = Array.isArray(this.checkpointBuildings)
-    ? this.checkpointBuildings
-    : this.sys.game.buildingData;
-  if (!Array.isArray(buildings)) return;
+// loadExistingBuildings() {
+//   const buildings = Array.isArray(this.checkpointBuildings)
+//     ? this.checkpointBuildings
+//     : this.sys.game.buildingData;
+//   if (!Array.isArray(buildings)) return;
 
-  console.log("loadExistingBuildings drawing", buildings.length, "buildings");
-  this.clearAllGameBuildings();
+//   console.log("loadExistingBuildings drawing", buildings.length, "buildings");
+//   this.clearAllGameBuildings();
 
-  buildings.forEach(buildingData => {
-    const name = buildingData.name
-      || buildingData.building?.name;
-    if (!this.buildingRegistry.buildings.has(name)) return;
+//   buildings.forEach(buildingData => {
+//     const name = buildingData.name
+//       || buildingData.building?.name;
+//     if (!this.buildingRegistry.buildings.has(name)) return;
 
-    // extract numeric level
-    const lvl =
-      buildingData.buildingLevel?.level   // if you have buildingLevel object
-      ?? buildingData.level?.level        // or if your API uses level object
-      ?? buildingData.level               // or if it's already a number
-      ?? 1;
+//     // extract numeric level
+//     const lvl =
+//       buildingData.buildingLevel?.level   // if you have buildingLevel object
+//       ?? buildingData.level?.level        // or if your API uses level object
+//       ?? buildingData.level               // or if it's already a number
+//       ?? 1;
 
-    this.buildingRegistry.grayoutAllBuildings(lvl, name);
+//     this.makeBuildingsInteractive();
+//     this.buildingRegistry.grayoutAllBuildings(lvl, name);
 
-    // store the sprite if you need it elsewhere:
-    const rect = this._makeBuildingRect(name);
-    this.buildingSprites.push(rect);
-  });
-}
+//     // store the sprite if you need it elsewhere:
+//     const rect = this._makeBuildingRect(name);
+//     this.buildingSprites.push(rect);
+//   });
+// }
   }}
