@@ -518,12 +518,12 @@ class GameControlPanel extends HTMLElement {
       ? this._game.scene.getScene("CityScene")
       : this._game.scene.getScene("OuterCityScene");
 
-    active.showCheckpointList((selectedId) => {
+    active.showCheckpointList((selectedCheckpointId, selectedChekpointName) => {
       active.showConfirmation(
-        `Wil je checkpoint ${selectedId} laden?`,
+        `Wil je ${selectedChekpointName} laden?`,
         (confirmed) => {
           if (confirmed) {
-            this._performLoadCheckpoint(selectedId);
+            this._performLoadCheckpoint(selectedCheckpointId);
             
           }
         }
@@ -559,7 +559,7 @@ async _performLoadCheckpoint(selectedCheckpointId) {
     
     // Fetch newly updated GameStatistics object
     this._updateStatistics();
-    
+
     // rebind your click events
     this._game.events.off("assetClicked");
     this._game.events.on("assetClicked", id => this._showAssetDetail(id));
