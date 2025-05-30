@@ -7,12 +7,10 @@ const Currency = require("../model/currency");
 const Checkpoint = require("../model/checkpoint");
 const Achievement = require("../model/achievement");
 
-
 class GameStatisticsRepository {
   constructor() {
     this.prisma = new PrismaClient();
   }
-
 
   //########################################################################
   //                            GAME STATISTICS
@@ -40,15 +38,14 @@ class GameStatisticsRepository {
             greenEnergy: currency.greenEnergy,
             greyEnergy: currency.greyEnergy,
             coins: currency.coins,
-            score: currency.score
-          }
-        }
+            score: currency.score,
+          },
+        },
       },
-      include: { currency: true }
+      include: { currency: true },
     });
     return GameStatistics.from(prismaGS);
   }
-
 
   /**
    * Retrieves all game statistics objects from the database, including related currency, assets, and checkpoints.
@@ -74,17 +71,16 @@ class GameStatisticsRepository {
             gameBuildings: {
               include: {
                 building: true,
-                buildingLevel: true
-              }
+                buildingLevel: true,
+              },
             },
-            assets: true
-          }
-        }
-      }
+            assets: true,
+          },
+        },
+      },
     });
     return gameStatistics.map((gs) => GameStatistics.from(gs));
   }
-
 
   /**
    * Finds a GameStatistics object by its id with optional related data.
@@ -99,13 +95,16 @@ class GameStatisticsRepository {
    * @param {boolean} [options.includeGroup=false] - Whether to include the group relation.
    * @returns {Promise<GameStatistics|null>} The found GameStatistics instance or null if not found.
    */
-  async findById( id, 
-    { includeCurrency = true, 
-      includeGameBuildings = true, 
-      includeAssets = true, 
-      includeCheckpoints = true, 
+  async findById(
+    id,
+    {
+      includeCurrency = true,
+      includeGameBuildings = true,
+      includeAssets = true,
+      includeCheckpoints = true,
       includeGroup = false,
-    } = {}) {
+    } = {}
+  ) {
     const prismaGS = await this.prisma.gameStatistics.findUnique({
       where: { id },
       include: {
@@ -133,12 +132,11 @@ class GameStatisticsRepository {
               },
             }
           : false,
-        group: includeGroup
-      }
+        group: includeGroup,
+      },
     });
     return prismaGS ? GameStatistics.from(prismaGS) : null;
   }
-
 
   /**
    * Retrieves a game statistics record by group id with optional related data.
@@ -182,14 +180,11 @@ class GameStatisticsRepository {
               },
             }
           : false,
-        group: opts.includeGroup ?? false
-      }
+        group: opts.includeGroup ?? false,
+      },
     });
     return prismaGS ? GameStatistics.from(prismaGS) : null;
   }
-
-
-
 
   //########################################################################
   //                                CURRENCY
@@ -208,7 +203,6 @@ class GameStatisticsRepository {
     });
     return prismaCurrency ? Currency.from(prismaCurrency) : null;
   }
-
 
   /**
    * Updates the currency values for a given currency id.
@@ -235,11 +229,10 @@ class GameStatisticsRepository {
 
     const updated = await this.prisma.currency.update({
       where: { id: currencyId },
-      data: { greenEnergy, greyEnergy, coins, score }
+      data: { greenEnergy, greyEnergy, coins, score },
     });
     return Currency.from(updated);
   }
-
 
   /**
    * Increments the specified currency fields for a given currency id.
@@ -253,19 +246,29 @@ class GameStatisticsRepository {
    * @param {number} [increments.score=0] - The amount to increment score by.
    * @returns {Promise<Currency>} The updated Currency instance.
    */
-  async incrementCurrency(currencyId, { greenEnergy = 0, greyEnergy = 0, coins = 0, score = 0 }) {
+  async incrementCurrency(
+    currencyId,
+    { greenEnergy = 0, greyEnergy = 0, coins = 0, score = 0 }
+  ) {
     const updated = await this.prisma.currency.update({
       where: { id: currencyId },
       data: {
         greenEnergy: { increment: greenEnergy },
         greyEnergy: { increment: greyEnergy },
         coins: { increment: coins },
-        score: { increment: score }
-      }
+        score: { increment: score },
+      },
     });
     return Currency.from(updated);
   }
 
+  /**
+   * Retrieves the currency associated with a specific game statistics ID.
+   *
+   * @async
+   * @param {string} gameStatisticsId - The unique identifier of the game statistics.
+   * @returns {Promise<Currency|null>} A promise that resolves to a Currency instance if found, or null if not found.
+   */
   async findCurrencyByGameStatisticsId(gameStatisticsId) {
     const currency = await this.prisma.currency.findFirst({
       where: { gameStatisticsId },
@@ -274,9 +277,6 @@ class GameStatisticsRepository {
     return currency ? Currency.from(currency) : null;
   }
 
-
-
- 
   //########################################################################
   //                                 ASSETS
   //########################################################################
@@ -301,12 +301,11 @@ class GameStatisticsRepository {
         xSize: asset.xSize,
         ySize: asset.ySize,
         type: asset.type,
-        gameStatistics: { connect: { id: statsId } }
-      }
+        gameStatistics: { connect: { id: statsId } },
+      },
     });
     return Asset.from(created);
   }
-
 
   /**
    * Removes an asset from the database by its id.
@@ -319,7 +318,13 @@ class GameStatisticsRepository {
     return await this.prisma.asset.delete({ where: { id: assetId } });
   }
 
-
+  /**
+   * Retrieves all assets associated with a specific game statistics ID.
+   *
+   * @async
+   * @param {string} gameStatisticsId - The ID of the game statistics to find assets for.
+   * @returns {Promise<Asset[]>} A promise that resolves to an array of Asset instances.
+   */
   async findAllAssetsByGameStatisticsId(gameStatisticsId) {
     const assets = await this.prisma.asset.findMany({
       where: { gameStatisticsId },
@@ -328,9 +333,6 @@ class GameStatisticsRepository {
 
     return assets.map((a) => Asset.from(a));
   }
-
-
-
 
   //########################################################################
   //                              CHECKPOINTS
@@ -357,7 +359,7 @@ class GameStatisticsRepository {
             greenEnergy: currency.greenEnergy,
             greyEnergy: currency.greyEnergy,
             coins: currency.coins,
-            score: currency.score
+            score: currency.score,
           },
         },
         gameBuildings: {
@@ -376,9 +378,9 @@ class GameStatisticsRepository {
             yLocation: a.yLocation,
             xSize: a.xSize,
             ySize: a.ySize,
-            type: a.type
-          }))
-        }
+            type: a.type,
+          })),
+        },
       },
       include: {
         currency: true,
@@ -394,7 +396,15 @@ class GameStatisticsRepository {
     return Checkpoint.from(prismaCP);
   }
 
-
+  /**
+   * Retrieves a checkpoint by its unique identifier, including related currency, game buildings (with building and building level), and assets.
+   * Throws an error if the checkpoint is not found.
+   *
+   * @async
+   * @param {string} checkpointId - The unique identifier of the checkpoint to retrieve.
+   * @returns {Promise<Checkpoint>} The checkpoint instance with all included relations.
+   * @throws {Error} If the checkpoint is not found.
+   */
   async findCheckpointById(checkpointId) {
     const checkpoint = await this.prisma.checkpoint.findUnique({
       where: { id: checkpointId },
@@ -413,7 +423,13 @@ class GameStatisticsRepository {
     return Checkpoint.from(checkpoint);
   }
 
-
+  /**
+   * Retrieves all checkpoints associated with a specific game statistics ID.
+   *
+   * @async
+   * @param {string} gameStatisticsId - The ID of the game statistics to find checkpoints for.
+   * @returns {Promise<Checkpoint[]>} A promise that resolves to an array of Checkpoint instances.
+   */
   async findAllCheckpointsByGameStatisticsId(gameStatisticsId) {
     const checkpoints = await this.prisma.checkpoint.findMany({
       where: { gameStatisticsId },
@@ -432,7 +448,30 @@ class GameStatisticsRepository {
     return checkpoints.map((cp) => Checkpoint.from(cp));
   }
 
-
+  /**
+   * Refactors the game statistics for a given checkpoint.
+   *
+   * This method performs the following steps:
+   * 1. Validates the provided checkpoint.
+   * 2. Deletes all existing gameBuildings and assets associated with the specified gameStatistics.
+   * 3. Updates the currency values.
+   * 4. Upserts (updates or creates) gameBuildings based on the checkpoint data.
+   * 5. Creates new assets as specified in the checkpoint.
+   * 6. Returns the updated GameStatistics instance.
+   *
+   * @async
+   * @param {Object} params - The parameters object.
+   * @param {Object} params.checkpoint - The checkpoint object containing updated game statistics data.
+   * @param {Function} params.checkpoint.validate - Function to validate the checkpoint data.
+   * @param {string} params.checkpoint.gameStatisticsId - The ID of the game statistics to update.
+   * @param {Object} params.checkpoint.currency - The updated currency values.
+   * @param {number} params.checkpoint.currency.greenEnergy - The updated green energy value.
+   * @param {number} params.checkpoint.currency.greyEnergy - The updated grey energy value.
+   * @param {number} params.checkpoint.currency.coins - The updated coins value.
+   * @param {Array<Object>} params.checkpoint.gameBuildings - Array of game building objects to upsert.
+   * @param {Array<Object>} params.checkpoint.assets - Array of asset objects to create.
+   * @returns {Promise<GameStatistics>} The updated GameStatistics instance.
+   */
   async refactorGameStatistics({ checkpoint }) {
     checkpoint.validate();
 
@@ -497,7 +536,6 @@ class GameStatisticsRepository {
     return GameStatistics.from(prismaGS);
   }
 
-
   /**
    * Removes a checkpoint from the database by its id.
    *
@@ -508,9 +546,6 @@ class GameStatisticsRepository {
   async removeCheckpoint(checkpointId) {
     return await this.prisma.checkpoint.delete({ where: { id: checkpointId } });
   }
-
-
-
 
   //########################################################################
   //                            BUILDING LEVELS
@@ -525,14 +560,11 @@ class GameStatisticsRepository {
    */
   async findBuildingLevelByBuildingIdAndLevel(buildingId, level) {
     const buildingLevel = await this.prisma.buildingLevel.findUnique({
-      where: { buildingId_level: { buildingId: buildingId, level: level} },
-      include: { building: true }
+      where: { buildingId_level: { buildingId: buildingId, level: level } },
+      include: { building: true },
     });
     return buildingLevel ? BuildingLevel.from(buildingLevel) : null;
   }
-
-
-
 
   //########################################################################
   //                             GAME BUILDINGS
@@ -550,12 +582,11 @@ class GameStatisticsRepository {
       include: {
         gameStatistics: true,
         building: true,
-        buildingLevel: true
-      }
+        buildingLevel: true,
+      },
     });
     return gameBuilding ? GameBuildings.from(gameBuilding) : null;
   }
-
 
   /**
    * Retrieves all game buildings associated with a specific group id.
@@ -571,25 +602,30 @@ class GameStatisticsRepository {
       include: {
         gameStatistics: true,
         building: true,
-        buildingLevel: true
-      }
+        buildingLevel: true,
+      },
     });
-    return gameBuildings.map(gb => GameBuildings.from(gb));
+    return gameBuildings.map((gb) => GameBuildings.from(gb));
   }
 
-
+  /**
+   * Retrieves all game building records associated with a specific game statistics ID.
+   *
+   * @async
+   * @param {string} gameStatisticsId - The unique identifier of the game statistics record.
+   * @returns {Promise<Array<GameBuildings>>} A promise that resolves to an array of GameBuildings instances.
+   */
   async findAllGameBuildingsByGameStatisticsId(gameStatisticsId) {
     const gameBuildings = await this.prisma.gameBuildings.findMany({
       where: { gameStatisticsId },
       include: {
         gameStatistics: true,
         building: true,
-        buildingLevel: true
-      }
+        buildingLevel: true,
+      },
     });
-    return gameBuildings.map(gb => GameBuildings.from(gb));
+    return gameBuildings.map((gb) => GameBuildings.from(gb));
   }
-
 
   /**
    * Upgrades the level of a game building by updating its associated building level.
@@ -604,19 +640,16 @@ class GameStatisticsRepository {
     const updated = await this.prisma.gameBuildings.update({
       where: { id: gameBuildingId },
       data: {
-        buildingLevel: { connect: { id: buildingLevelId } }
+        buildingLevel: { connect: { id: buildingLevelId } },
       },
       include: {
         gameStatistics: true,
         building: true,
-        buildingLevel: true
-      }
+        buildingLevel: true,
+      },
     });
     return GameBuildings.from(updated);
   }
-
-
-
 
   //########################################################################
   //                              ACHIEVEMENTS
@@ -628,9 +661,8 @@ class GameStatisticsRepository {
    * @returns {Promise<Achievement|null>} The achievement object if found, otherwise null.
    */
   async findAchievementByTitle(title) {
-    return await this.prisma.achievement.findUnique({ where: { title }});
+    return await this.prisma.achievement.findUnique({ where: { title } });
   }
-
 
   /**
    * Adds an achievement to the specified GameStatistics entry by its id and achievement title and updates the coins.
@@ -648,20 +680,19 @@ class GameStatisticsRepository {
         currency: {
           update: {
             coins: { increment: achievement.reward },
-            score: { increment: achievement.score }
-          }
+            score: { increment: achievement.score },
+          },
         },
         achievements: {
-          connect: { id: achievement.id }
-        }
+          connect: { id: achievement.id },
+        },
       },
       include: {
         currency: true,
-        achievements: true
-      }
+        achievements: true,
+      },
     });
   }
-
 
   /**
    * Retrieves the achievements associated with a specific GameStatistics entry.
@@ -674,12 +705,13 @@ class GameStatisticsRepository {
     const gameStatistics = await this.prisma.gameStatistics.findUnique({
       where: { id: gameStatisticsId },
       include: {
-        achievements: true
-      }
+        achievements: true,
+      },
     });
-    return gameStatistics ? gameStatistics.achievements.map(Achievement.from) : null;
+    return gameStatistics
+      ? gameStatistics.achievements.map(Achievement.from)
+      : null;
   }
 }
-
 
 module.exports = new GameStatisticsRepository();
