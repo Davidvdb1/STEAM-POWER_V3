@@ -52,7 +52,7 @@ window.customElements.define('gamepage-れ', class extends HTMLElement {
             ScoreCalculations(groupId, token)
                 .then(() => console.log("Score calculations completed"))
                 .catch(err => console.error("Error in score calculations:", err));
-            }, 1000);
+            }, 1000 *60);
         } else {
             console.warn("Group ID or token is missing, skipping score calculations.");
         }

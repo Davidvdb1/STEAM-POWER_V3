@@ -4,9 +4,11 @@ class Building {
   constructor({
     id = undefined,
     name,
+    runsOnGreen = false
   }, validate = true) {
     this.id = id;
     this.name = name
+    this.runsOnGreen = runsOnGreen
     if (validate) this.validate();
   }
 

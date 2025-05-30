@@ -156,6 +156,7 @@ model Asset {
 model Building {
   id   String @id @default(uuid())
   name String
+  runsOnGreen Boolean @default(false)
 
   // Add the relation to Checkpoint 
   checkpoint   Checkpoint? @relation("CP_Building", fields: [checkpointId], references: [id])
