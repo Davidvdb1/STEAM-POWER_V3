@@ -299,15 +299,16 @@ class GameStatisticsService {
   /**
    * Upgrades the level of a GameBuilding by its id.
    * Retrieves the GameBuilding and updates the GameBuilding's BuildingLevel object.
+   * Updates the Currency after the upgrade based on the current BuildingLevel's upgrade cost.
    * Checks for and awards any relevant achievements after the upgrade.
    *
    * @async
    * @param {string} gameBuildingId - The id of the GameBuilding to upgrade.
-   * @param {number} level - The new level to upgrade the building to.
+   * @param {number} nextLevel - The new level to upgrade the building to.
    * @returns {Promise<GameBuildings>} The updated GameBuilding object.
    * @throws {Error} If the GameBuilding or the next BuildingLevel is not found.
    */
-  async upgradeGameBuilding(gameBuildingId, { level }) {
+  async upgradeGameBuilding(gameBuildingId, { nextLevel }) {
     // Get the GameBuilding by its ID
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(gameBuildingId);
     if (!gameBuilding) {
@@ -315,20 +316,37 @@ class GameStatisticsService {
     }
 
     // Get the BuildingLevel for the next level of the selected building
-    const NextBuildingLevel = await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(gameBuilding.building.id, level);
+    const currentBuildingLevel = await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(gameBuilding.building.id, nextLevel-1);
+    if (!currentBuildingLevel) {
+      throw new Error(`BuildingLevel ${nextLevel-1} for building ${gameBuilding.building.id} not found`);
+    }
+
+    // Get the BuildingLevel for the next level of the selected building
+    const NextBuildingLevel = await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(gameBuilding.building.id, nextLevel);
     if (!NextBuildingLevel) {
-      throw new Error(`BuildingLevel ${level} for building ${gameBuilding.building.id} not found`);
+      throw new Error(`BuildingLevel ${nextLevel} for building ${gameBuilding.building.id} not found`);
     }
 
     // Call the upgrade method in the repository to update the GameBuilding's BuildingLevel
     const updatedGameBuilding = await gameStatisticsRepository.upgradeGameBuildingLevel(gameBuildingId, NextBuildingLevel.id);
 
+    // Update the currency after upgrading the building
+    // All currencies remain the same except for coins, which are reduced by the upgrade cost of the current building level
+    const gameStatistics = await gameStatisticsRepository.findById(gameBuilding.gameStatisticsId,
+      { includeCurrency: true, includeGameBuildings: false, includeAssets: false });
+    await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
+      greenEnergy: gameStatistics.currency.greenEnergy,
+      greyEnergy: gameStatistics.currency.greyEnergy,
+      coins: gameStatistics.currency.coins - currentBuildingLevel.upgradeCost,
+      score: gameStatistics.currency.score
+    });
+
     // Check if any achievement for upgrading a building has been achieved
     const buildingAchievements = ["Bouwassistent", "Bouwmeester", "Bouwkampioen"];
     for (const achievement of buildingAchievements) {
-      if (await this.hasAchievementBeenAchieved(gameBuilding.gameStatisticsId, achievement)) {
+      if (await this.hasAchievementBeenAchieved(gameStatistics.id, achievement)) {
         // If so, add the achievement to the game statistics
-        await this.addAchievementToGameStatistics(gameBuilding.gameStatisticsId, achievement);
+        await this.addAchievementToGameStatistics(gameStatistics.id, achievement);
       }
     }
     return updatedGameBuilding;
