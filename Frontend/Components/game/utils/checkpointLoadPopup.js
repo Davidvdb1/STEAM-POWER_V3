@@ -9,7 +9,6 @@ export function createCheckpointLoadPopup(scene) {
     popupHeight = 300;
   const centerX = width / 2,
     centerY = height / 2;
-
   // background
   const bg = scene.add
     .graphics()
@@ -24,27 +23,13 @@ export function createCheckpointLoadPopup(scene) {
     .setDepth(1000)
     .setScrollFactor(0)
     .setVisible(false);
+  // close button
+  const popupTop = centerY - popupHeight / 2;
 
-  // title
-  const title = scene.add
-    .text(centerX, centerY - 100, "Selecteer een checkpoint om te laden:", {
-      fontSize: "28px",
-      color: "#ffffff",
-      fontStyle: "bold",
-      align: "center",
-      wordWrap: { width: popupWidth - 40 },
-    })
-    .setOrigin(0.5)
-    .setDepth(1001)
-    .setScrollFactor(0)
-    .setVisible(false);
-
-  // ✖ CLOSE BUTTON (tiny square)
   const btnSize = 36;
   const btnRadius = 6;
-  // position at popup top-right with margin
   const btnX = centerX + popupWidth / 2 - btnSize - 10;
-  const btnY = centerY - popupHeight / 2 + 10;
+  const btnY = popupTop + 10;
 
   const closeBtnBg = scene.add
     .graphics()
@@ -66,6 +51,21 @@ export function createCheckpointLoadPopup(scene) {
     })
     .setOrigin(0.5)
     .setDepth(1002)
+    .setScrollFactor(0)
+    .setVisible(false);
+
+  // title
+  const titleY = popupTop + btnSize + 40;
+  const title = scene.add
+    .text(centerX, titleY, "Selecteer een checkpoint om te laden:", {
+      fontSize: "28px",
+      color: "#ffffff",
+      fontStyle: "bold",
+      align: "center",
+      wordWrap: { width: popupWidth - 40 },
+    })
+    .setOrigin(0.5)
+    .setDepth(1001)
     .setScrollFactor(0)
     .setVisible(false);
 
@@ -187,6 +187,7 @@ export function createCheckpointLoadPopup(scene) {
         .setVisible(false);
 
       optBg.on("pointerdown", () => {
+        selectedText.setText(cp.name || cp.id);
         optionItems.forEach((opt) => opt.setVisible(false));
         isDropdownOpen = false;
         hideAll();
