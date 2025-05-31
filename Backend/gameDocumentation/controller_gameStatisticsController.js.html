@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: controller/gameStatisticsController.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: controller/gameStatisticsController.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @module controller/gameStatisticsController
  * @description
  *   All GameStatistics-related endpoints: game statistics management, currency,
@@ -26,7 +54,7 @@ const router = express.Router();
  */
 
 /**
- * POST /gameStatistics<br>
+ * POST /gameStatistics&lt;br>
  * Creates a new game statistics entry.
  *
  * @function createGameStatistics
@@ -57,14 +85,14 @@ router.post("/", async (req, res) => {
 });
 
 /**
- * GET /gameStatistics<br>
+ * GET /gameStatistics&lt;br>
  * Retrieves all game statistics entries.
  *
  * @function getAllGameStatistics
  * @memberof module:controller/gameStatisticsController.Controller_GameStatistics
  * @param {express.Request}  req - Express request object.
  * @param {express.Response} res - Express response object.
- * @returns {Array<GameStatistics>} All saved GameStatistics objects.
+ * @returns {Array&lt;GameStatistics>} All saved GameStatistics objects.
  */
 router.get("/", async (req, res) => {
   try {
@@ -78,7 +106,7 @@ router.get("/", async (req, res) => {
 });
 
 /**
- * GET /gameStatistics/:id<br>
+ * GET /gameStatistics/:id&lt;br>
  * Retrieves a game statistics entry by its ID.
  *
  * @function getGameStatisticsById
@@ -103,7 +131,7 @@ router.get("/:id", async (req, res) => {
 });
 
 /**
- * GET /gameStatistics/group/:groupId<br>
+ * GET /gameStatistics/group/:groupId&lt;br>
  * Retrieves game statistics by group ID.
  *
  * @function getGameStatisticsByGroupId
@@ -143,7 +171,7 @@ router.get("/group/:groupId", async (req, res) => {
  */
 
 /**
- * GET /gameStatistics/:id/currency<br>
+ * GET /gameStatistics/:id/currency&lt;br>
  * Retrieves the Currency object associated with a GameStatistics entry.
  *
  * @function getCurrencyById
@@ -171,7 +199,7 @@ router.get("/:id/currency", async (req, res) => {
 });
 
 /**
- * PUT /gameStatistics/:id/currency<br>
+ * PUT /gameStatistics/:id/currency&lt;br>
  * Updates the Currency object associated with a GameStatistics entry.
  *
  * @function updateCurrency
@@ -200,7 +228,7 @@ router.put("/:id/currency", async (req, res) => {
 });
 
 /**
- * POST /gameStatistics/:id/currency/increment<br>
+ * POST /gameStatistics/:id/currency/increment&lt;br>
  * Increments the Currency object associated with a GameStatistics entry.
  *
  * @function incrementCurrency
@@ -239,7 +267,7 @@ router.post("/:id/currency/increment", async (req, res) => {
  */
 
 /**
- * POST /gameStatistics/:id/assets<br>
+ * POST /gameStatistics/:id/assets&lt;br>
  * Adds an asset to a GameStatistics object.
  *
  * @function addAssetToGameStatistics
@@ -274,7 +302,7 @@ router.post("/:id/assets", async (req, res) => {
 });
 
 /**
- * DELETE /gameStatistics/assets/:assetId<br>
+ * DELETE /gameStatistics/assets/:assetId&lt;br>
  * Removes an asset from a GameStatistics object.
  *
  * @function removeAssetFromGameStatistics
@@ -307,7 +335,7 @@ router.delete("/assets/:assetId", async (req, res) => {
  */
 
 /**
- * POST /gameStatistics/:id/checkpoints<br>
+ * POST /gameStatistics/:id/checkpoints&lt;br>
  * Creates a checkpoint for a GameStatistics object.
  *
  * @function recordCheckpoint
@@ -332,7 +360,7 @@ router.post("/:id/checkpoints", async (req, res) => {
 });
 
 /**
- * GET /gameStatistics/:id/checkpoints<br>
+ * GET /gameStatistics/:id/checkpoints&lt;br>
  * Fetches all checkpoints for a GameStatistics object.
  *
  * @function getAllCheckpointsByGameStatisticsId
@@ -359,7 +387,7 @@ router.get("/:id/checkpoints", async (req, res) => {
 });
 
 /**
- * DELETE /gameStatistics/checkpoints/:checkpointId<br>
+ * DELETE /gameStatistics/checkpoints/:checkpointId&lt;br>
  * Removes a checkpoint from a GameStatistics object.
  *
  * @function removeCheckpointFromGameStatistics
@@ -384,7 +412,7 @@ router.delete("/checkpoints/:checkpointId", async (req, res) => {
 });
 
 /**
- * PUT /gameStatistics/refactor/:checkpointId<br>
+ * PUT /gameStatistics/refactor/:checkpointId&lt;br>
  * Restores the GameStatistics object to the state of a specific checkpoint and returns the updated data.
  *
  * @function refactorGameStatistics
@@ -444,7 +472,7 @@ router.put("/refactor/:checkpointId", async (req, res) => {
  */
 
 /**
- * PUT /gameStatistics/buildings/:gameBuildingId/upgrade<br>
+ * PUT /gameStatistics/buildings/:gameBuildingId/upgrade&lt;br>
  * Upgrades a GameBuilding object to a new level.
  *
  * @function upgradeGameBuilding
@@ -473,7 +501,7 @@ router.put("/buildings/:gameBuildingId/upgrade", async (req, res) => {
 });
 
 /**
- * GET /gameStatistics/gameBuildings/getAllGameBuildingsByGroupId/:groupId<br>
+ * GET /gameStatistics/gameBuildings/getAllGameBuildingsByGroupId/:groupId&lt;br>
  * Retrieves all GameBuildings associated with a specific groupId.
  *
  * @function getAllGameBuildingsByGroupId
@@ -515,7 +543,7 @@ router.get(
  */
 
 /**
- * POST /gameStatistics/achievements/add/:gameStatisticsId/:title<br>
+ * POST /gameStatistics/achievements/add/:gameStatisticsId/:title&lt;br>
  * Adds an achievement to a GameStatistics object.
  *
  * @function addAchievementToGameStatistics
@@ -546,7 +574,7 @@ router.post("/achievements/add/:gameStatisticsId/:title", async (req, res) => {
 });
 
 /**
- * GET /gameStatistics/:gameStatisticsId/achievements<br>
+ * GET /gameStatistics/:gameStatisticsId/achievements&lt;br>
  * Retrieves all Achievements for a GameStatistics object.
  *
  * @function getGameStatisticsAchievements
@@ -574,7 +602,7 @@ router.get("/:gameStatisticsId/achievements", async (req, res) => {
 });
 
 /**
- * GET /gameStatistics/:gameStatisticsId/achievements/check/:title<br>
+ * GET /gameStatistics/:gameStatisticsId/achievements/check/:title&lt;br>
  * Checks if an achievement has been achieved for a GameStatistics object.
  *
  * @function checkGameStatisticsAchievement
@@ -612,3 +640,26 @@ router.get("/:gameStatisticsId/achievements/check/:title", async (req, res) => {
 });
 
 module.exports = router;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a></li><li><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a></li><li><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-controller_gameStatisticsController.Controller_Achievements.html">Controller_Achievements</a></li><li><a href="module-controller_gameStatisticsController.Controller_Assets.html">Controller_Assets</a></li><li><a href="module-controller_gameStatisticsController.Controller_Checkpoints.html">Controller_Checkpoints</a></li><li><a href="module-controller_gameStatisticsController.Controller_Currency.html">Controller_Currency</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameBuildings.html">Controller_GameBuildings</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameStatistics.html">Controller_GameStatistics</a></li></ul><h3>Classes</h3><ul><li><a href="Achievement.html">Achievement</a></li><li><a href="Asset.html">Asset</a></li><li><a href="Building.html">Building</a></li><li><a href="BuildingLevel.html">BuildingLevel</a></li><li><a href="Checkpoint.html">Checkpoint</a></li><li><a href="Currency.html">Currency</a></li><li><a href="GameBuildings.html">GameBuildings</a></li><li><a href="GameStatistics.html">GameStatistics</a></li><li><a href="Group.html">Group</a></li><li><a href="Nature.html">Nature</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 31 2025 18:13:17 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

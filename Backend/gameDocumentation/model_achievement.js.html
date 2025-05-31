@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: model/achievement.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: model/achievement.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Represents an achievement with a title, description, reward, and score.
+ *
+ * @constructor
+ * @param {Object} params - The achievement parameters.
+ * @param {string} [params.id] - The unique identifier of the achievement.
+ * @param {string} params.title - The title of the achievement.
+ * @param {string} params.description - A description of the achievement.
+ * @param {number} params.reward - The reward value (must be ≥ 0).
+ * @param {number} params.score - The score associated with the achievement.
+ * @param {boolean} [validate=true] - Whether to validate the input parameters.
+ *
+ * @throws {Error} If validation fails for any property.
+ */
+class Achievement {
+  constructor(
+    { id = undefined, title, description, reward, score },
+    validate = true
+  ) {
+    this.id = id;
+    this.title = title;
+    this.description = description;
+    this.reward = reward;
+    this.score = score;
+    if (validate) this.validate();
+  }
+
+  /**
+   * Validates the achievement properties.
+   *
+   * @throws {Error} If `title` or `description` is not a string,
+   *                 if `reward` &lt; 0, or if `score` is not a number.
+   * @returns {void}
+   */
+  validate() {
+    if (typeof this.title !== "string") {
+      throw new Error("Invalid title");
+    }
+    if (typeof this.description !== "string") {
+      throw new Error("Invalid description");
+    }
+    if (typeof this.reward !== "number" || this.reward &lt; 0) {
+      throw new Error("Invalid reward");
+    }
+    if (typeof this.score !== "number") {
+      throw new Error("Invalid score");
+    }
+  }
+
+  /**
+   * Creates an Achievement instance from a Prisma achievement object.
+   *
+   * @static
+   * @param {Object} prismaAchievement - A Prisma achievement record.
+   * @param {string} prismaAchievement.id - The unique identifier.
+   * @param {string} prismaAchievement.title - The title.
+   * @param {string} prismaAchievement.description - The description.
+   * @param {number} prismaAchievement.reward - The reward value.
+   * @param {number} prismaAchievement.score - The score value.
+   * @returns {Achievement} A new `Achievement` instance.
+   */
+  static from(prismaAchievement) {
+    return new Achievement({
+      id: prismaAchievement.id,
+      title: prismaAchievement.title,
+      description: prismaAchievement.description,
+      reward: prismaAchievement.reward,
+      score: prismaAchievement.score,
+    });
+  }
+}
+
+module.exports = Achievement;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a></li><li><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a></li><li><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-controller_gameStatisticsController.Controller_Achievements.html">Controller_Achievements</a></li><li><a href="module-controller_gameStatisticsController.Controller_Assets.html">Controller_Assets</a></li><li><a href="module-controller_gameStatisticsController.Controller_Checkpoints.html">Controller_Checkpoints</a></li><li><a href="module-controller_gameStatisticsController.Controller_Currency.html">Controller_Currency</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameBuildings.html">Controller_GameBuildings</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameStatistics.html">Controller_GameStatistics</a></li></ul><h3>Classes</h3><ul><li><a href="Achievement.html">Achievement</a></li><li><a href="Asset.html">Asset</a></li><li><a href="Building.html">Building</a></li><li><a href="BuildingLevel.html">BuildingLevel</a></li><li><a href="Checkpoint.html">Checkpoint</a></li><li><a href="Currency.html">Currency</a></li><li><a href="GameBuildings.html">GameBuildings</a></li><li><a href="GameStatistics.html">GameStatistics</a></li><li><a href="Group.html">Group</a></li><li><a href="Nature.html">Nature</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 31 2025 18:13:17 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

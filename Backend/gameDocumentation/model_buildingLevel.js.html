@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: model/buildingLevel.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: model/buildingLevel.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Represents a BuildingLevel with energy cost, upgrade cost, and score deduction.
+ *
+ * @constructor
+ * @param {Object} params - The parameters for the BuildingLevel.
+ * @param {string} [params.id] - The unique identifier of the building level.
+ * @param {string} [params.buildingId] - The identifier of the associated building.
+ * @param {number} params.level - The level number.
+ * @param {number} params.energyCost - The energy cost for this level.
+ * @param {number} params.upgradeCost - The cost to upgrade to this level.
+ * @param {number} params.scoreDeduction - The score deduction for this level.
+ * @param {boolean} [validate=true] - Whether to validate the instance on creation.
+ *
+ * @throws {Error} If any of the properties are of the wrong type.
+ */
+class BuildingLevel {
+  constructor(
+    {
+      id = undefined,
+      buildingId,
+      level,
+      energyCost,
+      upgradeCost,
+      scoreDeduction,
+    },
+    validate = true
+  ) {
+    this.id = id;
+    this.buildingId = buildingId;
+    this.level = level;
+    this.energyCost = energyCost;
+    this.upgradeCost = upgradeCost;
+    this.scoreDeduction = scoreDeduction;
+    if (validate) this.validate();
+  }
+
+  /**
+   * Validates the BuildingLevel properties.
+   *
+   * @throws {Error} If `buildingId` is not a string when present,
+   *                 or if any numeric property is not a number.
+   * @returns {void}
+   */
+  validate() {
+    if (this.buildingId != null &amp;&amp; typeof this.buildingId !== "string") {
+      throw new Error("Invalid buildingId");
+    }
+    if (typeof this.level !== "number") {
+      throw new Error("Invalid level");
+    }
+    if (typeof this.energyCost !== "number") {
+      throw new Error("Invalid energyCost");
+    }
+    if (typeof this.upgradeCost !== "number") {
+      throw new Error("Invalid upgradeCost");
+    }
+    if (typeof this.scoreDeduction !== "number") {
+      throw new Error("Invalid scoreDeduction");
+    }
+  }
+
+  /**
+   * Creates a BuildingLevel instance from a Prisma building level object.
+   *
+   * @static
+   * @param {Object} prismaBuildingLevel - The Prisma BuildingLevel record.
+   * @param {string} prismaBuildingLevel.id - The unique identifier from Prisma.
+   * @param {string} [prismaBuildingLevel.buildingId] - The building ID from Prisma.
+   * @param {Object} [prismaBuildingLevel.building] - Related building object, if loaded.
+   * @param {number} prismaBuildingLevel.level - The level number.
+   * @param {number} prismaBuildingLevel.energyCost - The energy cost.
+   * @param {number} prismaBuildingLevel.upgradeCost - The upgrade cost.
+   * @param {number} prismaBuildingLevel.scoreDeduction - The score deduction.
+   * @returns {BuildingLevel} The created BuildingLevel instance.
+   */
+  static from(prismaBuildingLevel) {
+    return new BuildingLevel(
+      {
+        id: prismaBuildingLevel.id,
+        buildingId:
+          prismaBuildingLevel.buildingId ||
+          (prismaBuildingLevel.building &amp;&amp; prismaBuildingLevel.building.id),
+        level: prismaBuildingLevel.level,
+        energyCost: prismaBuildingLevel.energyCost,
+        upgradeCost: prismaBuildingLevel.upgradeCost,
+        scoreDeduction: prismaBuildingLevel.scoreDeduction,
+      },
+      true
+    );
+  }
+}
+
+module.exports = BuildingLevel;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a></li><li><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a></li><li><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-controller_gameStatisticsController.Controller_Achievements.html">Controller_Achievements</a></li><li><a href="module-controller_gameStatisticsController.Controller_Assets.html">Controller_Assets</a></li><li><a href="module-controller_gameStatisticsController.Controller_Checkpoints.html">Controller_Checkpoints</a></li><li><a href="module-controller_gameStatisticsController.Controller_Currency.html">Controller_Currency</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameBuildings.html">Controller_GameBuildings</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameStatistics.html">Controller_GameStatistics</a></li></ul><h3>Classes</h3><ul><li><a href="Achievement.html">Achievement</a></li><li><a href="Asset.html">Asset</a></li><li><a href="Building.html">Building</a></li><li><a href="BuildingLevel.html">BuildingLevel</a></li><li><a href="Checkpoint.html">Checkpoint</a></li><li><a href="Currency.html">Currency</a></li><li><a href="GameBuildings.html">GameBuildings</a></li><li><a href="GameStatistics.html">GameStatistics</a></li><li><a href="Group.html">Group</a></li><li><a href="Nature.html">Nature</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sat May 31 2025 18:13:17 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
