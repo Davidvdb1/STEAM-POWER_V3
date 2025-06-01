@@ -24,6 +24,7 @@ import {
 } from "../../utils/uiPopups.js";
 
 import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
+import { handleAchievements } from "../../utils/achievementHandler.js";
 
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
@@ -292,7 +293,10 @@ reloadCheckpointAssets() {
               token
             );
 
-            this._placeAsset(type, tx, ty, size, response.id);
+            // Handle any achievements that were earned
+            handleAchievements(response, window.gameContainer);
+
+            this._placeAsset(type, tx, ty, size, response.asset.id);
             await updateCurrency(currencyId, updatedCurrency, token);
           } catch (err) {
             console.error("Error placing asset:", err);
