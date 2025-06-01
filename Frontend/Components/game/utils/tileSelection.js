@@ -205,11 +205,11 @@ export class TileSelection {
   /**
    * Removes grayscale effect from the building's layers
    */
-  removeGrayscale() {
-    this.buildingLayers.forEach(layer => {
-      if (layer.postFX) {
-        layer.postFX.clear();
-      }
-    });
-  }
+  // removeGrayscale() {
+  //   this.buildingLayers.forEach(layer => {
+  //     if (layer.postFX) {
+  //       layer.postFX.clear();
+  //     }
+  //   });
+  // }
 }

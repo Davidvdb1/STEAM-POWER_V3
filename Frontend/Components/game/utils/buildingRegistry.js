@@ -68,12 +68,12 @@ export class BuildingRegistry {
    * @param {string} name - The name of the building to grayout.
    * @param {number} intensity - The intensity of the grayscale effect, from 0 to 1 (default is 1).
    */
-  grayoutBuilding(name, intensity = 1) {
-    const building = this.getBuilding(name);
-    if (building) {
-      building.applyGrayscale(intensity);
-    }
-  }
+  // grayoutBuilding(name, intensity = 1) {
+  //   const building = this.getBuilding(name);
+  //   if (building) {
+  //     building.applyGrayscale(intensity);
+  //   }
+  // }
 
 
   /**
@@ -82,14 +82,14 @@ export class BuildingRegistry {
    * @param {string[]} names - An array of building names to apply the grayscale effect to.
    * @param {number} [intensity=1] - The intensity of the grayscale effect, from 0 to 1 (default is 1).
    */
-  grayoutBuildings(names, intensity = 1) {
-    for (const name of names) {
-      const building = this.getBuilding(name);
-      if (building) {
-        building.applyGrayscale(intensity);
-      }
-    }
-  }
+  // grayoutBuildings(names, intensity = 1) {
+  //   for (const name of names) {
+  //     const building = this.getBuilding(name);
+  //     if (building) {
+  //       building.applyGrayscale(intensity);
+  //     }
+  //   }
+  // }
   
 
   /**
@@ -107,12 +107,12 @@ export class BuildingRegistry {
    * Remove grayscale from a specific building
    * @param {string} name - Building identifier
    */
-  restoreBuilding(name) {
-    const building = this.getBuilding(name);
-    if (building) {
-      building.removeGrayscale();
-    }
-  }
+  // restoreBuilding(name) {
+  //   const building = this.getBuilding(name);
+  //   if (building) {
+  //     building.removeGrayscale();
+  //   }
+  // }
 
 
   /**
@@ -120,22 +120,22 @@ export class BuildingRegistry {
    *
    * @param {string[]} names - An array of building names to restore.
    */
-  restoreBuildings(names) {
-    for (const name of names) {
-      const building = this.getBuilding(name);
-      if (building) {
-        building.removeGrayscale();
-      }
-    }
-  }
+  // restoreBuildings(names) {
+  //   for (const name of names) {
+  //     const building = this.getBuilding(name);
+  //     if (building) {
+  //       building.removeGrayscale();
+  //     }
+  //   }
+  // }
   
 
   /**
    * Remove grayscale from all buildings
    */
-  restoreAllBuildings() {
-    for (const building of this.buildings.values()) {
-      building.removeGrayscale();
-    }
-  }
+  // restoreAllBuildings() {
+  //   for (const building of this.buildings.values()) {
+  //     building.removeGrayscale();
+  //   }
+  // }
 }
