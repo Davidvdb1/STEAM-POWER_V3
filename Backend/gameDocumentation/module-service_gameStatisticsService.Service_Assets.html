@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: Controller_GameStatistics</title>
+    <title>JSDoc: Namespace: Service_Assets</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: Controller_GameStatistics</h1>
+    <h1 class="page-title">Namespace: Service_Assets</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a>.</span>Controller_GameStatistics</h2>
+            <span class="ancestors"><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a>.</span>Service_Assets</h2>
         
     
 </header>
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">Endpoints for creating, retrieving, and querying GameStatistics entries.</div>
+            <div class="description">All service methods for managing assets in game statistics.  This includes adding, removing, and retrieving assets associated with game statistics.</div>
         
 
         
@@ -73,7 +73,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line19">line 19</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line196">line 196</a>
     </li></ul></dd>
     
 
@@ -112,7 +112,7 @@
     
 
     
-    <h4 class="name" id=".createGameStatistics"><span class="type-signature">(static) </span>createGameStatistics<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="GameStatistics.html">GameStatistics</a>}</span></h4>
+    <h4 class="name" id=".addAsset"><span class="type-signature">(async, static) </span>addAsset<span class="signature">(statsId, aData)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Asset.html">Asset</a>>}</span></h4>
     
 
     
@@ -120,7 +120,7 @@
 
 
 <div class="description">
-    POST /gameStatistics<br>Creates a new game statistics entry.
+    Adds an asset to the game statistics for the given statsId.Determines the asset type (Nature or Asset), creates an instance, and adds it via the repository.After adding, checks if any asset-related achievements have been achieved and adds them to the game statistics if so.
 </div>
 
 
@@ -156,13 +156,13 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
+                <td class="name"><code>statsId</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">express.Request</span>
+<span class="param-type">string</span>
 
 
             
@@ -172,7 +172,30 @@
 
             
 
-            <td class="description last">Express request object.
+            <td class="description last">The id of the game statistics object to associate the asset with.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>aData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The data for the asset to be added.
                 <h6>Properties</h6>
                 
 
@@ -198,7 +221,168 @@
 
         <tr>
             
-                <td class="name"><code>body.groupId</code></td>
+                <td class="name"><code>buildCost</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The cost to build the asset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>destroyCost</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The cost to destroy the asset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>energy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The energy produced by the asset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>xLocation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The x-coordinate location of the asset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>yLocation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The y-coordinate location of the asset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>xSize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The width of the asset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>ySize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The height of the asset.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>type</code></td>
             
 
             <td class="type">
@@ -214,20 +398,20 @@
 
             
 
-            <td class="description last">The ID of the group.</td>
+            <td class="description last">The type of the asset.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>body.greenEnergy</code></td>
+                <td class="name"><code>gameStatisticsId</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">string</span>
 
 
             
@@ -237,53 +421,7 @@
 
             
 
-            <td class="description last">Amount of green energy.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.greyEnergy</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Amount of grey energy.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.coins</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Number of coins.</td>
+            <td class="description last">The id for the game statistics to which the asset belongs.</td>
         </tr>
 
     
@@ -291,29 +429,6 @@
 </table>
 
             </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Express response object.</td>
         </tr>
 
     
@@ -354,7 +469,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line26">line 26</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line204">line 204</a>
     </li></ul></dd>
     
 
@@ -383,7 +498,7 @@
 
         
 <div class="param-desc">
-    The saved GameStatistics object.
+    The added asset instance.
 </div>
 
 
@@ -394,7 +509,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="GameStatistics.html">GameStatistics</a></span>
+<span class="param-type">Promise.&lt;<a href="Asset.html">Asset</a>></span>
 
 
     </dd>
@@ -412,7 +527,7 @@
     
 
     
-    <h4 class="name" id=".getAllGameStatistics"><span class="type-signature">(static) </span>getAllGameStatistics<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="GameStatistics.html">GameStatistics</a>>}</span></h4>
+    <h4 class="name" id=".findAllAssetsByGameStatisticsId"><span class="type-signature">(async, static) </span>findAllAssetsByGameStatisticsId<span class="signature">(gameStatisticsId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array>}</span></h4>
     
 
     
@@ -420,7 +535,7 @@
 
 
 <div class="description">
-    GET /gameStatistics<br>Retrieves all game statistics entries.
+    Retrieves all assets associated with a specific game statistics ID.
 </div>
 
 
@@ -456,13 +571,13 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
+                <td class="name"><code>gameStatisticsId</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">express.Request</span>
+<span class="param-type">string</span>
 
 
             
@@ -472,30 +587,7 @@
 
             
 
-            <td class="description last">Express request object.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Express response object.</td>
+            <td class="description last">The unique identifier of the game statistics.</td>
         </tr>
 
     
@@ -536,7 +628,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line57">line 57</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line283">line 283</a>
     </li></ul></dd>
     
 
@@ -565,7 +657,7 @@
 
         
 <div class="param-desc">
-    All saved GameStatistics objects.
+    A promise that resolves to an array of assets related to the given game statistics ID.
 </div>
 
 
@@ -576,7 +668,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array.&lt;<a href="GameStatistics.html">GameStatistics</a>></span>
+<span class="param-type">Promise.&lt;Array></span>
 
 
     </dd>
@@ -594,7 +686,7 @@
     
 
     
-    <h4 class="name" id=".getGameStatisticsByGroupId"><span class="type-signature">(static) </span>getGameStatisticsByGroupId<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="GameStatistics.html">GameStatistics</a>}</span></h4>
+    <h4 class="name" id=".removeAsset"><span class="type-signature">(async, static) </span>removeAsset<span class="signature">(assetId)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Asset.html">Asset</a>>}</span></h4>
     
 
     
@@ -602,7 +694,7 @@
 
 
 <div class="description">
-    GET /gameStatistics/group/:groupId<br>Retrieves game statistics by group ID.
+    Removes an asset by its id and checks if the "Milieuheld" achievement has been achieved as a result.If the achievement is achieved, it is added to the game statistics.
 </div>
 
 
@@ -638,49 +730,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.groupId</code></td>
+                <td class="name"><code>assetId</code></td>
             
 
             <td class="type">
@@ -696,37 +746,7 @@
 
             
 
-            <td class="description last">The unique identifier of the group.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Express response object.</td>
+            <td class="description last">The id of the asset to remove.</td>
         </tr>
 
     
@@ -767,7 +787,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line103">line 103</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line253">line 253</a>
     </li></ul></dd>
     
 
@@ -796,7 +816,7 @@
 
         
 <div class="param-desc">
-    The game statistics object for the specified group.
+    The removed asset object.
 </div>
 
 
@@ -807,238 +827,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="GameStatistics.html">GameStatistics</a></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id=".getGameStatisticsById"><span class="type-signature">(static) </span>getGameStatisticsById<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="GameStatistics.html">GameStatistics</a>}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    GET /gameStatistics/:id<br>Retrieves a game statistics entry by its ID.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The unique identifier of the game statistics entry.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Express response object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line78">line 78</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    The game statistics object.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type"><a href="GameStatistics.html">GameStatistics</a></span>
+<span class="param-type">Promise.&lt;<a href="Asset.html">Asset</a>></span>
 
 
     </dd>

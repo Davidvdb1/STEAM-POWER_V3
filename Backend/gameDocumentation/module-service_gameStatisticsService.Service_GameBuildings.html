@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: Controller_Checkpoints</title>
+    <title>JSDoc: Namespace: Service_GameBuildings</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: Controller_Checkpoints</h1>
+    <h1 class="page-title">Namespace: Service_GameBuildings</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a>.</span>Controller_Checkpoints</h2>
+            <span class="ancestors"><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a>.</span>Service_GameBuildings</h2>
         
     
 </header>
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">Endpoints for recording, fetching, and deleting checkpoints on a GameStatistics record.</div>
+            <div class="description">All service methods for managing game buildings in game statistics.  This includes retrieving, upgrading, and managing game buildings associated with game statistics.</div>
         
 
         
@@ -73,7 +73,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line300">line 300</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line393">line 393</a>
     </li></ul></dd>
     
 
@@ -112,7 +112,7 @@
     
 
     
-    <h4 class="name" id=".getAllCheckpointsByGameStatisticsId"><span class="type-signature">(static) </span>getAllCheckpointsByGameStatisticsId<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Checkpoint.html">Checkpoint</a>>}</span></h4>
+    <h4 class="name" id=".getAllGameBuildingsByGroupId"><span class="type-signature">(async, static) </span>getAllGameBuildingsByGroupId<span class="signature">(groupId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>>}</span></h4>
     
 
     
@@ -120,7 +120,7 @@
 
 
 <div class="description">
-    GET /gameStatistics/:id/checkpoints<br>Fetches all checkpoints for a GameStatistics object.
+    Retrieves all game buildings associated with a specific group id.
 </div>
 
 
@@ -156,49 +156,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>groupId</code></td>
             
 
             <td class="type">
@@ -214,37 +172,7 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
+            <td class="description last">The id of the group to fetch game buildings for.</td>
         </tr>
 
     
@@ -285,7 +213,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line332">line 332</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line401">line 401</a>
     </li></ul></dd>
     
 
@@ -314,7 +242,7 @@
 
         
 <div class="param-desc">
-    – An array of checkpoint objects.
+    A promise that resolves to an array of GameBuildings instances.
 </div>
 
 
@@ -325,7 +253,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array.&lt;<a href="Checkpoint.html">Checkpoint</a>></span>
+<span class="param-type">Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>></span>
 
 
     </dd>
@@ -343,7 +271,7 @@
     
 
     
-    <h4 class="name" id=".recordCheckpoint"><span class="type-signature">(static) </span>recordCheckpoint<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="Checkpoint.html">Checkpoint</a>}</span></h4>
+    <h4 class="name" id=".upgradeGameBuilding"><span class="type-signature">(async, static) </span>upgradeGameBuilding<span class="signature">(gameBuildingId, level)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="GameBuildings.html">GameBuildings</a>>}</span></h4>
     
 
     
@@ -351,7 +279,7 @@
 
 
 <div class="description">
-    POST /gameStatistics/:id/checkpoints<br>Creates a checkpoint for a GameStatistics object.
+    Upgrades the level of a GameBuilding by its id.Retrieves the GameBuilding and updates the GameBuilding's BuildingLevel object.Checks for and awards any relevant achievements after the upgrade.
 </div>
 
 
@@ -387,49 +315,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>gameBuildingId</code></td>
             
 
             <td class="type">
@@ -445,27 +331,20 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last">The id of the GameBuilding to upgrade.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>res</code></td>
+                <td class="name"><code>level</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">express.Response</span>
+<span class="param-type">number</span>
 
 
             
@@ -475,7 +354,7 @@
 
             
 
-            <td class="description last">– Express response object.</td>
+            <td class="description last">The new level to upgrade the building to.</td>
         </tr>
 
     
@@ -516,7 +395,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line307">line 307</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line416">line 416</a>
     </li></ul></dd>
     
 
@@ -539,13 +418,42 @@
 
 
 
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        If the GameBuilding or the next BuildingLevel is not found.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
 
 
 <h5>Returns:</h5>
 
         
 <div class="param-desc">
-    – The created checkpoint object.
+    The updated GameBuilding object.
 </div>
 
 
@@ -556,7 +464,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Checkpoint.html">Checkpoint</a></span>
+<span class="param-type">Promise.&lt;<a href="GameBuildings.html">GameBuildings</a>></span>
 
 
     </dd>

@@ -3,9 +3,7 @@
  * @description
  *   All GameStatistics-related endpoints: game statistics management, currency,
  *   assets, checkpoints, game buildings, achievements, etc., grouped below under separate sub-namespaces.
- *
- * @requires express
- * @requires gameStatisticsService
+ * @requires module:service/gameStatisticsService
  */
 
 const express = require("express");

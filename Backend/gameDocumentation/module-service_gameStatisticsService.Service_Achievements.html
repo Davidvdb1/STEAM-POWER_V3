@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: Controller_Checkpoints</title>
+    <title>JSDoc: Namespace: Service_Achievements</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: Controller_Checkpoints</h1>
+    <h1 class="page-title">Namespace: Service_Achievements</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a>.</span>Controller_Checkpoints</h2>
+            <span class="ancestors"><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a>.</span>Service_Achievements</h2>
         
     
 </header>
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">Endpoints for recording, fetching, and deleting checkpoints on a GameStatistics record.</div>
+            <div class="description">All service methods for managing achievements in game statistics.  This includes adding achievements to game statistics and checking if achievements have been achieved.</div>
         
 
         
@@ -73,7 +73,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line300">line 300</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line484">line 484</a>
     </li></ul></dd>
     
 
@@ -112,7 +112,7 @@
     
 
     
-    <h4 class="name" id=".getAllCheckpointsByGameStatisticsId"><span class="type-signature">(static) </span>getAllCheckpointsByGameStatisticsId<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Checkpoint.html">Checkpoint</a>>}</span></h4>
+    <h4 class="name" id=".addAchievementToGameStatistics"><span class="type-signature">(async, static) </span>addAchievementToGameStatistics<span class="signature">(gameStatisticsId, title)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="GameStatistics.html">GameStatistics</a>>}</span></h4>
     
 
     
@@ -120,7 +120,7 @@
 
 
 <div class="description">
-    GET /gameStatistics/:id/checkpoints<br>Fetches all checkpoints for a GameStatistics object.
+    Adds an achievement to the game statistics for a given gameStatisticsId.
 </div>
 
 
@@ -156,49 +156,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>gameStatisticsId</code></td>
             
 
             <td class="type">
@@ -214,27 +172,20 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last">The id of the game statistics record.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>res</code></td>
+                <td class="name"><code>title</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">express.Response</span>
+<span class="param-type">string</span>
 
 
             
@@ -244,7 +195,7 @@
 
             
 
-            <td class="description last">– Express response object.</td>
+            <td class="description last">The title of the achievement to add.</td>
         </tr>
 
     
@@ -285,7 +236,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line332">line 332</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line492">line 492</a>
     </li></ul></dd>
     
 
@@ -314,7 +265,7 @@
 
         
 <div class="param-desc">
-    – An array of checkpoint objects.
+    The updated game statistics object.
 </div>
 
 
@@ -325,7 +276,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array.&lt;<a href="Checkpoint.html">Checkpoint</a>></span>
+<span class="param-type">Promise.&lt;<a href="GameStatistics.html">GameStatistics</a>></span>
 
 
     </dd>
@@ -343,7 +294,7 @@
     
 
     
-    <h4 class="name" id=".recordCheckpoint"><span class="type-signature">(static) </span>recordCheckpoint<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="Checkpoint.html">Checkpoint</a>}</span></h4>
+    <h4 class="name" id=".getGameStatisticsAchievements"><span class="type-signature">(async, static) </span>getGameStatisticsAchievements<span class="signature">(gameStatisticsId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Achievement.html">Achievement</a>>>}</span></h4>
     
 
     
@@ -351,7 +302,7 @@
 
 
 <div class="description">
-    POST /gameStatistics/:id/checkpoints<br>Creates a checkpoint for a GameStatistics object.
+    Retrieves the achievements associated with a specific game statistics record.
 </div>
 
 
@@ -387,49 +338,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>gameStatisticsId</code></td>
             
 
             <td class="type">
@@ -445,37 +354,7 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics object.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
+            <td class="description last">The id of the game statistics record.</td>
         </tr>
 
     
@@ -516,7 +395,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line307">line 307</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line529">line 529</a>
     </li></ul></dd>
     
 
@@ -545,7 +424,7 @@
 
         
 <div class="param-desc">
-    – The created checkpoint object.
+    A promise that resolves to an array of achievements for the given game statistics.
 </div>
 
 
@@ -556,7 +435,189 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Checkpoint.html">Checkpoint</a></span>
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Achievement.html">Achievement</a>>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".hasAchievementBeenAchieved"><span class="type-signature">(async, static) </span>hasAchievementBeenAchieved<span class="signature">(gameStatisticsId, title)</span><span class="type-signature"> &rarr; {Promise.&lt;boolean>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Checks if a specific achievement has been achieved based on the provided game statistics and achievement title.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>gameStatisticsId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the GameStatistics object containing information about a group's game state.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>title</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The title of the achievement to check.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line544">line 544</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    - Returns a promise that resolves to true if the achievement has been achieved, otherwise false.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;boolean></span>
 
 
     </dd>

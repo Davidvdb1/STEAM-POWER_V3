@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: Controller_Currency</title>
+    <title>JSDoc: Namespace: Service_Checkpoints</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: Controller_Currency</h1>
+    <h1 class="page-title">Namespace: Service_Checkpoints</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a>.</span>Controller_Currency</h2>
+            <span class="ancestors"><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a>.</span>Service_Checkpoints</h2>
         
     
 </header>
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">All endpoints that deal with the Currency object (get, update, increment).</div>
+            <div class="description">All service methods for managing checkpoints in game statistics.  This includes creating, retrieving, and removing checkpoints associated with game statistics.</div>
         
 
         
@@ -73,7 +73,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line136">line 136</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line302">line 302</a>
     </li></ul></dd>
     
 
@@ -112,7 +112,7 @@
     
 
     
-    <h4 class="name" id=".getCurrencyById"><span class="type-signature">(static) </span>getCurrencyById<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="Currency.html">Currency</a>}</span></h4>
+    <h4 class="name" id=".findAllCheckpointsByGameStatisticsId"><span class="type-signature">(async, static) </span>findAllCheckpointsByGameStatisticsId<span class="signature">(gameStatisticsId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;Object>>}</span></h4>
     
 
     
@@ -120,7 +120,7 @@
 
 
 <div class="description">
-    GET /gameStatistics/:id/currency<br>Retrieves the Currency object associated with a GameStatistics entry.
+    Retrieves all checkpoints associated with a specific game statistics ID.
 </div>
 
 
@@ -156,55 +156,16 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>gameStatisticsId</code></td>
             
 
             <td class="type">
             
                 
 <span class="param-type">string</span>
+|
+
+<span class="param-type">number</span>
 
 
             
@@ -214,37 +175,7 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics entry.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
+            <td class="description last">The unique identifier of the game statistics.</td>
         </tr>
 
     
@@ -285,7 +216,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line143">line 143</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line342">line 342</a>
     </li></ul></dd>
     
 
@@ -314,7 +245,7 @@
 
         
 <div class="param-desc">
-    – The Currency object associated with the GameStatistics entry.
+    A promise that resolves to an array of checkpoint objects.
 </div>
 
 
@@ -325,7 +256,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Currency.html">Currency</a></span>
+<span class="param-type">Promise.&lt;Array.&lt;Object>></span>
 
 
     </dd>
@@ -343,7 +274,7 @@
     
 
     
-    <h4 class="name" id=".incrementCurrency"><span class="type-signature">(static) </span>incrementCurrency<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="Currency.html">Currency</a>}</span></h4>
+    <h4 class="name" id=".recordCheckpoint"><span class="type-signature">(async, static) </span>recordCheckpoint<span class="signature">(statsId, cpData)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Checkpoint.html">Checkpoint</a>>}</span></h4>
     
 
     
@@ -351,7 +282,7 @@
 
 
 <div class="description">
-    POST /gameStatistics/:id/currency/increment<br>Increments the Currency object associated with a GameStatistics entry.
+    Creates a checkpoint for a given game statistics id.
 </div>
 
 
@@ -387,13 +318,13 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
+                <td class="name"><code>statsId</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">express.Request</span>
+<span class="param-type">string</span>
 
 
             
@@ -403,7 +334,30 @@
 
             
 
-            <td class="description last">– Express request object.
+            <td class="description last">The id of the game statistics to associate with the checkpoint.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cpData</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The checkpoint data to record.
                 <h6>Properties</h6>
                 
 
@@ -429,13 +383,13 @@
 
         <tr>
             
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>currency</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="Currency.html">Currency</a></span>
 
 
             
@@ -445,20 +399,20 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics entry.</td>
+            <td class="description last">The currency instance for the checkpoint.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>body.greenEnergy</code></td>
+                <td class="name"><code>buildings</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">Array.&lt;<a href="Building.html">Building</a>></span>
 
 
             
@@ -468,20 +422,20 @@
 
             
 
-            <td class="description last">– The amount of green energy to increment.</td>
+            <td class="description last">An array of building instances.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>body.greyEnergy</code></td>
+                <td class="name"><code>assets</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">number</span>
+<span class="param-type">Array.&lt;<a href="Asset.html">Asset</a>></span>
 
 
             
@@ -491,53 +445,7 @@
 
             
 
-            <td class="description last">– The amount of grey energy to increment.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.coins</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The amount of coins to increment.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.score</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The amount of score to increment.</td>
+            <td class="description last">An array of asset instances.</td>
         </tr>
 
     
@@ -545,29 +453,6 @@
 </table>
 
             </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
         </tr>
 
     
@@ -608,7 +493,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line200">line 200</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line310">line 310</a>
     </li></ul></dd>
     
 
@@ -631,13 +516,42 @@
 
 
 
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        If a building name is missing in the provided data.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
 
 
 <h5>Returns:</h5>
 
         
 <div class="param-desc">
-    – The updated Currency object after incrementing.
+    The created checkpoint instance.
 </div>
 
 
@@ -648,7 +562,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Currency.html">Currency</a></span>
+<span class="param-type">Promise.&lt;<a href="Checkpoint.html">Checkpoint</a>></span>
 
 
     </dd>
@@ -666,7 +580,7 @@
     
 
     
-    <h4 class="name" id=".updateCurrency"><span class="type-signature">(static) </span>updateCurrency<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="Currency.html">Currency</a>}</span></h4>
+    <h4 class="name" id=".refactorGameStatistics"><span class="type-signature">(async, static) </span>refactorGameStatistics<span class="signature">(params)</span><span class="type-signature"> &rarr; {Promise.&lt;any>}</span></h4>
     
 
     
@@ -674,7 +588,7 @@
 
 
 <div class="description">
-    PUT /gameStatistics/:id/currency<br>Updates the Currency object associated with a GameStatistics entry.
+    Refactors game statistics for a given checkpoint.
 </div>
 
 
@@ -710,13 +624,13 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
+                <td class="name"><code>params</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">express.Request</span>
+<span class="param-type">Object</span>
 
 
             
@@ -726,7 +640,7 @@
 
             
 
-            <td class="description last">– Express request object.
+            <td class="description last">The parameters object.
                 <h6>Properties</h6>
                 
 
@@ -752,7 +666,7 @@
 
         <tr>
             
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>checkpointId</code></td>
             
 
             <td class="type">
@@ -768,99 +682,7 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics entry.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.greenEnergy</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The new green energy value.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.greyEnergy</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The new grey energy value.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.coins</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The new coins value.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.score</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The new score value.</td>
+            <td class="description last">The ID of the checkpoint to refactor statistics for.</td>
         </tr>
 
     
@@ -868,29 +690,6 @@
 </table>
 
             </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
         </tr>
 
     
@@ -931,7 +730,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line171">line 171</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line370">line 370</a>
     </li></ul></dd>
     
 
@@ -960,7 +759,7 @@
 
         
 <div class="param-desc">
-    – The updated Currency object.
+    The result of the refactored game statistics operation.
 </div>
 
 
@@ -971,7 +770,166 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Currency.html">Currency</a></span>
+<span class="param-type">Promise.&lt;any></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".removeCheckpoint"><span class="type-signature">(async, static) </span>removeCheckpoint<span class="signature">(checkpointId)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Checkpoint.html">Checkpoint</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Removes a checkpoint from the game statistics repository by its id.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>checkpointId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the checkpoint to remove.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line357">line 357</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The removed checkpoint object.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Checkpoint.html">Checkpoint</a>></span>
 
 
     </dd>

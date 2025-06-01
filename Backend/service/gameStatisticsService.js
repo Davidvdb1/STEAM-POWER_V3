@@ -1,5 +1,10 @@
 /**
  * @module service/gameStatisticsService
+ * @description
+ *   All GameStatistics-related logic is handled here.
+ *   This includes creating, retrieving, updating, and deleting game statistics,
+ *   as well as managing currency, assets, checkpoints, game buildings, and achievements.
+ * @requires module:repository/gameStatisticsRepository
  */
 
 require("@prisma/client");
@@ -16,10 +21,20 @@ class GameStatisticsService {
   //########################################################################
   //                            GAME STATISTICS
   //########################################################################
+
+  /**
+   * @namespace module:service/gameStatisticsService.Service_GameStatistics
+   * @memberof module:service/gameStatisticsService
+   * @description
+   *   All service methods for creating, retrieving, and querying GameStatistics entries.
+   */
+
   /**
    * Creates a new game statistics object for a specific group with the provided currency data.
    *
    * @async
+   * @function create
+   * @memberOf module:service/gameStatisticsService.Service_GameStatistics
    * @param {Object} params - The parameters for creating game statistics.
    * @param {string} params.groupId - The id of the group to associate with the game statistics.
    * @param {number} [params.greenEnergy] - The amount of green energy (optional).
@@ -43,6 +58,8 @@ class GameStatisticsService {
    * Retrieves all game statistics objects from the repository.
    *
    * @async
+   * @function getAllGameStatistics
+   * @memberOf module:service/gameStatisticsService.Service_GameStatistics
    * @returns {Promise<GameStatistics[]>} A promise that resolves to an array of GameStatistics objects.
    */
   async getAllGameStatistics() {
@@ -53,6 +70,8 @@ class GameStatisticsService {
    * Retrieves a GameStatistics object by its id with optional related data.
    *
    * @async
+   * @function getById
+   * @memberOf module:service/gameStatisticsService.Service_GameStatistics
    * @param {string} id - The id of the GameStatistics record.
    * @param {boolean} [includeCurrency=true] - Whether to include currency data.
    * @param {boolean} [includeGameBuildings=true] - Whether to include game buildings data.
@@ -82,6 +101,8 @@ class GameStatisticsService {
    * Retrieves a game statistics record by group id with optional related data.
    *
    * @async
+   * @function getByGroupId
+   * @memberOf module:service/gameStatisticsService.Service_GameStatistics
    * @param {string} groupId - The id of the group to search for.
    * @param {boolean} [includeCurrency=true] - Whether to include currency information in the result.
    * @param {boolean} [includeGameBuildings=true] - Whether to include game buildings in the result.
@@ -110,10 +131,21 @@ class GameStatisticsService {
   //########################################################################
   //                                CURRENCY
   //########################################################################
+
+  /**
+   * @namespace module:service/gameStatisticsService.Service_Currency
+   * @memberof module:service/gameStatisticsService
+   * @description
+   *   All service methods for managing currency in game statistics.
+   *  This includes retrieving, updating, and incrementing currency values.
+   */
+
   /**
    * Retrieves a Currency object by its id.
    *
    * @async
+   * @function getCurrencyById
+   * @memberOf module:service/gameStatisticsService.Service_Currency
    * @param {string} currencyId - The id of the currency to retrieve.
    * @returns {Promise<Currency|null>} A promise that resolves to a Currency instance if found, or null if not found.
    */
@@ -125,6 +157,8 @@ class GameStatisticsService {
    * Updates the currency values for a given currency id with the given payload.
    *
    * @async
+   * @function updateCurrency
+   * @memberOf module:service/gameStatisticsService.Service_Currency
    * @param {string} currencyId - The id of the currency to update.
    * @param {Object} payload - The new currency values.
    * @param {number} payload.greenEnergy - The updated amount of green energy.
@@ -141,6 +175,8 @@ class GameStatisticsService {
    * Increments the specified currency fields for a given currency id.
    *
    * @async
+   * @function incrementCurrency
+   * @memberOf module:service/gameStatisticsService.Service_Currency
    * @param {string} currencyId - The id of the currency to update.
    * @param {Object} payload - The amounts to increment for each currency field.
    * @param {number} [payload.greenEnergy=0] - The amount to increment greenEnergy by.
@@ -156,12 +192,23 @@ class GameStatisticsService {
   //########################################################################
   //                                 ASSETS
   //########################################################################
+
+  /**
+   * @namespace module:service/gameStatisticsService.Service_Assets
+   * @memberof module:service/gameStatisticsService
+   * @description
+   *   All service methods for managing assets in game statistics.
+   *   This includes adding, removing, and retrieving assets associated with game statistics.
+   */
+
   /**
    * Adds an asset to the game statistics for the given statsId.
    * Determines the asset type (Nature or Asset), creates an instance, and adds it via the repository.
    * After adding, checks if any asset-related achievements have been achieved and adds them to the game statistics if so.
    *
    * @async
+   * @function addAsset
+   * @memberOf module:service/gameStatisticsService.Service_Assets
    * @param {string} statsId - The id of the game statistics object to associate the asset with.
    * @param {Object} aData - The data for the asset to be added.
    * @param {number} aData.buildCost - The cost to build the asset.
@@ -208,6 +255,8 @@ class GameStatisticsService {
    * If the achievement is achieved, it is added to the game statistics.
    *
    * @async
+   * @function removeAsset
+   * @memberOf module:service/gameStatisticsService.Service_Assets
    * @param {string} assetId - The id of the asset to remove.
    * @returns {Promise<Asset>} The removed asset object.
    */
@@ -235,6 +284,8 @@ class GameStatisticsService {
    * Retrieves all assets associated with a specific game statistics ID.
    *
    * @async
+   * @function findAllAssetsByGameStatisticsId
+   * @memberOf module:service/gameStatisticsService.Service_Assets
    * @param {string} gameStatisticsId - The unique identifier of the game statistics.
    * @returns {Promise<Array>} A promise that resolves to an array of assets related to the given game statistics ID.
    */
@@ -247,10 +298,21 @@ class GameStatisticsService {
   //########################################################################
   //                              CHECKPOINTS
   //########################################################################
+
+  /**
+   * @namespace module:service/gameStatisticsService.Service_Checkpoints
+   * @memberof module:service/gameStatisticsService
+   * @description
+   *   All service methods for managing checkpoints in game statistics.
+   *   This includes creating, retrieving, and removing checkpoints associated with game statistics.
+   */
+
   /**
    * Creates a checkpoint for a given game statistics id.
    *
    * @async
+   * @function recordCheckpoint
+   * @memberof module:service/gameStatisticsService.Service_Checkpoints
    * @param {string} statsId - The id of the game statistics to associate with the checkpoint.
    * @param {Object} cpData - The checkpoint data to record.
    * @param {Currency} cpData.currency - The currency instance for the checkpoint.
@@ -281,6 +343,8 @@ class GameStatisticsService {
    * Retrieves all checkpoints associated with a specific game statistics ID.
    *
    * @async
+   * @function findAllCheckpointsByGameStatisticsId
+   * @memberof module:service/gameStatisticsService.Service_Checkpoints
    * @param {string|number} gameStatisticsId - The unique identifier of the game statistics.
    * @returns {Promise<Array<Object>>} A promise that resolves to an array of checkpoint objects.
    */
@@ -294,6 +358,8 @@ class GameStatisticsService {
    * Removes a checkpoint from the game statistics repository by its id.
    *
    * @async
+   * @function removeCheckpoint
+   * @memberof module:service/gameStatisticsService.Service_Checkpoints
    * @param {string} checkpointId - The id of the checkpoint to remove.
    * @returns {Promise<Checkpoint>} The removed checkpoint object.
    */
@@ -305,7 +371,8 @@ class GameStatisticsService {
    * Refactors game statistics for a given checkpoint.
    *
    * @async
-   * @function
+   * @function refactorGameStatistics
+   * @memberof module:service/gameStatisticsService.Service_Checkpoints
    * @param {Object} params - The parameters object.
    * @param {string} params.checkpointId - The ID of the checkpoint to refactor statistics for.
    * @returns {Promise<any>} The result of the refactored game statistics operation.
@@ -322,10 +389,21 @@ class GameStatisticsService {
   //########################################################################
   //                             GAME BUILDINGS
   //########################################################################
+
+  /**
+   * @namespace module:service/gameStatisticsService.Service_GameBuildings
+   * @memberof module:service/gameStatisticsService
+   * @description
+   *   All service methods for managing game buildings in game statistics.
+   *   This includes retrieving, upgrading, and managing game buildings associated with game statistics.
+   */
+
   /**
    * Retrieves all game buildings associated with a specific group id.
    *
    * @async
+   * @function getAllGameBuildingsByGroupId
+   * @memberof module:service/gameStatisticsService.Service_GameBuildings
    * @param {string} groupId - The id of the group to fetch game buildings for.
    * @returns {Promise<GameBuildings[]>} A promise that resolves to an array of GameBuildings instances.
    */
@@ -341,6 +419,8 @@ class GameStatisticsService {
    * Checks for and awards any relevant achievements after the upgrade.
    *
    * @async
+   * @function upgradeGameBuilding
+   * @memberof module:service/gameStatisticsService.Service_GameBuildings
    * @param {string} gameBuildingId - The id of the GameBuilding to upgrade.
    * @param {number} level - The new level to upgrade the building to.
    * @returns {Promise<GameBuildings>} The updated GameBuilding object.
@@ -400,10 +480,21 @@ class GameStatisticsService {
   //########################################################################
   //                              ACHIEVEMENTS
   //########################################################################
+
+  /**
+   * @namespace module:service/gameStatisticsService.Service_Achievements
+   * @memberof module:service/gameStatisticsService
+   * @description
+   *   All service methods for managing achievements in game statistics.
+   *   This includes adding achievements to game statistics and checking if achievements have been achieved.
+   */
+
   /**
    * Adds an achievement to the game statistics for a given gameStatisticsId.
    *
    * @async
+   * @function addAchievementToGameStatistics
+   * @memberof module:service/gameStatisticsService.Service_Achievements
    * @param {string} gameStatisticsId - The id of the game statistics record.
    * @param {string} title - The title of the achievement to add.
    * @returns {Promise<GameStatistics>} The updated game statistics object.
@@ -439,6 +530,8 @@ class GameStatisticsService {
    * Retrieves the achievements associated with a specific game statistics record.
    *
    * @async
+   * @function getGameStatisticsAchievements
+   * @memberof module:service/gameStatisticsService.Service_Achievements
    * @param {string} gameStatisticsId - The id of the game statistics record.
    * @returns {Promise<Achievement[]>} A promise that resolves to an array of achievements for the given game statistics.
    */
@@ -452,6 +545,8 @@ class GameStatisticsService {
    * Checks if a specific achievement has been achieved based on the provided game statistics and achievement title.
    *
    * @async
+   * @function hasAchievementBeenAchieved
+   * @memberof module:service/gameStatisticsService.Service_Achievements
    * @param {string} gameStatisticsId - The id of the GameStatistics object containing information about a group's game state.
    * @param {string} title - The title of the achievement to check.
    * @returns {Promise<boolean>} - Returns a promise that resolves to true if the achievement has been achieved, otherwise false.

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Checkpoint</title>
+    <title>JSDoc: Namespace: Service_Currency</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Checkpoint</h1>
+    <h1 class="page-title">Namespace: Service_Currency</h1>
 
     
 
@@ -28,9 +28,8 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Checkpoint<span class="signature">(params)</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description">Represents a Checkpoint, grouping currency, buildings, assets, and a reference to game statistics.</div>
+        <h2>
+            <span class="ancestors"><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a>.</span>Service_Currency</h2>
         
     
 </header>
@@ -39,18 +38,90 @@
     <div class="container-overview">
     
         
+            <div class="description">All service methods for managing currency in game statistics. This includes retrieving, updating, and incrementing currency values.</div>
+        
 
-    
-    <h2>Constructor</h2>
-    
-
-    
-    <h4 class="name" id="Checkpoint"><span class="type-signature"></span>new Checkpoint<span class="signature">(params)</span><span class="type-signature"></span></h4>
-    
-
-    
+        
 
 
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line135">line 135</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".getCurrencyById"><span class="type-signature">(async, static) </span>getCurrencyById<span class="signature">(currencyId)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="Currency.html">Currency</a>|null)>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves a Currency object by its id.
+</div>
 
 
 
@@ -85,7 +156,189 @@
 
         <tr>
             
-                <td class="name"><code>params</code></td>
+                <td class="name"><code>currencyId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the currency to retrieve.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line143">line 143</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A promise that resolves to a Currency instance if found, or null if not found.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;(<a href="Currency.html">Currency</a>|null)></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".incrementCurrency"><span class="type-signature">(async, static) </span>incrementCurrency<span class="signature">(currencyId, payload)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Currency.html">Currency</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Increments the specified currency fields for a given currency id.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>currencyId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the currency to update.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>payload</code></td>
             
 
             <td class="type">
@@ -101,7 +354,7 @@
 
             
 
-            <td class="description last">The parameters for the checkpoint.
+            <td class="description last">The amounts to increment for each currency field.
                 <h6>Properties</h6>
                 
 
@@ -131,13 +384,13 @@
 
         <tr>
             
-                <td class="name"><code>id</code></td>
+                <td class="name"><code>greenEnergy</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">number</span>
 
 
             
@@ -158,58 +411,25 @@
             
                 <td class="default">
                 
+                    0
+                
                 </td>
             
 
-            <td class="description last">The unique identifier of the checkpoint.</td>
+            <td class="description last">The amount to increment greenEnergy by.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>currency</code></td>
+                <td class="name"><code>greyEnergy</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type"><a href="Currency.html">Currency</a></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">The currency state at this checkpoint.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>gameBuildings</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;<a href="GameBuildings.html">GameBuildings</a>></span>
+<span class="param-type">number</span>
 
 
             
@@ -230,25 +450,25 @@
             
                 <td class="default">
                 
-                    []
+                    0
                 
                 </td>
             
 
-            <td class="description last">The list of game buildings.</td>
+            <td class="description last">The amount to increment greyEnergy by.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>assets</code></td>
+                <td class="name"><code>coins</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;<a href="Asset.html">Asset</a>></span>
+<span class="param-type">number</span>
 
 
             
@@ -269,25 +489,25 @@
             
                 <td class="default">
                 
-                    []
+                    0
                 
                 </td>
             
 
-            <td class="description last">The list of assets.</td>
+            <td class="description last">The amount to increment coins by.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>gameStatisticsId</code></td>
+                <td class="name"><code>score</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">number</span>
 
 
             
@@ -308,10 +528,12 @@
             
                 <td class="default">
                 
+                    0
+                
                 </td>
             
 
-            <td class="description last">The associated game statistics ID.</td>
+            <td class="description last">The amount to increment score by.</td>
         </tr>
 
     
@@ -359,7 +581,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="model_checkpoint.js.html">model/checkpoint.js</a>, <a href="model_checkpoint.js.html#line20">line 20</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line174">line 174</a>
     </li></ul></dd>
     
 
@@ -382,177 +604,15 @@
 
 
 
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        If any of the properties are invalid.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
-
-
-
-
-
-
-
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="validate"><span class="type-signature"></span>validate<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Validates the checkpoint properties.
-</div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="model_checkpoint.js.html">model/checkpoint.js</a>, <a href="model_checkpoint.js.html#line48">line 48</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        If `currency` is not a Currency instance,                or if `gameBuildings` is not an array of GameBuildings,                or if `assets` is not an array of Asset.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
 
 
 <h5>Returns:</h5>
 
         
+<div class="param-desc">
+    The updated Currency instance.
+</div>
+
 
 
 <dl>
@@ -561,7 +621,7 @@
     </dt>
     <dd>
         
-<span class="param-type">void</span>
+<span class="param-type">Promise.&lt;<a href="Currency.html">Currency</a>></span>
 
 
     </dd>
@@ -579,7 +639,7 @@
     
 
     
-    <h4 class="name" id=".from"><span class="type-signature">(static) </span>from<span class="signature">(prismaCp)</span><span class="type-signature"> &rarr; {<a href="Checkpoint.html">Checkpoint</a>}</span></h4>
+    <h4 class="name" id=".updateCurrency"><span class="type-signature">(async, static) </span>updateCurrency<span class="signature">(currencyId, payload)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Currency.html">Currency</a>>}</span></h4>
     
 
     
@@ -587,7 +647,7 @@
 
 
 <div class="description">
-    Creates a Checkpoint instance from a Prisma checkpoint object.
+    Updates the currency values for a given currency id with the given payload.
 </div>
 
 
@@ -623,7 +683,30 @@
 
         <tr>
             
-                <td class="name"><code>prismaCp</code></td>
+                <td class="name"><code>currencyId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the currency to update.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>payload</code></td>
             
 
             <td class="type">
@@ -639,7 +722,7 @@
 
             
 
-            <td class="description last">The Prisma checkpoint record.
+            <td class="description last">The new currency values.
                 <h6>Properties</h6>
                 
 
@@ -653,8 +736,6 @@
         <th>Type</th>
 
         
-        <th>Attributes</th>
-        
 
         
 
@@ -667,161 +748,92 @@
 
         <tr>
             
-                <td class="name"><code>id</code></td>
+                <td class="name"><code>greenEnergy</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">The unique identifier from Prisma.</td>
+            <td class="description last">The updated amount of green energy.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>currency</code></td>
+                <td class="name"><code>greyEnergy</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">The Prisma currency record.</td>
+            <td class="description last">The updated amount of grey energy.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>gameBuildings</code></td>
+                <td class="name"><code>coins</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;Object></span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Array of Prisma game buildings records.</td>
+            <td class="description last">The updated amount of coins.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>assets</code></td>
+                <td class="name"><code>score</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Array.&lt;Object></span>
+<span class="param-type">number</span>
 
 
             
             </td>
 
             
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
 
             
 
-            <td class="description last">Array of Prisma asset records.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>gameStatisticsId</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">The game statistics ID from Prisma.</td>
+            <td class="description last">The updated score value.</td>
         </tr>
 
     
@@ -869,7 +881,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="model_checkpoint.js.html">model/checkpoint.js</a>, <a href="model_checkpoint.js.html#line78">line 78</a>
+        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line156">line 156</a>
     </li></ul></dd>
     
 
@@ -898,7 +910,7 @@
 
         
 <div class="param-desc">
-    The created Checkpoint instance.
+    The updated Currency instance.
 </div>
 
 
@@ -909,7 +921,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Checkpoint.html">Checkpoint</a></span>
+<span class="param-type">Promise.&lt;<a href="Currency.html">Currency</a>></span>
 
 
     </dd>
