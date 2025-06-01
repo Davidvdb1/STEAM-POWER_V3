@@ -1,40 +1,85 @@
 // gameBuildings.js
-const Building      = require('./building');
-const BuildingLevel = require('./buildingLevel');
+const Building = require("./building");
+const BuildingLevel = require("./buildingLevel");
 
+/**
+ * Represents a GameBuildings record, linking a building and its level to a checkpoint or game statistics.
+ *
+ * @constructor
+ * @param {Object} params - The parameters for the GameBuildings instance.
+ * @param {string} [params.id] - The unique identifier of the game‐building record.
+ * @param {string|null} [params.gameStatisticsId=null] - The associated game statistics ID, if any.
+ * @param {string|null} [params.checkpointId=null] - The associated checkpoint ID, if any.
+ * @param {Building|null} params.building - The Building instance.
+ * @param {BuildingLevel} params.buildingLevel - The BuildingLevel instance.
+ * @param {boolean} [validate=true] - Whether to validate the instance on creation.
+ *
+ * @throws {Error} If any of the properties are invalid.
+ */
 class GameBuildings {
   constructor(
-    { id = undefined, gameStatisticsId = null, checkpointId = null, building, buildingLevel },
+    {
+      id = undefined,
+      gameStatisticsId = null,
+      checkpointId = null,
+      building,
+      buildingLevel,
+    },
     validate = true
   ) {
     this.id = id;
     this.gameStatisticsId = gameStatisticsId;
-    this.checkpointId     = checkpointId;
+    this.checkpointId = checkpointId;
     this.building = building;
     this.buildingLevel = buildingLevel;
+
     if (validate) this.validate();
   }
 
+  /**
+   * Validates the GameBuildings properties.
+   *
+   * @throws {Error} If `gameStatisticsId` is not a string when present,
+   *                 if `building` is not a Building instance,
+   *                 or if `buildingLevel` is not a BuildingLevel instance.
+   * @returns {void}
+   */
   validate() {
-    // Check type without using instanceof for GameStatistics to avoid circular dependency
-    if (this.gameStatisticsId && typeof this.gameStatisticsId !== 'string') {
-      throw new Error('Invalid gameStatistics (must be a string)');
+    if (
+      this.gameStatisticsId != null &&
+      typeof this.gameStatisticsId !== "string"
+    ) {
+      throw new Error("Invalid gameStatisticsId (must be a string)");
     }
-    if (this.building && !(this.building instanceof Building)) {
-      throw new Error('Invalid building (must be Building)');
+    if (this.building != null && !(this.building instanceof Building)) {
+      throw new Error("Invalid building (must be Building)");
     }
     if (!(this.buildingLevel instanceof BuildingLevel)) {
-      throw new Error('Invalid buildingLevel (must be BuildingLevel)');
+      throw new Error("Invalid buildingLevel (must be BuildingLevel)");
     }
   }
 
+  /**
+   * Creates a GameBuildings instance from a Prisma gameBuildings object.
+   *
+   * @static
+   * @param {Object} prismaGB - The Prisma GameBuildings record.
+   * @param {string} prismaGB.id - The unique identifier from Prisma.
+   * @param {string|null} prismaGB.gameStatisticsId - The game statistics ID from Prisma.
+   * @param {string|null} prismaGB.checkpointId - The checkpoint ID from Prisma.
+   * @param {Object} [prismaGB.building] - The related Prisma Building record.
+   * @param {Object} [prismaGB.buildingLevel] - The related Prisma BuildingLevel record.
+   * @returns {GameBuildings} The created GameBuildings instance.
+   */
   static from(prismaGB) {
     return new GameBuildings({
-      id:               prismaGB.id,
+      id: prismaGB.id,
       gameStatisticsId: prismaGB.gameStatisticsId,
-      checkpointId:     prismaGB.checkpointId,
-      building:         prismaGB.building       ? Building.from(prismaGB.building)       : null,
-      buildingLevel:    prismaGB.buildingLevel  ? BuildingLevel.from(prismaGB.buildingLevel) : null,
+      checkpointId: prismaGB.checkpointId,
+      building: prismaGB.building ? Building.from(prismaGB.building) : null,
+      buildingLevel: prismaGB.buildingLevel
+        ? BuildingLevel.from(prismaGB.buildingLevel)
+        : null,
     });
   }
 }
