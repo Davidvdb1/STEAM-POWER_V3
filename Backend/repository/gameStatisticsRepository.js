@@ -300,6 +300,7 @@ class GameStatisticsRepository {
     return Currency.from(updated);
   }
 
+
   /**
    * Retrieves the currency associated with a specific game statistics ID.
    *
@@ -316,6 +317,7 @@ class GameStatisticsRepository {
     });
     return currency ? Currency.from(currency) : null;
   }
+
 
   //########################################################################
   //                                 ASSETS

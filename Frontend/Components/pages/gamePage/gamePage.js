@@ -50,7 +50,6 @@ window.customElements.define('gamepage-れ', class extends HTMLElement {
         if (groupId && token) {
             this.scoreInterval = setInterval(() => {
             ScoreCalculations(groupId, token)
-                .then(() => console.log("Score calculations completed"))
                 .catch(err => console.error("Error in score calculations:", err));
             }, 1000);
         } else {

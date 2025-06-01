@@ -64,7 +64,7 @@ class BuildingDetail extends HTMLElement {
     if (!this._data) return;
 
     // Ensure we have level data
-    const lvl = this._data.level || this._data.buildingLevel;
+    const lvl = this._data.buildingLevel || this._data.level;
     if (!lvl) {
       console.error('Building has no level data:', this._data);
       return;
