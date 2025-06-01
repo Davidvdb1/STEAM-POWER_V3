@@ -1,0 +1,25 @@
+{
+  "source": {
+    "include": [
+      "controller/gameStatisticsController.js",
+      "model/achievement.js",
+      "model/asset.js",
+      "model/building.js",
+      "model/buildingLevel.js",
+      "model/checkpoint.js",
+      "model/currency.js",
+      "model/gameBuildings.js",
+      "model/gameStatistics.js",
+      "model/group.js",
+      "model/nature.js",
+      "repository/gameStatisticsRepository.js",
+      "service/gameStatisticsService.js"
+    ],
+    "includePattern": ".+\\.js$",
+    "excludePattern": "(^|/)node_modules/"
+  },
+  "opts": {
+    "destination": "gameDocumentation",
+    "recurse": false
+  }
+}

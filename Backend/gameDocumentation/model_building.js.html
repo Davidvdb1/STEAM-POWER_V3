@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: model/building.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: model/building.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Represents a Building entity.
+ *
+ * @constructor
+ * @param {Object} params - The parameters for the building.
+ * @param {string} [params.id] - The unique identifier of the building.
+ * @param {string} params.name - The name of the building.
+ * @param {boolean} [validate=true] - Whether to validate the building on creation.
+ *
+ * @throws {Error} If validation fails.
+ */
+class Building {
+  constructor({ id = undefined, name }, validate = true) {
+    this.id = id;
+    this.name = name;
+
+    if (validate) this.validate();
+  }
+
+  /**
+   * Validates the building’s properties.
+   *
+   * @throws {Error} If `name` is not a string.
+   * @returns {void}
+   */
+  validate() {
+    if (typeof this.name !== "string") {
+      throw new Error("Invalid name");
+    }
+  }
+
+  /**
+   * Creates a Building instance from a Prisma building object.
+   *
+   * @static
+   * @param {Object} prismaBuilding - The Prisma building object.
+   * @param {string} prismaBuilding.id - The unique identifier from Prisma.
+   * @param {string} prismaBuilding.name - The name from Prisma.
+   * @returns {Building} The created Building instance.
+   */
+  static from(prismaBuilding) {
+    return new Building({
+      id: prismaBuilding.id,
+      name: prismaBuilding.name,
+    });
+  }
+}
+
+module.exports = Building;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a></li><li><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a></li><li><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-controller_gameStatisticsController.Controller_Achievements.html">Controller_Achievements</a></li><li><a href="module-controller_gameStatisticsController.Controller_Assets.html">Controller_Assets</a></li><li><a href="module-controller_gameStatisticsController.Controller_Checkpoints.html">Controller_Checkpoints</a></li><li><a href="module-controller_gameStatisticsController.Controller_Currency.html">Controller_Currency</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameBuildings.html">Controller_GameBuildings</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameStatistics.html">Controller_GameStatistics</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_Achievements.html">Repository_Achievements</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_Assets.html">Repository_Assets</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_BuildingLevels.html">Repository_BuildingLevels</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_Checkpoints.html">Repository_Checkpoints</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_Currency.html">Repository_Currency</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_GameBuildings.html">Repository_GameBuildings</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_GameStatistics.html">Repository_GameStatistics</a></li><li><a href="module-service_gameStatisticsService.Service_Achievements.html">Service_Achievements</a></li><li><a href="module-service_gameStatisticsService.Service_Assets.html">Service_Assets</a></li><li><a href="module-service_gameStatisticsService.Service_Checkpoints.html">Service_Checkpoints</a></li><li><a href="module-service_gameStatisticsService.Service_Currency.html">Service_Currency</a></li><li><a href="module-service_gameStatisticsService.Service_GameBuildings.html">Service_GameBuildings</a></li><li><a href="module-service_gameStatisticsService.Service_GameStatistics.html">Service_GameStatistics</a></li></ul><h3>Classes</h3><ul><li><a href="Achievement.html">Achievement</a></li><li><a href="Asset.html">Asset</a></li><li><a href="Building.html">Building</a></li><li><a href="BuildingLevel.html">BuildingLevel</a></li><li><a href="Checkpoint.html">Checkpoint</a></li><li><a href="Currency.html">Currency</a></li><li><a href="GameBuildings.html">GameBuildings</a></li><li><a href="GameStatistics.html">GameStatistics</a></li><li><a href="Group.html">Group</a></li><li><a href="Nature.html">Nature</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Jun 01 2025 12:54:49 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
