@@ -284,8 +284,8 @@ router.post("/:id/assets", async (req, res) => {
  */
 router.delete("/assets/:assetId", async (req, res) => {
   try {
-    await gameStatisticsService.removeAsset(req.params.assetId);
-    res.status(200).json({ message: "Asset removed" });
+    const response = await gameStatisticsService.removeAsset(req.params.assetId);
+    res.status(200).json(response);
   } catch (error) {
     console.error(`Error removing asset ${req.params.assetId}:`, error);
     const statusCode = error.statusCode || 500;

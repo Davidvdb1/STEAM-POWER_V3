@@ -16,6 +16,7 @@ const Asset = require("../model/asset");
 const Nature = require("../model/nature");
 const Checkpoint = require("../model/checkpoint");
 const GameBuildings = require("../model/gameBuildings");
+const Achievement = require("../model/achievement");
 
 class GameStatisticsService {
   //########################################################################
@@ -220,7 +221,7 @@ class GameStatisticsService {
    * @param {number} aData.ySize - The height of the asset.
    * @param {string} aData.type - The type of the asset.
    * @param {string} aData.gameStatisticsId - The id for the game statistics to which the asset belongs.
-   * @returns {Promise<Asset>} The added asset instance.
+   * @returns {Promise<{asset: Asset, newlyEarnedAchievements: Achievement[]}>} The added Asset object and any newly earned achievements.
    */
   async addAsset(statsId, aData) {
     const { type } = aData;
@@ -235,19 +236,15 @@ class GameStatisticsService {
       assetInstance
     );
 
-    // Check if any achievement for building an asset has been achieved
-    const assetAchievements = [
-      "Energie-ingenieur",
-      "Energie-architect",
-      "Groene vingers",
-    ];
-    for (const achievement of assetAchievements) {
-      if (await this.hasAchievementBeenAchieved(statsId, achievement)) {
-        // If so, add the achievement to the game statistics
-        await this.addAchievementToGameStatistics(statsId, achievement);
-      }
-    }
-    return addedAsset;
+    // Check if any achievement for placing an asset has been achieved. If so add them to the GameStatistics object
+    const assetAchievements = ["Energie-ingenieur", "Energie-architect", "Groene vingers"];
+    const newlyEarnedAchievements = await this._trackEarnedAchievements( statsId, assetAchievements);
+
+    // Return both the added Asset and any newly earned Achievements
+      return {
+      asset: addedAsset,
+      newlyEarnedAchievements: newlyEarnedAchievements
+    };
   }
 
   /**
@@ -258,26 +255,20 @@ class GameStatisticsService {
    * @function removeAsset
    * @memberOf module:service/gameStatisticsService.Service_Assets
    * @param {string} assetId - The id of the asset to remove.
-   * @returns {Promise<Asset>} The removed asset object.
+   * @returns {Promise<{asset: Asset, newlyEarnedAchievements: Achievement[]}>} The removed Asset object and any newly earned achievements.
    */
   async removeAsset(assetId) {
+    // Remove the asset from the GameStatistics object
     const removedAsset = await gameStatisticsRepository.removeAsset(assetId);
 
-    // Check if any achievement for destroying an asset has been achieved
-    if (
-      await this.hasAchievementBeenAchieved(
-        removedAsset.gameStatisticsId,
-        "Milieuheld",
-        removedAsset
-      )
-    ) {
-      // If so, add the achievement to the game statistics
-      await this.addAchievementToGameStatistics(
-        removedAsset.gameStatisticsId,
-        "Milieuheld"
-      );
-    }
-    return removedAsset;
+    // Check if any achievement for destroying an asset has been achieved. If so add them to the GameStatistics object
+    const newlyEarnedAchievements = await this._trackEarnedAchievements( removedAsset.gameStatisticsId, ["Milieuheld"], removedAsset);
+
+    // Return both the removed Asset and any newly earned Achievements
+      return {
+      asset: removedAsset,
+      newlyEarnedAchievements: newlyEarnedAchievements
+    };
   }
 
   /**
@@ -424,7 +415,7 @@ class GameStatisticsService {
    * @memberof module:service/gameStatisticsService.Service_GameBuildings
    * @param {string} gameBuildingId - The id of the GameBuilding to upgrade.
    * @param {number} nextLevel - The new level to upgrade the building to.
-   * @returns {Promise<GameBuildings>} The updated GameBuilding object.
+   * @returns {Promise<{gameBuilding: GameBuildings, newlyEarnedAchievements: Achievement[]}>} The updated GameBuilding object and any newly earned achievements.
    * @throws {Error} If the GameBuilding or the next BuildingLevel is not found.
    */
   async upgradeGameBuilding(gameBuildingId, { nextLevel }) {
@@ -466,19 +457,15 @@ class GameStatisticsService {
       score: gameStatistics.currency.score
     });
 
-    // Check if any achievement for upgrading a building has been achieved
-    const buildingAchievements = [
-      "Bouwassistent",
-      "Bouwmeester",
-      "Bouwkampioen",
-    ];
-    for (const achievement of buildingAchievements) {
-      if (await this.hasAchievementBeenAchieved(gameStatistics.id, achievement)) {
-        // If so, add the achievement to the game statistics
-        await this.addAchievementToGameStatistics(gameStatistics.id, achievement);
-      }
-    }
-    return updatedGameBuilding;
+    // Check if any achievement for upgrading a building has been achieved. If so add them to the GameStatistics object
+    const buildingAchievements = ["Bouwassistent", "Bouwmeester", "Bouwkampioen"];
+    const newlyEarnedAchievements = await this._trackEarnedAchievements(gameStatistics.id, buildingAchievements);
+
+    // Return both the updated GameBuilding and any newly earned Achievements
+    return {
+      gameBuilding: updatedGameBuilding,
+      newlyEarnedAchievements: newlyEarnedAchievements
+    };
   }
 
   //########################################################################
@@ -494,55 +481,44 @@ class GameStatisticsService {
    */
 
   /**
-   * Adds an achievement to the game statistics for a given gameStatisticsId.
+   * Retrieves the achievements associated with a specific game statistics record.
    *
    * @async
    * @function addAchievementToGameStatistics
    * @memberof module:service/gameStatisticsService.Service_Achievements
    * @param {string} gameStatisticsId - The id of the game statistics record.
-   * @param {string} title - The title of the achievement to add.
-   * @returns {Promise<GameStatistics>} The updated game statistics object.
-   */
-  async addAchievementToGameStatistics(gameStatisticsId, title) {
-    const achievement = await gameStatisticsRepository.findAchievementByTitle(
-      title
-    );
-    if (!achievement) {
-      throw new Error(`Achievement with title "${title}" not found`);
-    }
-
-    // Get current achievements and check if this achievement already exists by id
-    const currentAchievements =
-      await gameStatisticsRepository.getGameStatisticsAchievements(
-        gameStatisticsId
-      );
-    const achievementExists = currentAchievements.some(
-      (a) => a.id === achievement.id
-    );
-    if (achievementExists) {
-      // If the achievement already exists, do nothing and return
-      return;
-    }
-
-    return await gameStatisticsRepository.addAchievementToGameStatistics(
-      gameStatisticsId,
-      achievement
-    );
-  }
-
-  /**
-   * Retrieves the achievements associated with a specific game statistics record.
-   *
-   * @async
-   * @function getGameStatisticsAchievements
-   * @memberof module:service/gameStatisticsService.Service_Achievements
-   * @param {string} gameStatisticsId - The id of the game statistics record.
    * @returns {Promise<Achievement[]>} A promise that resolves to an array of achievements for the given game statistics.
    */
   async getGameStatisticsAchievements(gameStatisticsId) {
-    return await gameStatisticsRepository.getGameStatisticsAchievements(
-      gameStatisticsId
-    );
+    return await gameStatisticsRepository.getGameStatisticsAchievements(gameStatisticsId);
+  }
+
+
+  /**
+   * Tracks and adds newly earned achievements to a GameStatistics object.
+   *
+   * Iterates over the provided achievement titles, checks if each achievement has been achieved,
+   * and if so, adds it to the GameStatistics. Returns a list of achievements that were earned.
+   *
+   * @async
+   * @param {string} gameStatisticsId - The identifier of the GameStatistics object.
+   * @param {string[]} achievementTitles - An array of achievement titles to check and add.
+   * @param {Asset} [removedAsset=null] - An optional Asset object used to check if a destroyed asset was a grey energy source.
+   * @returns {Promise<Achievement[]>} A promise that resolves to an array of earned achievement objects.
+   */
+  async _trackEarnedAchievements(gameStatisticsId, achievementTitles, removedAsset = null) {
+    const earnedAchievements = [];
+    
+    for (const title of achievementTitles) {
+      if (await this.hasAchievementBeenAchieved(gameStatisticsId, title, removedAsset)) {
+        // Add the achievement to the GameStatistics object
+        const achievement = await this.addAchievementToGameStatistics(gameStatisticsId, title);
+
+        // Add the achievement to the list of earned achievements if it exists
+        earnedAchievements.push(achievement);
+      }
+    }
+    return earnedAchievements;
   }
 
   /**
@@ -633,6 +609,34 @@ class GameStatisticsService {
         console.log(`Unknown achievement title: ${title}`);
         return false;
     }
+  }
+
+
+  /**
+   * Adds an achievement to the game statistics for a given gameStatisticsId.
+   *
+   * @async
+   * @param {string} gameStatisticsId - The id of the game statistics record.
+   * @param {string} title - The title of the achievement to add.
+   * @returns {Promise<Achievement>} The added Achievement object.
+   */
+  async addAchievementToGameStatistics(gameStatisticsId, title) {
+    // First, check if the achievement exists by its title
+    const achievement = await gameStatisticsRepository.findAchievementByTitle(title);
+    if (!achievement) {
+      throw new Error(`Achievement with title "${title}" not found`);
+    }
+    
+    // Check if the achievement already exists. If it does, do nothing and return
+    const currentAchievements = await gameStatisticsRepository.getGameStatisticsAchievements(gameStatisticsId);
+    const achievementAlreadyExists = currentAchievements.some(a => a.id === achievement.id);
+    if (achievementAlreadyExists) return;
+    
+    // Add the achievement to the game statistics
+    await gameStatisticsRepository.addAchievementToGameStatistics(gameStatisticsId, achievement);
+
+    // Return the achievement object that was already looked up
+    return achievement;
   }
 }
 

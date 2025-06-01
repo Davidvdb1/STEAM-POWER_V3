@@ -17,6 +17,7 @@ async function main() {
   await prisma.answer.deleteMany();
   await prisma.building.deleteMany();
   await prisma.asset.deleteMany();
+  await prisma.achievement.deleteMany();
 
 
   const image =

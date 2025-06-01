@@ -20,6 +20,7 @@ import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
+import { handleAchievements } from "../utils/achievementHandler.js";
 import { createCheckpointLoadPopup } from "../utils/checkpointLoadPopup.js";
 
 const template = document.createElement("template");
@@ -71,6 +72,7 @@ class GameControlPanel extends HTMLElement {
     this._innerButton = this._shadow.getElementById("inner-button");
     this._outerContainer = this._shadow.getElementById("outer-container");
     this._outerButton = this._shadow.getElementById("outer-button");
+    this._gameContainer = this._shadow.getElementById("game-container");
 
     this._greyEl = this._statsContainer.greyEl;
     this._greenEl = this._statsContainer.greenEl;
@@ -146,6 +148,7 @@ class GameControlPanel extends HTMLElement {
     });
 
     window.phaserGame = this._game;
+    window.gameContainer = this._gameContainer;
     this._game.events.on("buildingClicked", (id) =>
       this._showBuildingDetail(id)
     );
@@ -368,7 +371,10 @@ class GameControlPanel extends HTMLElement {
       if (!asset) throw new Error("Asset not found");
 
       // remove on backend
-      await removeAsset(assetId, token);
+      const response = await removeAsset(assetId, token);
+
+      // Handle any achievements that were earned
+      handleAchievements(response, this._gameContainer);
 
       // deduct destroyCost
       const cur = await getCurrencyById(currencyId, token);
@@ -431,10 +437,13 @@ class GameControlPanel extends HTMLElement {
       if (!building) throw new Error("Building not found");
 
       // Call the backend to upgrade the building to the next level
-      const upgradedBuilding = await upgradeBuilding( GameBuildingId, {nextLevel: building.level.level + 1 }, this._game.token);
+      const response = await upgradeBuilding( GameBuildingId, {nextLevel: building.level.level + 1 }, this._game.token);
 
       // Update the local building data to avoid data inconsistency
-      Object.assign(building, upgradedBuilding);
+      Object.assign(building, response.gameBuilding);
+
+      // Handle any achievements that were earned
+      handleAchievements(response, this._gameContainer);
 
       // Refetch the game statistics to update the UI with the updated currency values
       this._updateStatistics();
@@ -442,7 +451,7 @@ class GameControlPanel extends HTMLElement {
       // Update the detail panel with the new building data
       this._detailContainer.querySelector("building-detail").data = building;
     } catch (err) {
-      throw new Error("Error upgrading building:", err);
+      throw new Error(`Error upgrading building: ${err.message}`);
     }
   }
 
