@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: Controller_GameBuildings</title>
+    <title>JSDoc: Namespace: Repository_GameBuildings</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: Controller_GameBuildings</h1>
+    <h1 class="page-title">Namespace: Repository_GameBuildings</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a>.</span>Controller_GameBuildings</h2>
+            <span class="ancestors"><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a>.</span>Repository_GameBuildings</h2>
         
     
 </header>
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">Endpoints for retrieving and upgrading GameBuilding objects related to GameStatistics.</div>
+            <div class="description">All repository methods related to game buildings, including creation, retrieval, and upgrades.</div>
         
 
         
@@ -73,7 +73,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line437">line 437</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line655">line 655</a>
     </li></ul></dd>
     
 
@@ -112,7 +112,7 @@
     
 
     
-    <h4 class="name" id=".getAllGameBuildingsByGroupId"><span class="type-signature">(static) </span>getAllGameBuildingsByGroupId<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>}</span></h4>
+    <h4 class="name" id=".findAllGameBuildingsByGameStatisticsId"><span class="type-signature">(async, static) </span>findAllGameBuildingsByGameStatisticsId<span class="signature">(gameStatisticsId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>>}</span></h4>
     
 
     
@@ -120,7 +120,7 @@
 
 
 <div class="description">
-    GET /gameStatistics/gameBuildings/getAllGameBuildingsByGroupId/:groupId<br>Retrieves all GameBuildings associated with a specific groupId.
+    Retrieves all game building records associated with a specific game statistics ID.
 </div>
 
 
@@ -156,49 +156,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.groupId</code></td>
+                <td class="name"><code>gameStatisticsId</code></td>
             
 
             <td class="type">
@@ -214,37 +172,7 @@
 
             
 
-            <td class="description last">– The unique identifier of the group (URL parameter).</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
+            <td class="description last">The unique identifier of the game statistics record.</td>
         </tr>
 
     
@@ -285,7 +213,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line473">line 473</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line705">line 705</a>
     </li></ul></dd>
     
 
@@ -314,7 +242,7 @@
 
         
 <div class="param-desc">
-    – An array of GameBuildings objects.
+    A promise that resolves to an array of GameBuildings instances.
 </div>
 
 
@@ -325,7 +253,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Array.&lt;<a href="GameBuildings.html">GameBuildings</a>></span>
+<span class="param-type">Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>></span>
 
 
     </dd>
@@ -343,7 +271,7 @@
     
 
     
-    <h4 class="name" id=".upgradeGameBuilding"><span class="type-signature">(static) </span>upgradeGameBuilding<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="GameBuildings.html">GameBuildings</a>}</span></h4>
+    <h4 class="name" id=".findAllGameBuildingsByGroupId"><span class="type-signature">(async, static) </span>findAllGameBuildingsByGroupId<span class="signature">(groupId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>>}</span></h4>
     
 
     
@@ -351,7 +279,7 @@
 
 
 <div class="description">
-    PUT /gameStatistics/buildings/:gameBuildingId/upgrade<br>Upgrades a GameBuilding object to a new level.
+    Retrieves all game buildings associated with a specific group id.
 </div>
 
 
@@ -387,49 +315,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.gameBuildingId</code></td>
+                <td class="name"><code>groupId</code></td>
             
 
             <td class="type">
@@ -445,60 +331,7 @@
 
             
 
-            <td class="description last">The unique identifier of the GameBuilding to upgrade.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.level</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The new level to upgrade the building to.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Express response object.</td>
+            <td class="description last">The id of the group to fetch game buildings for.</td>
         </tr>
 
     
@@ -539,7 +372,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line444">line 444</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line683">line 683</a>
     </li></ul></dd>
     
 
@@ -568,7 +401,7 @@
 
         
 <div class="param-desc">
-    The updated GameBuilding object in the response body.
+    A promise that resolves to an array of GameBuildings instances.
 </div>
 
 
@@ -579,7 +412,348 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="GameBuildings.html">GameBuildings</a></span>
+<span class="param-type">Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".findGameBuildingById"><span class="type-signature">(async, static) </span>findGameBuildingById<span class="signature">(gameBuildingId)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="GameBuildings.html">GameBuildings</a>|null)>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves a game building by its id, including its associated game statistics, building, and building level objetcs.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>gameBuildingId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the game building to retrieve.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line662">line 662</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A promise that resolves to a GameBuildings instance if found, or null otherwise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;(<a href="GameBuildings.html">GameBuildings</a>|null)></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".upgradeGameBuildingLevel"><span class="type-signature">(async, static) </span>upgradeGameBuildingLevel<span class="signature">(gameBuildingId, buildingLevelId)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="GameBuildings.html">GameBuildings</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Upgrades the level of a game building by updating its associated building level.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>gameBuildingId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the game building to upgrade.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>buildingLevelId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the new building level to associate.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line726">line 726</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The updated GameBuildings instance after the level upgrade.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="GameBuildings.html">GameBuildings</a>></span>
 
 
     </dd>

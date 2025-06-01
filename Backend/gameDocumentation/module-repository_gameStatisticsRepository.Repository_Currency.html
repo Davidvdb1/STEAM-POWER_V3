@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: Controller_Currency</title>
+    <title>JSDoc: Namespace: Repository_Currency</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: Controller_Currency</h1>
+    <h1 class="page-title">Namespace: Repository_Currency</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a>.</span>Controller_Currency</h2>
+            <span class="ancestors"><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a>.</span>Repository_Currency</h2>
         
     
 </header>
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">All endpoints that deal with the Currency object (get, update, increment).</div>
+            <div class="description">All repository methods related to currency management, including creation, retrieval, and updates.</div>
         
 
         
@@ -73,7 +73,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line136">line 136</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line217">line 217</a>
     </li></ul></dd>
     
 
@@ -112,7 +112,7 @@
     
 
     
-    <h4 class="name" id=".getCurrencyById"><span class="type-signature">(static) </span>getCurrencyById<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="Currency.html">Currency</a>}</span></h4>
+    <h4 class="name" id=".findCurrencyByGameStatisticsId"><span class="type-signature">(async, static) </span>findCurrencyByGameStatisticsId<span class="signature">(gameStatisticsId)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="Currency.html">Currency</a>|null)>}</span></h4>
     
 
     
@@ -120,7 +120,7 @@
 
 
 <div class="description">
-    GET /gameStatistics/:id/currency<br>Retrieves the Currency object associated with a GameStatistics entry.
+    Retrieves the currency associated with a specific game statistics ID.
 </div>
 
 
@@ -156,49 +156,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>gameStatisticsId</code></td>
             
 
             <td class="type">
@@ -214,37 +172,7 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics entry.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
+            <td class="description last">The unique identifier of the game statistics.</td>
         </tr>
 
     
@@ -285,7 +213,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line143">line 143</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line303">line 303</a>
     </li></ul></dd>
     
 
@@ -314,7 +242,7 @@
 
         
 <div class="param-desc">
-    – The Currency object associated with the GameStatistics entry.
+    A promise that resolves to a Currency instance if found, or null if not found.
 </div>
 
 
@@ -325,7 +253,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Currency.html">Currency</a></span>
+<span class="param-type">Promise.&lt;(<a href="Currency.html">Currency</a>|null)></span>
 
 
     </dd>
@@ -343,7 +271,7 @@
     
 
     
-    <h4 class="name" id=".incrementCurrency"><span class="type-signature">(static) </span>incrementCurrency<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="Currency.html">Currency</a>}</span></h4>
+    <h4 class="name" id=".findCurrencyById"><span class="type-signature">(async, static) </span>findCurrencyById<span class="signature">(id)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="Currency.html">Currency</a>|null)>}</span></h4>
     
 
     
@@ -351,7 +279,7 @@
 
 
 <div class="description">
-    POST /gameStatistics/:id/currency/increment<br>Increments the Currency object associated with a GameStatistics entry.
+    Retrieves a currency by its id, including its associated game statistics object.
 </div>
 
 
@@ -387,49 +315,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>id</code></td>
             
 
             <td class="type">
@@ -445,129 +331,7 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics entry.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.greenEnergy</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The amount of green energy to increment.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.greyEnergy</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The amount of grey energy to increment.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.coins</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The amount of coins to increment.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>body.score</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– The amount of score to increment.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
+            <td class="description last">The id of the currency to retrieve.</td>
         </tr>
 
     
@@ -608,7 +372,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line200">line 200</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line224">line 224</a>
     </li></ul></dd>
     
 
@@ -637,7 +401,7 @@
 
         
 <div class="param-desc">
-    – The updated Currency object after incrementing.
+    A promise that resolves to a Currency instance if found, or null if not found.
 </div>
 
 
@@ -648,7 +412,7 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Currency.html">Currency</a></span>
+<span class="param-type">Promise.&lt;(<a href="Currency.html">Currency</a>|null)></span>
 
 
     </dd>
@@ -666,7 +430,7 @@
     
 
     
-    <h4 class="name" id=".updateCurrency"><span class="type-signature">(static) </span>updateCurrency<span class="signature">(req, res)</span><span class="type-signature"> &rarr; {<a href="Currency.html">Currency</a>}</span></h4>
+    <h4 class="name" id=".incrementCurrency"><span class="type-signature">(async, static) </span>incrementCurrency<span class="signature">(currencyId, increments)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Currency.html">Currency</a>>}</span></h4>
     
 
     
@@ -674,7 +438,7 @@
 
 
 <div class="description">
-    PUT /gameStatistics/:id/currency<br>Updates the Currency object associated with a GameStatistics entry.
+    Increments the specified currency fields for a given currency id.
 </div>
 
 
@@ -710,49 +474,7 @@
 
         <tr>
             
-                <td class="name"><code>req</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Request</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express request object.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>params.id</code></td>
+                <td class="name"><code>currencyId</code></td>
             
 
             <td class="type">
@@ -768,14 +490,60 @@
 
             
 
-            <td class="description last">– The unique identifier of the GameStatistics entry.</td>
+            <td class="description last">The id of the currency to update.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>body.greenEnergy</code></td>
+                <td class="name"><code>increments</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The amounts to increment for each currency field.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>greenEnergy</code></td>
             
 
             <td class="type">
@@ -788,17 +556,33 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">– The new green energy value.</td>
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The amount to increment greenEnergy by.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>body.greyEnergy</code></td>
+                <td class="name"><code>greyEnergy</code></td>
             
 
             <td class="type">
@@ -811,17 +595,33 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">– The new grey energy value.</td>
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The amount to increment greyEnergy by.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>body.coins</code></td>
+                <td class="name"><code>coins</code></td>
             
 
             <td class="type">
@@ -834,17 +634,33 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">– The new coins value.</td>
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The amount to increment coins by.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>body.score</code></td>
+                <td class="name"><code>score</code></td>
             
 
             <td class="type">
@@ -857,10 +673,26 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
 
+                
+
+                
+                </td>
             
 
-            <td class="description last">– The new score value.</td>
+            
+                <td class="default">
+                
+                    0
+                
+                </td>
+            
+
+            <td class="description last">The amount to increment score by.</td>
         </tr>
 
     
@@ -868,29 +700,6 @@
 </table>
 
             </td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>res</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">express.Response</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">– Express response object.</td>
         </tr>
 
     
@@ -931,7 +740,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="controller_gameStatisticsController.js.html">controller/gameStatisticsController.js</a>, <a href="controller_gameStatisticsController.js.html#line171">line 171</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line273">line 273</a>
     </li></ul></dd>
     
 
@@ -960,7 +769,7 @@
 
         
 <div class="param-desc">
-    – The updated Currency object.
+    The updated Currency instance.
 </div>
 
 
@@ -971,7 +780,336 @@
     </dt>
     <dd>
         
-<span class="param-type"><a href="Currency.html">Currency</a></span>
+<span class="param-type">Promise.&lt;<a href="Currency.html">Currency</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".updateCurrency"><span class="type-signature">(async, static) </span>updateCurrency<span class="signature">(currencyId, values)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Currency.html">Currency</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Updates the currency values for a given currency id.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>currencyId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the currency to update.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>values</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The new currency values.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>greenEnergy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The updated amount of green energy.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>greyEnergy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The updated amount of grey energy.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>coins</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The updated amount of coins.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>score</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The updated score value.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line241">line 241</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        If any of the currency values are not numbers.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The updated Currency instance.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Currency.html">Currency</a>></span>
 
 
     </dd>

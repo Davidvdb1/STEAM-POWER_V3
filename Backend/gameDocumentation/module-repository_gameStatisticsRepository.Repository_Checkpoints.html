@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Namespace: Service_Checkpoints</title>
+    <title>JSDoc: Namespace: Repository_Checkpoints</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Namespace: Service_Checkpoints</h1>
+    <h1 class="page-title">Namespace: Repository_Checkpoints</h1>
 
     
 
@@ -29,7 +29,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a>.</span>Service_Checkpoints</h2>
+            <span class="ancestors"><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a>.</span>Repository_Checkpoints</h2>
         
     
 </header>
@@ -38,7 +38,7 @@
     <div class="container-overview">
     
         
-            <div class="description">All service methods for managing checkpoints in game statistics.  This includes creating, retrieving, and removing checkpoints associated with game statistics.</div>
+            <div class="description">All repository methods related to checkpoint management, including creation, retrieval, and updates.</div>
         
 
         
@@ -73,7 +73,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line302">line 302</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line395">line 395</a>
     </li></ul></dd>
     
 
@@ -112,7 +112,7 @@
     
 
     
-    <h4 class="name" id=".findAllCheckpointsByGameStatisticsId"><span class="type-signature">(async, static) </span>findAllCheckpointsByGameStatisticsId<span class="signature">(gameStatisticsId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;Object>>}</span></h4>
+    <h4 class="name" id=".findAllCheckpointsByGameStatisticsId"><span class="type-signature">(async, static) </span>findAllCheckpointsByGameStatisticsId<span class="signature">(gameStatisticsId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="Checkpoint.html">Checkpoint</a>>>}</span></h4>
     
 
     
@@ -163,9 +163,6 @@
             
                 
 <span class="param-type">string</span>
-|
-
-<span class="param-type">number</span>
 
 
             
@@ -175,7 +172,7 @@
 
             
 
-            <td class="description last">The unique identifier of the game statistics.</td>
+            <td class="description last">The ID of the game statistics to find checkpoints for.</td>
         </tr>
 
     
@@ -216,7 +213,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line342">line 342</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line492">line 492</a>
     </li></ul></dd>
     
 
@@ -245,7 +242,7 @@
 
         
 <div class="param-desc">
-    A promise that resolves to an array of checkpoint objects.
+    A promise that resolves to an array of Checkpoint instances.
 </div>
 
 
@@ -256,7 +253,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;Array.&lt;Object>></span>
+<span class="param-type">Promise.&lt;Array.&lt;<a href="Checkpoint.html">Checkpoint</a>>></span>
 
 
     </dd>
@@ -274,7 +271,195 @@
     
 
     
-    <h4 class="name" id=".recordCheckpoint"><span class="type-signature">(async, static) </span>recordCheckpoint<span class="signature">(statsId, cpData)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Checkpoint.html">Checkpoint</a>>}</span></h4>
+    <h4 class="name" id=".findCheckpointById"><span class="type-signature">(async, static) </span>findCheckpointById<span class="signature">(checkpointId)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Checkpoint.html">Checkpoint</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves a checkpoint by its unique identifier, including related currency, game buildings (with building and building level), and assets.Throws an error if the checkpoint is not found.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>checkpointId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The unique identifier of the checkpoint to retrieve.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line463">line 463</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+<dl>
+    <dt>
+        <div class="param-desc">
+        If the checkpoint is not found.
+        </div>
+    </dt>
+    <dd></dd>
+    <dt>
+        <dl>
+            <dt>
+                Type
+            </dt>
+            <dd>
+                
+<span class="param-type">Error</span>
+
+
+            </dd>
+        </dl>
+    </dt>
+    <dd></dd>
+</dl>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The checkpoint instance with all included relations.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="Checkpoint.html">Checkpoint</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".recordCheckpoint"><span class="type-signature">(async, static) </span>recordCheckpoint<span class="signature">(statsId, cp)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="Checkpoint.html">Checkpoint</a>>}</span></h4>
     
 
     
@@ -341,7 +526,7 @@
 
         <tr>
             
-                <td class="name"><code>cpData</code></td>
+                <td class="name"><code>cp</code></td>
             
 
             <td class="type">
@@ -357,102 +542,7 @@
 
             
 
-            <td class="description last">The checkpoint data to record.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>currency</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Currency.html">Currency</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The currency instance for the checkpoint.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>buildings</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;<a href="Building.html">Building</a>></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">An array of building instances.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>assets</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;<a href="Asset.html">Asset</a>></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">An array of asset instances.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
+            <td class="description last">The checkpoint data to record.</td>
         </tr>
 
     
@@ -493,7 +583,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line310">line 310</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line402">line 402</a>
     </li></ul></dd>
     
 
@@ -516,35 +606,6 @@
 
 
 
-<h5>Throws:</h5>
-
-        
-
-<dl>
-    <dt>
-        <div class="param-desc">
-        If a building name is missing in the provided data.
-        </div>
-    </dt>
-    <dd></dd>
-    <dt>
-        <dl>
-            <dt>
-                Type
-            </dt>
-            <dd>
-                
-<span class="param-type">Error</span>
-
-
-            </dd>
-        </dl>
-    </dt>
-    <dd></dd>
-</dl>
-
-
-    
 
 
 <h5>Returns:</h5>
@@ -580,7 +641,7 @@
     
 
     
-    <h4 class="name" id=".refactorGameStatistics"><span class="type-signature">(async, static) </span>refactorGameStatistics<span class="signature">(params)</span><span class="type-signature"> &rarr; {Promise.&lt;any>}</span></h4>
+    <h4 class="name" id=".refactorGameStatistics"><span class="type-signature">(async, static) </span>refactorGameStatistics<span class="signature">(params)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="GameStatistics.html">GameStatistics</a>>}</span></h4>
     
 
     
@@ -588,7 +649,7 @@
 
 
 <div class="description">
-    Refactors game statistics for a given checkpoint.
+    Refactors the game statistics for a given checkpoint.This method performs the following steps:1. Validates the provided checkpoint.2. Deletes all existing gameBuildings and assets associated with the specified gameStatistics.3. Updates the currency values.4. Upserts (updates or creates) gameBuildings based on the checkpoint data.5. Creates new assets as specified in the checkpoint.6. Returns the updated GameStatistics instance.
 </div>
 
 
@@ -666,7 +727,72 @@
 
         <tr>
             
-                <td class="name"><code>checkpointId</code></td>
+                <td class="name"><code>checkpoint</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The checkpoint object containing updated game statistics data.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>validate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Function to validate the checkpoint data.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gameStatisticsId</code></td>
             
 
             <td class="type">
@@ -682,7 +808,178 @@
 
             
 
-            <td class="description last">The ID of the checkpoint to refactor statistics for.</td>
+            <td class="description last">The ID of the game statistics to update.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>currency</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The updated currency values.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>greenEnergy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The updated green energy value.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>greyEnergy</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The updated grey energy value.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>coins</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The updated coins value.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>gameBuildings</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Object></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Array of game building objects to upsert.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>assets</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;Object></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Array of asset objects to create.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
         </tr>
 
     
@@ -730,7 +1027,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line370">line 370</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line519">line 519</a>
     </li></ul></dd>
     
 
@@ -759,7 +1056,7 @@
 
         
 <div class="param-desc">
-    The result of the refactored game statistics operation.
+    The updated GameStatistics instance.
 </div>
 
 
@@ -770,7 +1067,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;any></span>
+<span class="param-type">Promise.&lt;<a href="GameStatistics.html">GameStatistics</a>></span>
 
 
     </dd>
@@ -796,7 +1093,7 @@
 
 
 <div class="description">
-    Removes a checkpoint from the game statistics repository by its id.
+    Removes a checkpoint from the database by its id.
 </div>
 
 
@@ -889,7 +1186,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="service_gameStatisticsService.js.html">service/gameStatisticsService.js</a>, <a href="service_gameStatisticsService.js.html#line357">line 357</a>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line609">line 609</a>
     </li></ul></dd>
     
 
