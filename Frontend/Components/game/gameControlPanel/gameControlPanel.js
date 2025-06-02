@@ -16,6 +16,9 @@ import {
   refactorGameStatistics,
 } from "../service/gameService.js";
 
+const cssResponse = await fetch('./Components/game/gameControlPanel/style.css');
+const cssText = await cssResponse.text();
+
 // register our detail-panel components
 import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
@@ -27,7 +30,7 @@ import { createCheckpointLoadPopup } from "../utils/checkpointLoadPopup.js";
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
-    @import './Components/game/gameControlPanel/style.css';
+    ${cssText}
     :host { display: block; position: relative; }
     #detail-container { position: absolute; top: 0; left: -220px; width: 200px; z-index: 10; }
   </style>
@@ -485,7 +488,7 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
-  
+
     async _performToggleBuildingEnergy(GameBuildingId) {
     try {
       const building = this._game.buildingData.find(

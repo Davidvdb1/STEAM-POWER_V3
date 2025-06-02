@@ -1,9 +1,11 @@
 import { BUILDING_NAME_TRANSLATIONS } from "../../utils/buildingDefinitions.js";
+const cssResponse = await fetch('./Components/game/components/details/style.css');
+const cssText = await cssResponse.text();
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
-    @import './Components/game/components/details/style.css';
+    ${cssText}
   </style>
 
   <button class="close">&times;</button>
