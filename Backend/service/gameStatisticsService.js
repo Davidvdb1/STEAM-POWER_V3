@@ -506,6 +506,21 @@ class GameStatisticsService {
     };
   }
 
+  /**
+   * Toggles the 'runsOnGreen' status of a game building by its id.
+   *
+   * @async
+   * @function toggleGameBuildingRunsOnGreen
+   * @memberof module:service/gameStatisticsService.Service_GameBuildings
+   * @param {string} gameBuildingId - The id of the GameBuilding to toggle.
+   * @returns {Promise<GameBuildings>} The updated GameBuilding object with the toggled 'runsOnGreen' status.
+   */
+  async toggleGameBuildingRunsOnGreen(gameBuildingId) {
+    return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
+      gameBuildingId
+    );
+  }
+
   //########################################################################
   //                              ACHIEVEMENTS
   //########################################################################

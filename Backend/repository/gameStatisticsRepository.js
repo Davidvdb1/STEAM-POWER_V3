@@ -300,7 +300,6 @@ class GameStatisticsRepository {
     return Currency.from(updated);
   }
 
-
   /**
    * Retrieves the currency associated with a specific game statistics ID.
    *
@@ -317,7 +316,6 @@ class GameStatisticsRepository {
     });
     return currency ? Currency.from(currency) : null;
   }
-
 
   //########################################################################
   //                                 ASSETS
@@ -742,6 +740,36 @@ class GameStatisticsRepository {
       data: {
         buildingLevel: { connect: { id: buildingLevelId } },
       },
+      include: {
+        gameStatistics: true,
+        building: true,
+        buildingLevel: true,
+      },
+    });
+    return GameBuildings.from(updated);
+  }
+
+  /**
+   * Flips the `runsOnGreen` flag for the specified GameBuildings record.
+   *
+   * @async
+   * @function toggleGameBuildingRunsOnGreen
+   * @memberof module:repository/gameStatisticsRepository.Repository_GameBuildings
+   * @param {string} gameBuildingId
+   * @returns {Promise<GameBuildings>}
+   */
+  async toggleGameBuildingRunsOnGreen(gameBuildingId) {
+    const existing = await this.prisma.gameBuildings.findUnique({
+      where: { id: gameBuildingId },
+      select: { runsOnGreen: true },
+    });
+    if (!existing) {
+      throw new Error("GameBuilding not found");
+    }
+
+    const updated = await this.prisma.gameBuildings.update({
+      where: { id: gameBuildingId },
+      data: { runsOnGreen: !existing.runsOnGreen },
       include: {
         gameStatistics: true,
         building: true,
