@@ -165,3 +165,22 @@ export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
 
   return res.json();
 }
+
+export async function toggleGameBuildingRunsOnGreen(GameBuildingId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/green`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      `Failed to upgrade GameBuilding: HTTP ${res.status}` +
+        (err.error ? ` - ${err.error}` : "")
+    );
+  }
+  return res.json();
+}

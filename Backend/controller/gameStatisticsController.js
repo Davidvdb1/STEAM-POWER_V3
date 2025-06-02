@@ -515,7 +515,7 @@ router.get(
  * @returns {GameBuildings} The updated GameBuilding object in the response body.
  */
 router.put(
-  "/gameStatistics/buildings/:gameBuildingId/green",
+  "/buildings/:gameBuildingId/green",
   async (req, res) => {
     try {
       const building =

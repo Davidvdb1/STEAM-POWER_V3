@@ -10,6 +10,7 @@ import {
   getCurrencyById,
   updateCurrency,
   upgradeBuilding,
+  toggleGameBuildingRunsOnGreen,
   recordCheckpoint,
   getCheckpointsByGameStatisticsId,
   refactorGameStatistics,
@@ -110,6 +111,9 @@ class GameControlPanel extends HTMLElement {
 
     this._shadow.addEventListener("upgrade-build", (e) => {
       this._confirmUpgradeBuilding(e.detail.GameBuildingId);
+    });
+    this._shadow.addEventListener("toggle-building-energy", (e) => {
+      this._confirmToggleBuildingEnergy(e.detail.GameBuildingId);
     });
     this._statsContainer.addEventListener("saveCheckpoint", () =>
       this._onSaveCheckpoint()
@@ -425,6 +429,24 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+    _confirmToggleBuildingEnergy(GameBuildingId) {
+    const building = this._game.buildingData.find(
+      (b) => b.id === GameBuildingId
+    );
+    if (!building) return;
+
+    const currentRunsOnGreen = building.runsOnGreen;
+    const nextRunsOnGreen = !currentRunsOnGreen;
+    const msg = `Wil je dit gebouw ${nextRunsOnGreen ? "op groen" : "op grijs"} zetten?`;
+
+    const scene = this._game.scene.getScene("CityScene");
+    scene.showConfirmation(msg, (confirmed) => {
+      if (confirmed) {
+        this._performToggleBuildingEnergy(GameBuildingId);
+      }
+    });
+  }
+
   /**
    * Upgrades a GameBuilding to the next level by calling the backend API, updates local building data,
    * refreshes game statistics, and updates the building detail panel in the UI.
@@ -444,6 +466,36 @@ class GameControlPanel extends HTMLElement {
       const response = await upgradeBuilding(
         GameBuildingId,
         { nextLevel: building.level.level + 1 },
+        this._game.token
+      );
+
+      // Update the local building data to avoid data inconsistency
+      Object.assign(building, response.gameBuilding);
+
+      // Handle any achievements that were earned
+      handleAchievements(response, this._gameContainer);
+
+      // Refetch the game statistics to update the UI with the updated currency values
+      this._updateStatistics();
+
+      // Update the detail panel with the new building data
+      this._detailContainer.querySelector("building-detail").data = building;
+    } catch (err) {
+      throw new Error(`Error upgrading building: ${err.message}`);
+    }
+  }
+
+  
+    async _performToggleBuildingEnergy(GameBuildingId) {
+    try {
+      const building = this._game.buildingData.find(
+        (b) => b.id === GameBuildingId
+      );
+      if (!building) throw new Error("Building not found");
+
+      // Call the backend to toggle the building's energy type
+      const response = await toggleGameBuildingRunsOnGreen(
+        GameBuildingId,
         this._game.token
       );
 
