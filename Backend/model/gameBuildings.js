@@ -12,6 +12,7 @@ const BuildingLevel = require("./buildingLevel");
  * @param {string|null} [params.checkpointId=null] - The associated checkpoint ID, if any.
  * @param {Building|null} params.building - The Building instance.
  * @param {BuildingLevel} params.buildingLevel - The BuildingLevel instance.
+ * @param {boolean} [params.runsOnGreen=false] - Whether this building is running on green energy.
  * @param {boolean} [validate=true] - Whether to validate the instance on creation.
  *
  * @throws {Error} If any of the properties are invalid.
@@ -24,6 +25,7 @@ class GameBuildings {
       checkpointId = null,
       building,
       buildingLevel,
+      runsOnGreen = false,
     },
     validate = true
   ) {
@@ -32,6 +34,7 @@ class GameBuildings {
     this.checkpointId = checkpointId;
     this.building = building;
     this.buildingLevel = buildingLevel;
+    this.runsOnGreen = runsOnGreen;
 
     if (validate) this.validate();
   }
@@ -40,8 +43,10 @@ class GameBuildings {
    * Validates the GameBuildings properties.
    *
    * @throws {Error} If `gameStatisticsId` is not a string when present,
+   *                 if `checkpointId` is not a string when present,
    *                 if `building` is not a Building instance,
-   *                 or if `buildingLevel` is not a BuildingLevel instance.
+   *                 if `buildingLevel` is not a BuildingLevel instance,
+   *                 or if `runsOnGreen` is not a boolean.
    * @returns {void}
    */
   validate() {
@@ -51,11 +56,17 @@ class GameBuildings {
     ) {
       throw new Error("Invalid gameStatisticsId (must be a string)");
     }
+    if (this.checkpointId != null && typeof this.checkpointId !== "string") {
+      throw new Error("Invalid checkpointId (must be a string)");
+    }
     if (this.building != null && !(this.building instanceof Building)) {
       throw new Error("Invalid building (must be Building)");
     }
     if (!(this.buildingLevel instanceof BuildingLevel)) {
       throw new Error("Invalid buildingLevel (must be BuildingLevel)");
+    }
+    if (typeof this.runsOnGreen !== "boolean") {
+      throw new Error("Invalid runsOnGreen (must be a boolean)");
     }
   }
 
@@ -67,6 +78,7 @@ class GameBuildings {
    * @param {string} prismaGB.id - The unique identifier from Prisma.
    * @param {string|null} prismaGB.gameStatisticsId - The game statistics ID from Prisma.
    * @param {string|null} prismaGB.checkpointId - The checkpoint ID from Prisma.
+   * @param {boolean} prismaGB.runsOnGreen - Whether this building is running on green energy in Prisma.
    * @param {Object} [prismaGB.building] - The related Prisma Building record.
    * @param {Object} [prismaGB.buildingLevel] - The related Prisma BuildingLevel record.
    * @returns {GameBuildings} The created GameBuildings instance.
@@ -80,6 +92,7 @@ class GameBuildings {
       buildingLevel: prismaGB.buildingLevel
         ? BuildingLevel.from(prismaGB.buildingLevel)
         : null,
+      runsOnGreen: prismaGB.runsOnGreen ?? false,
     });
   }
 }
