@@ -224,4 +224,6 @@ model GameBuildings {
   
   buildingLevelId  String
   buildingLevel    BuildingLevel @relation(fields: [buildingLevelId], references: [id])
+
+  runsOnGreen      Boolean        @default(false)
 }
