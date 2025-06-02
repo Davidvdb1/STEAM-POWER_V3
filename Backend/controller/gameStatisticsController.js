@@ -1,13 +1,42 @@
+/**
+ * @module controller/gameStatisticsController
+ * @description
+ *   All GameStatistics-related endpoints: game statistics management, currency,
+ *   assets, checkpoints, game buildings, achievements, etc., grouped below under separate sub-namespaces.
+ * @requires module:service/gameStatisticsService
+ */
+
 const express = require("express");
 const gameStatisticsService = require("../service/gameStatisticsService");
+const GameStatistics = require("../model/gameStatistics");
 
 const router = express.Router();
 
 //########################################################################
 //                            GAME STATISTICS
 //########################################################################
-// POST /gameStatistics
-// Creates a new GameStatistics object
+
+/**
+ * @namespace module:controller/gameStatisticsController.Controller_GameStatistics
+ * @memberof module:controller/gameStatisticsController
+ * @description
+ *   Endpoints for creating, retrieving, and querying GameStatistics entries.
+ */
+
+/**
+ * POST /gameStatistics<br>
+ * Creates a new game statistics entry.
+ *
+ * @function createGameStatistics
+ * @memberof module:controller/gameStatisticsController.Controller_GameStatistics
+ * @param {express.Request} req - Express request object.
+ * @param {string}           req.body.groupId - The ID of the group.
+ * @param {number}           req.body.greenEnergy - Amount of green energy.
+ * @param {number}           req.body.greyEnergy - Amount of grey energy.
+ * @param {number}           req.body.coins - Number of coins.
+ * @param {express.Response} res - Express response object.
+ * @returns {GameStatistics} The saved GameStatistics object.
+ */
 router.post("/", async (req, res) => {
   try {
     const { groupId, greenEnergy, greyEnergy, coins } = req.body;
@@ -25,9 +54,16 @@ router.post("/", async (req, res) => {
   }
 });
 
-// USED FOR MANUAL TESTING
-// GET /gameStatistics
-// Retrieves all GameStatistics objects
+/**
+ * GET /gameStatistics<br>
+ * Retrieves all game statistics entries.
+ *
+ * @function getAllGameStatistics
+ * @memberof module:controller/gameStatisticsController.Controller_GameStatistics
+ * @param {express.Request}  req - Express request object.
+ * @param {express.Response} res - Express response object.
+ * @returns {Array<GameStatistics>} All saved GameStatistics objects.
+ */
 router.get("/", async (req, res) => {
   try {
     const gameStatistics = await gameStatisticsService.getAllGameStatistics();
@@ -39,8 +75,17 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /gameStatistics/:id
-// Retrieves a GameStatistics object by its id
+/**
+ * GET /gameStatistics/:id<br>
+ * Retrieves a game statistics entry by its ID.
+ *
+ * @function getGameStatisticsById
+ * @memberof module:controller/gameStatisticsController.Controller_GameStatistics
+ * @param {express.Request} req - Express request object.
+ * @param {string}           req.params.id - The unique identifier of the game statistics entry.
+ * @param {express.Response} res - Express response object.
+ * @returns {GameStatistics} The game statistics object.
+ */
 router.get("/:id", async (req, res) => {
   try {
     const gs = await gameStatisticsService.getById(req.params.id);
@@ -55,8 +100,17 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// GET /gameStatistics/group/:groupId
-// Retrieves a GameStatistics object by its group id with
+/**
+ * GET /gameStatistics/group/:groupId<br>
+ * Retrieves game statistics by group ID.
+ *
+ * @function getGameStatisticsByGroupId
+ * @memberof module:controller/gameStatisticsController.Controller_GameStatistics
+ * @param {express.Request} req - Express request object.
+ * @param {string}           req.params.groupId - The unique identifier of the group.
+ * @param {express.Response} res - Express response object.
+ * @returns {GameStatistics} The game statistics object for the specified group.
+ */
 router.get("/group/:groupId", async (req, res) => {
   const { groupId } = req.params;
   try {
@@ -78,8 +132,25 @@ router.get("/group/:groupId", async (req, res) => {
 //########################################################################
 //                                CURRENCY
 //########################################################################
-// GET /gameStatistics/:id/currency
-// Retrieves a Currency object by its id.
+
+/**
+ * @namespace module:controller/gameStatisticsController.Controller_Currency
+ * @memberof module:controller/gameStatisticsController
+ * @description
+ *   All endpoints that deal with the Currency object (get, update, increment).
+ */
+
+/**
+ * GET /gameStatistics/:id/currency<br>
+ * Retrieves the Currency object associated with a GameStatistics entry.
+ *
+ * @function getCurrencyById
+ * @memberof module:controller/gameStatisticsController.Controller_Currency
+ * @param {express.Request}  req                – Express request object.
+ * @param {string}           req.params.id      – The unique identifier of the GameStatistics entry.
+ * @param {express.Response} res                – Express response object.
+ * @returns {Currency}                          – The Currency object associated with the GameStatistics entry.
+ */
 router.get("/:id/currency", async (req, res) => {
   try {
     const currency = await gameStatisticsService.getCurrencyById(req.params.id);
@@ -97,8 +168,21 @@ router.get("/:id/currency", async (req, res) => {
   }
 });
 
-// PUT /gameStatistics/:id/currency
-// Updates a Currency object's values
+/**
+ * PUT /gameStatistics/:id/currency<br>
+ * Updates the Currency object associated with a GameStatistics entry.
+ *
+ * @function updateCurrency
+ * @memberof module:controller/gameStatisticsController.Controller_Currency
+ * @param {express.Request}  req                      – Express request object.
+ * @param {string}           req.params.id            – The unique identifier of the GameStatistics entry.
+ * @param {number}           req.body.greenEnergy     – The new green energy value.
+ * @param {number}           req.body.greyEnergy      – The new grey energy value.
+ * @param {number}           req.body.coins           – The new coins value.
+ * @param {number}           req.body.score           – The new score value.
+ * @param {express.Response} res                      – Express response object.
+ * @returns {Currency}                               – The updated Currency object.
+ */
 router.put("/:id/currency", async (req, res) => {
   console.log("updateCurrency payload:", req.body);
   try {
@@ -113,8 +197,21 @@ router.put("/:id/currency", async (req, res) => {
   }
 });
 
-// POST /gameStatistics/:id/currency/increment
-// Increments a Currency object's values
+/**
+ * POST /gameStatistics/:id/currency/increment<br>
+ * Increments the Currency object associated with a GameStatistics entry.
+ *
+ * @function incrementCurrency
+ * @memberof module:controller/gameStatisticsController.Controller_Currency
+ * @param {express.Request}  req                      – Express request object.
+ * @param {string}           req.params.id            – The unique identifier of the GameStatistics entry.
+ * @param {number}           req.body.greenEnergy     – The amount of green energy to increment.
+ * @param {number}           req.body.greyEnergy      – The amount of grey energy to increment.
+ * @param {number}           req.body.coins           – The amount of coins to increment.
+ * @param {number}           req.body.score           – The amount of score to increment.
+ * @param {express.Response} res                      – Express response object.
+ * @returns {Currency}                               – The updated Currency object after incrementing.
+ */
 router.post("/:id/currency/increment", async (req, res) => {
   try {
     const updated = await gameStatisticsService.incrementCurrency(
@@ -131,8 +228,34 @@ router.post("/:id/currency/increment", async (req, res) => {
 //########################################################################
 //                                 ASSETS
 //########################################################################
-// POST /gameStatistics/:id/assets
-// Adds an asset to a GameStatistics object
+
+/**
+ * @namespace module:controller/gameStatisticsController.Controller_Assets
+ * @memberof module:controller/gameStatisticsController
+ * @description
+ *   Endpoints for adding and removing assets to/from a GameStatistics record.
+ */
+
+/**
+ * POST /gameStatistics/:id/assets<br>
+ * Adds an asset to a GameStatistics object.
+ *
+ * @function addAssetToGameStatistics
+ * @memberof module:controller/gameStatisticsController.Controller_Assets
+ * @param {express.Request}  req                          – Express request object.
+ * @param {string}           req.params.id               – The unique identifier of the GameStatistics object.
+ * @param {number}           req.body.buildCost          – The cost to build the asset.
+ * @param {number}           req.body.destroyCost        – The cost to destroy the asset.
+ * @param {number}           req.body.energy             – The energy produced by the asset.
+ * @param {number}           req.body.xLocation          – The x-coordinate location of the asset.
+ * @param {number}           req.body.yLocation          – The y-coordinate location of the asset.
+ * @param {number}           req.body.xSize              – The width of the asset.
+ * @param {number}           req.body.ySize              – The height of the asset.
+ * @param {string}           req.body.type               – The type of the asset.
+ * @param {string}           req.body.gameStatisticsId   – The ID of the GameStatistics to which the asset belongs.
+ * @param {express.Response} res                          – Express response object.
+ * @returns {Asset}                                     – The created asset object.
+ */
 router.post("/:id/assets", async (req, res) => {
   console.log(req.body, req.params.id);
   try {
@@ -148,12 +271,21 @@ router.post("/:id/assets", async (req, res) => {
   }
 });
 
-// DELETE /gameStatistics/assets/:assetId
-// Removes an asset from a GameStatistics object
+/**
+ * DELETE /gameStatistics/assets/:assetId<br>
+ * Removes an asset from a GameStatistics object.
+ *
+ * @function removeAssetFromGameStatistics
+ * @memberof module:controller/gameStatisticsController.Controller_Assets
+ * @param {express.Request} req - Express request object.
+ * @param {string}           req.params.assetId - The unique identifier of the asset to remove.
+ * @param {express.Response} res - Express response object.
+ * @returns {{ message: string }} A message indicating the asset has been removed.
+ */
 router.delete("/assets/:assetId", async (req, res) => {
   try {
-    await gameStatisticsService.removeAsset(req.params.assetId);
-    res.status(200).json({ message: "Asset removed" });
+    const response = await gameStatisticsService.removeAsset(req.params.assetId);
+    res.status(200).json(response);
   } catch (error) {
     console.error(`Error removing asset ${req.params.assetId}:`, error);
     const statusCode = error.statusCode || 500;
@@ -164,8 +296,25 @@ router.delete("/assets/:assetId", async (req, res) => {
 //########################################################################
 //                              CHECKPOINTS
 //########################################################################
-// POST /gameStatistics/:id/checkpoints
-// Creates a checkpoint for a GameStatistics object
+
+/**
+ * @namespace module:controller/gameStatisticsController.Controller_Checkpoints
+ * @memberof module:controller/gameStatisticsController
+ * @description
+ *   Endpoints for recording, fetching, and deleting checkpoints on a GameStatistics record.
+ */
+
+/**
+ * POST /gameStatistics/:id/checkpoints<br>
+ * Creates a checkpoint for a GameStatistics object.
+ *
+ * @function recordCheckpoint
+ * @memberof module:controller/gameStatisticsController.Controller_Checkpoints
+ * @param {express.Request}  req                  – Express request object.
+ * @param {string}           req.params.id        – The unique identifier of the GameStatistics object.
+ * @param {express.Response} res                  – Express response object.
+ * @returns {Checkpoint}                          – The created checkpoint object.
+ */
 router.post("/:id/checkpoints", async (req, res) => {
   try {
     const cp = await gameStatisticsService.recordCheckpoint(req.params.id);
@@ -180,8 +329,17 @@ router.post("/:id/checkpoints", async (req, res) => {
   }
 });
 
-// GET /gameStatistics/:id/checkpoints
-// Fetches all checkpoints for a GameStatistics object
+/**
+ * GET /gameStatistics/:id/checkpoints<br>
+ * Fetches all checkpoints for a GameStatistics object.
+ *
+ * @function getAllCheckpointsByGameStatisticsId
+ * @memberof module:controller/gameStatisticsController.Controller_Checkpoints
+ * @param {express.Request}  req             – Express request object.
+ * @param {string}           req.params.id   – The unique identifier of the GameStatistics object.
+ * @param {express.Response} res             – Express response object.
+ * @returns {Checkpoint[]}                 – An array of checkpoint objects.
+ */
 router.get("/:id/checkpoints", async (req, res) => {
   console.log(`→ HIT GET /gameStatistics/${req.params.id}/checkpoints`);
   try {
@@ -198,8 +356,17 @@ router.get("/:id/checkpoints", async (req, res) => {
   }
 });
 
-// DELETE /gameStatistics/checkpoints/:checkpointId
-// Removes a checkpoint from a GameStatistics object
+/**
+ * DELETE /gameStatistics/checkpoints/:checkpointId<br>
+ * Removes a checkpoint from a GameStatistics object.
+ *
+ * @function removeCheckpointFromGameStatistics
+ * @memberof module:controller/gameStatisticsController..Controller_Checkpoints
+ * @param {express.Request}  req                       – Express request object.
+ * @param {string}           req.params.checkpointId   – The unique identifier of the checkpoint to remove.
+ * @param {express.Response} res                       – Express response object.
+ * @returns {{ message: string }}                      – A message indicating the checkpoint has been removed.
+ */
 router.delete("/checkpoints/:checkpointId", async (req, res) => {
   try {
     await gameStatisticsService.removeCheckpoint(req.params.checkpointId);
@@ -214,8 +381,18 @@ router.delete("/checkpoints/:checkpointId", async (req, res) => {
   }
 });
 
-// POST /gameStatistics/refactor/:checkpointId
-// Update GameStatistics object
+/**
+ * PUT /gameStatistics/refactor/:checkpointId<br>
+ * Restores the GameStatistics object to the state of a specific checkpoint and returns the updated data.
+ *
+ * @function refactorGameStatistics
+ * @memberof module:controller/gameStatisticsController..Controller_Checkpoints
+ * @param {express.Request}   req                           – Express request object.
+ * @param {string}            req.params.checkpointId       – The unique identifier of the checkpoint to restore.
+ * @param {express.Response}  res                           – Express response object.
+ * @returns {{ gameStatistics: GameStatistics, assets: Asset[], gameBuildings: GameBuildings[] }}
+ *   An object containing the updated GameStatistics, its assets, and gameBuildings.
+ */
 router.put("/refactor/:checkpointId", async (req, res) => {
   const { checkpointId } = req.params;
   console.log(
@@ -256,8 +433,26 @@ router.put("/refactor/:checkpointId", async (req, res) => {
 //########################################################################
 //                             GAME BUILDINGS
 //########################################################################
-// PUT /gameStatistics/buildings/:gameBuildingId/upgrade
-// Upgrades a GameBuilding object
+
+/**
+ * @namespace module:controller/gameStatisticsController.Controller_GameBuildings
+ * @memberof module:controller/gameStatisticsController
+ * @description
+ *   Endpoints for retrieving and upgrading GameBuilding objects related to GameStatistics.
+ */
+
+/**
+ * PUT /gameStatistics/buildings/:gameBuildingId/upgrade<br>
+ * Upgrades a GameBuilding object to a new level.
+ *
+ * @function upgradeGameBuilding
+ * @memberof module:controller/gameStatisticsController.Controller_GameBuildings
+ * @param {express.Request} req - Express request object.
+ * @param {string}           req.params.gameBuildingId - The unique identifier of the GameBuilding to upgrade.
+ * @param {number}           req.body.level - The new level to upgrade the building to.
+ * @param {express.Response} res - Express response object.
+ * @returns {GameBuildings} The updated GameBuilding object in the response body.
+ */
 router.put("/buildings/:gameBuildingId/upgrade", async (req, res) => {
   try {
     const building = await gameStatisticsService.upgradeGameBuilding(
@@ -275,8 +470,17 @@ router.put("/buildings/:gameBuildingId/upgrade", async (req, res) => {
   }
 });
 
-// GET /gameStatistics/gameBuildings/getAllGameBuildingsByGroupId/:groupId
-// Retrieves all GameBuildings associated with a specific groupId
+/**
+ * GET /gameStatistics/gameBuildings/getAllGameBuildingsByGroupId/:groupId<br>
+ * Retrieves all GameBuildings associated with a specific groupId.
+ *
+ * @function getAllGameBuildingsByGroupId
+ * @memberof module:controller/gameStatisticsController.Controller_GameBuildings
+ * @param {express.Request}  req                    – Express request object.
+ * @param {string}           req.params.groupId     – The unique identifier of the group (URL parameter).
+ * @param {express.Response} res                    – Express response object.
+ * @returns {GameBuildings[]}                       – An array of GameBuildings objects.
+ */
 router.get(
   "/gameBuildings/getAllGameBuildingsByGroupId/:groupId",
   async (req, res) => {
@@ -300,8 +504,26 @@ router.get(
 //########################################################################
 //                              ACHIEVEMENTS
 //########################################################################
-// POST /gameStatistics/achievements/add/:gameStatisticsId/:title
-// Adds an achievement to a GameStatistics object
+
+/**
+ * @namespace module:controller/gameStatisticsController.Controller_Achievements
+ * @memberof module:controller/gameStatisticsController
+ * @description
+ *   Endpoints for adding, retrieving, and checking Achievements on a GameStatistics record.
+ */
+
+/**
+ * POST /gameStatistics/achievements/add/:gameStatisticsId/:title<br>
+ * Adds an achievement to a GameStatistics object.
+ *
+ * @function addAchievementToGameStatistics
+ * @memberof module:controller/gameStatisticsController.Controller_Achievements
+ * @param {express.Request} req - Express request object.
+ * @param {string}           req.params.gameStatisticsId - The unique identifier of the GameStatistics object.
+ * @param {string}           req.params.title - The title of the achievement to add.
+ * @param {express.Response} res - Express response object.
+ * @returns {GameStatistics} The updated GameStatistics object in the response body.
+ */
 router.post("/achievements/add/:gameStatisticsId/:title", async (req, res) => {
   try {
     const { gameStatisticsId, title } = req.params;
@@ -321,8 +543,17 @@ router.post("/achievements/add/:gameStatisticsId/:title", async (req, res) => {
   }
 });
 
-// GET /gameStatistics/:gameStatisticsId/achievements
-// Retrieves all Achievements for a GameStatistics object
+/**
+ * GET /gameStatistics/:gameStatisticsId/achievements<br>
+ * Retrieves all Achievements for a GameStatistics object.
+ *
+ * @function getGameStatisticsAchievements
+ * @memberof module:controller/gameStatisticsController.Controller_Achievements
+ * @param {express.Request}  req                            – Express request object.
+ * @param {string}           req.params.gameStatisticsId    – The unique identifier of the GameStatistics object.
+ * @param {express.Response} res                            – Express response object.
+ * @returns {Achievement[]}                                 – An array of Achievement objects.
+ */
 router.get("/:gameStatisticsId/achievements", async (req, res) => {
   try {
     const achievements =
@@ -340,9 +571,18 @@ router.get("/:gameStatisticsId/achievements", async (req, res) => {
   }
 });
 
-// USED FOR MANUAL TESTING
-// GET /gameStatistics/:gameStatisticsId/achievements/check/:title
-// Checks if an achievement has been achieved
+/**
+ * GET /gameStatistics/:gameStatisticsId/achievements/check/:title<br>
+ * Checks if an achievement has been achieved for a GameStatistics object.
+ *
+ * @function checkGameStatisticsAchievement
+ * @memberof module:controller/gameStatisticsController.Controller_Achievements
+ * @param {express.Request}  req                            – Express request object.
+ * @param {string}           req.params.gameStatisticsId    – The unique identifier of the GameStatistics object.
+ * @param {string}           req.params.title               – The title of the achievement to check.
+ * @param {express.Response} res                            – Express response object.
+ * @returns {{ achieved: boolean }}                          – An object indicating whether the achievement has been achieved.
+ */
 router.get("/:gameStatisticsId/achievements/check/:title", async (req, res) => {
   try {
     const { gameStatisticsId, title } = req.params;
