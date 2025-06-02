@@ -438,16 +438,10 @@ class GameControlPanel extends HTMLElement {
     );
     if (!building) return;
 
-    const currentRunsOnGreen = building.runsOnGreen;
-    const nextRunsOnGreen = !currentRunsOnGreen;
-    const msg = `Wil je dit gebouw ${nextRunsOnGreen ? "op groen" : "op grijs"} zetten?`;
+    // const currentRunsOnGreen = building.runsOnGreen;
 
     const scene = this._game.scene.getScene("CityScene");
-    scene.showConfirmation(msg, (confirmed) => {
-      if (confirmed) {
         this._performToggleBuildingEnergy(GameBuildingId);
-      }
-    });
   }
 
   /**

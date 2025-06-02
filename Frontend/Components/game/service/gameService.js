@@ -184,3 +184,15 @@ export async function toggleGameBuildingRunsOnGreen(GameBuildingId, token) {
   }
   return res.json();
 }
+
+// export async function getAllGameBuildingsByGameBuildingId(gameBuildingId, token) {
+//   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${gameBuildingId}`;
+//   const res = await fetch(url, {
+//     headers: { Authorization: `Bearer ${token}` },
+//   });
+
+//   if (!res.ok) {
+//     throw new Error(`Failed to load GameBuildings: HTTP ${res.status}`);
+//   }
+//   return res.json();
+// }

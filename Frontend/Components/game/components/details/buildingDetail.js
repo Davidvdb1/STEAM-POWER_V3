@@ -1,3 +1,4 @@
+// import gameStatisticsService from "../../../../../Backend/service/gameStatisticsService.js";
 import { BUILDING_NAME_TRANSLATIONS } from "../../utils/buildingDefinitions.js";
 const cssResponse = await fetch('./Components/game/components/details/style.css');
 const cssText = await cssResponse.text();
@@ -20,7 +21,7 @@ template.innerHTML = /*html*/ `
         <button class="upgrade">
           Upgrade
         </button>
-        <button class="toggleEnergy">Toggle Energy</button>
+        <button class="toggleEnergy"></button>
     </div>
   </div>
 `;
@@ -40,6 +41,7 @@ class BuildingDetail extends HTMLElement {
     this._upgradeBtn = shadow.querySelector(".upgrade");
     this._toggleEnergyBtn = shadow.querySelector(".toggleEnergy");
     this._data = null;
+    this._runsOnGreen = false;
   }
 
   set data(value) {
@@ -50,6 +52,25 @@ class BuildingDetail extends HTMLElement {
   get data() {
     return this._data;
   }
+
+  set runsOnGreen(value) {
+    // If you need to perform async logic, call an async method here
+    this._updateRunsOnGreen(value);
+    console.log(this._updateRunsOnGreen(value))
+  }
+
+  get runsOnGreen() {
+    return this._runsOnGreen;
+    
+  }
+
+  // async _updateRunsOnGreen(value) {
+  //   const data = await getAllGameBuildingsByGameBuildingId(this._data.id);
+  //   // You can update this._data or other properties as needed
+  //   this._render();
+  // }
+
+
 
   connectedCallback() {
     this._closeBtn.addEventListener("click", () =>
@@ -86,6 +107,10 @@ class BuildingDetail extends HTMLElement {
       BUILDING_NAME_TRANSLATIONS[buildingName] || buildingName;
     this._levelEl.textContent = num;
     this._energyCostEl.textContent = cost;
+    this._toggleEnergyBtn.textContent = `Op ${this._data.runsOnGreen ? 'grijze energie' : 'groene energie'} runnen`;
+    console.log(this._data)
+    // console.log(this._data.runsOnGreen)
+
 
     this._toggleEnergyBtn.onclick = () => {
       this.dispatchEvent(

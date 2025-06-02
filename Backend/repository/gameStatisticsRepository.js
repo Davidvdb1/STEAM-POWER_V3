@@ -186,6 +186,7 @@ class GameStatisticsRepository {
                 include: {
                   building: true,
                   buildingLevel: true,
+                  // runsOnGreen: true,
                 },
               }
             : false,
@@ -198,6 +199,7 @@ class GameStatisticsRepository {
                   include: {
                     building: true,
                     buildingLevel: true,
+                    // runsOnGreen: true,
                   },
                 },
                 assets: true,
