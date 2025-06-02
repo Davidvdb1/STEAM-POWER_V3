@@ -334,6 +334,10 @@ class GameStatisticsService {
     return updatedGameBuilding;
   }
 
+  async createGameBuildings(gameStatisticsId) {
+    return await gameStatisticsRepository.createGameBuildings(gameStatisticsId);
+  }
+
 
 
 
