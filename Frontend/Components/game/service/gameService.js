@@ -6,6 +6,10 @@ export async function fetchGameStatistics(groupId, token) {
     headers: { Authorization: `Bearer ${token}` },
   });
 
+  if (res.status === 404) {
+    return null;
+  }
+
   if (!res.ok) {
     throw new Error(`Failed to load stats: HTTP ${res.status}`);
   }
@@ -163,5 +167,51 @@ export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
     throw new Error(`Failed to fetch checkpoints: HTTP ${res.status}`);
   }
 
+  return res.json();
+}
+
+export async function createGameStatistics(groupId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      groupId,
+      currency: {
+        greenEnergy: 150,
+        greyEnergy: 75,
+        coins: 500,
+        score: 25,
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(
+      `Failed to create GameStatistics: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
+  }
+
+  return res.json();
+}
+
+export async function createGameBuildings(gameStatsId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/gameBuildings/${gameStatsId}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(
+      `Failed to create game buildings: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
+  }
   return res.json();
 }
