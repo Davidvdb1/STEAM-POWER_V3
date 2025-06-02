@@ -159,7 +159,6 @@ model Asset {
 model Building {
   id   String @id @default(uuid())
   name String
-  runsOnGreen Boolean @default(false)
 
   // Each building has multiple levels
   buildingLevels BuildingLevel[]
