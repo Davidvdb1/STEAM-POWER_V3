@@ -38,7 +38,7 @@ export function canPlaceAsset(tileAssetMap, tx, ty, size) {
       }
     }
   }
-  
+
   return true;
 }
 
@@ -102,6 +102,12 @@ export function verifyAssetPlacement(scene, type, tx, ty) {
     };
   }
 
+  // Check if the asset is placed on valid tiles for its type
+  const placedOnValidTiles = verifyAssetTypePlacement(scene, type, size, tx, ty);
+  if (!placedOnValidTiles.canPlace) {
+    return placedOnValidTiles;
+  }
+
   // Check if within map bounds
   if (tx < 0 || ty < 0 
       || tx + size.width > scene.map.width 
@@ -123,6 +129,112 @@ export function verifyAssetPlacement(scene, type, tx, ty) {
   
   // All checks passed
   return { canPlace: true };
+}
+
+
+/**
+ * Verifies if a water mill can be placed at the specified location.
+ * Water mills can only be placed along specific water edges
+ * 
+ * @function checkWaterMillPlacement
+ * @memberof game.utils.assetPlacer
+ * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
+ * @param {number} tx - The x-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @returns {{canPlace: boolean, reason?: string}} 
+ *  An object indicating whether the asset can be placed.
+ *  If placement is not possible, a reason is provided.
+ */
+export function verifyWaterMillPlacement(size, tx, ty) {
+  const validRanges = [
+    { startX: 62, endX: 75, y: 9 },
+    { startX: 92, endX: 125, y: 14 }
+  ];
+  
+  // Check if placement is along one of the valid water edges
+  // and ensure the full width of the mill fits within the valid range
+  for (const { startX, endX, y } of validRanges) {
+    if (ty+size.height-1 === y && tx >= startX && tx+size.width-1 <= endX) {
+      return { canPlace: true };
+    }
+  }
+  
+  // Return false with reason if no valid placement found
+  return { 
+    canPlace: false, 
+    reason: "Waterrad kan alleen langs het water geplaatst worden" 
+  };
+}
+
+
+/**
+ * Verifies whether an asset can be placed on tiles with any of the specified indices
+ *
+ * @function verifyAssetPlacedOnTileIndices
+ * @memberof game.utils.assetPlacer
+ * @param {Object} scene - The Phaser scene
+ * @param {string} type - Type of asset being placed
+ * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
+ * @param {number} tx - The x-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @param {number|number[]} validIndices - Single index or array of valid tile indices the asset can be placed on.
+ * @returns {{canPlace: boolean, reason?: string}} 
+ *  An object indicating whether the asset can be placed.
+ *  If placement is not possible, a reason is provided.
+ */
+function verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, validIndices) {
+  // Convert single index to array for consistent handling
+  const indices = Array.isArray(validIndices) ? validIndices : [validIndices];
+  
+  // Check all tiles the asset would occupy
+  for (let dx = 0; dx < size.width; dx++) {
+    for (let dy = 0; dy < size.height; dy++) {
+      // Get current tile
+      const tile = scene.layer1.getTileAt(tx+dx, ty+dy);
+      
+      // If no tile exists or its index is not in the valid indices, return false
+      if (!tile || !indices.includes(tile.index)) {
+        return {
+          canPlace: false,
+          reason: `Een ${type.toLowerCase()} kan niet op dit terrein worden geplaatst`
+        };
+      }
+    }
+  }
+
+  // If all tiles are in valid locations, return true
+  return { canPlace: true };
+}
+
+
+/**
+ * Verifies if an asset of a given type can be placed at the specified tile coordinates.
+ *
+ * @function verifyAssetTypePlacement
+ * @memberof game.utils.assetPlacer
+ * @param {Object} scene - The Phaser scene
+ * @param {string} type - Type of asset being placed
+ * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
+ * @param {number} tx - The x-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @returns {{canPlace: boolean, reason?: string}} 
+ *  An object indicating whether the asset can be placed.
+ *  If placement is not possible, a reason is provided.
+ */
+export function verifyAssetTypePlacement(scene, type, size, tx, ty) {
+  switch (type) {
+    case "Waterrad":
+      // Water mills can only be placed along specific water edges
+      return verifyWaterMillPlacement(size, tx, ty);
+
+    case "Windmolen":
+      // Check if the windmill is placed on either grass (9630) or water (9451, 44640) tiles
+      return verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, [9630, 9451, 44640]);
+
+    default:
+      // For all other assets, check if they are placed on grass (9630) tiles
+      return verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, 9630);
+  }
 }
 
 
@@ -385,4 +497,25 @@ function getTileFromEvent(scene, e) {
     Math.floor(world.x / scene.map.tileWidth),
     Math.floor(world.y / scene.map.tileHeight)
   ];
+}
+
+
+/**
+ * Gets the tile index at specified coordinates
+ * 
+ * @function getTileIndex
+ * @memberof game.utils.assetPlacer
+ * @param {Object} scene - The Phaser scene
+ * @param {number} tx - Tile x coordinate
+ * @param {number} ty - Tile y coordinate
+ * @param {string} layerName - Optional layer name (defaults to layer1)
+ * @returns {number} The tile index or -1 if no tile exists
+ */
+export function getTileIndex(scene, tx, ty, layerName = "layer1") {
+  console.log("scene: ", scene);
+  const layer = scene[layerName] || scene.layer1;
+  if (!layer) return -1;
+  
+  const tile = layer.getTileAt(tx, ty);
+  return tile ? tile.index : -1;
 }
