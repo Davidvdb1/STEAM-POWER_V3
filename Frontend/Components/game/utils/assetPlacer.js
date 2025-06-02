@@ -8,9 +8,9 @@ import { ASSETS } from "./assetConfig.js";
  * @function canPlaceAsset
  * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
- * @param {number} tx - Target X coordinate (in tiles)
- * @param {number} ty - Target Y coordinate (in tiles)
- * @param {Object} size - Size of the asset
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
  * @returns {boolean} True if placement is possible
  */
 export function canPlaceAsset(tileAssetMap, tx, ty, size) {
@@ -28,11 +28,10 @@ export function canPlaceAsset(tileAssetMap, tx, ty, size) {
   for (let dx = 0; dx < size.width; dx++) {
     for (let dy = 0; dy < size.height; dy++) {
       // Skip corners we already checked
-      if ((dx === 0 || dx === size.width - 1) && 
-          (dy === 0 || dy === size.height - 1)) {
+      if ((dx === 0 || dx === size.width - 1) && (dy === 0 || dy === size.height - 1)) {
         continue;
       }
-      
+
       if (tileAssetMap[`${tx + dx},${ty + dy}`]) {
         return false;
       }
@@ -49,9 +48,9 @@ export function canPlaceAsset(tileAssetMap, tx, ty, size) {
  * @function reserveTiles
  * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
- * @param {number} tx - X coordinate (in tiles)
- * @param {number} ty - Y coordinate (in tiles)
- * @param {Object} size - Size of the asset
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
  */
 export function reserveTiles(tileAssetMap, tx, ty, size) {
   for (let dx = 0; dx < size.width; dx++) {
@@ -68,9 +67,9 @@ export function reserveTiles(tileAssetMap, tx, ty, size) {
  * @function releaseTiles
  * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
- * @param {number} tx - X coordinate (in tiles)
- * @param {number} ty - Y coordinate (in tiles)
- * @param {Object} size - Size of the asset
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
  */
 export function releaseTiles(tileAssetMap, tx, ty, size) {
   for (let dx = 0; dx < size.width; dx++) {
@@ -87,9 +86,9 @@ export function releaseTiles(tileAssetMap, tx, ty, size) {
  * @function verifyAssetPlacement
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
- * @param {string} type - Asset type
- * @param {number} tx - Tile x coordinate
- * @param {number} ty - Tile y coordinate
+ * @param {string} type - Type of asset being placed
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @returns {Object} Result with canPlace boolean and reason
  */
 export function verifyAssetPlacement(scene, type, tx, ty) {
@@ -108,7 +107,7 @@ export function verifyAssetPlacement(scene, type, tx, ty) {
     return placedOnValidTiles;
   }
 
-  // Check if within map bounds
+  // Check if the asset is within map bounds
   if (tx < 0 || ty < 0 
       || tx + size.width > scene.map.width 
       || ty + size.height > scene.map.height) {
@@ -118,7 +117,7 @@ export function verifyAssetPlacement(scene, type, tx, ty) {
     };
   }
 
-  // Check if space is already occupied
+  // Check if the space is already occupied
   const isSpaceAvailable = canPlaceAsset(scene.tileAssetMap, tx, ty, size);
   if (!isSpaceAvailable) {
     return {
@@ -139,8 +138,8 @@ export function verifyAssetPlacement(scene, type, tx, ty) {
  * @function checkWaterMillPlacement
  * @memberof game.utils.assetPlacer
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
- * @param {number} tx - The x-coordinate (tile index) where the asset's top-left corner will be placed.
- * @param {number} ty - The y-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @returns {{canPlace: boolean, reason?: string}} 
  *  An object indicating whether the asset can be placed.
  *  If placement is not possible, a reason is provided.
@@ -175,8 +174,8 @@ export function verifyWaterMillPlacement(size, tx, ty) {
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
- * @param {number} tx - The x-coordinate (tile index) where the asset's top-left corner will be placed.
- * @param {number} ty - The y-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number|number[]} validIndices - Single index or array of valid tile indices the asset can be placed on.
  * @returns {{canPlace: boolean, reason?: string}} 
  *  An object indicating whether the asset can be placed.
@@ -191,7 +190,6 @@ function verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, validIndices)
     for (let dy = 0; dy < size.height; dy++) {
       // Get current tile
       const tile = scene.layer1.getTileAt(tx+dx, ty+dy);
-      
       // If no tile exists or its index is not in the valid indices, return false
       if (!tile || !indices.includes(tile.index)) {
         return {
@@ -215,8 +213,8 @@ function verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, validIndices)
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
- * @param {number} tx - The x-coordinate (tile index) where the asset's top-left corner will be placed.
- * @param {number} ty - The y-coordinate (tile index) where the asset's top-left corner will be placed.
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @returns {{canPlace: boolean, reason?: string}} 
  *  An object indicating whether the asset can be placed.
  *  If placement is not possible, a reason is provided.
@@ -244,9 +242,9 @@ export function verifyAssetTypePlacement(scene, type, size, tx, ty) {
  * @function highlightPlacementArea
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
- * @param {string} type - Asset type
- * @param {number} tx - Tile x coordinate
- * @param {number} ty - Tile y coordinate
+ * @param {string} type - Type of asset being placed
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {Phaser.GameObjects.Graphics} graphics - Graphics object to draw on
  */
 export function highlightPlacementArea(scene, type, tx, ty, graphics) {
@@ -306,10 +304,10 @@ export function calculateUpdatedCurrency(currentCurrency, assetType, cost) {
  * @function createAssetSprite
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
- * @param {string} type - Asset type
- * @param {number} tx - Tile x coordinate
- * @param {number} ty - Tile y coordinate
- * @param {Object} size - Asset size
+ * @param {string} type - Type of asset being placed
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
  * @param {string} assetId - Asset ID from backend
  * @returns {Object} Created asset data
  */
@@ -331,16 +329,7 @@ export function createAssetSprite(scene, type, tx, ty, size, assetId) {
   reserveTiles(scene.tileAssetMap, tx, ty, size);
   
   // Create and return the asset data
-  const assetData = { 
-    id: assetId, 
-    image: sprite, 
-    tx, 
-    ty, 
-    size, 
-    type 
-  };
-  
-  return assetData;
+  return { id: assetId, image: sprite, tx, ty, size, type };
 }
 
 
@@ -350,9 +339,9 @@ export function createAssetSprite(scene, type, tx, ty, size, assetId) {
  * @function placeAsset
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
- * @param {string} type - Asset type
- * @param {number} tx - Tile x coordinate
- * @param {number} ty - Tile y coordinate
+ * @param {string} type - Type of asset being placed
+ * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
+ * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {string} successMessage - Message to show on success
  * @returns {Promise<Object>} Result of the placement operation
  */
@@ -414,7 +403,6 @@ export async function placeAsset(scene, type, tx, ty, successMessage = null) {
         
         resolve({ success: true, asset: response.asset, assetData });
       } catch (err) {
-        console.error("Error placing asset:", err);
         scene.showError("Plaatsen mislukt: " + err.message);
         resolve({ success: false, reason: err.message });
       }
@@ -434,20 +422,20 @@ export function setupAssetDragAndDrop(scene) {
   const canvas = scene.game.canvas;
   let currentType = null;
 
-  canvas.addEventListener("dragenter", e => {
-    e.preventDefault();
+  canvas.addEventListener("dragenter", mouseEvent => {
+    mouseEvent.preventDefault();
     try {
-      currentType = e.dataTransfer.getData("text/plain");
+      currentType = mouseEvent.dataTransfer.getData("text/plain");
       scene.draggedAssetType = currentType;
     } catch {}
   });
 
-  canvas.addEventListener("dragover", e => {
-    e.preventDefault();
+  canvas.addEventListener("dragover", mouseEvent => {
+    mouseEvent.preventDefault();
     const type = scene.draggedAssetType || currentType;
     if (!type) return;
 
-    const [tx, ty] = getTileFromEvent(scene, e);
+    const [tx, ty] = getTileFromEvent(scene, mouseEvent);
     highlightPlacementArea(scene, type, tx, ty, scene.dragHighlight);
   });
 
@@ -455,17 +443,17 @@ export function setupAssetDragAndDrop(scene) {
     scene.dragHighlight.clear();
   });
 
-  canvas.addEventListener("drop", async e => {
-    e.preventDefault();
+  canvas.addEventListener("drop", async mouseEvent => {
+    mouseEvent.preventDefault();
   
     try {
-      const type = e.dataTransfer.getData("text/plain");
+      const type = mouseEvent.dataTransfer.getData("text/plain");
       if (!type) {
         scene.showError("Kon het object niet herkennen. Probeer het opnieuw of herlaad de pagina.");
         return;
       }
       
-      const [tx, ty] = getTileFromEvent(scene, e);
+      const [tx, ty] = getTileFromEvent(scene, mouseEvent);
       await placeAsset(scene, type, tx, ty);
     } catch (error) {
       scene.showError("Er is een probleem opgetreden. Probeer het opnieuw of herlaad de pagina.");
@@ -483,39 +471,18 @@ export function setupAssetDragAndDrop(scene) {
  * @function getTileFromEvent
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
- * @param {Event} e - Mouse event
+ * @param {Event} mouseEvent - Mouse event
  * @returns {number[]} Array with [tx, ty] coordinates
  */
-function getTileFromEvent(scene, e) {
+function getTileFromEvent(scene, mouseEvent) {
   const rect   = scene.game.canvas.getBoundingClientRect();
   const scaleX = scene.game.config.width  / rect.width;
   const scaleY = scene.game.config.height / rect.height;
-  const x      = (e.clientX - rect.left) * scaleX;
-  const y      = (e.clientY - rect.top)  * scaleY;
+  const x      = (mouseEvent.clientX - rect.left) * scaleX;
+  const y      = (mouseEvent.clientY - rect.top)  * scaleY;
   const world  = scene.cameras.main.getWorldPoint(x, y);
   return [
     Math.floor(world.x / scene.map.tileWidth),
     Math.floor(world.y / scene.map.tileHeight)
   ];
-}
-
-
-/**
- * Gets the tile index at specified coordinates
- * 
- * @function getTileIndex
- * @memberof game.utils.assetPlacer
- * @param {Object} scene - The Phaser scene
- * @param {number} tx - Tile x coordinate
- * @param {number} ty - Tile y coordinate
- * @param {string} layerName - Optional layer name (defaults to layer1)
- * @returns {number} The tile index or -1 if no tile exists
- */
-export function getTileIndex(scene, tx, ty, layerName = "layer1") {
-  console.log("scene: ", scene);
-  const layer = scene[layerName] || scene.layer1;
-  if (!layer) return -1;
-  
-  const tile = layer.getTileAt(tx, ty);
-  return tile ? tile.index : -1;
 }
