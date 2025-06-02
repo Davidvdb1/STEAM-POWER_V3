@@ -14,11 +14,31 @@ import { ASSETS } from "./assetConfig.js";
  * @returns {boolean} True if placement is possible
  */
 export function canPlaceAsset(tileAssetMap, tx, ty, size) {
+  // Check corners first (most likely to fail)
+  if (
+    tileAssetMap[`${tx},${ty}`] 
+    || tileAssetMap[`${tx + size.width - 1},${ty}`]
+    || tileAssetMap[`${tx},${ty + size.height - 1}`]
+    || tileAssetMap[`${tx + size.width - 1},${ty + size.height - 1}`]
+  ) {
+    return false;
+  }
+  
+  // Check remaining tiles if corners are clear
   for (let dx = 0; dx < size.width; dx++) {
     for (let dy = 0; dy < size.height; dy++) {
-      if (tileAssetMap[`${tx + dx},${ty + dy}`]) return false;
+      // Skip corners we already checked
+      if ((dx === 0 || dx === size.width - 1) && 
+          (dy === 0 || dy === size.height - 1)) {
+        continue;
+      }
+      
+      if (tileAssetMap[`${tx + dx},${ty + dy}`]) {
+        return false;
+      }
     }
   }
+  
   return true;
 }
 
@@ -43,7 +63,7 @@ export function reserveTiles(tileAssetMap, tx, ty, size) {
 
 
 /**
- * Releases occupied tiles
+ * Releases occupied tiles so they can be reused
  * 
  * @function releaseTiles
  * @memberof game.utils.assetPlacer
@@ -88,7 +108,7 @@ export function verifyAssetPlacement(scene, type, tx, ty) {
       || ty + size.height > scene.map.height) {
     return {
       canPlace: false,
-      reason: `Plaats je ${type} binnen de kaartgrenzen`
+      reason: `Plaats je ${type.toLowerCase()} binnen de kaartgrenzen`
     };
   }
 
@@ -118,30 +138,25 @@ export function verifyAssetPlacement(scene, type, tx, ty) {
  * @param {Phaser.GameObjects.Graphics} graphics - Graphics object to draw on
  */
 export function highlightPlacementArea(scene, type, tx, ty, graphics) {
-  if (!ASSETS[type]) return;
-  
   const size = ASSETS[type];
-  const verification = verifyAssetPlacement(scene, type, tx, ty);
+  if (!size) return;
   
   // Clear previous highlight
   graphics.clear();
   
-  // Set color based on whether placement is valid
-  graphics.fillStyle(verification.canPlace ? 0x00ff00 : 0xff0000, 0.4);
+  // Calculate placement validity
+  const canPlace = verifyAssetPlacement(scene, type, tx, ty).canPlace;
   
-  // Draw highlight rectangle for each tile the asset would occupy
-  for (let dx = 0; dx < size.width; dx++) {
-    for (let dy = 0; dy < size.height; dy++) {
-      graphics.fillRect(
-        (tx + dx) * scene.map.tileWidth,
-        (ty + dy) * scene.map.tileHeight,
-        scene.map.tileWidth,
-        scene.map.tileHeight
-      );
-    }
-  }
+  // Set color based on validity
+  graphics.fillStyle(canPlace ? 0x00ff00 : 0xff0000, 0.4);
   
-  return verification;
+  // Draw a single rectangle for the entire asset area
+  graphics.fillRect(
+    tx * scene.map.tileWidth,
+    ty * scene.map.tileHeight,
+    size.width * scene.map.tileWidth,
+    size.height * scene.map.tileHeight
+  );
 }
 
 
@@ -296,44 +311,6 @@ export async function placeAsset(scene, type, tx, ty, successMessage = null) {
 }
 
 
-// /**
-//  * Highlights an asset when hovered
-//  * 
-//  * @function highlightAssetUnderCursor
-//  * @memberof game.utils.assetPlacer
-//  * @param {Object} scene - The Phaser scene
-//  * @param {Phaser.Tilemaps.Tile} tile - The tile being hovered
-//  * @param {Phaser.GameObjects.Graphics} graphics - Graphics object to draw on
-//  */
-// export function highlightAssetUnderCursor(scene, tile, graphics) {
-//   if (!tile) return null;
-  
-//   const under = scene.assetObjects.find(a =>
-//     tile.x >= a.tx && tile.x < a.tx + a.size.width &&
-//     tile.y >= a.ty && tile.y < a.ty + a.size.height
-//   );
-  
-//   graphics.clear();
-  
-//   if (!under) return null;
-  
-//   const { tileWidth: tw, tileHeight: th } = scene.map;
-//   graphics.fillStyle(0x00ff00, 0.3);
-  
-//   for (let dx = 0; dx < under.size.width; dx++) {
-//     for (let dy = 0; dy < under.size.height; dy++) {
-//       graphics.fillRect(
-//         (under.tx + dx)*tw,
-//         (under.ty + dy)*th,
-//         tw, th
-//       );
-//     }
-//   }
-  
-//   return under;
-// }
-
-
 /**
  * Sets up drag and drop for asset placement
  * 
@@ -368,65 +345,24 @@ export function setupAssetDragAndDrop(scene) {
 
   canvas.addEventListener("drop", async e => {
     e.preventDefault();
-    const type = e.dataTransfer.getData("text/plain");
-    if (!type) return;
-
-    const [tx, ty] = getTileFromEvent(scene, e);
-    
-    // Use our new placeAsset method
-    await placeAsset(scene, type, tx, ty);
-    
-    // Clear highlights
-    scene.dragHighlight.clear();
-    scene.draggedAssetType = null;
+  
+    try {
+      const type = e.dataTransfer.getData("text/plain");
+      if (!type) {
+        scene.showError("Kon het object niet herkennen. Probeer het opnieuw of herlaad de pagina.");
+        return;
+      }
+      
+      const [tx, ty] = getTileFromEvent(scene, e);
+      await placeAsset(scene, type, tx, ty);
+    } catch (error) {
+      scene.showError("Er is een probleem opgetreden. Probeer het opnieuw of herlaad de pagina.");
+    } finally {
+      scene.dragHighlight.clear();
+      scene.draggedAssetType = null;
+    }
   });
 }
-
-
-// /**
-//  * Sets up hover effects for existing assets
-//  * 
-//  * @function setupAssetHoverEffects
-//  * @memberof game.utils.assetPlacer
-//  * @param {Object} scene - The Phaser scene
-//  */
-// export function setupAssetHoverEffects(scene) {
-//   scene.input.on("pointermove", pointer => {
-//     const world = pointer.positionToCamera(scene.cameras.main);
-//     const tile = scene.layer1.getTileAtWorldXY(world.x, world.y);
-    
-//     // Clear previous markers
-//     scene.hoverMarker.clear();
-    
-//     if (!tile || scene.isDragging) return;
-    
-//     // Draw hover marker
-//     drawHoverMarker(scene, tile);
-    
-//     // Highlight asset under cursor
-//     highlightAssetUnderCursor(scene, tile, scene.hoverTilesHighlight);
-//   });
-// }
-
-
-// /**
-//  * Draws a marker around the hovered tile
-//  * 
-//  * @function drawHoverMarker
-//  * @memberof game.utils.assetPlacer
-//  * @param {Object} scene - The Phaser scene
-//  * @param {Phaser.Tilemaps.Tile} tile - The tile being hovered
-//  */
-// function drawHoverMarker(scene, tile) {
-//   const { tileWidth: tw, tileHeight: th } = scene.map;
-//   const startX = tile.x - 1, startY = tile.y - 1;
-  
-//   scene.hoverMarker
-//     .lineStyle(1, 0x0000ff, 1)
-//     .fillStyle(0x0000ff, 0.3)
-//     .strokeRect(startX*tw, startY*th, tw*3, th*3)
-//     .fillRect(startX*tw, startY*th, tw*3, th*3);
-// }
 
 
 /**

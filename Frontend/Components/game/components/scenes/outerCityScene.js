@@ -16,7 +16,7 @@ export function createOuterCityScene() {
         if (this.layer1) this.layer1.destroy();
         if (this.layer2) this.layer2.destroy();
         if (this.map)    this.map.destroy();
-        ["dragHighlight","hoverMarker","hoverTilesHighlight"].forEach(p => this[p] && this[p].destroy());
+        "dragHighlight".forEach(p => this[p] && this[p].destroy());
       });
 
       // 2) Clear and inject checkpoint data:
@@ -56,8 +56,6 @@ export function createOuterCityScene() {
       handleMapDragging(this);
 
       this.dragHighlight       = this.add.graphics({ depth: 100 });
-      this.hoverMarker         = this.add.graphics({ depth:  99 });
-      this.hoverTilesHighlight = this.add.graphics({ depth: 101 });
 
       createErrorPopup(this);
       createConfirmationPopup(this);
@@ -136,7 +134,6 @@ export function createOuterCityScene() {
 
       releaseTiles(this.tileAssetMap, toRem.tx, toRem.ty, toRem.size);
       this.assetObjects.splice(idx, 1);
-      this.hoverTilesHighlight.clear();
     }
 
 
