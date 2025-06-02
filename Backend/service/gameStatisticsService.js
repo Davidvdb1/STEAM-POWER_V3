@@ -666,7 +666,8 @@ class GameStatisticsService {
   }
 
   /**
-   * Adds an achievement to the game statistics for a given gameStatisticsId.
+   * Adds an achievement to the game statistics for a given gameStatisticsId
+   * and adds 1 to the score of the game statistics.
    *
    * @async
    * @function addAchievementToGameStatistics
@@ -699,6 +700,23 @@ class GameStatisticsService {
       gameStatisticsId,
       achievement
     );
+
+    // Get and update the currency after adding the achievement
+    const gameStatistics = await gameStatisticsRepository.findById(
+      gameStatisticsId,
+      {
+        includeCurrency: true,
+        includeGameBuildings: false,
+        includeAssets: false,
+      }
+    );
+
+    await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
+      greenEnergy: gameStatistics.currency.greenEnergy,
+      greyEnergy: gameStatistics.currency.greyEnergy,
+      coins: gameStatistics.currency.coins,
+      score: gameStatistics.currency.score + 1,
+    });
 
     // Return the achievement object that was already looked up
     return achievement;
