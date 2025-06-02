@@ -214,15 +214,13 @@ class GameControlPanel extends HTMLElement {
       if (counts["Waterrad"]) extra.greenEnergy += counts["Waterrad"] * 50;
       if (counts["Zonnepaneel"])
         extra.greenEnergy += counts["Zonnepaneel"] * 50;
-      if (counts["Kerncentrale"])
-        extra.greyEnergy += counts["Kerncentrale"] * 100;
 
       const cur = gs.currency;
       const updated = {
         greenEnergy: cur.greenEnergy + extra.greenEnergy,
         greyEnergy: cur.greyEnergy + extra.greyEnergy,
         coins: cur.coins,
-        score: cur.score
+        score: cur.score,
       };
       await updateCurrency(cur.id, updated, token);
 
@@ -370,20 +368,25 @@ class GameControlPanel extends HTMLElement {
       const asset = this._game.assetData.find((a) => a.id === assetId);
       if (!asset) throw new Error("Asset not found");
 
-      // remove on backend
+      // Remove on backend
       const response = await removeAsset(assetId, token);
 
-      // Handle any achievements that were earned
+      // Handle any achievements earned by destroying this asset
       handleAchievements(response, this._gameContainer);
 
-      // deduct destroyCost
+      // Fetch the latest currency values
       const cur = await getCurrencyById(currencyId, token);
+
+      // Subtract only if this is a Kerncentrale
+      const greyDelta = asset.type === "Kerncentrale" ? asset.energy : 0;
+
       const updated = {
         greenEnergy: cur.greenEnergy,
-        greyEnergy:  cur.greyEnergy,
-        coins:       cur.coins - asset.destroyCost,
-        score:       cur.score
+        greyEnergy: cur.greyEnergy - greyDelta,
+        coins: cur.coins - asset.destroyCost,
+        score: cur.score,
       };
+
       await updateCurrency(currencyId, updated, token);
 
       this._coinsEl.textContent = updated.coins;
@@ -422,7 +425,6 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
-
   /**
    * Upgrades a GameBuilding to the next level by calling the backend API, updates local building data,
    * refreshes game statistics, and updates the building detail panel in the UI.
@@ -433,11 +435,17 @@ class GameControlPanel extends HTMLElement {
    */
   async _performUpgradeBuilding(GameBuildingId) {
     try {
-      const building = this._game.buildingData.find(b => b.id === GameBuildingId);
+      const building = this._game.buildingData.find(
+        (b) => b.id === GameBuildingId
+      );
       if (!building) throw new Error("Building not found");
 
       // Call the backend to upgrade the building to the next level
-      const response = await upgradeBuilding( GameBuildingId, {nextLevel: building.level.level + 1 }, this._game.token);
+      const response = await upgradeBuilding(
+        GameBuildingId,
+        { nextLevel: building.level.level + 1 },
+        this._game.token
+      );
 
       // Update the local building data to avoid data inconsistency
       Object.assign(building, response.gameBuilding);
@@ -499,54 +507,57 @@ class GameControlPanel extends HTMLElement {
         (confirmed) => {
           if (confirmed) {
             this._performLoadCheckpoint(selectedCheckpointId);
-            active.showSavedConfirmation(`Spel geladen van ${selectedChekpointName}!`);
+            active.showSavedConfirmation(
+              `Spel geladen van ${selectedChekpointName}!`
+            );
           }
         }
       );
     });
   }
 
-async _performLoadCheckpoint(selectedCheckpointId) {
-  const raw = sessionStorage.getItem("loggedInUser");
-  if (!raw) return console.error("No user in sessionStorage!");
-  const { token } = JSON.parse(raw);
+  async _performLoadCheckpoint(selectedCheckpointId) {
+    const raw = sessionStorage.getItem("loggedInUser");
+    if (!raw) return console.error("No user in sessionStorage!");
+    const { token } = JSON.parse(raw);
 
-  try {
-    // fetch gameStatistics, assets and gameBuildings
-    const { gameStatistics, assets, gameBuildings } =
-      await refactorGameStatistics(selectedCheckpointId, token);
+    try {
+      // fetch gameStatistics, assets and gameBuildings
+      const { gameStatistics, assets, gameBuildings } =
+        await refactorGameStatistics(selectedCheckpointId, token);
 
-    // stash into the game state
-    this._game.gameStatisticsId   = gameStatistics.id;
-    this._game.assetData          = assets;
-    this._game.gameBuildingsData  = gameBuildings;
+      // stash into the game state
+      this._game.gameStatisticsId = gameStatistics.id;
+      this._game.assetData = assets;
+      this._game.gameBuildingsData = gameBuildings;
 
-    clearInterval(this._energyInterval);
-    clearInterval(this._statsInterval);
+      clearInterval(this._energyInterval);
+      clearInterval(this._statsInterval);
 
-    // handle assets in OuterCityScene
-    const outer = this._game.scene.getScene("OuterCityScene");
-    outer.clearAllAssets();
-    outer.checkpointAssets = assets;
-    outer.reloadCheckpointAssets();
-    
-    // Fetch newly updated GameStatistics object
-    this._updateStatistics();
+      // handle assets in OuterCityScene
+      const outer = this._game.scene.getScene("OuterCityScene");
+      outer.clearAllAssets();
+      outer.checkpointAssets = assets;
+      outer.reloadCheckpointAssets();
 
-    // rebind your click events
-    this._game.events.off("assetClicked");
-    this._game.events.on("assetClicked", id => this._showAssetDetail(id));
+      // Fetch newly updated GameStatistics object
+      this._updateStatistics();
 
-    this._game.events.off("buildingClicked");
-    this._game.events.on("buildingClicked", id => this._showBuildingDetail(id));
-  } catch (err) {
-    console.error("Error loading checkpoint:", err);
-    const outer = this._game.scene.getScene("OuterCityScene");
-    if (outer?.showError) outer.showError("Kon checkpoint niet laden: " + err.message);
+      // rebind your click events
+      this._game.events.off("assetClicked");
+      this._game.events.on("assetClicked", (id) => this._showAssetDetail(id));
+
+      this._game.events.off("buildingClicked");
+      this._game.events.on("buildingClicked", (id) =>
+        this._showBuildingDetail(id)
+      );
+    } catch (err) {
+      console.error("Error loading checkpoint:", err);
+      const outer = this._game.scene.getScene("OuterCityScene");
+      if (outer?.showError)
+        outer.showError("Kon checkpoint niet laden: " + err.message);
+    }
   }
-}
-
-
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
