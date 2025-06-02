@@ -730,6 +730,21 @@ class GameStatisticsRepository {
     return gameBuildings.map((gb) => GameBuildings.from(gb));
   }
 
+
+  /**
+   *  
+   * Creates game buildings for a specific game statistics ID by associating them with existing buildings and their initial levels.
+   * @async
+   * @function createGameBuildings
+   * @memberof module:repository/gameStatisticsRepository.Repository_GameBuildings
+   * @param {string} gameStatisticsId - The id of the game statistics to associate the game buildings with.
+   * @param {Array<Object>} gameBuildings - An array of game building objects to create.
+   * @param {Array<Object>} buildingLevels - An array of building level objects to associate with the game buildings.
+   *  
+   * @returns {Promise<Array<GameBuildings>>} A promise that resolves to an array of GameBuildings instances.
+   * @throws {Error} If the game statistics ID is invalid or if there are issues creating the game buildings.
+   * */
+  
   async createGameBuildings(gameStatisticsId) {
     const buildings = await this.prisma.building.findMany();
     const buildingLevels = await this.prisma.buildingLevel.findMany();
