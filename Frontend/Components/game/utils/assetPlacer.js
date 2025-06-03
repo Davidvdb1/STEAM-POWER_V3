@@ -1,4 +1,4 @@
-import { addAsset, updateCurrency, getCurrencyById } from "../service/gameService.js";
+import { addAsset } from "../service/gameService.js";
 import { handleAchievements } from "./achievementHandler.js";
 import { ASSETS } from "./assetConfig.js";
 
@@ -279,34 +279,6 @@ function highlightPlacementArea(scene, type, tx, ty, graphics) {
 
 
 /**
- * Calculates updated currency after placing an asset
- * 
- * @function calculateUpdatedCurrency
- * @memberof game.utils.assetPlacer
- * @param {Object} currentCurrency - Current currency values
- * @param {string} assetType - Type of asset being placed
- * @param {number} cost - Cost of the asset
- * @returns {Object} Updated currency values
- */
-function calculateUpdatedCurrency(currentCurrency, assetType, cost) {
-  // Make a copy to avoid modifying the original
-  const updatedCurrency = { ...currentCurrency };
-  
-  // Deduct cost
-  updatedCurrency.coins -= cost;
-  
-  // Add energy based on asset type
-  if (assetType === "Kerncentrale") {
-    updatedCurrency.greyEnergy += 100;
-  } else if (["Windmolen", "Waterrad", "Zonnepaneel"].includes(assetType)) {
-    updatedCurrency.greenEnergy += 50;
-  }
-  
-  return updatedCurrency;
-}
-
-
-/**
  * Adds the asset's image on the map to visually represent it
  * 
  * @function createAssetSprite
@@ -372,13 +344,9 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
       }
       
       try {
-        const { gameStatisticsId, token, currencyId } = scene.sys.game;
-        const currentCurrency = await getCurrencyById(currencyId, token);
+        const { gameStatisticsId, token } = scene.sys.game;
 
-        // Update energy based on asset type
-        const updatedCurrency = calculateUpdatedCurrency(currentCurrency, type, cost);
-
-        // Call API to add asset
+        // Add the asset to the backend (which will also handle currency updates)
         const response = await addAsset(
           gameStatisticsId,
           {
@@ -400,9 +368,6 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
         // Place the asset on the map
         const assetData = createAssetSprite(scene, type, tx, ty, size, response.asset.id);
         scene.assetObjects.push(assetData);
-        
-        // Update currency
-        await updateCurrency(currencyId, updatedCurrency, token);
         
         // Show success message
         if (successMessage || successMessage === null) {
