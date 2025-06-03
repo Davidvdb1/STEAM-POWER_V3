@@ -1,9 +1,13 @@
 // src/components/currencyDisplay/currencyDisplay.js
+const cssResponse = await fetch(
+  "./Components/game/components/currencyDisplay/style.css"
+);
+const cssText = await cssResponse.text();
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
-    @import "./Components/game/components/currencyDisplay/style.css";
+    ${cssText}
   </style>
 
   <div class="currency-display">
@@ -32,28 +36,33 @@ class CurrencyDisplay extends HTMLElement {
     this._shadow = this.attachShadow({ mode: "open" });
     this._shadow.appendChild(template.content.cloneNode(true));
 
-    this.greyEl   = this._shadow.getElementById("greyEnergy");
-    this.greenEl  = this._shadow.getElementById("greenEnergy");
-    this.coinsEl  = this._shadow.getElementById("coins");
-    this.loadBtn  = this._shadow.getElementById("loadBtn");
-    this.saveBtn  = this._shadow.getElementById("saveBtn");
+    this.greyEl = this._shadow.getElementById("greyEnergy");
+    this.greenEl = this._shadow.getElementById("greenEnergy");
+    this.coinsEl = this._shadow.getElementById("coins");
+    this.loadBtn = this._shadow.getElementById("loadBtn");
+    this.saveBtn = this._shadow.getElementById("saveBtn");
 
-    this.loadBtn.addEventListener('click', () => this._onLoad());
-    this.saveBtn.addEventListener('click', () => this._onSave());
+    this.loadBtn.addEventListener("click", () => this._onLoad());
+    this.saveBtn.addEventListener("click", () => this._onSave());
   }
 
   set data({ greyEnergy, greenEnergy, coins }) {
-    if (greyEnergy  != null) this.greyEl.textContent  = greyEnergy;
-    if (greenEnergy != null) this.greenEl.textContent = Number(greenEnergy).toFixed(3);
-    if (coins       != null) this.coinsEl.textContent = coins;
+    if (greyEnergy != null) this.greyEl.textContent = greyEnergy;
+    if (greenEnergy != null)
+      this.greenEl.textContent = Number(greenEnergy).toFixed(3);
+    if (coins != null) this.coinsEl.textContent = coins;
   }
 
   _onLoad() {
-    this.dispatchEvent(new CustomEvent('loadCheckpoint', { bubbles: true, composed: true }));
+    this.dispatchEvent(
+      new CustomEvent("loadCheckpoint", { bubbles: true, composed: true })
+    );
   }
 
   _onSave() {
-    this.dispatchEvent(new CustomEvent('saveCheckpoint', { bubbles: true, composed: true }));
+    this.dispatchEvent(
+      new CustomEvent("saveCheckpoint", { bubbles: true, composed: true })
+    );
   }
 }
 

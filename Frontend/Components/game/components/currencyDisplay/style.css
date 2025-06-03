@@ -26,6 +26,7 @@
   color: #151515;
   font-family: "PixelFont" !important;
   margin-left: 6px;
+  font-weight: normal !important;
 }
 .currency-display .currency-item.green-energy img {
   height: 50px;
@@ -34,6 +35,7 @@
   color: #9ba143;
   font-family: "PixelFont" !important;
   margin-left: 6px;
+  font-weight: normal !important;
 }
 .currency-display .currency-item.coins img {
   height: 30px;
@@ -43,6 +45,7 @@
   color: #fbac2b;
   font-family: "PixelFont" !important;
   margin-left: 6px;
+  font-weight: normal !important;
 }
 .currency-display .currency-actions {
   display: flex;

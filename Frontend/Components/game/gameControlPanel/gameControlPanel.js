@@ -191,7 +191,6 @@ class GameControlPanel extends HTMLElement {
         }, 0);
 
       this._greyEl.textContent = `${totalGreyCost} / ${totalGreyProduction}`;
-
       const cur = gs.currency;
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._coinsEl.textContent = cur.coins;
@@ -253,9 +252,13 @@ class GameControlPanel extends HTMLElement {
       if (counts["Zonnepaneel"])
         extra.greenEnergy += counts["Zonnepaneel"] * 50;
 
+      const totalGreenCost = this._game.buildingData
+        .filter((b) => b.runsOnGreen === true)
+        .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
+
       const cur = gs.currency;
       const updated = {
-        greenEnergy: cur.greenEnergy + extra.greenEnergy,
+        greenEnergy: cur.greenEnergy + extra.greenEnergy - totalGreenCost,
         greyEnergy: cur.greyEnergy + extra.greyEnergy, // remains unchanged if extra.greyEnergy = 0
         coins: cur.coins,
         score: cur.score,
@@ -303,7 +306,7 @@ class GameControlPanel extends HTMLElement {
         this._game.token
       );
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
-      this._greyEl.textContent = cur.greyEnergy;
+      this._greyEl.textContent = `${totalGreyCost} / ${totalGreyProduction}`;
       this._coinsEl.textContent = cur.coins;
     } catch (e) {
       console.error("Error fetching currency:", e);
