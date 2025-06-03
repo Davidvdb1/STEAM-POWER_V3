@@ -5,18 +5,16 @@ import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
 import {
   fetchGameStatistics,
-  getAllGameBuildingsByGroupId,
   removeAsset,
   getCurrencyById,
   updateCurrency,
   upgradeBuilding,
   toggleGameBuildingRunsOnGreen,
   recordCheckpoint,
-  getCheckpointsByGameStatisticsId,
   refactorGameStatistics,
 } from "../service/gameService.js";
 
-const cssResponse = await fetch('./Components/game/gameControlPanel/style.css');
+const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
 
 // register our detail-panel components
@@ -180,9 +178,22 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
+      const totalGreyCost = this._game.buildingData
+        .filter((b) => b.runsOnGreen === false)
+        .reduce((sum, b) => {
+          return sum + (b.level.energyCost || 0);
+        }, 0);
+
+      const totalGreyProduction = gs.assets
+        .filter((a) => a.type === "Kerncentrale")
+        .reduce((sum, a) => {
+          return sum + (a.energy || 0);
+        }, 0);
+
+      this._greyEl.textContent = `${totalGreyCost} / ${totalGreyProduction}`;
+
       const cur = gs.currency;
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
-      this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
@@ -198,7 +209,7 @@ class GameControlPanel extends HTMLElement {
       name: gb.building ? gb.building.name : "Unknown Building",
       building: gb.building, // Keep original reference if needed
       level: gb.buildingLevel,
-      runsOnGreen: gb.runsOnGreen // Directly use buildingLevel as level
+      runsOnGreen: gb.runsOnGreen, // Directly use buildingLevel as level
     }));
   }
 
@@ -207,17 +218,36 @@ class GameControlPanel extends HTMLElement {
       const user = sessionStorage.getItem("loggedInUser");
       if (!user) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(user);
+
+      // 1) Fetch game statistics
       const gs = await fetchGameStatistics(groupId, token);
 
+      // 2) Transform building data
+      if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
+        this._game.buildingData = this._transformBuildingData(gs.gameBuildings);
+      }
+      this._game.token = token;
+      this._game.groupId = groupId;
+      this._game.assetData = gs.assets;
+      this._game.gameStatisticsId = gs.id;
+      this._game.currencyId = gs.currency.id;
+
+      // 3) Compute total grey-cost from buildings on grey
+      const totalGreyCost = this._game.buildingData
+        .filter((b) => b.runsOnGreen === false)
+        .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
+
+      // 4) Compute total grey-production from “Kerncentrale” assets
+      const totalGreyProduction = gs.assets
+        .filter((a) => a.type === "Kerncentrale")
+        .reduce((sum, a) => sum + (a.energy || 0), 0);
+
+      // 5) (optional) Compute extra from assets and push minimal changes to server
       const counts = gs.assets.reduce((acc, asset) => {
         acc[asset.type] = (acc[asset.type] || 0) + 1;
         return acc;
       }, {});
-
-      const extra = {
-        greenEnergy: 0,
-        greyEnergy: 0,
-      };
+      const extra = { greenEnergy: 0, greyEnergy: 0 };
       if (counts["Windmolen"]) extra.greenEnergy += counts["Windmolen"] * 50;
       if (counts["Waterrad"]) extra.greenEnergy += counts["Waterrad"] * 50;
       if (counts["Zonnepaneel"])
@@ -226,14 +256,18 @@ class GameControlPanel extends HTMLElement {
       const cur = gs.currency;
       const updated = {
         greenEnergy: cur.greenEnergy + extra.greenEnergy,
-        greyEnergy: cur.greyEnergy + extra.greyEnergy,
+        greyEnergy: cur.greyEnergy + extra.greyEnergy, // remains unchanged if extra.greyEnergy = 0
         coins: cur.coins,
         score: cur.score,
       };
       await updateCurrency(cur.id, updated, token);
 
-      this._greenEl.textContent = updated.greenEnergy;
-      this._greyEl.textContent = updated.greyEnergy;
+      // 6) Overwrite the “grey” display with “<building-cost> / <asset-prod>”
+      this._greyEl.textContent = `${totalGreyCost} / ${totalGreyProduction}`;
+
+      // 7) Make sure green always shows three decimals:
+      this._greenEl.textContent = updated.greenEnergy.toFixed(3);
+      this._coinsEl.textContent = updated.coins;
     } catch (e) {
       console.error("Error updating energy:", e);
     }
@@ -248,29 +282,6 @@ class GameControlPanel extends HTMLElement {
     await this._updateStatistics();
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3000);
-    try {
-      const raw = sessionStorage.getItem("loggedInUser");
-      if (!raw) throw new Error("Not logged in");
-      const { token, groupId } = JSON.parse(raw);
-      const gs = await fetchGameStatistics(groupId, token);
-      const gameBuildings = gs.gameBuildings || [];
-      console.log("Game buildings:", gameBuildings);
-
-      this._game.token = token;
-      this._game.groupId = groupId;
-      this._game.buildingData = this._transformBuildingData(gameBuildings);
-      this._game.assetData = gs.assets;
-      this._game.gameStatisticsId = gs.id;
-      this._game.currencyId = gs.currency.id;
-
-      const cur = gs.currency;
-      this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
-      this._greyEl.textContent = cur.greyEnergy;
-      this._coinsEl.textContent = cur.coins;
-      this._statsContainer.classList.remove("hidden");
-    } catch (e) {
-      console.error("Error fetching stats:", e);
-    }
   }
 
   async _updateCurrency() {
@@ -433,7 +444,7 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
-    _confirmToggleBuildingEnergy(GameBuildingId) {
+  _confirmToggleBuildingEnergy(GameBuildingId) {
     const building = this._game.buildingData.find(
       (b) => b.id === GameBuildingId
     );
@@ -442,7 +453,7 @@ class GameControlPanel extends HTMLElement {
     // const currentRunsOnGreen = building.runsOnGreen;
 
     const scene = this._game.scene.getScene("CityScene");
-        this._performToggleBuildingEnergy(GameBuildingId);
+    this._performToggleBuildingEnergy(GameBuildingId);
   }
 
   /**
@@ -483,8 +494,7 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
-
-    async _performToggleBuildingEnergy(GameBuildingId) {
+  async _performToggleBuildingEnergy(GameBuildingId) {
     try {
       const building = this._game.buildingData.find(
         (b) => b.id === GameBuildingId
