@@ -71,7 +71,9 @@ export function createOuterCityScene() {
     // call this to completely wipe out your old assets (sprites & tile reservations)
     clearAllAssets() {
       // destroy each sprite
-      this.assetObjects.forEach(o => o.image.destroy());
+      if (this.assetObjects) {
+        this.assetObjects.forEach(o => o.image.destroy());
+      }
       // reset arrays/maps
       this.assetObjects = [];
       this.tileAssetMap = {};
