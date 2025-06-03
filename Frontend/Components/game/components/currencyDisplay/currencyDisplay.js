@@ -41,17 +41,27 @@ template.innerHTML = /*html*/ `
       </div>
     </div>
 
-    <div class="progress-row">
-      <div class="currency-item green-buildings">
-        <span class="unit">Groene Stad:</span>
+    <div class="progress-div">
+      <div class="progress-row">
+        <div class="currency-item green-buildings">
+          <span class="unit">Groene Stad:</span>
+        </div>
+
+        <div class="progress-container">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+        <div class="currency-item progress-percent">
+          <span id="progressPercentText">0%</span>
+        </div>
       </div>
 
-      <div class="progress-container">
-        <div id="progressBar" class="progress-bar"></div>
-      </div>
-
-      <div class="currency-item progress-percent">
-        <span id="progressPercentText">0%</span>
+    
+      <div class="multipliers">
+        <span>Bonus:</span>
+        <span></span>
+        <span></span>
+        <span></span>
       </div>
     </div>
   </div>
@@ -72,6 +82,16 @@ class CurrencyDisplay extends HTMLElement {
     this._progressBar = this._shadow.getElementById("progressBar");
     this._progressPercentText = this._shadow.getElementById(
       "progressPercentText"
+    );
+
+    this.solarSpan = this._shadow.querySelector(
+      ".multipliers span:nth-child(2)"
+    );
+    this.waterSpan = this._shadow.querySelector(
+      ".multipliers span:nth-child(3)"
+    );
+    this.windSpan = this._shadow.querySelector(
+      ".multipliers span:nth-child(4)"
     );
 
     this.loadBtn.addEventListener("click", () => this._onLoad());
@@ -101,7 +121,14 @@ class CurrencyDisplay extends HTMLElement {
    *   - score
    *   - greenBuildingPercentage   (nummer tussen 0 en 100)
    */
-  set data({ greyEnergy, greenEnergy, coins, score, greenBuildingPercentage }) {
+  set data({
+    greyEnergy,
+    greenEnergy,
+    coins,
+    score,
+    greenBuildingPercentage,
+    multipliers,
+  }) {
     if (greyEnergy != null) this.greyEl.textContent = greyEnergy;
     if (greenEnergy != null)
       this.greenEl.textContent = Number(greenEnergy).toFixed(3);
@@ -115,6 +142,22 @@ class CurrencyDisplay extends HTMLElement {
       const pct = Math.max(0, Math.min(100, greenBuildingPercentage));
       this._progressBar.style.width = `${pct}%`;
       this._progressPercentText.textContent = `${pct}%`;
+    }
+
+    if (multipliers) {
+      this._updateMultipliers(multipliers);
+    }
+  }
+
+  _updateMultipliers({ solar, water, wind }) {
+    if (solar != null) {
+      this.solarSpan.innerHTML = `<img src="Assets/images/solar_panel.png" alt="Solar Panel"> ${solar}x`;
+    }
+    if (water != null) {
+      this.waterSpan.innerHTML = `<img src="Assets/images/waterrad.png" alt="Water Wheel"> ${water}x`;
+    }
+    if (wind != null) {
+      this.windSpan.innerHTML = `<img src="Assets/images/windturbine.png" alt="Wind Turbine"> ${wind}x`;
     }
   }
 

@@ -219,6 +219,11 @@ class GameControlPanel extends HTMLElement {
         coins: cur.coins,
         score: cur.score,
         greenBuildingPercentage,
+        multipliers: {
+          solar: this.solar,
+          water: this.water,
+          wind: this.wind,
+        },
       };
 
       this._statsContainer.classList.remove("hidden");

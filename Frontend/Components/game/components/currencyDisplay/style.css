@@ -75,10 +75,17 @@
 .currency-display .currency-actions button:hover {
   background: #aaa;
 }
+.currency-display .progress-div {
+  display: flex;
+  flex-direction: row;
+}
+.currency-display .progress-div div:nth-child(1) {
+  width: 75%;
+}
 .currency-display .progress-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   width: 100%;
   margin-top: 8px;
 }
@@ -123,4 +130,23 @@
   margin-right: 6px;
   color: #151515;
   white-space: nowrap;
+}
+
+.multipliers {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 10px;
+  justify-content: center;
+  gap: 20px;
+  padding-bottom: 20px;
+}
+.multipliers span {
+  font-family: "PixelFont" !important;
+  color: #151515;
+  font-weight: normal !important;
+}
+.multipliers span img {
+  height: 30px;
+  margin-right: 6px;
 }/*# sourceMappingURL=style.css.map */
