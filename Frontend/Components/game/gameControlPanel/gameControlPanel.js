@@ -258,7 +258,7 @@ class GameControlPanel extends HTMLElement {
             a.type === "Zonnepaneel"
         )
         .reduce((sum, a) => sum + (a.energy || 0), 0);
-
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
       const totalGreenCost = this._game.buildingData
         .filter((b) => b.runsOnGreen === true)
         .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
@@ -271,7 +271,7 @@ class GameControlPanel extends HTMLElement {
         coins: cur.coins,
         score: cur.score,
       };
-      ////////////////////////////////////////////////////////////////////////////////////////////////////
+
       await updateCurrency(cur.id, updated, token);
 
       this._greyEl.textContent = `${totalGreyCost} / ${totalGreyProduction}`;
