@@ -55,7 +55,7 @@ export function createOuterCityScene() {
       setMovementKeys(this);
       handleMapDragging(this);
 
-      this.dragHighlight       = this.add.graphics({ depth: 100 });
+      this.dragHighlight = this.add.graphics({ depth: 100 });
 
       createErrorPopup(this);
       createConfirmationPopup(this);
@@ -80,22 +80,37 @@ export function createOuterCityScene() {
 
     // call this *after* setting checkpointAssets; it simply draws them on the existing map
     reloadCheckpointAssets() {
-      const assets = Array.isArray(this.checkpointAssets) ? this.checkpointAssets : this.sys.game.assetData;
+      const assets = Array.isArray(this.checkpointAssets)
+        ? this.checkpointAssets
+        : this.sys.game.assetData;
       if (!Array.isArray(assets)) return;
-
-      assets.forEach(a => {
+      assets.forEach((a) => {
         const wx = a.xLocation * this.map.tileWidth;
         const wy = a.yLocation * this.map.tileHeight;
-        const sprite = this.add.image(wx, wy, a.type)
+        const sprite = this.add
+          .image(wx, wy, a.type)
           .setOrigin(0)
-          .setDisplaySize(a.xSize * this.map.tileWidth, a.ySize * this.map.tileHeight)
+          .setDisplaySize(
+            a.xSize * this.map.tileWidth,
+            a.ySize * this.map.tileHeight
+          )
           .setInteractive()
           .on("pointerdown", () => {
             this.isDragging = false;
             this.game.events.emit("assetClicked", a.id);
           });
-        reserveTiles(this.tileAssetMap, a.xLocation, a.yLocation, { width: a.xSize, height: a.ySize });
-        this.assetObjects.push({ id: a.id, image: sprite, tx: a.xLocation, ty: a.yLocation, size: { width: a.xSize, height: a.ySize }, type: a.type });
+        reserveTiles(this.tileAssetMap, a.xLocation, a.yLocation, {
+          width: a.xSize,
+          height: a.ySize,
+        });
+        this.assetObjects.push({
+          id: a.id,
+          image: sprite,
+          tx: a.xLocation,
+          ty: a.yLocation,
+          size: { width: a.xSize, height: a.ySize },
+          type: a.type,
+        });
       });
     }
 
@@ -118,6 +133,7 @@ export function createOuterCityScene() {
         this.assetObjects.push(assetData);
       });
     }
+
 
     // Remove an asset from the map
     _removeAsset(asset) {

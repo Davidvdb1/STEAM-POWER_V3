@@ -26,6 +26,14 @@
   background: #add8e6;
 }
 
+:host([runsOnGreen=true]) {
+  background: #d2f7d2;
+}
+
+:host([runsOnGreen=false]) {
+  background: #d3d3d3;
+}
+
 .close {
   position: absolute;
   top: 6px;
@@ -55,6 +63,22 @@ button.destroy {
   background: #d3d3d3;
   cursor: pointer;
   font-family: "PixelFont", sans-serif !important;
+}
+
+.toggleEnergy {
+  display: block;
+  margin: 12px auto 0;
+  padding: 6px 10px;
+  border: 2px solid #555;
+  background: #d3d3d3;
+  cursor: pointer;
+  font-family: "PixelFont", sans-serif !important;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 button.destroy:hover {
