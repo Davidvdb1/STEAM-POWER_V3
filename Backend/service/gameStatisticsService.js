@@ -391,17 +391,12 @@ class GameStatisticsService {
    * @async
    * @function refactorGameStatistics
    * @memberof module:service/gameStatisticsService.Service_Checkpoints
-   * @param {Object} params - The parameters object.
-   * @param {string} params.checkpointId - The ID of the checkpoint to refactor statistics for.
-   * @returns {Promise<any>} The result of the refactored game statistics operation.
+   * @param {string} checkpointId - The ID of the checkpoint to refactor statistics for.
+   * @returns {Promise<GameStatistics>} The restored GameStatistics object.
    */
-  async refactorGameStatistics({ checkpointId }) {
-    const checkpoint = await gameStatisticsRepository.findCheckpointById(
-      checkpointId
-    );
-    return await gameStatisticsRepository.refactorGameStatistics({
-      checkpoint,
-    });
+  async refactorGameStatistics(checkpointId) {
+    const checkpoint = await gameStatisticsRepository.findCheckpointById(checkpointId);
+    return await gameStatisticsRepository.refactorGameStatistics({checkpoint});
   }
 
   //########################################################################

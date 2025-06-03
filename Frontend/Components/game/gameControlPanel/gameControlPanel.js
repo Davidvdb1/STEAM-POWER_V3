@@ -85,6 +85,8 @@ class GameControlPanel extends HTMLElement {
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
+
+    this._boundAssetPlacedHandler = () => this._updateStatistics();
   }
 
   _loadPhaser() {
@@ -125,6 +127,7 @@ class GameControlPanel extends HTMLElement {
     this._statsContainer.addEventListener("loadCheckpoint", () =>
       this._onLoadCheckpoint()
     );
+    document.addEventListener('asset-placed', this._boundAssetPlacedHandler);
 
     this._loadPhaser().then(() => this._initializeGame());
 
@@ -134,6 +137,10 @@ class GameControlPanel extends HTMLElement {
         this._updateCurrency();
       }, 5000);
     }
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener('asset-placed', this._boundAssetPlacedHandler);
   }
 
   _initializeGame() {
@@ -343,6 +350,7 @@ class GameControlPanel extends HTMLElement {
       );
     });
   }
+
 
   _showBuildingDetail(id) {
     this._detailContainer.innerHTML = "";
@@ -576,43 +584,41 @@ class GameControlPanel extends HTMLElement {
     if (!raw) return console.error("No user in sessionStorage!");
     const { token } = JSON.parse(raw);
 
-    try {
-      // fetch gameStatistics, assets and gameBuildings
-      const { gameStatistics, assets, gameBuildings } =
-        await refactorGameStatistics(selectedCheckpointId, token);
+  try {
+    // fetch gameStatistics, assets and gameBuildings
+    const gameStatistics = await refactorGameStatistics(selectedCheckpointId, token);
 
-      // stash into the game state
-      this._game.gameStatisticsId = gameStatistics.id;
-      this._game.assetData = assets;
-      this._game.gameBuildingsData = gameBuildings;
+    // stash into the game state
+    this._game.gameStatisticsId   = gameStatistics.id;
+    this._game.currencyId         = gameStatistics.currency.id; 
+    this._game.assetData          = gameStatistics.assets;
+    this._game.gameBuildingsData  = gameStatistics.gameBuildings;
 
       clearInterval(this._energyInterval);
       clearInterval(this._statsInterval);
 
-      // handle assets in OuterCityScene
-      const outer = this._game.scene.getScene("OuterCityScene");
-      outer.clearAllAssets();
-      outer.checkpointAssets = assets;
-      outer.reloadCheckpointAssets();
+    // handle assets in OuterCityScene
+    const outer = this._game.scene.getScene("OuterCityScene");
+    outer.clearAllAssets();
+    outer.checkpointAssets = gameStatistics.assets;
+    outer.reloadCheckpointAssets();
+    
+    // Fetch newly updated GameStatistics object
+    this._updateStatistics();
 
-      // Fetch newly updated GameStatistics object
-      this._updateStatistics();
+    // rebind your click events
+    this._game.events.off("assetClicked");
+    this._game.events.on("assetClicked", id => this._showAssetDetail(id));
 
-      // rebind your click events
-      this._game.events.off("assetClicked");
-      this._game.events.on("assetClicked", (id) => this._showAssetDetail(id));
-
-      this._game.events.off("buildingClicked");
-      this._game.events.on("buildingClicked", (id) =>
-        this._showBuildingDetail(id)
-      );
-    } catch (err) {
-      console.error("Error loading checkpoint:", err);
-      const outer = this._game.scene.getScene("OuterCityScene");
-      if (outer?.showError)
-        outer.showError("Kon checkpoint niet laden: " + err.message);
-    }
+    this._game.events.off("buildingClicked");
+    this._game.events.on("buildingClicked", id => this._showBuildingDetail(id));
+  } catch (err) {
+    console.error("Error loading checkpoint:", err);
+    const outer = this._game.scene.getScene("OuterCityScene");
+    if (outer?.showError) outer.showError("Kon checkpoint niet laden: " + err.message);
   }
+}
+
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
