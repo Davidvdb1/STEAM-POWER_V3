@@ -105,11 +105,14 @@ export function createCityScene() {
       this.buildingRegistry = new BuildingRegistry();
 
       // Define buildings by specific tile coordinates and layers, defined in BUILDING_DEFINITIONS
-       BUILDING_DEFINITIONS.forEach(building => {
-        this.buildingRegistry.createBuilding(building.name, this.map, ...building.layers);
+      BUILDING_DEFINITIONS.forEach((building) => {
+        this.buildingRegistry.createBuilding(
+          building.name,
+          this.map,
+          ...building.layers
+        );
       });
-    };
-
+    }
 
     /**
      * Iterates over all registered buildings and creates a single interactive transparent rectangle
@@ -178,4 +181,23 @@ export function createCityScene() {
         }
       }
     }
-  }}
+
+    /**
+     * Make one building either grayscale or full‐color
+     * based on its runsOnGreen flag.
+     *
+     * @param {{ name: string, runsOnGreen: boolean }} b
+     *   Any object with `name` and `runsOnGreen`.
+     *   We look up the TileSelection by `name` in the registry.
+     */
+    setBuildingColor(b) {
+      const tileSel = this.buildingRegistry.getBuilding(b.name);
+      if (!tileSel) return;
+      if (b.runsOnGreen) {
+        tileSel.removeGrayscale();
+      } else {
+        tileSel.applyGrayscale(1);
+      }
+    }
+  };
+}

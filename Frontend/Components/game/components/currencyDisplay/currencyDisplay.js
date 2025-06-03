@@ -1,9 +1,13 @@
 // src/components/currencyDisplay/currencyDisplay.js
+const cssResponse = await fetch(
+  "./Components/game/components/currencyDisplay/style.css"
+);
+const cssText = await cssResponse.text();
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
-    @import "./Components/game/components/currencyDisplay/style.css";
+    ${cssText}
   </style>
 
   <div class="currency-display">
@@ -34,6 +38,7 @@ class CurrencyDisplay extends HTMLElement {
     super();
     this._shadow = this.attachShadow({ mode: "open" });
     this._shadow.appendChild(template.content.cloneNode(true));
+
 
     this.greyEl   = this._shadow.getElementById("greyEnergy");
     this.greenEl  = this._shadow.getElementById("greenEnergy");
@@ -69,15 +74,18 @@ class CurrencyDisplay extends HTMLElement {
       this.scoreEl.textContent = score;
       this.scoreEl.style.setProperty('--score', score);
     }
-
   }
 
   _onLoad() {
-    this.dispatchEvent(new CustomEvent('loadCheckpoint', { bubbles: true, composed: true }));
+    this.dispatchEvent(
+      new CustomEvent("loadCheckpoint", { bubbles: true, composed: true })
+    );
   }
 
   _onSave() {
-    this.dispatchEvent(new CustomEvent('saveCheckpoint', { bubbles: true, composed: true }));
+    this.dispatchEvent(
+      new CustomEvent("saveCheckpoint", { bubbles: true, composed: true })
+    );
   }
 }
 
