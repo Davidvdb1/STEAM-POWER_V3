@@ -530,6 +530,12 @@ class GameControlPanel extends HTMLElement {
       console.log("Response from toggle:", response);
       Object.assign(building, response);
 
+      //recolor the building in the game scene
+      const cityScene = this._game.scene.getScene("CityScene");
+      if (cityScene && typeof cityScene.setBuildingColor === "function") {
+        cityScene.setBuildingColor(building);
+      }
+
       // Handle any achievements that were earned
       handleAchievements(response, this._gameContainer);
 
