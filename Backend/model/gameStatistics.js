@@ -102,6 +102,7 @@ class GameStatistics {
         id: gb.id,
         building: gb.building,
         buildingLevel: gb.buildingLevel,
+        runsOnGreen: gb.runsOnGreen,
       })),
       groupId: this.groupId,
       checkpoints: this.checkpoints,

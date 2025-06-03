@@ -10,10 +10,14 @@ import {
   getCurrencyById,
   updateCurrency,
   upgradeBuilding,
+  toggleGameBuildingRunsOnGreen,
   recordCheckpoint,
   getCheckpointsByGameStatisticsId,
   refactorGameStatistics,
 } from "../service/gameService.js";
+
+const cssResponse = await fetch('./Components/game/gameControlPanel/style.css');
+const cssText = await cssResponse.text();
 
 // register our detail-panel components
 import "../components/details/buildingDetail.js";
@@ -26,7 +30,7 @@ import { createCheckpointLoadPopup } from "../utils/checkpointLoadPopup.js";
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
-    @import './Components/game/gameControlPanel/style.css';
+    ${cssText}
     :host { display: block; position: relative; }
     #detail-container { position: absolute; top: 0; left: -220px; width: 200px; z-index: 10; }
   </style>
@@ -77,6 +81,7 @@ class GameControlPanel extends HTMLElement {
     this._greyEl = this._statsContainer.greyEl;
     this._greenEl = this._statsContainer.greenEl;
     this._coinsEl = this._statsContainer.coinsEl;
+    this._scoreEl = this._statsContainer.scoreEl;
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
@@ -113,6 +118,9 @@ class GameControlPanel extends HTMLElement {
     this._shadow.addEventListener("upgrade-build", (e) => {
       this._confirmUpgradeBuilding(e.detail.GameBuildingId);
     });
+    this._shadow.addEventListener("toggle-building-energy", (e) => {
+      this._confirmToggleBuildingEnergy(e.detail.GameBuildingId);
+    });
     this._statsContainer.addEventListener("saveCheckpoint", () =>
       this._onSaveCheckpoint()
     );
@@ -127,7 +135,7 @@ class GameControlPanel extends HTMLElement {
     if (bluetooth) {
       this._interval = setInterval(() => {
         this._updateCurrency();
-      }, 2000);
+      }, 5000);
     }
   }
 
@@ -184,6 +192,7 @@ class GameControlPanel extends HTMLElement {
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
+      this._scoreEl.textContent = cur.score;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
@@ -197,7 +206,8 @@ class GameControlPanel extends HTMLElement {
       id: gb.id,
       name: gb.building ? gb.building.name : "Unknown Building",
       building: gb.building, // Keep original reference if needed
-      level: gb.buildingLevel, // Directly use buildingLevel as level
+      level: gb.buildingLevel,
+      runsOnGreen: gb.runsOnGreen // Directly use buildingLevel as level
     }));
   }
 
@@ -221,15 +231,13 @@ class GameControlPanel extends HTMLElement {
       if (counts["Waterrad"]) extra.greenEnergy += counts["Waterrad"] * 50;
       if (counts["Zonnepaneel"])
         extra.greenEnergy += counts["Zonnepaneel"] * 50;
-      if (counts["Kerncentrale"])
-        extra.greyEnergy += counts["Kerncentrale"] * 100;
 
       const cur = gs.currency;
       const updated = {
         greenEnergy: cur.greenEnergy + extra.greenEnergy,
         greyEnergy: cur.greyEnergy + extra.greyEnergy,
         coins: cur.coins,
-        score: cur.score
+        score: cur.score,
       };
       await updateCurrency(cur.id, updated, token);
 
@@ -268,6 +276,7 @@ class GameControlPanel extends HTMLElement {
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
+      this._scoreEl.textContent = cur.score;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
@@ -283,6 +292,7 @@ class GameControlPanel extends HTMLElement {
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
+      this._scoreEl.textContent = cur.score;
     } catch (e) {
       console.error("Error fetching currency:", e);
     }
@@ -378,20 +388,25 @@ class GameControlPanel extends HTMLElement {
       const asset = this._game.assetData.find((a) => a.id === assetId);
       if (!asset) throw new Error("Asset not found");
 
-      // remove on backend
+      // Remove on backend
       const response = await removeAsset(assetId, token);
 
-      // Handle any achievements that were earned
+      // Handle any achievements earned by destroying this asset
       handleAchievements(response, this._gameContainer);
 
-      // deduct destroyCost
+      // Fetch the latest currency values
       const cur = await getCurrencyById(currencyId, token);
+
+      // Subtract only if this is a Kerncentrale
+      const greyDelta = asset.type === "Kerncentrale" ? asset.energy : 0;
+
       const updated = {
         greenEnergy: cur.greenEnergy,
-        greyEnergy:  cur.greyEnergy,
-        coins:       cur.coins - asset.destroyCost,
-        score:       cur.score
+        greyEnergy: cur.greyEnergy - greyDelta,
+        coins: cur.coins - asset.destroyCost,
+        score: cur.score,
       };
+
       await updateCurrency(currencyId, updated, token);
 
       this._coinsEl.textContent = updated.coins;
@@ -430,6 +445,17 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+    _confirmToggleBuildingEnergy(GameBuildingId) {
+    const building = this._game.buildingData.find(
+      (b) => b.id === GameBuildingId
+    );
+    if (!building) return;
+
+    // const currentRunsOnGreen = building.runsOnGreen;
+
+    const scene = this._game.scene.getScene("CityScene");
+        this._performToggleBuildingEnergy(GameBuildingId);
+  }
 
   /**
    * Upgrades a GameBuilding to the next level by calling the backend API, updates local building data,
@@ -441,14 +467,51 @@ class GameControlPanel extends HTMLElement {
    */
   async _performUpgradeBuilding(GameBuildingId) {
     try {
-      const building = this._game.buildingData.find(b => b.id === GameBuildingId);
+      const building = this._game.buildingData.find(
+        (b) => b.id === GameBuildingId
+      );
       if (!building) throw new Error("Building not found");
 
       // Call the backend to upgrade the building to the next level
-      const response = await upgradeBuilding( GameBuildingId, {nextLevel: building.level.level + 1 }, this._game.token);
+      const response = await upgradeBuilding(
+        GameBuildingId,
+        { nextLevel: building.level.level + 1 },
+        this._game.token
+      );
 
       // Update the local building data to avoid data inconsistency
       Object.assign(building, response.gameBuilding);
+
+      // Handle any achievements that were earned
+      handleAchievements(response, this._gameContainer);
+
+      // Refetch the game statistics to update the UI with the updated currency values
+      this._updateStatistics();
+
+      // Update the detail panel with the new building data
+      this._detailContainer.querySelector("building-detail").data = building;
+    } catch (err) {
+      throw new Error(`Error upgrading building: ${err.message}`);
+    }
+  }
+
+
+    async _performToggleBuildingEnergy(GameBuildingId) {
+    try {
+      const building = this._game.buildingData.find(
+        (b) => b.id === GameBuildingId
+      );
+      if (!building) throw new Error("Building not found");
+
+      // Call the backend to toggle the building's energy type
+      const response = await toggleGameBuildingRunsOnGreen(
+        GameBuildingId,
+        this._game.token
+      );
+
+      // Update the local building data to avoid data inconsistency
+      console.log("Response from toggle:", response);
+      Object.assign(building, response);
 
       // Handle any achievements that were earned
       handleAchievements(response, this._gameContainer);
@@ -507,17 +570,19 @@ class GameControlPanel extends HTMLElement {
         (confirmed) => {
           if (confirmed) {
             this._performLoadCheckpoint(selectedCheckpointId);
-            active.showSavedConfirmation(`Spel geladen van ${selectedChekpointName}!`);
+            active.showSavedConfirmation(
+              `Spel geladen van ${selectedChekpointName}!`
+            );
           }
         }
       );
     });
   }
 
-async _performLoadCheckpoint(selectedCheckpointId) {
-  const raw = sessionStorage.getItem("loggedInUser");
-  if (!raw) return console.error("No user in sessionStorage!");
-  const { token } = JSON.parse(raw);
+  async _performLoadCheckpoint(selectedCheckpointId) {
+    const raw = sessionStorage.getItem("loggedInUser");
+    if (!raw) return console.error("No user in sessionStorage!");
+    const { token } = JSON.parse(raw);
 
   try {
     // fetch gameStatistics, assets and gameBuildings
@@ -529,8 +594,8 @@ async _performLoadCheckpoint(selectedCheckpointId) {
     this._game.assetData          = gameStatistics.assets;
     this._game.gameBuildingsData  = gameStatistics.gameBuildings;
 
-    clearInterval(this._energyInterval);
-    clearInterval(this._statsInterval);
+      clearInterval(this._energyInterval);
+      clearInterval(this._statsInterval);
 
     // handle assets in OuterCityScene
     const outer = this._game.scene.getScene("OuterCityScene");
@@ -553,7 +618,6 @@ async _performLoadCheckpoint(selectedCheckpointId) {
     if (outer?.showError) outer.showError("Kon checkpoint niet laden: " + err.message);
   }
 }
-
 
 }
 

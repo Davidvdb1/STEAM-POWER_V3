@@ -22,7 +22,7 @@
   transform: translateX(10px);
   z-index: 10;
   display: flex;
-  height: 190px;
+  height: 250px;
   width: 200px;
 }
 
@@ -58,12 +58,18 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   transition: transform 0.1s ease-in-out;
 }
-#startButton.hidden { display: none; }
-#startButton:hover  { transform: translateX(-50%) scale(1.05); }
-#startButton:active { transform: translateX(-50%) scale(0.95); }
+#startButton.hidden {
+  display: none;
+}
+#startButton:hover {
+  transform: translateX(-50%) scale(1.05);
+}
+#startButton:active {
+  transform: translateX(-50%) scale(0.95);
+}
 
 #outer-container {
   position: absolute;
@@ -120,15 +126,20 @@
   flex-direction: row;
   justify-content: space-evenly;
   background: #d3d3d3;
-  border-left:  2px solid #555;
+  border-left: 2px solid #555;
   border-right: 2px solid #555;
-  border-bottom:2px solid #555;
+  border-bottom: 2px solid #555;
   width: 964px;
   margin: 0 auto;
 }
-#stats.hidden { display: none; }
+#stats.hidden {
+  display: none;
+}
 
-#stat-item { display: flex; align-items: center; }
+#stat-item {
+  display: flex;
+  align-items: center;
+}
 
 .euro {
   display: flex;
@@ -144,14 +155,18 @@
   margin-left: 6px;
 }
 
-.img-greenEnergy { height: 50px; }
+.img-greenEnergy {
+  height: 50px;
+}
 .p-greenEnergy {
   color: #9ba143;
   font-family: "PixelFont" !important;
   margin-left: 6px;
 }
 
-.img-greyEnergy { height: 50px; }
+.img-greyEnergy {
+  height: 50px;
+}
 .p-greyEnergy {
   color: #151515;
   font-family: "PixelFont" !important;
@@ -162,19 +177,25 @@
   display: flex;
   align-items: center;
 }
-.mr { margin-right: 3px; }
+.mr {
+  margin-right: 3px;
+}
 
 .popup {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
 }
-.popup.hidden { display: none; }
+.popup.hidden {
+  display: none;
+}
 .popup-content {
   background: white;
   padding: 2rem;
