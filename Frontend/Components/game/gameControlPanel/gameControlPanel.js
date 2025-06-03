@@ -15,9 +15,6 @@ import {
 } from "../service/gameService.js";
 import {
   transformBuildingData,
-  calculateTotalGreyCost,
-  calculateTotalGreyProduction,
-  calculateGreenBuildingPercentage,
   buildCurrencyDisplayPayload,
   calculateTotalGreenCost,
   calculateTotalGreenProduction,
@@ -30,7 +27,6 @@ import { animateWrapperAndStats } from "../utils/animationHelpers.js";
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
 
-// register our detail-panel components
 import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
@@ -45,12 +41,9 @@ template.innerHTML = /*html*/ `
     #detail-container { position: absolute; top: 0; left: -220px; width: 200px; z-index: 10; }
   </style>
 
-  <!-- wrapper holds both game and panel -->
   <div id="wrapper">
-    <!-- DETAIL PANEL: appears when you click a building or asset -->
     <div id="detail-container" class="hidden"></div>
     <div id="inner-container">
-      <!-- now using our extracted shop-sidebar component -->
       <shop-sidebar></shop-sidebar>
 
       <div class="test">
@@ -91,7 +84,6 @@ class GameControlPanel extends HTMLElement {
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
 
-    // Deze variabelen updaten als er een natuurramp of weersverandering is.
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
@@ -197,15 +189,6 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
-      // Bereken totalGreyCost en totalGreyProduction
-      const totalGreyCost = calculateTotalGreyCost(this._game.buildingData);
-      const totalGreyProduction = calculateTotalGreyProduction(gs.assets);
-
-      // Bereken percentage groene gebouwen
-      const greenBuildingPercentage = calculateGreenBuildingPercentage(
-        this._game.buildingData
-      );
-
       const payload = buildCurrencyDisplayPayload({
         buildings: this._game.buildingData,
         assets: gs.assets,
@@ -249,7 +232,6 @@ class GameControlPanel extends HTMLElement {
         totalGreenProduction,
         totalGreenCost
       );
-      // Update the currency on the backend
       await updateCurrency(currencyId, currencyPayload, token);
 
       this._updateStatistics();
@@ -259,7 +241,6 @@ class GameControlPanel extends HTMLElement {
   }
 
   async _onStartClick() {
-    // 1) Hide “Start” and switch to CityScene
     this._startButton.classList.add("hidden");
     this._game.scene.start("CityScene");
     this._outerContainer.style.display = "flex";
@@ -358,16 +339,12 @@ class GameControlPanel extends HTMLElement {
       const asset = this._game.assetData.find((a) => a.id === assetId);
       if (!asset) throw new Error("Asset not found");
 
-      // Remove on backend
       const response = await removeAsset(assetId, token);
 
-      // Handle any achievements earned by destroying this asset
       handleAchievements(response, this._gameContainer);
 
-      // Fetch de pas geüpdatete currency
       const cur = await getCurrencyById(currencyId, token);
 
-      // Subtract alleen als dit een Kerncentrale is
       const greyDelta = asset.type === "Kerncentrale" ? asset.energy : 0;
       const updatedCurrency = {
         greenEnergy: cur.greenEnergy,
@@ -377,8 +354,6 @@ class GameControlPanel extends HTMLElement {
       };
 
       await updateCurrency(currencyId, updatedCurrency, token);
-
-      // Laat CurrencyDisplay opnieuw updaten
       this._updateStatistics();
 
       const outer = this._game.scene.getScene("OuterCityScene");
@@ -422,29 +397,20 @@ class GameControlPanel extends HTMLElement {
       );
       if (!building) throw new Error("Building not found");
 
-      // Call the backend to upgrade the building to the next level
       const response = await upgradeBuilding(
         GameBuildingId,
         { nextLevel: building.level.level + 1 },
         this._game.token
       );
-
-      // Update the local building data to avoid data inconsistency
       Object.assign(building, response.gameBuilding);
 
-      // Update the building color in the game data
       const cityScene = this._game.scene.getScene("CityScene");
       if (cityScene && cityScene.setBuildingColor) {
         cityScene.setBuildingColor(building);
       }
-
-      // Handle any achievements that were earned
       handleAchievements(response, this._gameContainer);
-
-      // Laat CurrencyDisplay opnieuw updaten
       this._updateStatistics();
 
-      // Update the detail panel met de nieuwe building data
       this._detailContainer.querySelector("building-detail").data = building;
     } catch (err) {
       throw new Error(`Error upgrading building: ${err.message}`);
@@ -467,28 +433,21 @@ class GameControlPanel extends HTMLElement {
       );
       if (!building) throw new Error("Building not found");
 
-      // Call the backend to toggle het energy‐type
       const response = await toggleGameBuildingRunsOnGreen(
         GameBuildingId,
         this._game.token
       );
 
-      // Update the lokale building data
       Object.assign(building, response);
 
-      // Herkleuren in CityScene
       const cityScene = this._game.scene.getScene("CityScene");
       if (cityScene && typeof cityScene.setBuildingColor === "function") {
         cityScene.setBuildingColor(building);
       }
 
-      // Verder met achievements
       handleAchievements(response, this._gameContainer);
-
-      // Laat CurrencyDisplay opnieuw updaten
       this._updateStatistics();
 
-      // Update detail panel met nieuwe data
       this._detailContainer.querySelector("building-detail").data = building;
     } catch (err) {
       throw new Error(`Error toggling building energy: ${err.message}`);
