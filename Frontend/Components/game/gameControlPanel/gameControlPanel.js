@@ -13,6 +13,19 @@ import {
   recordCheckpoint,
   refactorGameStatistics,
 } from "../service/gameService.js";
+import {
+  transformBuildingData,
+  calculateTotalGreyCost,
+  calculateTotalGreyProduction,
+  calculateGreenBuildingPercentage,
+  buildCurrencyDisplayPayload,
+  calculateTotalGreenCost,
+  calculateTotalGreenProduction,
+  unpackCheckpointPayload,
+} from "../utils/gameDataHelpers.js";
+import { getAuthFromSession } from "../utils/sessionHelper.js";
+import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
+import { animateWrapperAndStats } from "../utils/animationHelpers.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -23,7 +36,6 @@ import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
 import { handleAchievements } from "../utils/achievementHandler.js";
-import { createCheckpointLoadPopup } from "../utils/checkpointLoadPopup.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -173,13 +185,11 @@ class GameControlPanel extends HTMLElement {
 
   async _updateStatistics() {
     try {
-      const raw = sessionStorage.getItem("loggedInUser");
-      if (!raw) throw new Error("Not logged in");
-      const { token, groupId } = JSON.parse(raw);
+      const { token, groupId } = getAuthFromSession();
       const gs = await fetchGameStatistics(groupId, token);
 
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
-        this._game.buildingData = this._transformBuildingData(gs.gameBuildings);
+        this._game.buildingData = transformBuildingData(gs.gameBuildings);
       }
       this._game.token = token;
       this._game.groupId = groupId;
@@ -188,70 +198,39 @@ class GameControlPanel extends HTMLElement {
       this._game.currencyId = gs.currency.id;
 
       // Bereken totalGreyCost en totalGreyProduction
-      const totalGreyCost = this._game.buildingData
-        .filter((b) => b.runsOnGreen === false)
-        .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
-
-      const totalGreyProduction = gs.assets
-        .filter((a) => a.type === "Kerncentrale")
-        .reduce((sum, a) => sum + (a.energy || 0), 0);
+      const totalGreyCost = calculateTotalGreyCost(this._game.buildingData);
+      const totalGreyProduction = calculateTotalGreyProduction(gs.assets);
 
       // Bereken percentage groene gebouwen
-      const totalBuildings = this._game.buildingData.length;
-      const greenCount = this._game.buildingData.filter(
-        (b) => b.runsOnGreen
-      ).length;
-      const greenBuildingPercentage =
-        totalBuildings > 0
-          ? Math.round((greenCount / totalBuildings) * 100)
-          : 0;
+      const greenBuildingPercentage = calculateGreenBuildingPercentage(
+        this._game.buildingData
+      );
 
-      // Verzamel multipliers
-      const multiplierValues = {
-        solar: this.solar,
-        water: this.water,
-        wind: this.wind,
-      };
-
-      // Stuur alle ruwe waarden door naar CurrencyDisplay
-      this._statsContainer.data = {
-        greyEnergy: `${totalGreyCost} / ${totalGreyProduction}`,
-        greenEnergy: gs.currency.greenEnergy,
-        coins: gs.currency.coins,
-        score: gs.currency.score,
-        greenBuildingPercentage,
-        multipliers: multiplierValues,
-      };
-
+      const payload = buildCurrencyDisplayPayload({
+        buildings: this._game.buildingData,
+        assets: gs.assets,
+        currency: gs.currency,
+        componentMultipliers: {
+          solar: this.solar,
+          water: this.water,
+          wind: this.wind,
+        },
+      });
+      this._statsContainer.data = payload;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
     }
   }
 
-  _transformBuildingData(gameBuildings) {
-    if (!gameBuildings || !Array.isArray(gameBuildings)) return [];
-
-    return gameBuildings.map((gb) => ({
-      id: gb.id,
-      name: gb.building ? gb.building.name : "Unknown Building",
-      building: gb.building,
-      level: gb.buildingLevel,
-      runsOnGreen: gb.runsOnGreen,
-    }));
-  }
-
   async _updateEnergy() {
     try {
-      const raw = sessionStorage.getItem("loggedInUser");
-      if (!raw) throw new Error("Not logged in");
-      const { token, groupId } = JSON.parse(raw);
+      const { token, groupId } = getAuthFromSession();
 
-      // Haal huidige GameStatistics en bereken nieuwe greenEnergy
       const gs = await fetchGameStatistics(groupId, token);
 
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
-        this._game.buildingData = this._transformBuildingData(gs.gameBuildings);
+        this._game.buildingData = transformBuildingData(gs.gameBuildings);
       }
       this._game.token = token;
       this._game.groupId = groupId;
@@ -259,39 +238,20 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
-      const totalGreyCost = this._game.buildingData
-        .filter((b) => b.runsOnGreen === false)
-        .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
+      const totalGreenCost = calculateTotalGreenCost(this._game.buildingData);
+      const totalGreenProduction = calculateTotalGreenProduction(
+        gs.assets,
+        /* microbitValue= */ 1
+      );
 
-      const multiplier = gs.assets
-        .filter(
-          (a) =>
-            a.type === "Windmolen" ||
-            a.type === "Waterrad" ||
-            a.type === "Zonnepaneel"
-        )
-        .reduce((sum, a) => sum + (a.energy || 0), 0);
+      const { id: currencyId, payload: currencyPayload } = buildUpdatedCurrency(
+        gs.currency,
+        totalGreenProduction,
+        totalGreenCost
+      );
+      // Update the currency on the backend
+      await updateCurrency(currencyId, currencyPayload, token);
 
-      // Vervang microbitValue door de werkelijke waarde als die beschikbaar is
-      const microbitValue = 1;
-      const totalGreenProduction = multiplier * microbitValue;
-
-      const totalGreenCost = this._game.buildingData
-        .filter((b) => b.runsOnGreen === true)
-        .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
-
-      const cur = gs.currency;
-      const newGreen = cur.greenEnergy + totalGreenProduction - totalGreenCost;
-      const updatedCurrency = {
-        greenEnergy: newGreen,
-        greyEnergy: cur.greyEnergy,
-        coins: cur.coins,
-        score: cur.score,
-      };
-
-      await updateCurrency(cur.id, updatedCurrency, token);
-
-      // Na het bijwerken van currency, laat CurrencyDisplay opnieuw renderen
       this._updateStatistics();
     } catch (e) {
       console.error("Error updating energy:", e);
@@ -327,7 +287,6 @@ class GameControlPanel extends HTMLElement {
   }
 
   async _updateCurrency() {
-    // Gewoon hergebruik _updateStatistics() om altijd up-to-date te blijven
     await this._updateStatistics();
   }
 
@@ -356,34 +315,13 @@ class GameControlPanel extends HTMLElement {
   }
 
   _animateWrapper(offsetX, onComplete) {
-    const els = [this._wrapper, this._statsContainer];
-    els.forEach((el) => {
-      el.style.transition = "transform 0.5s ease";
-      el.style.transform = `translateX(${offsetX}px)`;
-    });
-
-    let done = 0;
-    els.forEach((el) => {
-      el.addEventListener(
-        "transitionend",
-        () => {
-          done++;
-          if (done === els.length) {
-            onComplete();
-            els.forEach((inner) => {
-              inner.style.transition = "none";
-              inner.style.transform = `translateX(${-offsetX}px)`;
-              void inner.offsetWidth;
-              inner.style.transition = "transform 0.5s ease";
-              inner.style.transform = "translateX(0)";
-            });
-          }
-        },
-        { once: true }
-      );
-    });
+    animateWrapperAndStats(
+      this._wrapper,
+      this._statsContainer,
+      offsetX,
+      onComplete
+    );
   }
-
   _showBuildingDetail(id) {
     this._detailContainer.innerHTML = "";
     const detail = document.createElement("building-detail");
@@ -574,12 +512,7 @@ class GameControlPanel extends HTMLElement {
   }
 
   async _performSaveCheckpoint() {
-    const raw = sessionStorage.getItem("loggedInUser");
-    if (!raw) {
-      console.error("No user in sessionStorage!");
-      return;
-    }
-    const { groupId, token } = JSON.parse(raw);
+    const { token, groupId } = getAuthFromSession();
 
     const stats = await fetchGameStatistics(groupId, token);
     const gameStatisticsId = stats.id;
@@ -611,22 +544,16 @@ class GameControlPanel extends HTMLElement {
   }
 
   async _performLoadCheckpoint(selectedCheckpointId) {
-    const raw = sessionStorage.getItem("loggedInUser");
-    if (!raw) return console.error("No user in sessionStorage!");
-    const { token } = JSON.parse(raw);
+    const { token, groupId } = getAuthFromSession();
 
     try {
-      // fetch gameStatistics, assets and gameBuildings
       const gameStatistics = await refactorGameStatistics(
         selectedCheckpointId,
         token
       );
 
-      // stash into de game‐state
-      this._game.gameStatisticsId = gameStatistics.id;
-      this._game.currencyId = gameStatistics.currency.id;
-      this._game.assetData = gameStatistics.assets;
-      this._game.gameBuildingsData = gameStatistics.gameBuildings;
+      const { gameStatisticsId, currencyId, assetData, buildingData } =
+        unpackCheckpointPayload(gameStatistics);
 
       clearInterval(this._energyInterval);
       clearInterval(this._statsInterval);
@@ -640,19 +567,15 @@ class GameControlPanel extends HTMLElement {
         cityScene.setBuildingColor(buildingInCorrectFormat);
       }
 
-      // handle assets in OuterCityScene
       const outer = this._game.scene.getScene("OuterCityScene");
       outer.clearAllAssets();
       outer.checkpointAssets = gameStatistics.assets;
       outer.reloadCheckpointAssets();
 
-      // Laat CurrencyDisplay opnieuw updaten
       this._updateStatistics();
 
-      // rebind je click‐events
       this._game.events.off("assetClicked");
       this._game.events.on("assetClicked", (id) => this._showAssetDetail(id));
-
       this._game.events.off("buildingClicked");
       this._game.events.on("buildingClicked", (id) =>
         this._showBuildingDetail(id)
