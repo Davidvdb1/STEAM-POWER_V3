@@ -51,7 +51,7 @@ window.customElements.define('gamepage-れ', class extends HTMLElement {
             this.scoreInterval = setInterval(() => {
             ScoreCalculations(groupId, token)
                 .catch(err => console.error("Error in score calculations:", err));
-            }, 1000);
+            }, 5000);
         } else {
             console.warn("Group ID or token is missing, skipping score calculations.");
         }

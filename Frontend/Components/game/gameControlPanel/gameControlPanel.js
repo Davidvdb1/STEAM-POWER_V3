@@ -81,6 +81,7 @@ class GameControlPanel extends HTMLElement {
     this._greyEl = this._statsContainer.greyEl;
     this._greenEl = this._statsContainer.greenEl;
     this._coinsEl = this._statsContainer.coinsEl;
+    this._scoreEl = this._statsContainer.scoreEl;
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
@@ -131,7 +132,7 @@ class GameControlPanel extends HTMLElement {
     if (bluetooth) {
       this._interval = setInterval(() => {
         this._updateCurrency();
-      }, 2000);
+      }, 5000);
     }
   }
 
@@ -184,6 +185,7 @@ class GameControlPanel extends HTMLElement {
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
+      this._scoreEl.textContent = cur.score;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
@@ -267,6 +269,7 @@ class GameControlPanel extends HTMLElement {
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
+      this._scoreEl.textContent = cur.score;
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
@@ -282,6 +285,7 @@ class GameControlPanel extends HTMLElement {
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._greyEl.textContent = cur.greyEnergy;
       this._coinsEl.textContent = cur.coins;
+      this._scoreEl.textContent = cur.score;
     } catch (e) {
       console.error("Error fetching currency:", e);
     }
