@@ -11,9 +11,11 @@ import { ASSETS } from "./assetConfig.js";
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
- * @returns {boolean} True if placement is possible
+ * @returns {{canPlace: boolean, reason?: string}} 
+ *  An object indicating whether the asset can be placed.
+ *  If placement is not possible, a reason is provided.
  */
-export function canPlaceAsset(tileAssetMap, tx, ty, size) {
+function canPlaceAsset(tileAssetMap, tx, ty, size) {
   // Check corners first (most likely to fail)
   if (
     tileAssetMap[`${tx},${ty}`] 
@@ -33,12 +35,15 @@ export function canPlaceAsset(tileAssetMap, tx, ty, size) {
       }
 
       if (tileAssetMap[`${tx + dx},${ty + dy}`]) {
-        return false;
+        return {
+          canPlace: false,
+          reason: "Deze locatie is al bezet"
+        };
       }
     }
   }
 
-  return true;
+  return { canPlace: true };
 }
 
 
@@ -51,6 +56,7 @@ export function canPlaceAsset(tileAssetMap, tx, ty, size) {
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
+ * @returns {void} This function doesn't return a value
  */
 export function reserveTiles(tileAssetMap, tx, ty, size) {
   for (let dx = 0; dx < size.width; dx++) {
@@ -70,6 +76,7 @@ export function reserveTiles(tileAssetMap, tx, ty, size) {
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
+ * @returns {void} This function doesn't return a value
  */
 export function releaseTiles(tileAssetMap, tx, ty, size) {
   for (let dx = 0; dx < size.width; dx++) {
@@ -91,7 +98,7 @@ export function releaseTiles(tileAssetMap, tx, ty, size) {
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @returns {Object} Result with canPlace boolean and reason
  */
-export function verifyAssetPlacement(scene, type, tx, ty) {
+function verifyAssetPlacement(scene, type, tx, ty) {
   // Check if asset type is valid
   const size = ASSETS[type];
   if (!size) {
@@ -144,7 +151,7 @@ export function verifyAssetPlacement(scene, type, tx, ty) {
  *  An object indicating whether the asset can be placed.
  *  If placement is not possible, a reason is provided.
  */
-export function verifyWaterMillPlacement(size, tx, ty) {
+function verifyWaterMillPlacement(size, tx, ty) {
   const validRanges = [
     { startX: 62, endX: 75, y: 9 },
     { startX: 92, endX: 125, y: 14 }
@@ -191,7 +198,7 @@ function verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, validIndices)
       // Get current tile
       const tile = scene.layer1.getTileAt(tx+dx, ty+dy);
       // If no tile exists or its index is not in the valid indices, return false
-      if (!tile || !indices.includes(tile.index)) {
+      if (!tile?.index || !indices.includes(tile.index)) {
         return {
           canPlace: false,
           reason: `Een ${type.toLowerCase()} kan niet op dit terrein worden geplaatst`
@@ -219,7 +226,7 @@ function verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, validIndices)
  *  An object indicating whether the asset can be placed.
  *  If placement is not possible, a reason is provided.
  */
-export function verifyAssetTypePlacement(scene, type, size, tx, ty) {
+function verifyAssetTypePlacement(scene, type, size, tx, ty) {
   switch (type) {
     case "Waterrad":
       // Water mills can only be placed along specific water edges
@@ -246,8 +253,9 @@ export function verifyAssetTypePlacement(scene, type, size, tx, ty) {
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {Phaser.GameObjects.Graphics} graphics - Graphics object to draw on
+ * @returns {void} This function doesn't return a value
  */
-export function highlightPlacementArea(scene, type, tx, ty, graphics) {
+function highlightPlacementArea(scene, type, tx, ty, graphics) {
   const size = ASSETS[type];
   if (!size) return;
   
@@ -280,7 +288,7 @@ export function highlightPlacementArea(scene, type, tx, ty, graphics) {
  * @param {number} cost - Cost of the asset
  * @returns {Object} Updated currency values
  */
-export function calculateUpdatedCurrency(currentCurrency, assetType, cost) {
+function calculateUpdatedCurrency(currentCurrency, assetType, cost) {
   // Make a copy to avoid modifying the original
   const updatedCurrency = { ...currentCurrency };
   
@@ -345,7 +353,7 @@ export function createAssetSprite(scene, type, tx, ty, size, assetId) {
  * @param {string} successMessage - Message to show on success
  * @returns {Promise<Object>} Result of the placement operation
  */
-export async function placeAsset(scene, type, tx, ty, successMessage = null) {
+async function placeAsset(scene, type, tx, ty, successMessage = null) {
   const verification = verifyAssetPlacement(scene, type, tx, ty);
   if (!verification.canPlace) {
     scene.showError(`Kan hier niets plaatsen: ${verification.reason}`);
@@ -417,6 +425,7 @@ export async function placeAsset(scene, type, tx, ty, successMessage = null) {
  * @function setupAssetDragAndDrop
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
+ * @returns {void} This function doesn't return a value
  */
 export function setupAssetDragAndDrop(scene) {
   const canvas = scene.game.canvas;
@@ -432,7 +441,7 @@ export function setupAssetDragAndDrop(scene) {
 
   canvas.addEventListener("dragover", mouseEvent => {
     mouseEvent.preventDefault();
-    const type = scene.draggedAssetType || currentType;
+    const type = scene.draggedAssetType ?? currentType;
     if (!type) return;
 
     const [tx, ty] = getTileFromEvent(scene, mouseEvent);
