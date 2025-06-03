@@ -279,9 +279,21 @@ class GameControlPanel extends HTMLElement {
     this._outerContainer.style.display = "flex";
     this._innerContainer.style.display = "none";
 
+    const cityScene = this._game.scene.getScene("CityScene");
+    await new Promise((resolve) => {
+      cityScene.events.once("create", resolve);
+    });
+
     await this._updateStatistics();
+
+    if (cityScene.setBuildingColor) {
+      for (const b of this._game.buildingData) {
+        cityScene.setBuildingColor(b);
+      }
+    }
+
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
-    this._statsInterval = setInterval(() => this._updateStatistics(), 3000);
+    this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
   }
 
   async _updateCurrency() {
@@ -480,6 +492,13 @@ class GameControlPanel extends HTMLElement {
 
       // Update the local building data to avoid data inconsistency
       Object.assign(building, response.gameBuilding);
+
+      // Update the building color in the game data
+      const cityScene = this._game.scene.getScene("CityScene");
+      if (cityScene && cityScene.setBuildingColor) {
+        // Pass the updated object (with runsOnGreen) into the helper
+        cityScene.setBuildingColor(building);
+      }
 
       // Handle any achievements that were earned
       handleAchievements(response, this._gameContainer);
