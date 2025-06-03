@@ -8,14 +8,13 @@ export const scoreCost = {
         Buxus: 2,
         Hulst: 1,
     },
-    achievement: 100,
     ActiveGreenSource: {
         Windmolen: 1,
         Zonnepaneel: 1,
         Waterrad: 1,
     },
     buildingOnGrey: -1,
-    ActiveGreySource: -1,
+    ActiveGreySource: -0,
     energyBuilding: {
         level1: -4,
         level2: -3,
@@ -43,4 +42,6 @@ export async function ScoreCalculations(groupId, token) {
             score += scoreCost.Nature[asset.type];
         }
     });
+
+    console.log("Total score:", score);
 }
