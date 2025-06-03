@@ -170,12 +170,11 @@ export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
   return res.json();
 }
 
-
 export async function toggleGameBuildingRunsOnGreen(GameBuildingId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/green`;
   const res = await fetch(url, {
     method: "PUT",
-        headers: {
+    headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
@@ -189,13 +188,16 @@ export async function toggleGameBuildingRunsOnGreen(GameBuildingId, token) {
   }
   return res.json();
 }
-    
 
 export async function createGameStatistics(groupId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics`;
   const res = await fetch(url, {
     method: "POST",
-        body: JSON.stringify({
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
       groupId,
       currency: {
         greenEnergy: 150,
@@ -216,7 +218,6 @@ export async function createGameStatistics(groupId, token) {
 
   return res.json();
 }
-
 
 export async function createGameBuildings(gameStatsId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/gameBuildings/${gameStatsId}`;
