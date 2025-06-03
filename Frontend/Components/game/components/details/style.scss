@@ -26,6 +26,13 @@
   background: #add8e6;
 }
 
+:host([runsOnGreen = true]) {
+  background: #d2f7d2;
+}
+:host([runsOnGreen = false]) {
+  background: #d3d3d3;
+}
+
 .close {
   position: absolute;
   top: 6px;

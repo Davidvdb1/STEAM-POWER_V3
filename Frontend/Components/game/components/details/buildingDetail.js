@@ -53,24 +53,6 @@ class BuildingDetail extends HTMLElement {
     return this._data;
   }
 
-  set runsOnGreen(value) {
-    // If you need to perform async logic, call an async method here
-    this._updateRunsOnGreen(value);
-    console.log(this._updateRunsOnGreen(value))
-  }
-
-  get runsOnGreen() {
-    return this._runsOnGreen;
-    
-  }
-
-  // async _updateRunsOnGreen(value) {
-  //   const data = await getAllGameBuildingsByGameBuildingId(this._data.id);
-  //   // You can update this._data or other properties as needed
-  //   this._render();
-  // }
-
-
 
   connectedCallback() {
     this._closeBtn.addEventListener("click", () =>
@@ -90,6 +72,10 @@ class BuildingDetail extends HTMLElement {
   _render() {
     if (!this._data) return;
 
+    const { runsOnGreen } = this._data;
+
+    this.setAttribute('runsOnGreen', runsOnGreen);
+
     // Ensure we have level data
     const lvl = this._data.buildingLevel || this._data.level;
     if (!lvl) {
@@ -108,8 +94,6 @@ class BuildingDetail extends HTMLElement {
     this._levelEl.textContent = num;
     this._energyCostEl.textContent = cost;
     this._toggleEnergyBtn.textContent = `Op ${this._data.runsOnGreen ? 'grijze energie' : 'groene energie'} runnen`;
-    console.log(this._data)
-    // console.log(this._data.runsOnGreen)
 
 
     this._toggleEnergyBtn.onclick = () => {

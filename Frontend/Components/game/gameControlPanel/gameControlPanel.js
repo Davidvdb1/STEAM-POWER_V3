@@ -197,7 +197,8 @@ class GameControlPanel extends HTMLElement {
       id: gb.id,
       name: gb.building ? gb.building.name : "Unknown Building",
       building: gb.building, // Keep original reference if needed
-      level: gb.buildingLevel, // Directly use buildingLevel as level
+      level: gb.buildingLevel,
+      runsOnGreen: gb.runsOnGreen // Directly use buildingLevel as level
     }));
   }
 
@@ -497,7 +498,8 @@ class GameControlPanel extends HTMLElement {
       );
 
       // Update the local building data to avoid data inconsistency
-      Object.assign(building, response.gameBuilding);
+      console.log("Response from toggle:", response);
+      Object.assign(building, response);
 
       // Handle any achievements that were earned
       handleAchievements(response, this._gameContainer);

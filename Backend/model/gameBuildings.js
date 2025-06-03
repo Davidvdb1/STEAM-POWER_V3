@@ -83,18 +83,16 @@ class GameBuildings {
    * @param {Object} [prismaGB.buildingLevel] - The related Prisma BuildingLevel record.
    * @returns {GameBuildings} The created GameBuildings instance.
    */
-  static from(prismaGB) {
-    return new GameBuildings({
-      id: prismaGB.id,
-      gameStatisticsId: prismaGB.gameStatisticsId,
-      checkpointId: prismaGB.checkpointId,
-      building: prismaGB.building ? Building.from(prismaGB.building) : null,
-      buildingLevel: prismaGB.buildingLevel
-        ? BuildingLevel.from(prismaGB.buildingLevel)
-        : null,
-      runsOnGreen: prismaGB.runsOnGreen ?? false,
-    });
-  }
+static from(prismaGameBuilding) {
+  return new GameBuildings({
+    id: prismaGameBuilding.id,
+    gameStatisticsId: prismaGameBuilding.gameStatisticsId,
+    checkpointId: prismaGameBuilding.checkpointId,
+    building: prismaGameBuilding.building ? Building.from(prismaGameBuilding.building) : null,
+    buildingLevel: prismaGameBuilding.buildingLevel ? BuildingLevel.from(prismaGameBuilding.buildingLevel) : null,
+    runsOnGreen: prismaGameBuilding.runsOnGreen ?? false,
+  });
+}
 }
 
 module.exports = GameBuildings;
