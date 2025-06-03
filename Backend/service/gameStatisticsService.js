@@ -332,28 +332,18 @@ class GameStatisticsService {
    * @function recordCheckpoint
    * @memberof module:service/gameStatisticsService.Service_Checkpoints
    * @param {string} statsId - The id of the game statistics to associate with the checkpoint.
-   * @param {Object} cpData - The checkpoint data to record.
-   * @param {Currency} cpData.currency - The currency instance for the checkpoint.
-   * @param {Array<Building>} cpData.buildings - An array of building instances.
-   * @param {Array<Asset>} cpData.assets - An array of asset instances.
    * @returns {Promise<Checkpoint>} The created checkpoint instance.
-   * @throws {Error} If a building name is missing in the provided data.
    */
   async recordCheckpoint(statsId) {
     const gameStatistics = await gameStatisticsRepository.findById(statsId);
-    const currency = gameStatistics.currency;
-    const gameBuildings =
-      await gameStatisticsRepository.findAllGameBuildingsByGameStatisticsId(
-        statsId
-      );
-    const assets =
-      await gameStatisticsRepository.findAllAssetsByGameStatisticsId(statsId);
+    const achievements = await gameStatisticsRepository.getGameStatisticsAchievements(statsId);
 
     return await gameStatisticsRepository.recordCheckpoint(
-      statsId,
-      currency,
-      gameBuildings,
-      assets
+      gameStatistics.id,
+      gameStatistics.currency,
+      gameStatistics.gameBuildings,
+      gameStatistics.assets,
+      achievements
     );
   }
 

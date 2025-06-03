@@ -175,6 +175,7 @@ model Checkpoint {
 
   gameBuildings GameBuildings[] @relation("CP_Building")
   assets Asset[]
+  achievements Achievement[] @relation("CP_Achievements")
 
   gameStatistics   GameStatistics? @relation(fields: [gameStatisticsId], references: [id])
   gameStatisticsId String?
@@ -208,6 +209,8 @@ model Achievement {
   
   // Achievement can be earned by multiple GameStatistics
   gameStatistics GameStatistics[]
+
+  checkpoints Checkpoint[] @relation("CP_Achievements")
 }
 
 model GameBuildings {

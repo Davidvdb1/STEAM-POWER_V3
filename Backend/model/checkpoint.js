@@ -3,6 +3,7 @@ const Building = require("./building");
 const Asset = require("./asset");
 const GameBuildings = require("./gameBuildings");
 const GameStatistics = require("./gameStatistics");
+const Achievement = require("./achievement");
 
 /**
  * Represents a Checkpoint, grouping currency, buildings, assets, and a reference to game statistics.
@@ -13,6 +14,7 @@ const GameStatistics = require("./gameStatistics");
  * @param {Currency} params.currency - The currency state at this checkpoint.
  * @param {GameBuildings[]} [params.gameBuildings=[]] - The list of game buildings.
  * @param {Asset[]} [params.assets=[]] - The list of assets.
+ * @param {Achievement[]} [params.achievements=[]] - The list of achievements.
  * @param {string} [params.gameStatisticsId] - The associated game statistics ID.
  *
  * @throws {Error} If any of the properties are invalid.
@@ -24,6 +26,7 @@ class Checkpoint {
       currency,
       gameBuildings = [],
       assets = [],
+      achievements = [],
       gameStatisticsId = undefined,
     },
     validate = true
@@ -32,6 +35,7 @@ class Checkpoint {
     this.currency = currency;
     this.gameBuildings = gameBuildings;
     this.assets = assets;
+    this.achievements = achievements;
     this.gameStatisticsId = gameStatisticsId;
 
     if (validate) this.validate();
@@ -43,6 +47,7 @@ class Checkpoint {
    * @throws {Error} If `currency` is not a Currency instance,
    *                 or if `gameBuildings` is not an array of GameBuildings,
    *                 or if `assets` is not an array of Asset.
+   *                 or if `achievements` is not an array of Achievement.
    * @returns {void}
    */
   validate() {
@@ -61,6 +66,10 @@ class Checkpoint {
     ) {
       throw new Error("Invalid assets (must be Asset[])");
     }
+    if (!Array.isArray(this.achievements) ||
+        !this.achievements.every((a) => a instanceof Achievement)) {
+      throw new Error("Invalid achievements (must be Achievement[])");
+    }
   }
 
   /**
@@ -72,6 +81,7 @@ class Checkpoint {
    * @param {Object} prismaCp.currency - The Prisma currency record.
    * @param {Object[]} [prismaCp.gameBuildings] - Array of Prisma game buildings records.
    * @param {Object[]} [prismaCp.assets] - Array of Prisma asset records.
+   * @param {Object[]} [prismaCp.achievements] - Array of Prisma achievement records.
    * @param {string} [prismaCp.gameStatisticsId] - The game statistics ID from Prisma.
    * @returns {Checkpoint} The created Checkpoint instance.
    */
@@ -81,6 +91,7 @@ class Checkpoint {
       currency: Currency.from(prismaCp.currency),
       gameBuildings: (prismaCp.gameBuildings || []).map(GameBuildings.from),
       assets: (prismaCp.assets || []).map(Asset.from),
+      achievements: (prismaCp.achievements || []).map(Achievement.from),
       gameStatisticsId: prismaCp.gameStatisticsId,
     });
   }
