@@ -58,6 +58,13 @@
         font-weight: normal !important;
       }
     }
+
+    &.score {
+      span {
+        font-family: "PixelFont" !important;
+        margin-left: 6px;
+      }
+    }
   }
 
   .currency-actions {

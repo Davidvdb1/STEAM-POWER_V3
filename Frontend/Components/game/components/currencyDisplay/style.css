@@ -47,6 +47,10 @@
   margin-left: 6px;
   font-weight: normal !important;
 }
+.currency-display .currency-item.score span {
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
 .currency-display .currency-actions {
   display: flex;
   gap: 10px;

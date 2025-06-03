@@ -236,6 +236,22 @@ class GameStatisticsService {
       assetInstance
     );
 
+    // Update the currency after adding the asset
+    const gameStatistics = await gameStatisticsRepository.findById(statsId, {
+      includeCurrency: true, 
+      includeGameBuildings: false, 
+      includeAssets: false, 
+      includeCheckpoints: false, 
+      includeGroup: false
+    });
+
+    await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
+      greenEnergy: addedAsset.type !== "Kerncentrale" ? gameStatistics.currency.greenEnergy + addedAsset.energy : gameStatistics.currency.greenEnergy,
+      greyEnergy: addedAsset.type === "Kerncentrale" ? gameStatistics.currency.greyEnergy + addedAsset.energy : gameStatistics.currency.greyEnergy,
+      coins: gameStatistics.currency.coins - addedAsset.buildCost,
+      score: gameStatistics.currency.score,
+    });
+
     // Check if any achievement for placing an asset has been achieved. If so add them to the GameStatistics object
     const assetAchievements = [
       "Energie-ingenieur",
@@ -375,17 +391,12 @@ class GameStatisticsService {
    * @async
    * @function refactorGameStatistics
    * @memberof module:service/gameStatisticsService.Service_Checkpoints
-   * @param {Object} params - The parameters object.
-   * @param {string} params.checkpointId - The ID of the checkpoint to refactor statistics for.
-   * @returns {Promise<any>} The result of the refactored game statistics operation.
+   * @param {string} checkpointId - The ID of the checkpoint to refactor statistics for.
+   * @returns {Promise<GameStatistics>} The restored GameStatistics object.
    */
-  async refactorGameStatistics({ checkpointId }) {
-    const checkpoint = await gameStatisticsRepository.findCheckpointById(
-      checkpointId
-    );
-    return await gameStatisticsRepository.refactorGameStatistics({
-      checkpoint,
-    });
+  async refactorGameStatistics(checkpointId) {
+    const checkpoint = await gameStatisticsRepository.findCheckpointById(checkpointId);
+    return await gameStatisticsRepository.refactorGameStatistics({checkpoint});
   }
 
   //########################################################################
