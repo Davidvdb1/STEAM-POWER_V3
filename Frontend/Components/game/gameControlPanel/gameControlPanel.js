@@ -215,9 +215,9 @@ class GameControlPanel extends HTMLElement {
     return gameBuildings.map((gb) => ({
       id: gb.id,
       name: gb.building ? gb.building.name : "Unknown Building",
-      building: gb.building, // Keep original reference if needed
+      building: gb.building,
       level: gb.buildingLevel,
-      runsOnGreen: gb.runsOnGreen, // Directly use buildingLevel as level
+      runsOnGreen: gb.runsOnGreen,
     }));
   }
 
@@ -227,10 +227,8 @@ class GameControlPanel extends HTMLElement {
       if (!raw) throw new Error("Not logged in");
       const { token, groupId } = JSON.parse(raw);
 
-      // 1) Fetch game statistics
       const gs = await fetchGameStatistics(groupId, token);
 
-      // 2) Transform building data
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
         this._game.buildingData = this._transformBuildingData(gs.gameBuildings);
       }
@@ -240,12 +238,10 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
-      // 3) Compute total grey‐cost
       const totalGreyCost = this._game.buildingData
         .filter((b) => b.runsOnGreen === false)
         .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
 
-      // 4) Compute total grey‐production
       const totalGreyProduction = gs.assets
         .filter((a) => a.type === "Kerncentrale")
         .reduce((sum, a) => sum + (a.energy || 0), 0);
