@@ -236,6 +236,22 @@ class GameStatisticsService {
       assetInstance
     );
 
+    // Update the currency after adding the asset
+    const gameStatistics = await gameStatisticsRepository.findById(statsId, {
+      includeCurrency: true, 
+      includeGameBuildings: false, 
+      includeAssets: false, 
+      includeCheckpoints: false, 
+      includeGroup: false
+    });
+
+    await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
+      greenEnergy: addedAsset.type !== "Kerncentrale" ? gameStatistics.currency.greenEnergy + addedAsset.energy : gameStatistics.currency.greenEnergy,
+      greyEnergy: addedAsset.type === "Kerncentrale" ? gameStatistics.currency.greyEnergy + addedAsset.energy : gameStatistics.currency.greyEnergy,
+      coins: gameStatistics.currency.coins - addedAsset.buildCost,
+      score: gameStatistics.currency.score,
+    });
+
     // Check if any achievement for placing an asset has been achieved. If so add them to the GameStatistics object
     const assetAchievements = [
       "Energie-ingenieur",
