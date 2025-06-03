@@ -368,13 +368,27 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
         // Place the asset on the map
         const assetData = createAssetSprite(scene, type, tx, ty, size, response.asset.id);
         scene.assetObjects.push(assetData);
-        
-        // Show success message
-        if (successMessage || successMessage === null) {
-          scene.showError(successMessage || `${type} succesvol geplaatst!`);
+
+        // Dispatch a custom event to notify that an asset was placed so that other components can be updated and rerendered
+        if (response.asset) {
+          const assetPlacedEvent = new CustomEvent('asset-placed', {
+            detail: {
+              assetId: response.asset.id,
+              type: type,
+              cost: cost
+            },
+            bubbles: true,
+            composed: true // Important for crossing shadow DOM boundaries
+          });
+          document.dispatchEvent(assetPlacedEvent);
+          
+          // Show success message
+          if (successMessage || successMessage === null) {
+            scene.showError(successMessage || `${type} succesvol geplaatst!`);
+          }
+          
+          resolve({ success: true, asset: response.asset, assetData });
         }
-        
-        resolve({ success: true, asset: response.asset, assetData });
       } catch (err) {
         scene.showError("Plaatsen mislukt: " + err.message);
         resolve({ success: false, reason: err.message });

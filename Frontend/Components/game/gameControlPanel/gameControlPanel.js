@@ -80,6 +80,8 @@ class GameControlPanel extends HTMLElement {
 
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
+
+    this._boundAssetPlacedHandler = () => this._updateStatistics();
   }
 
   _loadPhaser() {
@@ -117,6 +119,7 @@ class GameControlPanel extends HTMLElement {
     this._statsContainer.addEventListener("loadCheckpoint", () =>
       this._onLoadCheckpoint()
     );
+    document.addEventListener('asset-placed', this._boundAssetPlacedHandler);
 
     this._loadPhaser().then(() => this._initializeGame());
 
@@ -126,6 +129,10 @@ class GameControlPanel extends HTMLElement {
         this._updateCurrency();
       }, 2000);
     }
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener('asset-placed', this._boundAssetPlacedHandler);
   }
 
   _initializeGame() {
@@ -334,6 +341,7 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+
   _showBuildingDetail(id) {
     this._detailContainer.innerHTML = "";
     const detail = document.createElement("building-detail");
@@ -513,13 +521,13 @@ async _performLoadCheckpoint(selectedCheckpointId) {
 
   try {
     // fetch gameStatistics, assets and gameBuildings
-    const { gameStatistics, assets, gameBuildings } =
-      await refactorGameStatistics(selectedCheckpointId, token);
+    const gameStatistics = await refactorGameStatistics(selectedCheckpointId, token);
 
     // stash into the game state
     this._game.gameStatisticsId   = gameStatistics.id;
-    this._game.assetData          = assets;
-    this._game.gameBuildingsData  = gameBuildings;
+    this._game.currencyId         = gameStatistics.currency.id; 
+    this._game.assetData          = gameStatistics.assets;
+    this._game.gameBuildingsData  = gameStatistics.gameBuildings;
 
     clearInterval(this._energyInterval);
     clearInterval(this._statsInterval);
@@ -527,7 +535,7 @@ async _performLoadCheckpoint(selectedCheckpointId) {
     // handle assets in OuterCityScene
     const outer = this._game.scene.getScene("OuterCityScene");
     outer.clearAllAssets();
-    outer.checkpointAssets = assets;
+    outer.checkpointAssets = gameStatistics.assets;
     outer.reloadCheckpointAssets();
     
     // Fetch newly updated GameStatistics object
