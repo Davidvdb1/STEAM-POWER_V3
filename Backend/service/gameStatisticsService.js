@@ -129,8 +129,6 @@ class GameStatisticsService {
     });
   }
 
-  
-
   //########################################################################
   //                                CURRENCY
   //########################################################################
@@ -522,7 +520,9 @@ class GameStatisticsService {
     return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
+  }
 
+  /**
    * Creates the initial game buildings for a given game statistics id.
    * This method initializes the game buildings based on the predefined building types and their levels.
    * @async
@@ -535,7 +535,6 @@ class GameStatisticsService {
 
   async createGameBuildings(gameStatisticsId) {
     return await gameStatisticsRepository.createGameBuildings(gameStatisticsId);
-
   }
 
   //########################################################################
