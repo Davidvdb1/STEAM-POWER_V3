@@ -250,7 +250,7 @@ class GameControlPanel extends HTMLElement {
         .filter((a) => a.type === "Kerncentrale")
         .reduce((sum, a) => sum + (a.energy || 0), 0);
       //////////////////microbit hier implementeren//////////////////////////
-      const microbitValue = 1; // Replace with actual microbit value logic
+      const microbitValue = 1; // 1 vervangen door waarde van microbit
       const multiplier = gs.assets
         .filter(
           (a) =>
