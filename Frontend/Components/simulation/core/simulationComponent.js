@@ -163,7 +163,8 @@ export class SimulationComponent extends HTMLElement {
 
         // Create settings UI
         createSettingsPanel(
-            this.scene, 
+            this.scene,
+            this,
             (bladeCount) => this._handleBladeCountChange(bladeCount),
             (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal)
         );

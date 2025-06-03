@@ -5,11 +5,11 @@ import { createLine } from '../utils/uiElements.js';
  * @param {BABYLON.GUI.StackPanel} layout - The parent layout panel
  * @param {Function} onBladeCountChange - Callback for when blade count changes
  */
-export function createWindmillSettings(layout, onBladeCountChange) {
+export function createWindmillSettings(layout, onBladeCountChange, onManualRotationChange) {
     // wind title
     const windTitle = new BABYLON.GUI.TextBlock();
     windTitle.text = "Windturbine";
-    windTitle.fontSize = 25;
+    windTitle.fontSize = 22;
     windTitle.color = "white";
     windTitle.height = "50px";
     layout.addControl(windTitle);
@@ -18,10 +18,10 @@ export function createWindmillSettings(layout, onBladeCountChange) {
 
     const windText = new BABYLON.GUI.TextBlock();
     windText.text = "Pas het aantal wieken aan.";
-    windText.fontSize = 20;
+    windText.fontSize = 18;
     windText.color = "white";
     windText.width = "90%";
-    windText.height = "50px";
+    windText.height = "60px";
     layout.addControl(windText);
 
     // Slider for blade count
@@ -67,5 +67,46 @@ export function createWindmillSettings(layout, onBladeCountChange) {
     layout.addControl(tickGrid);
 
     // line
+    layout.addControl(createLine());
+
+    // Create the text block
+    const rotate = new BABYLON.GUI.TextBlock();
+    rotate.text = "Manueel draaien.";
+    rotate.fontSize = 18;
+    rotate.color = "white";
+    rotate.width = "90%";
+    rotate.height = "60px";
+    layout.addControl(rotate);
+
+    // Create the slider
+    const slider = new BABYLON.GUI.Slider();
+    slider.minimum = 0;
+    slider.maximum = 360;
+    slider.value = 0;
+    slider.height = "20px";
+    slider.width = "90%";
+    slider.color = "white";
+    slider.background = "gray";
+    slider.thumbColor = "white";
+    layout.addControl(slider);
+
+    // Create the text block for the slider value
+    const sliderValueText = new BABYLON.GUI.TextBlock();
+    sliderValueText.text = "0°";
+    sliderValueText.fontSize = 18;
+    sliderValueText.color = "white";
+    sliderValueText.height = "50px";
+    sliderValueText.width = "90%";
+    sliderValueText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+    sliderValueText.paddingBottom = "10px"
+    layout.addControl(sliderValueText);
+
+    slider.onValueChangedObservable.add((value) => {
+        sliderValueText.text = `${Math.round(value)}°`;
+        if (onManualRotationChange) {
+            onManualRotationChange(value);
+        }
+    });
+
     layout.addControl(createLine());
 }

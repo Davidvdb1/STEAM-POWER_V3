@@ -19,7 +19,6 @@ export async function loadWindmill(scene, component, bladeCount = 3) {
             if (component.windmill) {
                 component.windmill.scaling = new BABYLON.Vector3(5, 5, 5);
                 component.windmill.position = new BABYLON.Vector3(-1.1, -0.1, 0.5);
-                component.windmill.rotation = new BABYLON.Vector3(0, -1.1, 0);
 
                 try {
                     const degrees = await fetchWindDirection();

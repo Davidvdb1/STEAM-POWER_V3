@@ -11,7 +11,7 @@ import { sunPositionToCartesian } from '../utils/sunCalculator.js';
  * @param {Function} onLocationChange - Callback for when location changes
  * @returns {BABYLON.GUI.AdvancedDynamicTexture} The GUI texture
  */
-export function createSettingsPanel(scene, onBladeCountChange, onLocationChange) {
+export function createSettingsPanel(scene, component, onBladeCountChange, onLocationChange) {
     // creates a full-screen 2D GUI layer over the whole 3D scene
     const GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
@@ -30,23 +30,24 @@ export function createSettingsPanel(scene, onBladeCountChange, onLocationChange)
     const layout = new BABYLON.GUI.StackPanel();
     layout.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
     settingsPanel.addControl(layout);
-
-    // settings title
-    const title = new BABYLON.GUI.TextBlock();
-    title.text = "Instellingen";
-    title.fontSize = 30;
-    title.color = "white";
-    title.height = "80px";
-    layout.addControl(title);
     
     // separator line
+
+    const spacer = new BABYLON.GUI.TextBlock();
+    spacer.height = "20px"; // Adjust the height as needed
+    spacer.text = "";
+    layout.addControl(spacer);
     layout.addControl(createLine());
 
     // Add location settings section with new callback
     createLocationSettings(layout, onLocationChange);
     
     // Add windmill settings section
-    createWindmillSettings(layout, onBladeCountChange);
+    createWindmillSettings(layout, onBladeCountChange, (degrees) => {
+        if (component.windmill) {
+            component.windmill.rotation.y = BABYLON.Angle.FromDegrees(degrees).radians();
+        }
+    });
 
     return GUI;
 }
