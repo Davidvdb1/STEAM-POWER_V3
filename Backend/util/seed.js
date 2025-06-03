@@ -226,9 +226,9 @@ async function main() {
   
 
   // ASSETS
-  const asset1 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 4, yLocation: 5, xSize: 6, ySize: 7, type: "windmolen" } });
-  const asset2 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 5, yLocation: 6, xSize: 3, ySize: 3, type: "waterrad" } });
-  const asset3 = await prisma.asset.create({ data: { buildCost: 2, destroyCost: 1, energy: 2, xLocation: 8, yLocation: 2, xSize: 1, ySize: 1, type: "kernreactor" } });
+  // const asset1 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 4, yLocation: 5, xSize: 6, ySize: 7, type: "windmolen" } });
+  // const asset2 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 5, yLocation: 6, xSize: 3, ySize: 3, type: "waterrad" } });
+  // const asset3 = await prisma.asset.create({ data: { buildCost: 2, destroyCost: 1, energy: 2, xLocation: 8, yLocation: 2, xSize: 1, ySize: 1, type: "kernreactor" } });
 
 
   // CURRENCIES

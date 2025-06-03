@@ -84,6 +84,11 @@ class GameControlPanel extends HTMLElement {
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
 
+    //Deze variabelen updaten als er een natuurramp of weersverandering is.
+    this.solar = 1;
+    this.wind = 1;
+    this.water = 1;
+
     this._boundAssetPlacedHandler = () => this._updateStatistics();
   }
 
@@ -214,6 +219,11 @@ class GameControlPanel extends HTMLElement {
         coins: cur.coins,
         score: cur.score,
         greenBuildingPercentage,
+        multipliers: {
+          solar: this.solar,
+          water: this.water,
+          wind: this.wind,
+        },
       };
 
       this._statsContainer.classList.remove("hidden");

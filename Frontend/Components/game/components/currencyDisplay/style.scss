@@ -94,57 +94,87 @@
     }
   }
 
+  .progress-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
   .progress-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
+    justify-content: center;
+    width: 50%;
     margin-top: 8px;
+    gap: 8px;
+
+    .green-buildings {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      margin-left: 12px;
+
+      span {
+        font-family: "PixelFont" !important;
+        margin-left: 6px;
+        color: #151515;
+        white-space: nowrap;
+      }
+    }
+
+    .progress-container {
+      flex: 1 1 auto;
+      background: #888;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      height: 16px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+
+      .progress-bar {
+        width: 0%;
+        height: 100%;
+        background: #d2f7d2;
+        transition: width 0.3s ease;
+      }
+    }
+
+    .progress-percent {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+
+      span {
+        font-family: "PixelFont" !important;
+        margin-right: 6px;
+        color: #151515;
+        white-space: nowrap;
+      }
+    }
   }
 
-  .green-buildings {
-    flex: 1;
+  .multipliers {
     display: flex;
+    flex-direction: row;
     align-items: center;
+    margin-top: 10px;
     justify-content: center;
-  }
-  .green-buildings span {
-    font-family: "PixelFont" !important;
-    margin-left: 6px;
-    color: #151515;
-    white-space: nowrap;
-  }
+    gap: 20px;
 
-  .progress-container {
-    flex: 1;
-    background: #ccc;
-    border: 1px solid #aaa;
-    border-radius: 4px;
-    height: 16px;
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-  }
+    span {
+      font-family: "PixelFont" !important;
+      color: #151515;
+      font-weight: normal !important;
 
-  .progress-bar {
-    width: 0%;
-    height: 100%;
-    background: #d2f7d2;
-    transition: width 0.3s ease;
-  }
-
-  .progress-percent {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .progress-percent span {
-    font-family: "PixelFont" !important;
-    margin-right: 6px;
-    color: #151515;
-    white-space: nowrap;
+      img {
+        height: 30px;
+        margin-right: 6px;
+      }
+    }
   }
 }
