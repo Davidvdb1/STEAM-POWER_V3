@@ -284,7 +284,9 @@ router.post("/:id/assets", async (req, res) => {
  */
 router.delete("/assets/:assetId", async (req, res) => {
   try {
-    const response = await gameStatisticsService.removeAsset(req.params.assetId);
+    const response = await gameStatisticsService.removeAsset(
+      req.params.assetId
+    );
     res.status(200).json(response);
   } catch (error) {
     console.error(`Error removing asset ${req.params.assetId}:`, error);
@@ -503,6 +505,38 @@ router.get(
 
 
 /**
+ * PUT /gameStatistics/buildings/:gameBuildingId/green<br>
+ * Toggles the runsOnGreen property of a GameBuilding object.
+ *
+ * @function toggleGameBuildingRunsOnGreen
+ * @memberof module:controller/gameStatisticsController.Controller_GameBuildings
+ * @param {express.Request} req - Express request object.
+ * @param {string}           req.params.gameBuildingId - The unique identifier of the GameBuilding to toggle.
+ * @param {express.Response} res - Express response object.
+ * @returns {GameBuildings} The updated GameBuilding object in the response body.
+ */
+router.put(
+  "/buildings/:gameBuildingId/green",
+  async (req, res) => {
+    try {
+      const building =
+        await gameStatisticsService.toggleGameBuildingRunsOnGreen(
+          req.params.gameBuildingId
+        );
+      res.status(200).json(building);
+    } catch (error) {
+      console.error(
+        `Error setting gameBuilding ${req.params.gameBuildingId} to green:`,
+        error
+      );
+      const statusCode = error.statusCode || 400;
+      res.status(statusCode).json({ error: error.message });
+    }
+  }
+);
+
+
+/**
  *  
  *  
  * POST /gameBuildings/:gameStatisticsId<br>
@@ -531,6 +565,7 @@ router.post("/gameBuildings/:gameStatisticsId", async (req, res) => {
     res.status(statusCode).json({ error: error.message });
   }
 });
+
 
 //########################################################################
 //                              ACHIEVEMENTS

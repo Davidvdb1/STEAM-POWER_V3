@@ -10,10 +10,14 @@ import {
   getCurrencyById,
   updateCurrency,
   upgradeBuilding,
+  toggleGameBuildingRunsOnGreen,
   recordCheckpoint,
   getCheckpointsByGameStatisticsId,
   refactorGameStatistics,
 } from "../service/gameService.js";
+
+const cssResponse = await fetch('./Components/game/gameControlPanel/style.css');
+const cssText = await cssResponse.text();
 
 // register our detail-panel components
 import "../components/details/buildingDetail.js";
@@ -26,7 +30,7 @@ import { createCheckpointLoadPopup } from "../utils/checkpointLoadPopup.js";
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
-    @import './Components/game/gameControlPanel/style.css';
+    ${cssText}
     :host { display: block; position: relative; }
     #detail-container { position: absolute; top: 0; left: -220px; width: 200px; z-index: 10; }
   </style>
@@ -111,6 +115,9 @@ class GameControlPanel extends HTMLElement {
     this._shadow.addEventListener("upgrade-build", (e) => {
       this._confirmUpgradeBuilding(e.detail.GameBuildingId);
     });
+    this._shadow.addEventListener("toggle-building-energy", (e) => {
+      this._confirmToggleBuildingEnergy(e.detail.GameBuildingId);
+    });
     this._statsContainer.addEventListener("saveCheckpoint", () =>
       this._onSaveCheckpoint()
     );
@@ -190,7 +197,8 @@ class GameControlPanel extends HTMLElement {
       id: gb.id,
       name: gb.building ? gb.building.name : "Unknown Building",
       building: gb.building, // Keep original reference if needed
-      level: gb.buildingLevel, // Directly use buildingLevel as level
+      level: gb.buildingLevel,
+      runsOnGreen: gb.runsOnGreen // Directly use buildingLevel as level
     }));
   }
 
@@ -425,6 +433,18 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+    _confirmToggleBuildingEnergy(GameBuildingId) {
+    const building = this._game.buildingData.find(
+      (b) => b.id === GameBuildingId
+    );
+    if (!building) return;
+
+    // const currentRunsOnGreen = building.runsOnGreen;
+
+    const scene = this._game.scene.getScene("CityScene");
+        this._performToggleBuildingEnergy(GameBuildingId);
+  }
+
   /**
    * Upgrades a GameBuilding to the next level by calling the backend API, updates local building data,
    * refreshes game statistics, and updates the building detail panel in the UI.
@@ -449,6 +469,37 @@ class GameControlPanel extends HTMLElement {
 
       // Update the local building data to avoid data inconsistency
       Object.assign(building, response.gameBuilding);
+
+      // Handle any achievements that were earned
+      handleAchievements(response, this._gameContainer);
+
+      // Refetch the game statistics to update the UI with the updated currency values
+      this._updateStatistics();
+
+      // Update the detail panel with the new building data
+      this._detailContainer.querySelector("building-detail").data = building;
+    } catch (err) {
+      throw new Error(`Error upgrading building: ${err.message}`);
+    }
+  }
+
+
+    async _performToggleBuildingEnergy(GameBuildingId) {
+    try {
+      const building = this._game.buildingData.find(
+        (b) => b.id === GameBuildingId
+      );
+      if (!building) throw new Error("Building not found");
+
+      // Call the backend to toggle the building's energy type
+      const response = await toggleGameBuildingRunsOnGreen(
+        GameBuildingId,
+        this._game.token
+      );
+
+      // Update the local building data to avoid data inconsistency
+      console.log("Response from toggle:", response);
+      Object.assign(building, response);
 
       // Handle any achievements that were earned
       handleAchievements(response, this._gameContainer);
