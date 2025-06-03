@@ -6,6 +6,10 @@ export async function fetchGameStatistics(groupId, token) {
     headers: { Authorization: `Bearer ${token}` },
   });
 
+  if (res.status === 404) {
+    return null;
+  }
+
   if (!res.ok) {
     throw new Error(`Failed to load stats: HTTP ${res.status}`);
   }
@@ -166,11 +170,12 @@ export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
   return res.json();
 }
 
+
 export async function toggleGameBuildingRunsOnGreen(GameBuildingId, token) {
   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/green`;
   const res = await fetch(url, {
     method: "PUT",
-    headers: {
+        headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
@@ -178,21 +183,53 @@ export async function toggleGameBuildingRunsOnGreen(GameBuildingId, token) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(
-      `Failed to upgrade GameBuilding: HTTP ${res.status}` +
+      `Failed to switch energy type: HTTP ${res.status}` +
         (err.error ? ` - ${err.error}` : "")
     );
   }
   return res.json();
 }
+    
 
-// export async function getAllGameBuildingsByGameBuildingId(gameBuildingId, token) {
-//   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${gameBuildingId}`;
-//   const res = await fetch(url, {
-//     headers: { Authorization: `Bearer ${token}` },
-//   });
+export async function createGameStatistics(groupId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics`;
+  const res = await fetch(url, {
+    method: "POST",
+        body: JSON.stringify({
+      groupId,
+      currency: {
+        greenEnergy: 150,
+        greyEnergy: 75,
+        coins: 500,
+        score: 25,
+      },
+    }),
+  });
 
-//   if (!res.ok) {
-//     throw new Error(`Failed to load GameBuildings: HTTP ${res.status}`);
-//   }
-//   return res.json();
-// }
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(
+      `Failed to create GameStatistics: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
+  }
+
+  return res.json();
+}
+
+
+export async function createGameBuildings(gameStatsId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/gameBuildings/${gameStatsId}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(
+      `Failed to create game buildings: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
+  }
+  return res.json();
+}

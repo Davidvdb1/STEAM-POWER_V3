@@ -503,6 +503,7 @@ router.get(
   }
 );
 
+
 /**
  * PUT /gameStatistics/buildings/:gameBuildingId/green<br>
  * Toggles the runsOnGreen property of a GameBuilding object.
@@ -533,6 +534,38 @@ router.put(
     }
   }
 );
+
+
+/**
+ *  
+ *  
+ * POST /gameBuildings/:gameStatisticsId<br>
+ * Creates GameBuildings for a GameStatistics object.
+ *  
+ * @function createGameBuildings
+ * @memberof module:controller/gameStatisticsController.Controller_GameBuildings
+ * @param {express.Request} req - Express request object.
+ * @param {string}           req.params.gameStatisticsId - The unique identifier of the GameStatistics object.
+ * @param {express.Response} res - Express response object.
+ *  
+ * @returns {GameBuildings[]} An array of created GameBuildings objects.
+ * */
+
+router.post("/gameBuildings/:gameStatisticsId", async (req, res) => {
+  try {
+    const gameStatisticsId = req.params.gameStatisticsId;
+    const gameBuildings = await gameStatisticsService.createGameBuildings(gameStatisticsId);
+    res.status(201).json(gameBuildings);
+  } catch (error) {
+    console.error(
+      `Error creating game buildings for GameStatistics ${req.params.gameStatisticsId}:`,
+      error
+    );
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
 
 //########################################################################
 //                              ACHIEVEMENTS

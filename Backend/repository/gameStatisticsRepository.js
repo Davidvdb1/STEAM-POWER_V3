@@ -14,6 +14,7 @@ const Asset = require("../model/asset");
 const Currency = require("../model/currency");
 const Checkpoint = require("../model/checkpoint");
 const Achievement = require("../model/achievement");
+// const { createdBuildings, buildingLevels } = require("../util/seed.js");
 
 class GameStatisticsRepository {
   constructor() {
@@ -372,6 +373,7 @@ class GameStatisticsRepository {
     return await this.prisma.asset.delete({ where: { id: assetId } });
   }
 
+
   /**
    * Retrieves all assets associated with a specific game statistics ID.
    *
@@ -462,6 +464,7 @@ class GameStatisticsRepository {
     return Checkpoint.from(prismaCP);
   }
 
+
   /**
    * Retrieves a checkpoint by its unique identifier, including related currency, game buildings (with building and building level), and assets.
    * Throws an error if the checkpoint is not found.
@@ -491,6 +494,7 @@ class GameStatisticsRepository {
     return Checkpoint.from(checkpoint);
   }
 
+
   /**
    * Retrieves all checkpoints associated with a specific game statistics ID.
    *
@@ -517,6 +521,7 @@ class GameStatisticsRepository {
 
     return checkpoints.map((cp) => Checkpoint.from(cp));
   }
+
 
   /**
    * Refactors the game statistics for a given checkpoint.
@@ -713,6 +718,7 @@ class GameStatisticsRepository {
    * @param {string} gameStatisticsId - The unique identifier of the game statistics record.
    * @returns {Promise<Array<GameBuildings>>} A promise that resolves to an array of GameBuildings instances.
    */
+
   async findAllGameBuildingsByGameStatisticsId(gameStatisticsId) {
     const gameBuildings = await this.prisma.gameBuildings.findMany({
       where: { gameStatisticsId },
@@ -723,6 +729,44 @@ class GameStatisticsRepository {
       },
     });
     return gameBuildings.map((gb) => GameBuildings.from(gb));
+  }
+
+
+  /**
+   *  
+   * Creates game buildings for a specific game statistics ID by associating them with existing buildings and their initial levels.
+   * @async
+   * @function createGameBuildings
+   * @memberof module:repository/gameStatisticsRepository.Repository_GameBuildings
+   * @param {string} gameStatisticsId - The id of the game statistics to associate the game buildings with.
+   * @param {Array<Object>} gameBuildings - An array of game building objects to create.
+   * @param {Array<Object>} buildingLevels - An array of building level objects to associate with the game buildings.
+   *  
+   * @returns {Promise<Array<GameBuildings>>} A promise that resolves to an array of GameBuildings instances.
+   * @throws {Error} If the game statistics ID is invalid or if there are issues creating the game buildings.
+   * */
+  
+  async createGameBuildings(gameStatisticsId) {
+    const buildings = await this.prisma.building.findMany();
+    const buildingLevels = await this.prisma.buildingLevel.findMany();
+
+    const gameBuildings = [];
+
+    for (let i = 0; i < buildings.length; i++) {
+      const gameBuilding = await this.prisma.gameBuildings.create({
+        data: {
+          gameStatistics: { connect: { id: gameStatisticsId } },
+          building: { connect: { id: buildings[i].id } },
+          buildingLevel: { connect: { id: buildingLevels[i * 5].id } },
+        },
+        include: {
+          building: true,
+          buildingLevel: true,
+        },
+      });
+      gameBuildings.push(GameBuildings.from(gameBuilding));
+    }
+    return gameBuildings;
   }
 
   /**

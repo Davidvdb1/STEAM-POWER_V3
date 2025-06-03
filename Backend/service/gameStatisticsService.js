@@ -509,6 +509,7 @@ class GameStatisticsService {
   }
 
   /**
+
    * Toggles the 'runsOnGreen' status of a game building by its id.
    *
    * @async
@@ -521,6 +522,20 @@ class GameStatisticsService {
     return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
+
+   * Creates the initial game buildings for a given game statistics id.
+   * This method initializes the game buildings based on the predefined building types and their levels.
+   * @async
+   * @function createGameBuildings
+   * @memberof module:service/gameStatisticsService.Service_GameBuildings
+   * @param {string} gameStatisticsId - The id of the game statistics to create buildings for.
+   * @returns {Promise<GameBuildings[]>} A promise that resolves to an array of created GameBuildings instances.
+
+   * */
+
+  async createGameBuildings(gameStatisticsId) {
+    return await gameStatisticsRepository.createGameBuildings(gameStatisticsId);
+
   }
 
   //########################################################################
