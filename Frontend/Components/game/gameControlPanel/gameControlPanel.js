@@ -650,6 +650,12 @@ class GameControlPanel extends HTMLElement {
       clearInterval(this._energyInterval);
       clearInterval(this._statsInterval);
 
+      const cityScene = this._game.scene.getScene("CityScene");
+      for (const b of gameStatistics.gameBuildings) {
+        const buildingInCorrectFormat = {name: b.building.name, runsOnGreen: b.runsOnGreen};
+        cityScene.setBuildingColor(buildingInCorrectFormat);
+      }
+
       // handle assets in OuterCityScene
       const outer = this._game.scene.getScene("OuterCityScene");
       outer.clearAllAssets();

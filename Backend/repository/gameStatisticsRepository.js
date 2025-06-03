@@ -410,14 +410,18 @@ class GameStatisticsRepository {
    * @function recordCheckpoint
    * @memberof module:repository/gameStatisticsRepository.Repository_Checkpoints
    * @param {string} statsId - The id of the game statistics to associate with the checkpoint.
-   * @param {Object} cp - The checkpoint data to record.
+   * @param {Currency} currency - The currency object containing the current game statistics.
+   * @param {Array<GameBuildings>} gameBuildings - An array of game building objects to include in the checkpoint.
+   * @param {Array<Asset>} assets - An array of asset objects to include in the checkpoint.
+   * @param {Array<Achievement>} achievements - An array of achievement objects to include in the checkpoint.
    * @returns {Promise<Checkpoint>} The created checkpoint instance.
    */
-  async recordCheckpoint(statsId, currency, gameBuildings, assets) {
+  async recordCheckpoint(statsId, currency, gameBuildings, assets, achievements) {
     // Validate input
     currency.validate();
     gameBuildings.forEach((gb) => gb.validate());
     assets.forEach((a) => a.validate());
+    achievements.forEach((ach) => ach.validate());
 
     const prismaCP = await this.prisma.checkpoint.create({
       data: {
@@ -427,15 +431,15 @@ class GameStatisticsRepository {
             greenEnergy: currency.greenEnergy,
             greyEnergy: currency.greyEnergy,
             coins: currency.coins,
-            score: currency.score,
-          },
+            score: currency.score
+          }
         },
         gameBuildings: {
           create: gameBuildings.map((gb) => ({
             building: { connect: { id: gb.building.id } },
             buildingLevel: { connect: { id: gb.buildingLevel.id } },
-            // gameStatistics: { connect: { id: statsId } }, // required by schema
-          })),
+            runsOnGreen: gb.runsOnGreen
+          }))
         },
         assets: {
           create: assets.map((a) => ({
@@ -446,20 +450,24 @@ class GameStatisticsRepository {
             yLocation: a.yLocation,
             xSize: a.xSize,
             ySize: a.ySize,
-            type: a.type,
-          })),
+            type: a.type
+          }))
         },
+        achievements: {
+          connect: achievements.map((ach) => ({ id: ach.id }))
+        }
       },
       include: {
         currency: true,
         gameBuildings: {
           include: {
             building: true,
-            buildingLevel: true,
-          },
+            buildingLevel: true
+          }
         },
         assets: true,
-      },
+        achievements: true
+      }
     });
     return Checkpoint.from(prismaCP);
   }
@@ -484,11 +492,12 @@ class GameStatisticsRepository {
         gameBuildings: {
           include: {
             building: true,
-            buildingLevel: true,
-          },
+            buildingLevel: true
+          }
         },
         assets: true,
-      },
+        achievements: true
+      }
     });
     if (!checkpoint) throw new Error("Checkpoint not found");
     return Checkpoint.from(checkpoint);
@@ -512,11 +521,12 @@ class GameStatisticsRepository {
         gameBuildings: {
           include: {
             building: true,
-            buildingLevel: true,
-          },
+            buildingLevel: true
+          }
         },
         assets: true,
-      },
+        achievements: true
+      }
     });
 
     return checkpoints.map((cp) => Checkpoint.from(cp));
@@ -545,8 +555,9 @@ class GameStatisticsRepository {
    * @param {number} params.checkpoint.currency.greenEnergy - The updated green energy value.
    * @param {number} params.checkpoint.currency.greyEnergy - The updated grey energy value.
    * @param {number} params.checkpoint.currency.coins - The updated coins value.
-   * @param {Array<Object>} params.checkpoint.gameBuildings - Array of game building objects to upsert.
-   * @param {Array<Object>} params.checkpoint.assets - Array of asset objects to create.
+   * @param {Array<GameBuildings>} params.checkpoint.gameBuildings - Array of game building objects to upsert.
+   * @param {Array<Asset>} params.checkpoint.assets - Array of asset objects to create.
+   * @param {Array<Achievement>} params.checkpoint.achievements - Array of achievement objects to set.
    * @returns {Promise<GameStatistics>} The updated GameStatistics instance.
    */
   async refactorGameStatistics({ checkpoint }) {
@@ -554,10 +565,10 @@ class GameStatisticsRepository {
 
     // 1. Delete existing gameBuildings and assets for this gameStatistics
     await this.prisma.gameBuildings.deleteMany({
-      where: { gameStatisticsId: checkpoint.gameStatisticsId },
+      where: { gameStatisticsId: checkpoint.gameStatisticsId }
     });
     await this.prisma.asset.deleteMany({
-      where: { gameStatisticsId: checkpoint.gameStatisticsId },
+      where: { gameStatisticsId: checkpoint.gameStatisticsId }
     });
 
     // 2. Update currency and create new gameBuildings and assets
@@ -568,8 +579,8 @@ class GameStatisticsRepository {
           update: {
             greenEnergy: checkpoint.currency.greenEnergy,
             greyEnergy: checkpoint.currency.greyEnergy,
-            coins: checkpoint.currency.coins,
-          },
+            coins: checkpoint.currency.coins
+          }
         },
         gameBuildings: {
           upsert: checkpoint.gameBuildings.map((gb) => ({
@@ -578,12 +589,14 @@ class GameStatisticsRepository {
               id: gb.id,
               building: { connect: { id: gb.building.id } },
               buildingLevel: { connect: { id: gb.buildingLevel.id } },
+              runsOnGreen: gb.runsOnGreen
             },
             create: {
               building: { connect: { id: gb.building.id } },
               buildingLevel: { connect: { id: gb.buildingLevel.id } },
-            },
-          })),
+              runsOnGreen: gb.runsOnGreen
+            }
+          }))
         },
         assets: {
           create: checkpoint.assets.map((a) => ({
@@ -594,20 +607,24 @@ class GameStatisticsRepository {
             yLocation: a.yLocation,
             xSize: a.xSize,
             ySize: a.ySize,
-            type: a.type,
-          })),
+            type: a.type
+          }))
         },
+        achievements: {
+          set: checkpoint.achievements.map((ach) => ({ id: ach.id }))
+        }
       },
       include: {
         currency: true,
         gameBuildings: {
           include: {
             building: true,
-            buildingLevel: true,
-          },
+            buildingLevel: true
+          }
         },
         assets: true,
-      },
+        achievements: true
+      }
     });
 
     return GameStatistics.from(prismaGS);
