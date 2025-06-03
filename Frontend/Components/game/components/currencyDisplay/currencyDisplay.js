@@ -12,7 +12,6 @@ template.innerHTML = /*html*/ `
   </style>
 
   <div class="currency-display">
-
     <div class="currency-row">
       <div class="currency-item score">
         <span class="unit">Luchtkwaliteit:</span>
@@ -56,7 +55,6 @@ template.innerHTML = /*html*/ `
         </div>
       </div>
 
-    
       <div class="multipliers">
         <span>Bonus:</span>
         <span></span>
@@ -115,11 +113,12 @@ class CurrencyDisplay extends HTMLElement {
 
   /**
    * Verwacht een object met:
-   *   - greyEnergy
-   *   - greenEnergy
-   *   - coins
-   *   - score
-   *   - greenBuildingPercentage   (nummer tussen 0 en 100)
+   *   - greyEnergy (string zoals "10 / 50")
+   *   - greenEnergy (nummer)
+   *   - coins (nummer)
+   *   - score (nummer)
+   *   - greenBuildingPercentage (nummer tussen 0 en 100)
+   *   - multipliers: { solar, water, wind }
    */
   set data({
     greyEnergy,
@@ -129,13 +128,17 @@ class CurrencyDisplay extends HTMLElement {
     greenBuildingPercentage,
     multipliers,
   }) {
-    if (greyEnergy != null) this.greyEl.textContent = greyEnergy;
-    if (greenEnergy != null)
+    if (greyEnergy != null) {
+      this.greyEl.textContent = greyEnergy;
+    }
+    if (greenEnergy != null) {
       this.greenEl.textContent = Number(greenEnergy).toFixed(3);
-    if (coins != null) this.coinsEl.textContent = coins;
+    }
+    if (coins != null) {
+      this.coinsEl.textContent = coins;
+    }
     if (score != null) {
       this.scoreEl.textContent = score;
-      this.scoreEl.style.setProperty("--score", score);
     }
 
     if (greenBuildingPercentage != null) {
