@@ -78,32 +78,32 @@
 .currency-display .progress-div {
   display: flex;
   flex-direction: row;
-}
-.currency-display .progress-div div:nth-child(1) {
-  width: 75%;
+  justify-content: space-between;
 }
 .currency-display .progress-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  width: 50%;
   margin-top: 8px;
+  gap: 8px;
 }
-.currency-display .green-buildings {
-  flex: 1;
+.currency-display .progress-row .green-buildings {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
+  margin-left: 12px;
 }
-.currency-display .green-buildings span {
+.currency-display .progress-row .green-buildings span {
   font-family: "PixelFont" !important;
   margin-left: 6px;
   color: #151515;
   white-space: nowrap;
 }
-.currency-display .progress-container {
-  flex: 1;
-  background: #ccc;
+.currency-display .progress-row .progress-container {
+  flex: 1 1 auto;
+  background: #888;
   border: 1px solid #aaa;
   border-radius: 4px;
   height: 16px;
@@ -113,26 +113,25 @@
   align-items: center;
   justify-content: flex-start;
 }
-.currency-display .progress-bar {
+.currency-display .progress-row .progress-container .progress-bar {
   width: 0%;
   height: 100%;
   background: #d2f7d2;
   transition: width 0.3s ease;
 }
-.currency-display .progress-percent {
-  flex: 1;
+.currency-display .progress-row .progress-percent {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
 }
-.currency-display .progress-percent span {
+.currency-display .progress-row .progress-percent span {
   font-family: "PixelFont" !important;
   margin-right: 6px;
   color: #151515;
   white-space: nowrap;
 }
-
-.multipliers {
+.currency-display .multipliers {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -140,12 +139,12 @@
   justify-content: center;
   gap: 20px;
 }
-.multipliers span {
+.currency-display .multipliers span {
   font-family: "PixelFont" !important;
   color: #151515;
   font-weight: normal !important;
 }
-.multipliers span img {
+.currency-display .multipliers span img {
   height: 30px;
   margin-right: 6px;
 }/*# sourceMappingURL=style.css.map */
