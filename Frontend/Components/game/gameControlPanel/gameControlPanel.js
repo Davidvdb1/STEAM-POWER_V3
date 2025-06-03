@@ -221,6 +221,70 @@ class GameControlPanel extends HTMLElement {
     }));
   }
 
+  async _updateEnergy() {
+    try {
+      const user = sessionStorage.getItem("loggedInUser");
+      if (!user) throw new Error("Not logged in");
+      const { token, groupId } = JSON.parse(user);
+
+      // 1) Fetch game statistics
+      const gs = await fetchGameStatistics(groupId, token);
+
+      // 2) Transform building data
+      if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
+        this._game.buildingData = this._transformBuildingData(gs.gameBuildings);
+      }
+      this._game.token = token;
+      this._game.groupId = groupId;
+      this._game.assetData = gs.assets;
+      this._game.gameStatisticsId = gs.id;
+      this._game.currencyId = gs.currency.id;
+
+      // 3) Compute total grey-cost from buildings on grey
+      const totalGreyCost = this._game.buildingData
+        .filter((b) => b.runsOnGreen === false)
+        .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
+
+      // 4) Compute total grey-production from “Kerncentrale” assets
+      const totalGreyProduction = gs.assets
+        .filter((a) => a.type === "Kerncentrale")
+        .reduce((sum, a) => sum + (a.energy || 0), 0);
+
+      // 5) (optional) Compute extra from assets and push minimal changes to server
+      const counts = gs.assets.reduce((acc, asset) => {
+        acc[asset.type] = (acc[asset.type] || 0) + 1;
+        return acc;
+      }, {});
+      const extra = { greenEnergy: 0, greyEnergy: 0 };
+      if (counts["Windmolen"]) extra.greenEnergy += counts["Windmolen"] * 50;
+      if (counts["Waterrad"]) extra.greenEnergy += counts["Waterrad"] * 50;
+      if (counts["Zonnepaneel"])
+        extra.greenEnergy += counts["Zonnepaneel"] * 50;
+
+      const totalGreenCost = this._game.buildingData
+        .filter((b) => b.runsOnGreen === true)
+        .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
+
+      const cur = gs.currency;
+      const updated = {
+        greenEnergy: cur.greenEnergy + extra.greenEnergy - totalGreenCost,
+        greyEnergy: cur.greyEnergy + extra.greyEnergy, // remains unchanged if extra.greyEnergy = 0
+        coins: cur.coins,
+        score: cur.score,
+      };
+      await updateCurrency(cur.id, updated, token);
+
+      // 6) Overwrite the “grey” display with “<building-cost> / <asset-prod>”
+      this._greyEl.textContent = `${totalGreyCost} / ${totalGreyProduction}`;
+
+      // 7) Make sure green always shows three decimals:
+      this._greenEl.textContent = updated.greenEnergy.toFixed(3);
+      this._coinsEl.textContent = updated.coins;
+    } catch (e) {
+      console.error("Error updating energy:", e);
+    }
+  }
+
   async _onStartClick() {
     // 1) Hide “Start” and switch to CityScene
     this._startButton.classList.add("hidden");
