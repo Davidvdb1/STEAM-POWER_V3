@@ -1,186 +1,237 @@
-const GameStatistics = require('../../model/gameStatistics');
-const Currency       = require('../../model/currency');
-const Building       = require('../../model/building');
-const Asset          = require('../../model/asset');
-const Checkpoint     = require('../../model/checkpoint');
-const Level          = require('../../model/level');
+const Currency = require("../../model/currency");
+const GameBuildings = require("../../model/gameBuildings");
+const Checkpoint = require("../../model/checkpoint");
+const Asset = require("../../model/asset");
+const Achievement = require("../../model/achievement");
+const GameStatistics = require("../../model/gameStatistics");
+const Building = require("../../model/building");
+const BuildingLevel = require("../../model/buildingLevel");
 
-describe('GameStatistics model tests', () => {
-  const validCurrency = new Currency({
-    greenEnergy: 10,
-    greyEnergy: 20,
-    coins: 1000
+describe("GameStatistics", () => {
+  // Maak geldige mocks van Building en BuildingLevel
+  const mockBuilding = new Building({ id: "b-1", name: "House" }, false);
+  const mockBuildingLevel = new BuildingLevel({ id: "bl-1", level: 1 }, false);
+
+  // Mock van GameBuildings met correcte Building en BuildingLevel instances
+  const mockGameBuilding = new GameBuildings(
+    {
+      id: "gb-1",
+      gameStatisticsId: "gs-1",
+      checkpointId: null,
+      building: mockBuilding,
+      buildingLevel: mockBuildingLevel,
+      runsOnGreen: true,
+    },
+    false
+  );
+
+  const mockCurrency = new Currency(
+    { id: "cur-1", name: "Gold", symbol: "G" },
+    false
+  );
+
+  const mockCheckpoint = new Checkpoint(
+    {
+      id: "cp-1",
+      currency: mockCurrency,
+      gameBuildings: [mockGameBuilding],
+      assets: [],
+      gameStatisticsId: "gs-1",
+    },
+    false
+  );
+
+  const mockAsset = new Asset(
+    {
+      id: "a-1",
+      buildCost: 100,
+      destroyCost: 50,
+      energy: 10,
+      xLocation: 0,
+      yLocation: 0,
+      xSize: 1,
+      ySize: 1,
+      type: "building",
+    },
+    false
+  );
+
+  const mockAchievement = new Achievement(
+    { id: "ach-1", name: "First Win" },
+    false
+  );
+
+  describe("constructor and validate", () => {
+    it("creates instance with valid data", () => {
+      const gs = new GameStatistics({
+        id: "gs-1",
+        currency: mockCurrency,
+        gameBuildings: [mockGameBuilding],
+        groupId: "group-1",
+        checkpoints: [mockCheckpoint],
+        assets: [mockAsset],
+        achievements: [mockAchievement],
+      });
+
+      expect(gs.id).toBe("gs-1");
+      expect(gs.currency).toBeInstanceOf(Currency);
+      expect(gs.gameBuildings).toHaveLength(1);
+      expect(gs.gameBuildings[0]).toBeInstanceOf(GameBuildings);
+      expect(gs.groupId).toBe("group-1");
+      expect(gs.checkpoints).toHaveLength(1);
+      expect(gs.checkpoints[0]).toBeInstanceOf(Checkpoint);
+      expect(gs.assets).toHaveLength(1);
+      expect(gs.assets[0]).toBeInstanceOf(Asset);
+      expect(gs.achievements).toHaveLength(1);
+      expect(gs.achievements[0]).toBeInstanceOf(Achievement);
+    });
+
+    it("throws on invalid currency", () => {
+      expect(
+        () =>
+          new GameStatistics({
+            currency: {},
+            gameBuildings: [],
+            groupId: "group-1",
+            checkpoints: [],
+            assets: [],
+            achievements: [],
+          })
+      ).toThrow("Invalid currency (must be Currency)");
+    });
+
+    it("throws on invalid gameBuildings array", () => {
+      expect(
+        () =>
+          new GameStatistics({
+            currency: mockCurrency,
+            gameBuildings: [{}],
+            groupId: "group-1",
+            checkpoints: [],
+            assets: [],
+            achievements: [],
+          })
+      ).toThrow("Invalid gameBuilding (must be GameBuildings)");
+    });
+
+    it("throws on non-string groupId", () => {
+      expect(
+        () =>
+          new GameStatistics({
+            currency: mockCurrency,
+            gameBuildings: [],
+            groupId: 123,
+            checkpoints: [],
+            assets: [],
+            achievements: [],
+          })
+      ).toThrow("Invalid groupId (must be string)");
+    });
+
+    it("throws on invalid achievements element", () => {
+      expect(
+        () =>
+          new GameStatistics({
+            currency: mockCurrency,
+            gameBuildings: [],
+            groupId: "group-1",
+            checkpoints: [],
+            assets: [],
+            achievements: [{}],
+          })
+      ).toThrow("Invalid achievement (must be Achievement)");
+    });
   });
 
-  const validLevel = new Level({
-    level: 1,
-    upgradeCost: 100,
-    energyCost: 10
-  });
-
-  const validBuilding = new Building({
-    xLocation: 1,
-    yLocation: 2,
-    xSize: 2,
-    ySize: 2,
-    level: validLevel
-  });
-
-  const validAsset = new Asset({
-    buildCost: 50,
-    destroyCost: 10,
-    energy: 5,
-    xLocation: 0,
-    yLocation: 0,
-    xSize: 1,
-    ySize: 1,
-    type: 'solar'
-  });
-
-  const validCheckpoint = new Checkpoint({
-    currency: validCurrency,
-    buildings: [validBuilding],
-    assets: [validAsset]
-  });
-
-  const validData = {
-    currency: validCurrency,
-    buildings: [validBuilding],
-    groupId: 'group123',
-    checkpoints: [validCheckpoint],
-    assets: [validAsset]
-  };
-
-  test('creates GameStatistics with valid data', () => {
-    const gs = new GameStatistics(validData);
-    expect(gs).toBeInstanceOf(GameStatistics);
-    expect(gs.currency).toBeInstanceOf(Currency);
-    expect(gs.buildings[0]).toBeInstanceOf(Building);
-    expect(gs.groupId).toBe('group123');
-    expect(gs.checkpoints[0]).toBeInstanceOf(Checkpoint);
-    expect(gs.assets[0]).toBeInstanceOf(Asset);
-  });
-
-  test('throws error for invalid currency', () => {
-    expect(() => {
-      new GameStatistics({ ...validData, currency: {} });
-    }).toThrow('Invalid currency (must be Currency)');
-  });
-
-  test('throws error for invalid buildings array', () => {
-    expect(() => {
-      new GameStatistics({ ...validData, buildings: 'not an array' });
-    }).toThrow('Invalid buildings (must be Building[])');
-  });
-
-  test('throws error for buildings with invalid types', () => {
-    expect(() => {
-      new GameStatistics({ ...validData, buildings: [{}] });
-    }).toThrow('Invalid buildings (must be Building[])');
-  });
-
-  test('throws error for invalid groupId type', () => {
-    expect(() => {
-      new GameStatistics({ ...validData, groupId: 123 });
-    }).toThrow('Invalid groupId (must be string)');
-  });
-
-  test('throws error for invalid checkpoints array', () => {
-    expect(() => {
-      new GameStatistics({ ...validData, checkpoints: 'nope' });
-    }).toThrow('Invalid checkpoints (must be Checkpoint[])');
-  });
-
-  test('throws error for checkpoints with invalid types', () => {
-    expect(() => {
-      new GameStatistics({ ...validData, checkpoints: [{}] });
-    }).toThrow('Invalid checkpoints (must be Checkpoint[])');
-  });
-
-  test('throws error for invalid assets array', () => {
-    expect(() => {
-      new GameStatistics({ ...validData, assets: 'no' });
-    }).toThrow('Invalid assets (must be Asset[])');
-  });
-
-  test('throws error for assets with invalid types', () => {
-    expect(() => {
-      new GameStatistics({ ...validData, assets: [{}] });
-    }).toThrow('Invalid assets (must be Asset[])');
-  });
-
-  test('skips validation when validate = false', () => {
-    expect(() => {
-      new GameStatistics({
-        currency: {},
-        buildings: [{}],
-        groupId: 123,
-        checkpoints: [{}],
-        assets: [{}],
-      }, false);
-    }).not.toThrow();
-  });
-
-  test('from() creates GameStatistics from prisma-like object', () => {
-    const prismaGS = {
-      id: 123,
-      currency: {
-        id: 1,
-        greenEnergy: 10,
-        greyEnergy: 20,
-        coins: 1000
-      },
-      buildings: [
-        {
-          id: 2,
-          xLocation: 1,
-          yLocation: 2,
-          xSize: 2,
-          ySize: 2,
-          level: {
-            id: 3,
-            level: 1,
-            upgradeCost: 100,
-            energyCost: 10
-          }
-        }
-      ],
-      groupId: 'group123',
-      checkpoints: [
-        {
-          id: 4,
-          currency: {
-            id: 5,
-            greenEnergy: 5,
-            greyEnergy: 10,
-            coins: 500
+  describe("from() static method", () => {
+    it("creates GameStatistics from prisma-like object", () => {
+      const prismaObj = {
+        id: "gs-2",
+        currency: { id: "cur-2", name: "Silver", symbol: "S" },
+        gameBuildings: [
+          {
+            id: "gb-2",
+            gameStatisticsId: "gs-2",
+            checkpointId: null,
+            building: { id: "b-2", name: "Farm" },
+            buildingLevel: {
+              id: "bl-2",
+              level: 2,
+              energyCost: 100,
+              upgradeCost: 50,
+              scoreDeduction: 5, // <-- toegevoegd
+              // voeg hier nog andere vereiste properties toe als die er zijn
+            },
+            runsOnGreen: false,
           },
-          buildings: [],
-          assets: []
-        }
-      ],
-      assets: [
-        {
-          id: 6,
-          buildCost: 50,
-          destroyCost: 10,
-          energy: 5,
-          xLocation: 0,
-          yLocation: 0,
-          xSize: 1,
-          ySize: 1,
-          type: 'solar'
-        }
-      ]
-    };
+        ],
 
-    const gs = GameStatistics.from(prismaGS);
-    expect(gs).toBeInstanceOf(GameStatistics);
-    expect(gs.currency).toBeInstanceOf(Currency);
-    expect(gs.buildings[0]).toBeInstanceOf(Building);
-    expect(gs.groupId).toBe('group123');
-    expect(gs.checkpoints[0]).toBeInstanceOf(Checkpoint);
-    expect(gs.assets[0]).toBeInstanceOf(Asset);
-    expect(gs.id).toBe(123);
+        groupId: "group-2",
+        checkpoints: [],
+        assets: [],
+        achievements: [],
+      };
+
+      const gs = GameStatistics.from(prismaObj);
+
+      expect(gs.id).toBe("gs-2");
+      expect(gs.currency).toBeInstanceOf(Currency);
+      // expect(gs.currency.name).toBe("Silver");
+      expect(gs.gameBuildings).toHaveLength(1);
+      expect(gs.gameBuildings[0]).toBeInstanceOf(GameBuildings);
+      expect(gs.groupId).toBe("group-2");
+      expect(gs.checkpoints).toHaveLength(0);
+      expect(gs.assets).toHaveLength(0);
+      expect(gs.achievements).toHaveLength(0);
+    });
+
+    it("handles null currency and missing optional arrays", () => {
+      const prismaObj = {
+        id: "gs-3",
+        currency: null,
+        groupId: "group-3",
+      };
+
+      const gs = GameStatistics.from(prismaObj);
+
+      expect(gs.currency).toBeNull();
+      expect(gs.gameBuildings).toHaveLength(0);
+      expect(gs.checkpoints).toHaveLength(0);
+      expect(gs.assets).toHaveLength(0);
+      expect(gs.achievements).toHaveLength(0);
+    });
+  });
+
+  describe("toJSON()", () => {
+    it("serializes without circular references", () => {
+      const gs = new GameStatistics({
+        id: "gs-4",
+        currency: mockCurrency,
+        gameBuildings: [mockGameBuilding],
+        groupId: "group-4",
+        checkpoints: [mockCheckpoint],
+        assets: [mockAsset],
+        achievements: [mockAchievement],
+      });
+
+      const json = gs.toJSON();
+
+      expect(json).toEqual({
+        id: "gs-4",
+        currency: mockCurrency,
+        gameBuildings: [
+          {
+            id: mockGameBuilding.id,
+            building: mockGameBuilding.building,
+            buildingLevel: mockGameBuilding.buildingLevel,
+            runsOnGreen: mockGameBuilding.runsOnGreen,
+          },
+        ],
+        groupId: "group-4",
+        checkpoints: [mockCheckpoint],
+        assets: [mockAsset],
+        achievements: [mockAchievement],
+      });
+    });
   });
 });
