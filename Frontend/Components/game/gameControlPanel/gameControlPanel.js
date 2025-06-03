@@ -175,7 +175,6 @@ class GameControlPanel extends HTMLElement {
       const { token, groupId } = JSON.parse(raw);
       const gs = await fetchGameStatistics(groupId, token);
 
-      // If buildings are included in game statistics, transform them
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
         this._game.buildingData = this._transformBuildingData(gs.gameBuildings);
       }
@@ -188,21 +187,35 @@ class GameControlPanel extends HTMLElement {
 
       const totalGreyCost = this._game.buildingData
         .filter((b) => b.runsOnGreen === false)
-        .reduce((sum, b) => {
-          return sum + (b.level.energyCost || 0);
-        }, 0);
+        .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
 
       const totalGreyProduction = gs.assets
         .filter((a) => a.type === "Kerncentrale")
-        .reduce((sum, a) => {
-          return sum + (a.energy || 0);
-        }, 0);
+        .reduce((sum, a) => sum + (a.energy || 0), 0);
 
       this._greyEl.textContent = `${totalGreyCost} / ${totalGreyProduction}`;
       const cur = gs.currency;
       this._greenEl.textContent = Number(cur.greenEnergy).toFixed(3);
       this._coinsEl.textContent = cur.coins;
       this._scoreEl.textContent = cur.score;
+
+      const totalBuildings = this._game.buildingData.length;
+      const greenCount = this._game.buildingData.filter(
+        (b) => b.runsOnGreen
+      ).length;
+      const greenBuildingPercentage =
+        totalBuildings > 0
+          ? Math.round((greenCount / totalBuildings) * 100)
+          : 0;
+
+      this._statsContainer.data = {
+        greyEnergy: `${totalGreyCost} / ${totalGreyProduction}`,
+        greenEnergy: cur.greenEnergy,
+        coins: cur.coins,
+        score: cur.score,
+        greenBuildingPercentage,
+      };
+
       this._statsContainer.classList.remove("hidden");
     } catch (e) {
       console.error("Error fetching stats:", e);
