@@ -1,43 +1,51 @@
-import { addAsset } from "../service/gameService.js";
 import { handleAchievements } from "./achievementHandler.js";
 import { ASSETS } from "./assetConfig.js";
+import {
+  getCurrencyById,
+  updateCurrency,
+  addAsset,
+  removeAsset,
+} from "../service/gameService.js";
 
 /**
  * Checks if an asset can be placed at specified coordinates
- * 
+ *
  * @function canPlaceAsset
  * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
- * @returns {{canPlace: boolean, reason?: string}} 
+ * @returns {{canPlace: boolean, reason?: string}}
  *  An object indicating whether the asset can be placed.
  *  If placement is not possible, a reason is provided.
  */
 function canPlaceAsset(tileAssetMap, tx, ty, size) {
   // Check corners first (most likely to fail)
   if (
-    tileAssetMap[`${tx},${ty}`] 
-    || tileAssetMap[`${tx + size.width - 1},${ty}`]
-    || tileAssetMap[`${tx},${ty + size.height - 1}`]
-    || tileAssetMap[`${tx + size.width - 1},${ty + size.height - 1}`]
+    tileAssetMap[`${tx},${ty}`] ||
+    tileAssetMap[`${tx + size.width - 1},${ty}`] ||
+    tileAssetMap[`${tx},${ty + size.height - 1}`] ||
+    tileAssetMap[`${tx + size.width - 1},${ty + size.height - 1}`]
   ) {
     return false;
   }
-  
+
   // Check remaining tiles if corners are clear
   for (let dx = 0; dx < size.width; dx++) {
     for (let dy = 0; dy < size.height; dy++) {
       // Skip corners we already checked
-      if ((dx === 0 || dx === size.width - 1) && (dy === 0 || dy === size.height - 1)) {
+      if (
+        (dx === 0 || dx === size.width - 1) &&
+        (dy === 0 || dy === size.height - 1)
+      ) {
         continue;
       }
 
       if (tileAssetMap[`${tx + dx},${ty + dy}`]) {
         return {
           canPlace: false,
-          reason: "Deze locatie is al bezet"
+          reason: "Deze locatie is al bezet",
         };
       }
     }
@@ -46,10 +54,9 @@ function canPlaceAsset(tileAssetMap, tx, ty, size) {
   return { canPlace: true };
 }
 
-
 /**
  * Marks tiles as occupied in the tile asset map
- * 
+ *
  * @function reserveTiles
  * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
@@ -66,10 +73,9 @@ export function reserveTiles(tileAssetMap, tx, ty, size) {
   }
 }
 
-
 /**
  * Releases occupied tiles so they can be reused
- * 
+ *
  * @function releaseTiles
  * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
@@ -86,10 +92,9 @@ export function releaseTiles(tileAssetMap, tx, ty, size) {
   }
 }
 
-
 /**
  * Verifies if an asset can be placed at specified location
- * 
+ *
  * @function verifyAssetPlacement
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
@@ -102,25 +107,34 @@ function verifyAssetPlacement(scene, type, tx, ty) {
   // Check if asset type is valid
   const size = ASSETS[type];
   if (!size) {
-    return { 
-      canPlace: false, 
-      reason: `Onbekend type: ${type}` 
+    return {
+      canPlace: false,
+      reason: `Onbekend type: ${type}`,
     };
   }
 
   // Check if the asset is placed on valid tiles for its type
-  const placedOnValidTiles = verifyAssetTypePlacement(scene, type, size, tx, ty);
+  const placedOnValidTiles = verifyAssetTypePlacement(
+    scene,
+    type,
+    size,
+    tx,
+    ty
+  );
   if (!placedOnValidTiles.canPlace) {
     return placedOnValidTiles;
   }
 
   // Check if the asset is within map bounds
-  if (tx < 0 || ty < 0 
-      || tx + size.width > scene.map.width 
-      || ty + size.height > scene.map.height) {
+  if (
+    tx < 0 ||
+    ty < 0 ||
+    tx + size.width > scene.map.width ||
+    ty + size.height > scene.map.height
+  ) {
     return {
       canPlace: false,
-      reason: `Plaats je ${type.toLowerCase()} binnen de kaartgrenzen`
+      reason: `Plaats je ${type.toLowerCase()} binnen de kaartgrenzen`,
     };
   }
 
@@ -129,49 +143,51 @@ function verifyAssetPlacement(scene, type, tx, ty) {
   if (!isSpaceAvailable) {
     return {
       canPlace: false,
-      reason: "Deze locatie is al bezet"
+      reason: "Deze locatie is al bezet",
     };
   }
-  
+
   // All checks passed
   return { canPlace: true };
 }
 
-
 /**
  * Verifies if a water mill can be placed at the specified location.
  * Water mills can only be placed along specific water edges
- * 
+ *
  * @function checkWaterMillPlacement
  * @memberof game.utils.assetPlacer
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
- * @returns {{canPlace: boolean, reason?: string}} 
+ * @returns {{canPlace: boolean, reason?: string}}
  *  An object indicating whether the asset can be placed.
  *  If placement is not possible, a reason is provided.
  */
 function verifyWaterMillPlacement(size, tx, ty) {
   const validRanges = [
     { startX: 62, endX: 75, y: 9 },
-    { startX: 92, endX: 125, y: 14 }
+    { startX: 92, endX: 125, y: 14 },
   ];
-  
+
   // Check if placement is along one of the valid water edges
   // and ensure the full width of the mill fits within the valid range
   for (const { startX, endX, y } of validRanges) {
-    if (ty+size.height-1 === y && tx >= startX && tx+size.width-1 <= endX) {
+    if (
+      ty + size.height - 1 === y &&
+      tx >= startX &&
+      tx + size.width - 1 <= endX
+    ) {
       return { canPlace: true };
     }
   }
-  
+
   // Return false with reason if no valid placement found
-  return { 
-    canPlace: false, 
-    reason: "Waterrad kan alleen langs het water geplaatst worden" 
+  return {
+    canPlace: false,
+    reason: "Waterrad kan alleen langs het water geplaatst worden",
   };
 }
-
 
 /**
  * Verifies whether an asset can be placed on tiles with any of the specified indices
@@ -184,24 +200,31 @@ function verifyWaterMillPlacement(size, tx, ty) {
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number|number[]} validIndices - Single index or array of valid tile indices the asset can be placed on.
- * @returns {{canPlace: boolean, reason?: string}} 
+ * @returns {{canPlace: boolean, reason?: string}}
  *  An object indicating whether the asset can be placed.
  *  If placement is not possible, a reason is provided.
  */
-function verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, validIndices) {
+function verifyAssetPlacedOnTileIndices(
+  scene,
+  type,
+  size,
+  tx,
+  ty,
+  validIndices
+) {
   // Convert single index to array for consistent handling
   const indices = Array.isArray(validIndices) ? validIndices : [validIndices];
-  
+
   // Check all tiles the asset would occupy
   for (let dx = 0; dx < size.width; dx++) {
     for (let dy = 0; dy < size.height; dy++) {
       // Get current tile
-      const tile = scene.layer1.getTileAt(tx+dx, ty+dy);
+      const tile = scene.layer1.getTileAt(tx + dx, ty + dy);
       // If no tile exists or its index is not in the valid indices, return false
       if (!tile?.index || !indices.includes(tile.index)) {
         return {
           canPlace: false,
-          reason: `Een ${type.toLowerCase()} kan niet op dit terrein worden geplaatst`
+          reason: `Een ${type.toLowerCase()} kan niet op dit terrein worden geplaatst`,
         };
       }
     }
@@ -210,7 +233,6 @@ function verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, validIndices)
   // If all tiles are in valid locations, return true
   return { canPlace: true };
 }
-
 
 /**
  * Verifies if an asset of a given type can be placed at the specified tile coordinates.
@@ -222,7 +244,7 @@ function verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, validIndices)
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
- * @returns {{canPlace: boolean, reason?: string}} 
+ * @returns {{canPlace: boolean, reason?: string}}
  *  An object indicating whether the asset can be placed.
  *  If placement is not possible, a reason is provided.
  */
@@ -234,7 +256,14 @@ function verifyAssetTypePlacement(scene, type, size, tx, ty) {
 
     case "Windmolen":
       // Check if the windmill is placed on either grass (9630) or water (9451, 44640) tiles
-      return verifyAssetPlacedOnTileIndices(scene, type, size, tx, ty, [9630, 9451, 44640]);
+      return verifyAssetPlacedOnTileIndices(
+        scene,
+        type,
+        size,
+        tx,
+        ty,
+        [9630, 9451, 44640]
+      );
 
     default:
       // For all other assets, check if they are placed on grass (9630) tiles
@@ -242,10 +271,9 @@ function verifyAssetTypePlacement(scene, type, size, tx, ty) {
   }
 }
 
-
 /**
  * Draws a highlight showing if an asset can be placed
- * 
+ *
  * @function highlightPlacementArea
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
@@ -258,16 +286,16 @@ function verifyAssetTypePlacement(scene, type, size, tx, ty) {
 function highlightPlacementArea(scene, type, tx, ty, graphics) {
   const size = ASSETS[type];
   if (!size) return;
-  
+
   // Clear previous highlight
   graphics.clear();
-  
+
   // Calculate placement validity
   const canPlace = verifyAssetPlacement(scene, type, tx, ty).canPlace;
-  
+
   // Set color based on validity
   graphics.fillStyle(canPlace ? 0x00ff00 : 0xff0000, 0.4);
-  
+
   // Draw a single rectangle for the entire asset area
   graphics.fillRect(
     tx * scene.map.tileWidth,
@@ -277,10 +305,9 @@ function highlightPlacementArea(scene, type, tx, ty, graphics) {
   );
 }
 
-
 /**
  * Adds the asset's image on the map to visually represent it
- * 
+ *
  * @function createAssetSprite
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
@@ -292,11 +319,8 @@ function highlightPlacementArea(scene, type, tx, ty, graphics) {
  * @returns {Object} Created asset data
  */
 export function createAssetSprite(scene, type, tx, ty, size, assetId) {
-  const sprite = scene.add.image(
-    tx * scene.map.tileWidth,
-    ty * scene.map.tileHeight,
-    type
-  )
+  const sprite = scene.add
+    .image(tx * scene.map.tileWidth, ty * scene.map.tileHeight, type)
     .setOrigin(0)
     .setDisplaySize(
       size.width * scene.map.tileWidth,
@@ -304,18 +328,17 @@ export function createAssetSprite(scene, type, tx, ty, size, assetId) {
     )
     .setInteractive()
     .on("pointerdown", () => scene.game.events.emit("assetClicked", assetId));
-  
+
   // Reserve tiles in the map
   reserveTiles(scene.tileAssetMap, tx, ty, size);
-  
+
   // Create and return the asset data
   return { id: assetId, image: sprite, tx, ty, size, type };
 }
 
-
 /**
  * Places an asset after backend confirmation
- * 
+ *
  * @function placeAsset
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
@@ -335,14 +358,14 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
   const size = ASSETS[type];
   const cost = size.cost;
   const msg = `Wil je hier een ${type} plaatsen voor ${cost} coins?`;
-  
-  return new Promise(resolve => {
-    scene.showConfirmation(msg, async confirmed => {
+
+  return new Promise((resolve) => {
+    scene.showConfirmation(msg, async (confirmed) => {
       if (!confirmed) {
         resolve({ success: false, reason: "User cancelled" });
         return;
       }
-      
+
       try {
         const { gameStatisticsId, token } = scene.sys.game;
 
@@ -350,43 +373,50 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
         const response = await addAsset(
           gameStatisticsId,
           {
-            buildCost:   cost,
+            buildCost: cost,
             destroyCost: cost,
-            energy:      size.energy,
-            xLocation:   tx,
-            yLocation:   ty,
-            xSize:       size.width,
-            ySize:       size.height,
-            type
+            energy: size.energy,
+            xLocation: tx,
+            yLocation: ty,
+            xSize: size.width,
+            ySize: size.height,
+            type,
           },
           token
         );
-        
+
         // Handle achievements
         handleAchievements(response, window.gameContainer);
 
         // Place the asset on the map
-        const assetData = createAssetSprite(scene, type, tx, ty, size, response.asset.id);
+        const assetData = createAssetSprite(
+          scene,
+          type,
+          tx,
+          ty,
+          size,
+          response.asset.id
+        );
         scene.assetObjects.push(assetData);
 
         // Dispatch a custom event to notify that an asset was placed so that other components can be updated and rerendered
         if (response.asset) {
-          const assetPlacedEvent = new CustomEvent('asset-placed', {
+          const assetPlacedEvent = new CustomEvent("asset-placed", {
             detail: {
               assetId: response.asset.id,
               type: type,
-              cost: cost
+              cost: cost,
             },
             bubbles: true,
-            composed: true // Important for crossing shadow DOM boundaries
+            composed: true, // Important for crossing shadow DOM boundaries
           });
           document.dispatchEvent(assetPlacedEvent);
-          
+
           // Show success message
           if (successMessage || successMessage === null) {
             scene.showError(successMessage || `${type} succesvol geplaatst!`);
           }
-          
+
           resolve({ success: true, asset: response.asset, assetData });
         }
       } catch (err) {
@@ -397,10 +427,9 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
   });
 }
 
-
 /**
  * Sets up drag and drop for asset placement
- * 
+ *
  * @function setupAssetDragAndDrop
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
@@ -410,7 +439,7 @@ export function setupAssetDragAndDrop(scene) {
   const canvas = scene.game.canvas;
   let currentType = null;
 
-  canvas.addEventListener("dragenter", mouseEvent => {
+  canvas.addEventListener("dragenter", (mouseEvent) => {
     mouseEvent.preventDefault();
     try {
       currentType = mouseEvent.dataTransfer.getData("text/plain");
@@ -418,7 +447,7 @@ export function setupAssetDragAndDrop(scene) {
     } catch {}
   });
 
-  canvas.addEventListener("dragover", mouseEvent => {
+  canvas.addEventListener("dragover", (mouseEvent) => {
     mouseEvent.preventDefault();
     const type = scene.draggedAssetType ?? currentType;
     if (!type) return;
@@ -431,20 +460,24 @@ export function setupAssetDragAndDrop(scene) {
     scene.dragHighlight.clear();
   });
 
-  canvas.addEventListener("drop", async mouseEvent => {
+  canvas.addEventListener("drop", async (mouseEvent) => {
     mouseEvent.preventDefault();
-  
+
     try {
       const type = mouseEvent.dataTransfer.getData("text/plain");
       if (!type) {
-        scene.showError("Kon het object niet herkennen. Probeer het opnieuw of herlaad de pagina.");
+        scene.showError(
+          "Kon het object niet herkennen. Probeer het opnieuw of herlaad de pagina."
+        );
         return;
       }
-      
+
       const [tx, ty] = getTileFromEvent(scene, mouseEvent);
       await placeAsset(scene, type, tx, ty);
     } catch (error) {
-      scene.showError("Er is een probleem opgetreden. Probeer het opnieuw of herlaad de pagina.");
+      scene.showError(
+        "Er is een probleem opgetreden. Probeer het opnieuw of herlaad de pagina."
+      );
     } finally {
       scene.dragHighlight.clear();
       scene.draggedAssetType = null;
@@ -452,10 +485,9 @@ export function setupAssetDragAndDrop(scene) {
   });
 }
 
-
 /**
  * Gets tile coordinates from mouse event
- * 
+ *
  * @function getTileFromEvent
  * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
@@ -463,14 +495,97 @@ export function setupAssetDragAndDrop(scene) {
  * @returns {number[]} Array with [tx, ty] coordinates
  */
 function getTileFromEvent(scene, mouseEvent) {
-  const rect   = scene.game.canvas.getBoundingClientRect();
-  const scaleX = scene.game.config.width  / rect.width;
+  const rect = scene.game.canvas.getBoundingClientRect();
+  const scaleX = scene.game.config.width / rect.width;
   const scaleY = scene.game.config.height / rect.height;
-  const x      = (mouseEvent.clientX - rect.left) * scaleX;
-  const y      = (mouseEvent.clientY - rect.top)  * scaleY;
-  const world  = scene.cameras.main.getWorldPoint(x, y);
+  const x = (mouseEvent.clientX - rect.left) * scaleX;
+  const y = (mouseEvent.clientY - rect.top) * scaleY;
+  const world = scene.cameras.main.getWorldPoint(x, y);
   return [
     Math.floor(world.x / scene.map.tileWidth),
-    Math.floor(world.y / scene.map.tileHeight)
+    Math.floor(world.y / scene.map.tileHeight),
   ];
+}
+
+/**
+ * Look up the Asset’s data (type, destroyCost, energy, etc.) from scene.sys.game.assetData.
+ * Then ask the user via a confirmation popup. On confirm, call performDestroyAsset.
+ *
+ * @param {Phaser.Scene} scene   – an instance of OuterCityScene (so we can access scene.assetObjects, scene.sys.game, scene.showConfirmation, etc.)
+ * @param {number|string} assetId – ID of the asset to delete
+ */
+export async function requestDestroyAsset(scene, assetId) {
+  const found = scene.assetObjects.find((o) => o.id === assetId);
+  if (!found) {
+    console.warn(`Asset ${assetId} not found in scene.assetObjects.`);
+    return;
+  }
+
+  const textureKey = found.image.texture.key;
+
+  const fullAssetData =
+    (Array.isArray(scene.sys.game.assetData)
+      ? scene.sys.game.assetData.find((a) => a.id === assetId)
+      : null) || {};
+  const cost = fullAssetData.destroyCost || 0;
+
+  const msg = `Wil je deze ${textureKey} slopen voor ${cost} coins?`;
+  scene.showConfirmation(msg, (confirmed) => {
+    if (confirmed) {
+      performDestroyAsset(scene, assetId);
+    }
+  });
+}
+
+/**
+ * Actually call the API to delete the asset, update currency, remove the sprite & tiles,
+ * then mark the scene so it can re‐fetch stats.
+ *
+ * @param {Phaser.Scene} scene    – OuterCityScene instance
+ * @param {number|string} assetId – ID of the asset to delete
+ */
+export async function performDestroyAsset(scene, assetId) {
+  try {
+    const token = scene.sys.game.token;
+    const currencyId = scene.sys.game.currencyId;
+
+    const response = await removeAsset(assetId, token);
+
+    handleAchievements(response, scene.game.canvas);
+
+    const currentCurrency = await getCurrencyById(currencyId, token);
+
+    const fullAssetData =
+      (Array.isArray(scene.sys.game.assetData)
+        ? scene.sys.game.assetData.find((a) => a.id === assetId)
+        : null) || {};
+
+    const greyDelta =
+      fullAssetData.type === "Kerncentrale" ? fullAssetData.energy : 0;
+
+    const updatedCurrencyPayload = {
+      greenEnergy: currentCurrency.greenEnergy,
+      greyEnergy: currentCurrency.greyEnergy - greyDelta,
+      coins: currentCurrency.coins - (fullAssetData.destroyCost || 0),
+      score: currentCurrency.score,
+    };
+
+    await updateCurrency(currencyId, updatedCurrencyPayload, token);
+
+    const idx = scene.assetObjects.findIndex((o) => o.id === assetId);
+    if (idx > -1) {
+      const toRem = scene.assetObjects[idx];
+      toRem.image.destroy();
+      releaseTiles(scene.tileAssetMap, toRem.tx, toRem.ty, toRem.size);
+      scene.assetObjects.splice(idx, 1);
+    }
+
+    scene._currencyNeedsRefresh = true;
+  } catch (err) {
+    console.error("Error destroying asset in helper:", err);
+    if (typeof scene.showError === "function") {
+      scene.showError("Kon asset niet slopen: " + err.message);
+    }
+  }
+  document.dispatchEvent(new CustomEvent("asset-deleted"));
 }

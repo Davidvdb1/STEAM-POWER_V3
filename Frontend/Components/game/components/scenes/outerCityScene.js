@@ -1,6 +1,21 @@
-import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys, handleMapDragging } from "../../utils/phaserSceneUtils.js";
-import { setupAssetDragAndDrop, createAssetSprite, reserveTiles, releaseTiles } from "../../utils/assetPlacer.js";
-import { createErrorPopup, createConfirmationPopup } from "../../utils/uiPopups.js";
+import {
+  setCameraBounds,
+  handleZoom,
+  setMovementKeys,
+  handleMovementKeys,
+  handleMapDragging,
+} from "../../utils/phaserSceneUtils.js";
+import {
+  setupAssetDragAndDrop,
+  createAssetSprite,
+  reserveTiles,
+  releaseTiles,
+  requestDestroyAsset,
+} from "../../utils/assetHandler.js";
+import {
+  createErrorPopup,
+  createConfirmationPopup,
+} from "../../utils/uiPopups.js";
 import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
 
 export function createOuterCityScene() {
@@ -9,17 +24,14 @@ export function createOuterCityScene() {
       super("OuterCityScene");
     }
 
-
     init(data) {
-      // 1) Pre-shutdown hook:
       this.events.once("shutdown", () => {
         if (this.layer1) this.layer1.destroy();
         if (this.layer2) this.layer2.destroy();
-        if (this.map)    this.map.destroy();
-        "dragHighlight".forEach(p => this[p] && this[p].destroy());
+        if (this.map) this.map.destroy();
+        "dragHighlight".forEach((p) => this[p] && this[p].destroy());
       });
 
-      // 2) Clear and inject checkpoint data:
       this.assetObjects = [];
       this.tileAssetMap = {};
       if (data.assets) {
@@ -29,10 +41,12 @@ export function createOuterCityScene() {
       }
     }
 
-
     preload() {
       this.load.tilemapTiledJSON("outerCityMap", "Assets/json/buitenstad.json");
-      this.load.image("tilesetImage", "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png");
+      this.load.image(
+        "tilesetImage",
+        "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
+      );
       this.load.image("Zonnepaneel", "Assets/images/solar_panel.png");
       this.load.image("Windmolen", "Assets/images/windturbine.png");
       this.load.image("Waterrad", "Assets/images/waterrad.png");
@@ -43,10 +57,12 @@ export function createOuterCityScene() {
       this.load.image("Hulst", "Assets/images/Hulst.png");
     }
 
-
     create() {
       this.map = this.make.tilemap({ key: "outerCityMap" });
-      const tileset = this.map.addTilesetImage("Modern_Exteriors_Complete_Tileset_Custom", "tilesetImage");
+      const tileset = this.map.addTilesetImage(
+        "Modern_Exteriors_Complete_Tileset_Custom",
+        "tilesetImage"
+      );
       this.layer1 = this.map.createLayer("Layer-1", tileset);
       this.layer2 = this.map.createLayer("Layer-2", tileset);
 
@@ -61,26 +77,28 @@ export function createOuterCityScene() {
       createConfirmationPopup(this);
       createCheckpointLoadPopup(this);
 
-      // Setup asset placement functionality
       setupAssetDragAndDrop(this);
 
       this.loadExistingAssets();
+
+      document.addEventListener(
+        "scene:destroy-asset",
+        (e) => {
+          const assetId = e.detail.assetId;
+          requestDestroyAsset(this, assetId);
+        },
+        false
+      );
     }
 
-
-    // call this to completely wipe out your old assets (sprites & tile reservations)
     clearAllAssets() {
-      // destroy each sprite
       if (this.assetObjects) {
-        this.assetObjects.forEach(o => o.image.destroy());
+        this.assetObjects.forEach((o) => o.image.destroy());
       }
-      // reset arrays/maps
       this.assetObjects = [];
       this.tileAssetMap = {};
     }
 
-
-    // call this *after* setting checkpointAssets; it simply draws them on the existing map
     reloadCheckpointAssets() {
       const assets = Array.isArray(this.checkpointAssets)
         ? this.checkpointAssets
@@ -116,13 +134,13 @@ export function createOuterCityScene() {
       });
     }
 
-
     loadExistingAssets() {
-      // Prefer checkpointAssets if provided, else fallback
-      const assets = Array.isArray(this.checkpointAssets) ? this.checkpointAssets : this.sys.game.assetData;
+      const assets = Array.isArray(this.checkpointAssets)
+        ? this.checkpointAssets
+        : this.sys.game.assetData;
       if (!Array.isArray(assets)) return;
 
-      assets.forEach(a => {
+      assets.forEach((a) => {
         const assetData = createAssetSprite(
           this,
           a.type,
@@ -131,32 +149,18 @@ export function createOuterCityScene() {
           { width: a.xSize, height: a.ySize },
           a.id
         );
-        
+
         this.assetObjects.push(assetData);
       });
     }
 
-
-    // Remove an asset from the map
-    _removeAsset(asset) {
-      const idx = this.assetObjects.findIndex(a =>
-        asset.id ? a.id === asset.id : a.tx === asset.tx 
-        && a.ty === asset.ty 
-        && a.type === asset.type
-      );
-      
-      if (idx === -1) return;
-
-      const toRem = this.assetObjects[idx];
-      toRem.image.destroy();
-
-      releaseTiles(this.tileAssetMap, toRem.tx, toRem.ty, toRem.size);
-      this.assetObjects.splice(idx, 1);
-    }
-
-
     update(time, delta) {
       handleMovementKeys(this, delta);
+
+      if (this._currencyNeedsRefresh) {
+        this._currencyNeedsRefresh = false;
+        this.game.events.emit("forceStatsUpdate");
+      }
     }
   };
 }
