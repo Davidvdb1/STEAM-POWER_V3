@@ -24,7 +24,6 @@ export function createOuterCityScene() {
     }
 
     init(data) {
-      // 1) Pre-shutdown hook:
       this.events.once("shutdown", () => {
         if (this.layer1) this.layer1.destroy();
         if (this.layer2) this.layer2.destroy();
@@ -32,7 +31,6 @@ export function createOuterCityScene() {
         "dragHighlight".forEach((p) => this[p] && this[p].destroy());
       });
 
-      // 2) Clear and inject checkpoint data:
       this.assetObjects = [];
       this.tileAssetMap = {};
       if (data.assets) {
@@ -78,24 +76,19 @@ export function createOuterCityScene() {
       createConfirmationPopup(this);
       createCheckpointLoadPopup(this);
 
-      // Setup asset placement functionality
       setupAssetDragAndDrop(this);
 
       this.loadExistingAssets();
     }
 
-    // call this to completely wipe out your old assets (sprites & tile reservations)
     clearAllAssets() {
-      // destroy each sprite
       if (this.assetObjects) {
         this.assetObjects.forEach((o) => o.image.destroy());
       }
-      // reset arrays/maps
       this.assetObjects = [];
       this.tileAssetMap = {};
     }
 
-    // call this *after* setting checkpointAssets; it simply draws them on the existing map
     reloadCheckpointAssets() {
       const assets = Array.isArray(this.checkpointAssets)
         ? this.checkpointAssets
@@ -132,7 +125,6 @@ export function createOuterCityScene() {
     }
 
     loadExistingAssets() {
-      // Prefer checkpointAssets if provided, else fallback
       const assets = Array.isArray(this.checkpointAssets)
         ? this.checkpointAssets
         : this.sys.game.assetData;
@@ -152,7 +144,6 @@ export function createOuterCityScene() {
       });
     }
 
-    // Remove an asset from the map
     _removeAsset(asset) {
       const idx = this.assetObjects.findIndex((a) =>
         asset.id
@@ -171,6 +162,66 @@ export function createOuterCityScene() {
 
     update(time, delta) {
       handleMovementKeys(this, delta);
+    }
+
+    _onRequestDestroyAsset(assetId) {
+      const asset = this.assetObjects.find((o) => o.id === assetId);
+      if (!asset) {
+        console.warn(`Tried to delete asset ${assetId}, but couldn’t find it.`);
+        return;
+      }
+
+      const type = asset.image.texture.key;
+      const fullAssetData =
+        this.sys.game.assetData?.find((a) => a.id === assetId) || {};
+      const cost = fullAssetData.destroyCost ?? 0;
+      const msg = `Wil je deze ${type} slopen voor ${cost} coins?`;
+
+      this.showConfirmation(msg, (confirmed) => {
+        if (confirmed) {
+          this._performDestroyAsset(assetId);
+        }
+      });
+    }
+
+    async _performDestroyAsset(assetId) {
+      try {
+        const token = this.sys.game.token;
+        const currencyId = this.sys.game.currencyId;
+
+        const response = await removeAsset(assetId, token);
+
+        handleAchievements(response, this.game.canvas);
+
+        const cur = await getCurrencyById(currencyId, token);
+
+        const fullAssetData =
+          this.sys.game.assetData.find((a) => a.id === assetId) || {};
+        const greyDelta =
+          fullAssetData.type === "Kerncentrale" ? fullAssetData.energy : 0;
+
+        const updatedCurrency = {
+          greenEnergy: cur.greenEnergy,
+          greyEnergy: cur.greyEnergy - greyDelta,
+          coins: cur.coins - (fullAssetData.destroyCost || 0),
+          score: cur.score,
+        };
+
+        await updateCurrency(currencyId, updatedCurrency, token);
+
+        const idx = this.assetObjects.findIndex((o) => o.id === assetId);
+        if (idx > -1) {
+          const toRem = this.assetObjects[idx];
+          toRem.image.destroy();
+          releaseTiles(this.tileAssetMap, toRem.tx, toRem.ty, toRem.size);
+          this.assetObjects.splice(idx, 1);
+        }
+
+        this._currencyNeedsRefresh = true;
+      } catch (err) {
+        console.error("Error destroying asset in scene:", err);
+        this.showError("Kon asset niet slopen: " + err.message);
+      }
     }
   };
 }

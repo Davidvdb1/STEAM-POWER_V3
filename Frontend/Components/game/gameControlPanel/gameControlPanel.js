@@ -134,6 +134,13 @@ class GameControlPanel extends HTMLElement {
 
     this._loadPhaser().then(() => this._initializeGame());
 
+    this._shadow.addEventListener("delete-asset", (e) => {
+      const assetId = e.detail.assetId;
+      document.dispatchEvent(
+        new CustomEvent("scene:destroy-asset", { detail: { assetId } })
+      );
+    });
+
     const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
     if (bluetooth) {
       this._interval = setInterval(() => {
@@ -189,6 +196,10 @@ class GameControlPanel extends HTMLElement {
         id
       )
     );
+
+    this._game.events.on("forceStatsUpdate", () => {
+      this._updateStatistics();
+    });
   }
 
   async _updateStatistics() {
