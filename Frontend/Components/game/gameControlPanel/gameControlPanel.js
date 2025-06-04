@@ -20,6 +20,7 @@ import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
 import { animateWrapperAndStats } from "../utils/animationHandler.js";
 import { showDetail } from "../utils/detailHelper.js";
+import { setBuildingColor } from "../utils/buildingHandler.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -266,7 +267,8 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
-      const totalGreenCost = calculateTotalGreenCost(this._game.buildingData) / 60;
+      const totalGreenCost =
+        calculateTotalGreenCost(this._game.buildingData) / 60;
 
       const { id: currencyId, payload: currencyPayload } = buildUpdatedCurrency(
         gs.currency,
@@ -294,9 +296,9 @@ class GameControlPanel extends HTMLElement {
     try {
       await this._updateStatistics();
 
-      if (cityScene.setBuildingColor) {
+      if (setBuildingColor) {
         for (const b of this._game.buildingData) {
-          cityScene.setBuildingColor(b);
+          setBuildingColor(cityScene, b);
         }
       }
     } catch (e) {
@@ -413,7 +415,7 @@ class GameControlPanel extends HTMLElement {
           name: b.building.name,
           runsOnGreen: b.runsOnGreen,
         };
-        cityScene.setBuildingColor(buildingInCorrectFormat);
+        setBuildingColor(cityScene, buildingInCorrectFormat);
       }
 
       const outer = this._game.scene.getScene("OuterCityScene");
