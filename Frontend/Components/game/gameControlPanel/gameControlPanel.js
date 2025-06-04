@@ -241,8 +241,13 @@ class GameControlPanel extends HTMLElement {
       });
       this._statsContainer.data = payload;
       this._statsContainer.classList.remove("hidden");
+
+      // Emit event when statistics update is complete
+      this._game.events.emit("statsUpdateComplete");
     } catch (e) {
       console.error("Error fetching stats:", e);
+      // Still emit the event to prevent hanging
+      this._game.events.emit("statsUpdateComplete");
     }
   }
 
