@@ -77,7 +77,6 @@ class BuildingDetail extends HTMLElement {
 
     this.setAttribute("runsOnGreen", runsOnGreen);
 
-    // Ensure we have level data
     const lvl = this._data.buildingLevel || this._data.level;
     if (!lvl) {
       console.error("Building has no level data:", this._data);
@@ -89,7 +88,6 @@ class BuildingDetail extends HTMLElement {
     const cost = lvl.energyCost;
     const upgCost = lvl.upgradeCost;
 
-    // populate basics
     this._nameEl.textContent =
       BUILDING_NAME_TRANSLATIONS[buildingName] || buildingName;
     this._levelEl.textContent = num;
@@ -109,7 +107,6 @@ class BuildingDetail extends HTMLElement {
     };
 
     if (num < 5) {
-      // under max: show cost & button
       this._upgradeLine.textContent = `Upgrade kost: ${upgCost} coins`;
       this._upgradeBtn.style.display = "";
       this._upgradeBtn.onclick = () => {
@@ -122,7 +119,6 @@ class BuildingDetail extends HTMLElement {
         );
       };
     } else {
-      // at max: replace line and hide button
       this._upgradeLine.textContent = "Max level";
       this._upgradeBtn.style.display = "none";
     }
