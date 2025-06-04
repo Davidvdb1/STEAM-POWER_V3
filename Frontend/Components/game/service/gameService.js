@@ -205,6 +205,11 @@ export async function createGameStatistics(groupId, token) {
         coins: 500,
         score: 25,
       },
+      multiplier: {
+        solar: 1.0,
+        wind: 1.0,
+        water: 1.0,
+      },
     }),
   });
 

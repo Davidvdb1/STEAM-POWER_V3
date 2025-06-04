@@ -45,6 +45,7 @@ class GameStatisticsRepository {
    * @param {number} params.currency.greyEnergy - The amount of grey energy.
    * @param {number} params.currency.coins - The number of coins.
    * @param {number} params.currency.score - The score value.
+   * 
    * @returns {Promise<GameStatistics>} The created GameStatistics instance.
    */
   async create({ groupId, currency }) {
@@ -58,6 +59,13 @@ class GameStatisticsRepository {
             greyEnergy: currency.greyEnergy,
             coins: currency.coins,
             score: currency.score,
+          },
+        },
+        multiplier: {
+          create: {
+            solar: 1.0,
+            wind: 1.0,
+            water: 1.0,
           },
         },
       },
@@ -125,6 +133,7 @@ class GameStatisticsRepository {
       includeGameBuildings = true,
       includeAssets = true,
       includeCheckpoints = true,
+      includeMultiplier = true,
       includeGroup = false,
     } = {}
   ) {
@@ -141,6 +150,7 @@ class GameStatisticsRepository {
             }
           : false,
         assets: includeAssets,
+        multiplier: includeMultiplier,
         checkpoints: includeCheckpoints
           ? {
               include: {
@@ -192,6 +202,7 @@ class GameStatisticsRepository {
               }
             : false,
         assets: opts.includeAssets ?? true,
+        multiplier: opts.includeGroup ?? true,
         checkpoints: opts.includeCheckpoints
           ? {
               include: {
@@ -331,7 +342,7 @@ class GameStatisticsRepository {
      * @returns {Promise<Currency>} The updated Currency instance after incrementing green energy.
      * @throws {Error} If the group statistics, currency, or assets are not found, or if the type is unknown.
      */
-    async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
+    async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type, assetMultiplier) {
     const gs = await this.findByGroupId(groupId);
 
     if (!gs || !gs.currency || !gs.assets) {
@@ -339,9 +350,9 @@ class GameStatisticsRepository {
     }
 
     const typeMap = {
-      WIND: "windmolen",
-      SOLAR: "zonnepaneel",
-      WATER: "waterrad",
+      WIND: "wind",
+      SOLAR: "solar",
+      WATER: "water",
     };
 
     const assetType = typeMap[type.toUpperCase()];
@@ -352,7 +363,7 @@ class GameStatisticsRepository {
     );
 
     const totalGain = matchingAssets.reduce((sum, asset) => {
-      return sum + greenEnergy * asset.energy;
+      return sum + greenEnergy * assetMultiplier;
     }, 0);
 
     const updated = await this.prisma.currency.update({
@@ -964,6 +975,7 @@ class GameStatisticsRepository {
       ? gameStatistics.achievements.map(Achievement.from)
       : null;
   }
+
 }
 
 module.exports = new GameStatisticsRepository();

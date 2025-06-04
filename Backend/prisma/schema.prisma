@@ -193,6 +193,9 @@ model GameStatistics {
   checkpoints   Checkpoint[]
   assets        Asset[]
 
+  multiplier   Multiplier @relation("GS_Multiplier", fields: [multiplierId], references: [id])
+  multiplierId String   @unique
+
   // GameStatistics has many GameBuildings
   gameBuildings GameBuildings[]
   
@@ -228,4 +231,12 @@ model GameBuildings {
   buildingLevel    BuildingLevel @relation(fields: [buildingLevelId], references: [id])
 
   runsOnGreen      Boolean        @default(false)
+}
+
+model Multiplier {
+  id          String @id @default(uuid())
+  solar        Float @default(1.0)
+  water        Float @default(1.0)
+  wind         Float @default(1.0)
+  gameStatistics GameStatistics? @relation("GS_Multiplier")
 }

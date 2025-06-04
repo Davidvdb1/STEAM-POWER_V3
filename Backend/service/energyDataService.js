@@ -12,12 +12,13 @@ class EnergyDataService {
             const Energy = data.value /1024 * 3 * 0.5 * 2 /3600; // /1024 * 3 voorde voltagewaarde, * 0.5 Ampère voor het vermogen, * 2/3600  voor de energie te verkrijgen in Wh.
             const gameStats = await gameStatisticsRepository.findByGroupId(data.groupId);
             const currency = gameStats.currency;
+            const assetMultiplier = gameStats.multiplier;
             const group = await groupRepository.findById(data.groupId);
             const multiplier = group.energyMultiplier;
             const greenEnergy = Energy * multiplier / 1000; // 1000 omdat de currency in kWh is
             await groupRepository.addEnergyToGroup(data.groupId, Energy);
             await gameStatisticsRepository.incrementCurrency(currency.id, { greenEnergy }); 
-            await gameStatisticsRepository.incrementGreenEnergyWithMultiplier(data.groupId, greenEnergy, data.type); // om factor van groene energiebronnen erin te brengen
+            await gameStatisticsRepository.incrementGreenEnergyWithMultiplier(data.groupId, greenEnergy, data.type, assetMultiplier); // om factor van groene energiebronnen erin te brengen
             return await energyDataRepository.create(energyData);
         } catch (error) {
             if (error instanceof utility.ValidationError) throw error;
