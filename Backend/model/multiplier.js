@@ -60,10 +60,12 @@ class Multiplier {
      */
     static from(prismaMultiplier) {
         return new Multiplier({
-            id: prismaMultiplier.id,
-            solar: prismaMultiplier.solar,
-            wind: prismaMultiplier.wind,
-            water: prismaMultiplier.water
-        }, false);
+        id: prismaMultiplier.id,
+        solar: prismaMultiplier.solar,
+        wind: prismaMultiplier.wind,
+        water: prismaMultiplier.water
+        });
     }
 }
+
+module.exports = Multiplier;

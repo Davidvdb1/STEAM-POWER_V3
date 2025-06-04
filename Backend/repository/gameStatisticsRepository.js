@@ -202,7 +202,7 @@ class GameStatisticsRepository {
               }
             : false,
         assets: opts.includeAssets ?? true,
-        multiplier: opts.includeGroup ?? true,
+        multiplier: opts.includeMultiplier ?? true,
         checkpoints: opts.includeCheckpoints
           ? {
               include: {
@@ -342,39 +342,47 @@ class GameStatisticsRepository {
      * @returns {Promise<Currency>} The updated Currency instance after incrementing green energy.
      * @throws {Error} If the group statistics, currency, or assets are not found, or if the type is unknown.
      */
-    async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type, assetMultiplier) {
-    const gs = await this.findByGroupId(groupId);
+    async incrementGreenEnergyWithMultiplier(currency, greenEnergy, type, assetMultiplier, assets) {
+      const typeToAssetLabel = {
+        SOLAR: "zonnepaneel",
+        WIND: "windmolen",
+        WATER: "waterrad",
+      };
 
-    if (!gs || !gs.currency || !gs.assets) {
-      throw new Error("GameStatistics, currency of assets niet gevonden");
+      const label = typeToAssetLabel[type?.toUpperCase()];
+      if (!label) throw new Error(`Onbekend asset type: ${type}`);
+
+      const relevantAssets = assets.filter(
+        (asset) => asset.type?.toLowerCase() === label
+      );
+
+      const typeMap = {
+        zonnepaneel: "solar",
+        windmolen: "wind",
+        waterrad: "water",
+      };
+
+      const multiplierKey = typeMap[label];
+      const typeMultiplier = assetMultiplier[multiplierKey];
+
+      if (typeof typeMultiplier !== "number") {
+        throw new Error(`Multiplier ontbreekt of ongeldig voor type ${multiplierKey}`);
+      }
+
+      const totalGain = relevantAssets.length * greenEnergy * typeMultiplier;
+
+      const updated = await this.prisma.currency.update({
+        where: { id: currency.id },
+        data: {
+          greenEnergy: { increment: totalGain },
+        },
+      });
+
+      return Currency.from(updated);
     }
 
-    const typeMap = {
-      WIND: "wind",
-      SOLAR: "solar",
-      WATER: "water",
-    };
 
-    const assetType = typeMap[type.toUpperCase()];
-    if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
 
-    const matchingAssets = gs.assets.filter(
-      (a) => a.type.toLowerCase() === assetType
-    );
-
-    const totalGain = matchingAssets.reduce((sum, asset) => {
-      return sum + greenEnergy * assetMultiplier;
-    }, 0);
-
-    const updated = await this.prisma.currency.update({
-      where: { id: gs.currency.id },
-      data: {
-        greenEnergy: { increment: totalGain },
-      },
-    });
-
-    return Currency.from(updated);
-  }
 
   //########################################################################
   //                                 ASSETS
