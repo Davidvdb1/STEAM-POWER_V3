@@ -17,8 +17,9 @@ import {
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
-import { animateWrapperAndStats } from "../utils/animationHandler.js";
+import { animateWrapperAndStats } from "../utils/transitionHandler.js";
 import { showDetail } from "../utils/detailHelper.js";
+import { goToInnerCity, goToOuterCity } from "../utils/transitionHandler.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -306,26 +307,24 @@ class GameControlPanel extends HTMLElement {
   }
 
   _transitionToOuterCity() {
-    this._detailContainer.classList.add("hidden");
-    this._detailContainer.innerHTML = "";
-
-    const distance = this._wrapper.offsetWidth + 800;
-    this._animateWrapper(-distance, () => {
-      this._game.scene.switch("CityScene", "OuterCityScene");
-      this._outerContainer.style.display = "none";
-      this._innerContainer.style.display = "flex";
+    goToOuterCity({
+      wrapperEl: this._wrapper,
+      statsEl: this._statsContainer,
+      detailContainer: this._detailContainer,
+      game: this._game,
+      innerContainer: this._innerContainer,
+      outerContainer: this._outerContainer,
     });
   }
 
   _transitionToCity() {
-    this._detailContainer.classList.add("hidden");
-    this._detailContainer.innerHTML = "";
-
-    const distance = this._wrapper.offsetWidth + 800;
-    this._animateWrapper(distance, () => {
-      this._game.scene.switch("OuterCityScene", "CityScene");
-      this._innerContainer.style.display = "none";
-      this._outerContainer.style.display = "flex";
+    goToInnerCity({
+      wrapperEl: this._wrapper,
+      statsEl: this._statsContainer,
+      detailContainer: this._detailContainer,
+      game: this._game,
+      innerContainer: this._innerContainer,
+      outerContainer: this._outerContainer,
     });
   }
 
