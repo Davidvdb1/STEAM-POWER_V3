@@ -562,6 +562,7 @@ describe("GameStatisticsRepository", () => {
           "gs-1",
           mockCurrency,
           [],
+          [],
           []
         );
 
