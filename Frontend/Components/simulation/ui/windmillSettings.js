@@ -2,19 +2,19 @@ import { createLine } from '../utils/uiElements.js';
 
 /**
  * Creates the windmill settings UI section
- * @param {BABYLON.GUI.StackPanel} layout - The parent layout panel
+ * @param {BABYLON.GUI.StackPanel} page1 - The parent page1 panel
  * @param {Function} onBladeCountChange - Callback for when blade count changes
  */
-export function createWindmillSettings(layout, onBladeCountChange, onManualRotationChange, onAutoRotateChange) {
+export function createWindmillSettings(page1, onBladeCountChange, onManualRotationChange, onAutoRotateChange) {
     // wind title
     const windTitle = new BABYLON.GUI.TextBlock();
     windTitle.text = "Windturbine";
     windTitle.fontSize = 22;
     windTitle.color = "white";
     windTitle.height = "50px";
-    layout.addControl(windTitle);
+    page1.addControl(windTitle);
 
-    layout.addControl(createLine());
+    page1.addControl(createLine());
 
     const windText = new BABYLON.GUI.TextBlock();
     windText.text = "Pas het aantal wieken aan.";
@@ -22,7 +22,7 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
     windText.color = "white";
     windText.width = "90%";
     windText.height = "60px";
-    layout.addControl(windText);
+    page1.addControl(windText);
 
     // Slider for blade count
     const bladeSlider = new BABYLON.GUI.Slider();
@@ -36,7 +36,7 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
     bladeSlider.background = "gray";
     bladeSlider.thumbColor = "rgba(30, 30, 30, 1.0)";
     bladeSlider.borderColor = "rgba(30, 30, 30, 1.0)";
-    layout.addControl(bladeSlider);
+    page1.addControl(bladeSlider);
 
     bladeSlider.onValueChangedObservable.add((value) => {
         if (onBladeCountChange) {
@@ -64,10 +64,10 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
         tick.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
         tickGrid.addControl(tick, 0, i); // row 0, column i
     }
-    layout.addControl(tickGrid);
+    page1.addControl(tickGrid);
 
     // line
-    layout.addControl(createLine());
+    page1.addControl(createLine());
 
     // Create the text block
     const rotate = new BABYLON.GUI.TextBlock();
@@ -76,7 +76,7 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
     rotate.color = "white";
     rotate.width = "90%";
     rotate.height = "60px";
-    layout.addControl(rotate);
+    page1.addControl(rotate);
 
     // Create the slider
     const slider = new BABYLON.GUI.Slider();
@@ -88,7 +88,7 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
     slider.color = "white";
     slider.background = "gray";
     slider.thumbColor = "white";
-    layout.addControl(slider);
+    page1.addControl(slider);
 
     // Create the text block for the slider value
     const sliderValueText = new BABYLON.GUI.TextBlock();
@@ -99,7 +99,7 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
     sliderValueText.width = "90%";
     sliderValueText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     sliderValueText.paddingBottom = "10px"
-    layout.addControl(sliderValueText);
+    page1.addControl(sliderValueText);
 
     slider.onValueChangedObservable.add((value) => {
         sliderValueText.text = `${Math.round(value)}°`;
@@ -113,7 +113,7 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
         }
     });
 
-    layout.addControl(createLine());
+    page1.addControl(createLine());
 
     const rotateb = new BABYLON.GUI.TextBlock();
     rotateb.text = "Volg automatisch de wind.";
@@ -121,14 +121,14 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
     rotateb.color = "white";
     rotateb.width = "90%";
     rotateb.height = "60px";
-    layout.addControl(rotateb);
+    page1.addControl(rotateb);
 
     const toggleButton = BABYLON.GUI.Button.CreateSimpleButton("toggleBtn", "Aan");
     toggleButton.width = "90%";
     toggleButton.height = "40px";
     toggleButton.color = "black";
     toggleButton.background = "white"
-    layout.addControl(toggleButton);
+    page1.addControl(toggleButton);
 
     let autoRotate = true;
 

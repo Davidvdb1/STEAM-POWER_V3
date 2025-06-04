@@ -2,20 +2,20 @@ import { createLine } from '../utils/uiElements.js';
 
 /**
  * Creates the location settings UI section
- * @param {BABYLON.GUI.StackPanel} layout - The parent layout panel
+ * @param {BABYLON.GUI.StackPanel} page1 - The parent page1 panel
  * @param {Function} onLocationChange - Callback for when location changes
  */
-export function createLocationSettings(layout, onLocationChange) {
+export function createLocationSettings(page1, onLocationChange) {
     // location title
     const locationTitle = new BABYLON.GUI.TextBlock();
     locationTitle.text = "Locatie";
     locationTitle.fontSize = 22;
     locationTitle.color = "white";
     locationTitle.height = "50px";
-    layout.addControl(locationTitle);
+    page1.addControl(locationTitle);
     
     // line
-    layout.addControl(createLine());
+    page1.addControl(createLine());
 
     // location text
     const locationText = new BABYLON.GUI.TextBlock();
@@ -24,7 +24,7 @@ export function createLocationSettings(layout, onLocationChange) {
     locationText.color = "white";
     locationText.width = "90%";
     locationText.height = "60px";
-    layout.addControl(locationText);
+    page1.addControl(locationText);
 
     // street
     const street = new BABYLON.GUI.InputText();
@@ -36,7 +36,7 @@ export function createLocationSettings(layout, onLocationChange) {
     street.focusedBackground = "white";
     street.text = "Geldenaaksebaan 335";
     street.paddingBottom = "5px"
-    layout.addControl(street);
+    page1.addControl(street);
     
     // city
     const city = new BABYLON.GUI.InputText();
@@ -48,7 +48,7 @@ export function createLocationSettings(layout, onLocationChange) {
     city.focusedBackground = "white";
     city.text = "Leuven";
     city.paddingBottom = "5px"
-    layout.addControl(city);
+    page1.addControl(city);
 
     // postal code
     const postal = new BABYLON.GUI.InputText();
@@ -60,7 +60,7 @@ export function createLocationSettings(layout, onLocationChange) {
     postal.focusedBackground = "white";
     postal.text = "3001";
     postal.paddingBottom = "5px"
-    layout.addControl(postal);
+    page1.addControl(postal);
 
     // "Change" button
     const changeButton = BABYLON.GUI.Button.CreateSimpleButton("changeBtn", "Verplaats");
@@ -69,7 +69,7 @@ export function createLocationSettings(layout, onLocationChange) {
     changeButton.color = "black";             
     changeButton.background = "white"; 
     changeButton.paddingBottom = "20px"    
-    layout.addControl(changeButton);
+    page1.addControl(changeButton);
 
     changeButton.onPointerUpObservable.add(() => {
         if (onLocationChange) {
@@ -77,5 +77,5 @@ export function createLocationSettings(layout, onLocationChange) {
         }
     });
 
-    layout.addControl(createLine());
+    page1.addControl(createLine());
 }

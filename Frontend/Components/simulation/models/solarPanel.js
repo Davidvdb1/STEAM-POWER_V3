@@ -34,6 +34,52 @@ export async function loadSolarPanel(scene, component) {
     });
 }
 
+export async function updateSolarRotation(scene, component, manualDegrees) {
+    if (!component.solarPanel || component.autoRotateSolar) return;
+
+    // Make sure base rotation is stored
+    if (!component.baseSolarRotation) {
+        // Store current rotation as base
+        component.baseSolarRotation = component.solarPanel.rotation.clone();
+    }
+
+    // Convert degrees to radians
+    const radians = BABYLON.Angle.FromDegrees(manualDegrees).radians();
+
+    // Apply manual rotation relative to sun-facing base rotation
+    component.solarPanel.rotation.y = component.baseSolarRotation.y + radians;
+}
+
+export async function updateAutoRotateChangeSolar(scene, component, enabledSolar) {
+    if (!component.solarPanel) return;
+
+    component.autoRotateSolar = enabledSolar;
+
+    if (enabledSolar) {
+        const { azimuth, altitude } = await getSunPosition("Geldenaaksebaan 335", "Leuven", "3001");
+        const target = sunPositionToCartesian(azimuth, altitude, 4);
+        const dir = target.subtract(component.solarPanel.position).normalize();
+
+        const yaw = Math.atan2(dir.x, dir.z) + 1;
+        const pitch = Math.asin(dir.y);
+
+        component.solarPanel.rotation = new BABYLON.Vector3(pitch, yaw, 0);
+
+        // Store as new base rotation
+        component.baseSolarRotation = component.solarPanel.rotation.clone();
+
+        if (component.dragBehaviorSolar) {
+            component.dragBehaviorSolar.enabled = false;
+        }
+    } else {
+        if (component.dragBehaviorSolar) {
+            component.dragBehaviorSolar.enabled = true;
+        }
+    }
+
+    calculateSolarPowerOutput(component.solarPanel);
+}
+
 /**
  * Orients the solar panel to face the sun based on current location and time
  * @param {BABYLON.Mesh} solarPanel - The solar panel mesh
