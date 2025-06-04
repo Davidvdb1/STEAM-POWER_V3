@@ -15,7 +15,7 @@ class Currency {
   static DEFAULT_GREEN_ENERGY = 0;
   static DEFAULT_GREY_ENERGY = 0;
   static STARTING_COINS = 1000;
-  static STARTING_SCORE = 100;
+  static STARTING_SCORE = 0;
 
   constructor(
     {
