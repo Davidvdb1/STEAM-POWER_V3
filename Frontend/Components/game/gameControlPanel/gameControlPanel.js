@@ -24,6 +24,7 @@ import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
 import { animateWrapperAndStats } from "../utils/animationHelpers.js";
 import { showDetail } from "../utils/detailHelper.js";
+import { handleAchievements } from "../utils/achievementHandler.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -32,7 +33,6 @@ import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
-import { handleAchievements } from "../utils/achievementHandler.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
