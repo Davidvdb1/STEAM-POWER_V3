@@ -3,6 +3,7 @@
 import { createLogoScene } from "../components/scenes/logoScene.js";
 import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
+import { createMenuScene } from "../components/scenes/menuScene.js";
 import {
   fetchGameStatistics,
   removeAsset,
@@ -152,13 +153,14 @@ class GameControlPanel extends HTMLElement {
     const LogoScene = createLogoScene(this._startButton);
     const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();
+    const MenuScene = createMenuScene();
 
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: this._shadow.getElementById("game-container"),
       width: 140 * 16,
       height: 70 * 16,
-      scene: [LogoScene, CityScene, OuterCityScene],
+      scene: [LogoScene, CityScene, OuterCityScene, MenuScene],
       backgroundColor: "#9bd5e4",
       pixelArt: true,
       scale: {

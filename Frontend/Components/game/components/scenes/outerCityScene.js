@@ -1,4 +1,4 @@
-import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys, handleMapDragging } from "../../utils/phaserSceneUtils.js";
+import { setCameraBounds, handleZoom, setMovementKeys, handleMovementKeys, handleMapDragging, setupMenuButton } from "../../utils/phaserSceneUtils.js";
 import { setupAssetDragAndDrop, createAssetSprite, reserveTiles, releaseTiles } from "../../utils/assetPlacer.js";
 import { createErrorPopup, createConfirmationPopup } from "../../utils/uiPopups.js";
 import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
@@ -65,6 +65,9 @@ export function createOuterCityScene() {
       setupAssetDragAndDrop(this);
 
       this.loadExistingAssets();
+
+      // Add menu button to top right corner
+      setupMenuButton(this);
     }
 
 

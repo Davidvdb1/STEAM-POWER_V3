@@ -4,6 +4,7 @@ import {
   setMovementKeys,
   handleMovementKeys,
   handleMapDragging,
+  setupMenuButton
 } from "../../utils/phaserSceneUtils.js";
 import { BuildingRegistry } from "../../utils/buildingRegistry.js";
 import { createConfirmationPopup } from "../../utils/uiPopups.js";
@@ -84,6 +85,9 @@ export function createCityScene() {
 
       // Create the checkpoint load popup UI
       createCheckpointLoadPopup(this);
+
+      // Add menu button to top right corner
+      setupMenuButton(this);
     }
 
     update(time, delta) {

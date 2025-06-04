@@ -107,3 +107,98 @@ export function handleMapDragging(scene) {
     scene.isDragging = false;
   });
 }
+
+
+/**
+ * Creates a button with rounded corners and text
+ * 
+ * @function createButton
+ * @param {Phaser.Scene} scene - The scene to add the button to
+ * @param {number} x - The x coordinate (center of button)
+ * @param {number} y - The y coordinate (center of button)
+ * @param {number} width - The width of the button
+ * @param {number} height - The height of the button
+ * @param {number} borderRadius - The corner radius
+ * @param {string} text - The text to display
+ * @param {number} bgColor - The background color (hex)
+ * @param {Function} callback - The function to call when clicked
+ * @returns {void}
+ */
+export function createButton(scene, x, y, width, height, borderRadius, text, bgColor, callback) {
+  // Create a graphics object for the button
+  const buttonGraphics = scene.add.graphics();
+
+  // Set the background color
+  buttonGraphics.fillStyle(bgColor, 1);
+
+  // Draw a rounded rectangle (x, y, width, height, radius)
+  // x and y are for the top-left corner, so we offset from center
+  buttonGraphics.fillRoundedRect(
+    x - (width / 2), 
+    y - (height / 2), 
+    width, 
+    height, 
+    borderRadius
+  );
+
+  // Make the graphics object interactive
+  const hitArea = new Phaser.Geom.Rectangle(0, 0, width, height);
+  buttonGraphics.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains)
+    .on('pointerdown', callback);
+
+  // Center the hit area on the button
+  buttonGraphics.input.hitArea.x = x - (width / 2);
+  buttonGraphics.input.hitArea.y = y - (height / 2);
+
+  // Calculate font size relative to button height
+  const fontSize = Math.max(height * 0.4, 16);
+
+  // Button text
+  scene.add.text(x, y, text, {
+    fontSize: `${fontSize}px`,
+    fontFamily: 'Arial',
+    color: '#fff'
+  }).setOrigin(0.5);
+}
+
+
+/**
+ * Creates a menu button in the top right corner of the scene
+ * 
+ * @function createMenuButton
+ * @param {Phaser.Scene} scene - The scene to add the button to
+ * @param {Function} callback - The function to call when the button is clicked
+ */
+export function createMenuButton(scene, callback) {
+  const container = scene.add.container(scene.sys.game.config.width - 60, 60);
+  
+  // Now we pass scene as the first parameter
+  createButton(
+    scene,            // scene
+    0,                // x
+    0,                // y
+    80,               // width
+    80,               // height
+    15,               // border radius
+    'Menu',           // button text
+    0x008000,         // background color
+    callback          // callback function
+  );
+  
+  // Set the container to a high depth so it's always on top
+  container.setDepth(1100);
+}
+
+
+/**
+ * Sets up a menu button in the top right corner that transitions to the MenuScene
+ * 
+ * @function setupMenuButton
+ * @param {Phaser.Scene} scene - The scene to add the menu button to
+ */
+export function setupMenuButton(scene) {
+  createMenuButton(scene, () => {
+    scene.scene.sleep(scene.scene.key);
+    scene.scene.run('MenuScene', { previousScene: scene.scene.key });
+  });
+}
