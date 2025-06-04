@@ -320,6 +320,51 @@ class GameStatisticsRepository {
     return currency ? Currency.from(currency) : null;
   }
 
+    /**
+     * Increments the green energy value for a group's currency based on the provided green energy amount,
+     * the type of green energy asset, and the energy multiplier of each matching asset owned by the group.
+     *
+     * @async
+     * @param {string|number} groupId - The unique identifier of the group.
+     * @param {number} greenEnergy - The base amount of green energy to increment per asset.
+     * @param {'WIND'|'SOLAR'|'WATER'} type - The type of green energy asset (case-insensitive).
+     * @returns {Promise<Currency>} The updated Currency instance after incrementing green energy.
+     * @throws {Error} If the group statistics, currency, or assets are not found, or if the type is unknown.
+     */
+    async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
+    const gs = await this.findByGroupId(groupId);
+
+    if (!gs || !gs.currency || !gs.assets) {
+      throw new Error("GameStatistics, currency of assets niet gevonden");
+    }
+
+    const typeMap = {
+      WIND: "windmolen",
+      SOLAR: "zonnepaneel",
+      WATER: "waterrad",
+    };
+
+    const assetType = typeMap[type.toUpperCase()];
+    if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
+
+    const matchingAssets = gs.assets.filter(
+      (a) => a.type.toLowerCase() === assetType
+    );
+
+    const totalGain = matchingAssets.reduce((sum, asset) => {
+      return sum + greenEnergy * asset.energy;
+    }, 0);
+
+    const updated = await this.prisma.currency.update({
+      where: { id: gs.currency.id },
+      data: {
+        greenEnergy: { increment: totalGain },
+      },
+    });
+
+    return Currency.from(updated);
+  }
+
   //########################################################################
   //                                 ASSETS
   //########################################################################

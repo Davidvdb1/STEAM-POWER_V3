@@ -222,14 +222,9 @@ class GameControlPanel extends HTMLElement {
       this._game.currencyId = gs.currency.id;
 
       const totalGreenCost = calculateTotalGreenCost(this._game.buildingData);
-      const totalGreenProduction = calculateTotalGreenProduction(
-        gs.assets,
-        /* microbitValue= */ 1
-      );
 
       const { id: currencyId, payload: currencyPayload } = buildUpdatedCurrency(
         gs.currency,
-        totalGreenProduction,
         totalGreenCost
       );
       await updateCurrency(currencyId, currencyPayload, token);
