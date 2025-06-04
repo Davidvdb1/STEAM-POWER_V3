@@ -66,6 +66,31 @@ export async function updateWindmillRotation(scene, component, manualDegrees) {
     component.windmill.rotation.y = radians;
 }
 
+export async function updateAutoRotateChange(scene, component, enabled) {
+    if (!component.windmill) return;
+
+    if (enabled) {
+        try {
+            const degrees = await fetchWindDirection();
+            const adjustedDegrees = (degrees + 180) % 360;
+
+            component.initialWindmillDirection = adjustedDegrees;
+
+            const radians = BABYLON.Angle.FromDegrees(adjustedDegrees).radians();
+
+            // Reset windmill rotation to API direction
+            component.windmill.rotation.y = radians;
+
+            if (component.rotationSlider) {
+                component.rotationSlider.value = 0;
+            }
+        } catch (error) {
+            console.error("Error fetching wind direction:", error);
+        }
+    }
+    // If disabled, nothing to do here (manual mode)
+}
+
 /**
  * Fetches current wind direction from the server
  * @returns {Promise<number>} Wind direction in degrees

@@ -5,7 +5,7 @@ import { createLine } from '../utils/uiElements.js';
  * @param {BABYLON.GUI.StackPanel} layout - The parent layout panel
  * @param {Function} onBladeCountChange - Callback for when blade count changes
  */
-export function createWindmillSettings(layout, onBladeCountChange, onManualRotationChange) {
+export function createWindmillSettings(layout, onBladeCountChange, onManualRotationChange, onAutoRotateChange) {
     // wind title
     const windTitle = new BABYLON.GUI.TextBlock();
     windTitle.text = "Windturbine";
@@ -103,10 +103,43 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
 
     slider.onValueChangedObservable.add((value) => {
         sliderValueText.text = `${Math.round(value)}°`;
+        if (autoRotate) {
+            autoRotate = false;
+            toggleButton.textBlock.text = "Uit";
+            onAutoRotateChange(false);
+        }
         if (onManualRotationChange) {
-            onManualRotationChange(value)
+            onManualRotationChange(value);
         }
     });
 
     layout.addControl(createLine());
+
+    const rotateb = new BABYLON.GUI.TextBlock();
+    rotateb.text = "Volg automatisch de wind.";
+    rotateb.fontSize = 18;
+    rotateb.color = "white";
+    rotateb.width = "90%";
+    rotateb.height = "60px";
+    layout.addControl(rotateb);
+
+    const toggleButton = BABYLON.GUI.Button.CreateSimpleButton("toggleBtn", "Aan");
+    toggleButton.width = "90%";
+    toggleButton.height = "40px";
+    toggleButton.color = "black";
+    toggleButton.background = "white"
+    layout.addControl(toggleButton);
+
+    let autoRotate = true;
+
+    toggleButton.onPointerUpObservable.add(() => {
+        autoRotate = !autoRotate;
+        toggleButton.textBlock.text = autoRotate ? "Aan" : "Uit";
+
+        if (autoRotate) {
+            onAutoRotateChange(true);
+        } else {
+            onAutoRotateChange(false);
+        }
+    });
 }
