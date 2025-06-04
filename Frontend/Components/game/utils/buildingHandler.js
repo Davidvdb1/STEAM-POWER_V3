@@ -114,6 +114,7 @@ export async function handleUpgradeRequest(scene, gameBuildingId) {
 
       scene.game.events.emit("forceStatsUpdate");
 
+      // Refresh the detail panel for this building **after a tick**:
       document.dispatchEvent(
         new CustomEvent("scene:refresh-detail", {
           detail: { type: "building", id: gameBuildingId },
@@ -145,6 +146,7 @@ export async function handleToggleEnergyRequest(scene, gameBuildingId) {
     handleAchievements(response, scene.game.canvas);
     scene.game.events.emit("forceStatsUpdate");
 
+    // Refresh the detail panel for this building **after a tick**:
     document.dispatchEvent(
       new CustomEvent("scene:refresh-detail", {
         detail: { type: "building", id: gameBuildingId },
