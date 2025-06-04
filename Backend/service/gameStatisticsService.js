@@ -139,9 +139,9 @@ class GameStatisticsService {
 
     await gameStatisticsRepository.updateCurrency(gamestats.currency.id, {
       greenEnergy: gamestats.currency.greenEnergy,
-      greyEnergy: gamestats.currency.greyEnergy + totalGreyEnergy, 
+      greyEnergy: gamestats.currency.greyEnergy + totalGreyEnergy,
       coins: gamestats.currency.coins,
-      score: gamestats.currency.score + totalScoreChange, 
+      score: gamestats.currency.score + totalScoreChange,
     });
 
     return await gameStatisticsRepository.findById(gamestats.id, {
@@ -702,6 +702,51 @@ class GameStatisticsService {
     return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
+  }
+
+  /**
+   * Fetches all game‐buildings under a given gameStatisticsId where runsOnGreen is true,
+   * subtracts 1 from the score for each of those buildings, then flips all of them to false.
+   *
+   * @async
+   * @function toggleAllGameBuildingsRunsOnGreenFalse
+   * @memberof module:service/gameStatisticsService.Service_GameBuildings
+   * @param {string} gameStatisticsId
+   * @returns {Promise<GameBuildings[]>} The list of updated GameBuilding objects
+   */
+  async toggleAllGameBuildingsRunsOnGreenFalse(gameStatisticsId) {
+    const gameStatistics = await gameStatisticsRepository.findById(
+      gameStatisticsId
+    );
+    if (!gameStatistics) {
+      throw new Error(`No GameStatistics found for id=${gameStatisticsId}`);
+    }
+
+    const buildingsOnGreen = await gameStatisticsRepository.findGameBuildings({
+      where: {
+        gameStatisticsId: gameStatisticsId,
+        runsOnGreen: true,
+      },
+    });
+
+    if (buildingsOnGreen.length > 0) {
+      const currentCurrency = gameStatistics.currency;
+      const decrementAmount = buildingsOnGreen.length;
+
+      await gameStatisticsRepository.updateCurrency(currentCurrency.id, {
+        greenEnergy: currentCurrency.greenEnergy,
+        greyEnergy: currentCurrency.greyEnergy,
+        coins: currentCurrency.coins,
+        score: currentCurrency.score - decrementAmount,
+      });
+    }
+
+    const updatedBuildings =
+      await gameStatisticsRepository.toggleAllGameBuildingsRunsOnGreenFalse(
+        gameStatisticsId
+      );
+
+    return updatedBuildings;
   }
 
   /**
