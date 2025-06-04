@@ -101,7 +101,10 @@ class CurrencyDisplay extends HTMLElement {
           const newScore = Number(this.scoreEl.textContent);
           if (!isNaN(newScore)) {
             const hue = newScore * 1.2;
-            const color = `hsl(${hue}, 100%, 45%)`;
+            let color = "#00ff00"; // groen
+            if (newScore < 30) color = "#ff0000"; // rood
+            else if (newScore < 60) color = "#ffa500"; // oranje
+            else if (newScore < 80) color = "#ffff00"; // geel
             this.scoreEl.style.color = color;
           }
         }

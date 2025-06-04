@@ -23,7 +23,7 @@ export const ASSETS = {
     width: 12,
     height: 10,
     cost: 20,
-    energy: 30,
+    energy: 250,
   },
   Eik: {
     width: 5,

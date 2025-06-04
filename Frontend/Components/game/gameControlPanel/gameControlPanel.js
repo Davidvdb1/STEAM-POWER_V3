@@ -261,7 +261,7 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
-      const totalGreenCost = calculateTotalGreenCost(this._game.buildingData);
+      const totalGreenCost = calculateTotalGreenCost(this._game.buildingData) / 60;
 
       const { id: currencyId, payload: currencyPayload } = buildUpdatedCurrency(
         gs.currency,
