@@ -1,7 +1,7 @@
 import {
   fetchGameStatistics,
   getCheckpointsByGameStatisticsId,
-} from "../service/gameService.js";
+} from "../../service/gameService.js";
 
 export function createCheckpointLoadPopup(scene) {
   const { width, height } = scene.cameras.main;
@@ -111,7 +111,7 @@ export function createCheckpointLoadPopup(scene) {
 
   scene.showCheckpointList = async (callback) => {
     // Reset state so the popup works correctly on multiple calls
-    dropdownBg.removeAllListeners('pointerdown');
+    dropdownBg.removeAllListeners("pointerdown");
     hideAll();
 
     const raw = sessionStorage.getItem("loggedInUser");

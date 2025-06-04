@@ -11,8 +11,8 @@ import {
 import {
   createConfirmationPopup,
   createErrorPopup,
-} from "../../utils/uiPopups.js";
-import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
+} from "../popups/uiPopups.js";
+import { createCheckpointLoadPopup } from "../popups/checkpointLoadPopup.js";
 
 import {
   initializeBuildingRegistry,

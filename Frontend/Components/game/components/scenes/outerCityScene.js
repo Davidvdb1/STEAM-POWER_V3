@@ -9,14 +9,13 @@ import {
   setupAssetDragAndDrop,
   createAssetSprite,
   reserveTiles,
-  releaseTiles,
   requestDestroyAsset,
 } from "../../utils/assetHandler.js";
 import {
   createErrorPopup,
   createConfirmationPopup,
-} from "../../utils/uiPopups.js";
-import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
+} from "../popups/uiPopups.js";
+import { createCheckpointLoadPopup } from "../popups/checkpointLoadPopup.js";
 
 export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {

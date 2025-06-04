@@ -1,7 +1,7 @@
 // src/utils/buildingHandler.js
 
 import { BuildingRegistry } from "./buildingRegistry.js";
-import { BUILDING_DEFINITIONS } from "./buildingDefinitions.js";
+import { BUILDING_DEFINITIONS } from "./buildingConfig.js";
 import {
   upgradeBuilding,
   toggleGameBuildingRunsOnGreen,

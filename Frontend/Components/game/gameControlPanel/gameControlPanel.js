@@ -13,7 +13,6 @@ import {
   transformBuildingData,
   buildCurrencyDisplayPayload,
   calculateTotalGreenCost,
-  calculateTotalGreenProduction,
   unpackCheckpointPayload,
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";

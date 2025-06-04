@@ -1,5 +1,5 @@
 // import gameStatisticsService from "../../../../../Backend/service/gameStatisticsService.js";
-import { BUILDING_NAME_TRANSLATIONS } from "../../utils/buildingDefinitions.js";
+import { BUILDING_NAME_TRANSLATIONS } from "../../utils/buildingConfig.js";
 const cssResponse = await fetch(
   "./Components/game/components/details/style.css"
 );
