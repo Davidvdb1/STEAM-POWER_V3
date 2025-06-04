@@ -35,6 +35,10 @@ describe("GameStatisticsService", () => {
         );
 
         gameStatisticsRepository.create.mockResolvedValue(mockCreatedGS);
+        // Mock the additional calls made by the new create function
+        gameStatisticsRepository.addAsset.mockResolvedValue();
+        gameStatisticsRepository.updateCurrency.mockResolvedValue();
+        gameStatisticsRepository.findById.mockResolvedValue(mockCreatedGS);
 
         const result = await gameStatisticsService.create({
           groupId: "group-1",
@@ -44,6 +48,8 @@ describe("GameStatisticsService", () => {
           groupId: "group-1",
           currency: expect.any(Currency),
         });
+        // Expect addAsset to be called 7 times (for 7 Kerncentrales)
+        expect(gameStatisticsRepository.addAsset).toHaveBeenCalledTimes(7);
         expect(result).toBe(mockCreatedGS);
       });
 
@@ -63,6 +69,10 @@ describe("GameStatisticsService", () => {
         );
 
         gameStatisticsRepository.create.mockResolvedValue(mockCreatedGS);
+        // Mock the additional calls made by the new create function
+        gameStatisticsRepository.addAsset.mockResolvedValue();
+        gameStatisticsRepository.updateCurrency.mockResolvedValue();
+        gameStatisticsRepository.findById.mockResolvedValue(mockCreatedGS);
 
         const result = await gameStatisticsService.create({
           groupId: "group-1",
@@ -298,7 +308,7 @@ describe("GameStatisticsService", () => {
             greenEnergy: 120, // 100 + 20 (asset energy)
             greyEnergy: 50,
             coins: 400, // 500 - 100 (build cost)
-            score: 1000,
+            score: 1001, // 1000 + 1 (Windmolen score from scoreCost.ActiveGreenSource)
           }
         );
         expect(result.asset).toBe(mockAddedAsset);
@@ -347,7 +357,7 @@ describe("GameStatisticsService", () => {
             greenEnergy: 100, // unchanged
             greyEnergy: 250, // 50 + 200 (nuclear energy)
             coins: 500, // 1500 - 1000 (build cost)
-            score: 1000,
+            score: 998, // 1000 + (-2) (Kerncentrale penalty from scoreCost.ActiveGreySource)
           }
         );
       });
@@ -767,9 +777,9 @@ describe("GameStatisticsService", () => {
     });
 
     describe("addAchievementToGameStatistics", () => {
-      it("should add achievement and update score", async () => {
+      it("should add achievement without updating currency", async () => {
         const mockAchievement = new Achievement(
-          { id: "ach-1", title: "Test Achievement" },
+          { id: "ach-1", title: "Test Achievement" }, // Remove reward property
           false
         );
         const mockGameStatistics = new GameStatistics(
@@ -786,9 +796,9 @@ describe("GameStatisticsService", () => {
         gameStatisticsRepository.getGameStatisticsAchievements.mockResolvedValue(
           []
         );
-        gameStatisticsRepository.addAchievementToGameStatistics.mockResolvedValue();
-        gameStatisticsRepository.findById.mockResolvedValue(mockGameStatistics);
-        gameStatisticsRepository.updateCurrency.mockResolvedValue();
+        gameStatisticsRepository.addAchievementToGameStatistics.mockResolvedValue(
+          mockAchievement
+        );
 
         const result =
           await gameStatisticsService.addAchievementToGameStatistics(
@@ -799,12 +809,10 @@ describe("GameStatisticsService", () => {
         expect(
           gameStatisticsRepository.addAchievementToGameStatistics
         ).toHaveBeenCalledWith("gs-1", mockAchievement);
-        expect(gameStatisticsRepository.updateCurrency).toHaveBeenCalledWith(
-          "cur-1",
-          expect.objectContaining({
-            score: 101, // 100 + 1
-          })
-        );
+
+        // Since achievements no longer give rewards, currency should not be updated
+        expect(gameStatisticsRepository.updateCurrency).not.toHaveBeenCalled();
+        expect(gameStatisticsRepository.findById).not.toHaveBeenCalled();
         expect(result).toBe(mockAchievement);
       });
 
