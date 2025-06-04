@@ -229,6 +229,7 @@ class GameControlPanel extends HTMLElement {
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
+      this._game.currency = gs.currency;
 
       const payload = buildCurrencyDisplayPayload({
         buildings: this._game.buildingData,

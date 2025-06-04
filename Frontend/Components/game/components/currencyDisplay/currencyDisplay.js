@@ -139,6 +139,11 @@ class CurrencyDisplay extends HTMLElement {
     }
     if (coins != null) {
       this.coinsEl.textContent = coins;
+      if (Number(coins) < 0) {
+        this.coinsEl.style.color = "#ff0000";
+      } else {
+        this.coinsEl.style.color = "";
+      }
     }
     if (score != null) {
       this.scoreEl.textContent = score;

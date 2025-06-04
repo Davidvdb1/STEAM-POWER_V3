@@ -94,6 +94,15 @@ export async function handleUpgradeRequest(scene, gameBuildingId) {
   const currentLevel = buildingObj.level.level;
   const nextLevel = currentLevel + 1;
   const upgCost = buildingObj.level.upgradeCost;
+
+  const currentCoins = scene.sys.game.currency?.coins ?? 0;
+  if (currentCoins - upgCost < -100) {
+    scene.showError(
+      `Je hebt niet genoeg coins om naar niveau ${nextLevel} te gaan.`
+    );
+    return;
+  }
+
   const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${upgCost} coins?`;
 
   scene.showConfirmation(msg, async (confirmed) => {
@@ -117,10 +126,10 @@ export async function handleUpgradeRequest(scene, gameBuildingId) {
           resolve();
           scene.game.events.off("statsUpdateComplete", statsUpdateListener);
         };
-        
+
         // Add the listener before emitting the event
         scene.game.events.on("statsUpdateComplete", statsUpdateListener);
-        
+
         // Trigger the stats update
         scene.game.events.emit("forceStatsUpdate");
       });
