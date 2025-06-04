@@ -18,7 +18,7 @@ import {
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
-import { animateWrapperAndStats } from "../utils/animationHelpers.js";
+import { animateWrapperAndStats } from "../utils/animationHandler.js";
 import { showDetail } from "../utils/detailHelper.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
