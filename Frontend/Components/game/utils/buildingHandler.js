@@ -108,13 +108,24 @@ export async function handleUpgradeRequest(scene, gameBuildingId) {
 
       Object.assign(buildingObj, response.gameBuilding);
 
-      setBuildingColor(scene, buildingObj);
+      handleAchievements(response, window.gameContainer);
 
-      handleAchievements(response, scene.game.canvas);
+      // Create a promise that resolves when stats update is complete
+      await new Promise((resolve) => {
+        // Create a one-time listener for stats update completion
+        const statsUpdateListener = () => {
+          resolve();
+          scene.game.events.off("statsUpdateComplete", statsUpdateListener);
+        };
+        
+        // Add the listener before emitting the event
+        scene.game.events.on("statsUpdateComplete", statsUpdateListener);
+        
+        // Trigger the stats update
+        scene.game.events.emit("forceStatsUpdate");
+      });
 
-      scene.game.events.emit("forceStatsUpdate");
-
-      // Refresh the detail panel for this building
+      // Now that stats are updated, refresh the detail panel
       document.dispatchEvent(
         new CustomEvent("scene:refresh-detail", {
           detail: { type: "building", id: gameBuildingId },

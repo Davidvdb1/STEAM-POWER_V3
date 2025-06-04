@@ -42,7 +42,7 @@ template.innerHTML = /*html*/ `
     <div id="inner-container">
       <shop-sidebar></shop-sidebar>
 
-      <div class="test">
+      <div class="test" style="z-index: 1000;">
         <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
         <div id="inner-text">Ga naar binnenstad</div>
       </div>
@@ -241,8 +241,13 @@ class GameControlPanel extends HTMLElement {
       });
       this._statsContainer.data = payload;
       this._statsContainer.classList.remove("hidden");
+
+      // Emit event when statistics update is complete
+      this._game.events.emit("statsUpdateComplete");
     } catch (e) {
       console.error("Error fetching stats:", e);
+      // Still emit the event to prevent hanging
+      this._game.events.emit("statsUpdateComplete");
     }
   }
 
