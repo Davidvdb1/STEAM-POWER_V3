@@ -42,6 +42,46 @@ const scoreCost = {
   },
 };
 
+const beginAssetCoordinates = [
+  {
+    xLocation: 65,
+    yLocation: 42,
+  },
+  {
+    xLocation: 82,
+    yLocation: 32,
+  },
+  {
+    xLocation: 128,
+    yLocation: 42,
+  },
+  {
+    xLocation: 46,
+    yLocation: 24,
+  },
+  {
+    xLocation: 123,
+    yLocation: 59,
+  },
+  {
+    xLocation: 61,
+    yLocation: 59,
+  },
+  {
+    xLocation: 91,
+    yLocation: 59,
+  },
+];
+
+const defaultKernCentrale = {
+  type: "Kerncentrale",
+  energy: 250,
+  buildCost: 20,
+  destroyCost: 20,
+  xSize: 12,
+  ySize: 10,
+};
+
 class GameStatisticsService {
   //########################################################################
   //                            GAME STATISTICS
@@ -75,7 +115,42 @@ class GameStatisticsService {
       coins: coins ?? Currency.STARTING_COINS,
       score: score ?? Currency.STARTING_SCORE,
     });
-    return await gameStatisticsRepository.create({ groupId, currency });
+    const gamestats = await gameStatisticsRepository.create({
+      groupId,
+      currency,
+    });
+
+    for (let i = 0; i < beginAssetCoordinates.length && i < 7; i++) {
+      const assetData = {
+        ...defaultKernCentrale,
+        xLocation: beginAssetCoordinates[i].xLocation,
+        yLocation: beginAssetCoordinates[i].yLocation,
+        gameStatisticsId: gamestats.id,
+      };
+
+      const assetInstance = new Asset(assetData);
+
+      await gameStatisticsRepository.addAsset(gamestats.id, assetInstance);
+    }
+
+    const totalKerncentrales = 7;
+    const totalScoreChange = scoreCost.ActiveGreySource * totalKerncentrales;
+    const totalGreyEnergy = defaultKernCentrale.energy * totalKerncentrales;
+
+    await gameStatisticsRepository.updateCurrency(gamestats.currency.id, {
+      greenEnergy: gamestats.currency.greenEnergy,
+      greyEnergy: gamestats.currency.greyEnergy + totalGreyEnergy, 
+      coins: gamestats.currency.coins,
+      score: gamestats.currency.score + totalScoreChange, 
+    });
+
+    return await gameStatisticsRepository.findById(gamestats.id, {
+      includeCurrency: true,
+      includeGameBuildings: true,
+      includeAssets: true,
+      includeCheckpoints: false,
+      includeGroup: false,
+    });
   }
 
   // USED FOR MANUAL TESTING
@@ -320,7 +395,7 @@ class GameStatisticsService {
    * @param {string} assetId - The id of the asset to remove.
    * @returns {Promise<{asset: Asset, newlyEarnedAchievements: Achievement[]}>} The removed Asset object and any newly earned achievements.
    */
-  
+
   async removeAsset(assetId) {
     const removedAsset = await gameStatisticsRepository.removeAsset(assetId);
 
