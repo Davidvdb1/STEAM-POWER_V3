@@ -73,13 +73,10 @@ export async function updateAutoRotateChange(scene, component, enabled) {
         try {
             const degrees = await fetchWindDirection();
             const adjustedDegrees = (degrees + 180) % 360;
-
             component.initialWindmillDirection = adjustedDegrees;
 
-            const radians = BABYLON.Angle.FromDegrees(adjustedDegrees).radians();
-
-            // Reset windmill rotation to API direction
-            component.windmill.rotation.y = radians;
+            // Animate rotation instead of snapping
+            animateRotationY(component.windmill, BABYLON.Angle.FromDegrees(adjustedDegrees).radians(), 30, 20);
 
             if (component.rotationSlider) {
                 component.rotationSlider.value = 0;
@@ -88,7 +85,36 @@ export async function updateAutoRotateChange(scene, component, enabled) {
             console.error("Error fetching wind direction:", error);
         }
     }
-    // If disabled, nothing to do here (manual mode)
+    // If disabled, no action needed (manual mode)
+}
+
+/**
+ * Animates rotation on the Y-axis from current value to target radians
+ * @param {BABYLON.Mesh} mesh 
+ * @param {number} targetRadians 
+ * @param {number} frameRate - Frames per second
+ * @param {number} totalFrames - Duration of animation in frames
+ */
+function animateRotationY(mesh, targetRadians, frameRate = 30, totalFrames = 15) {
+    const animation = new BABYLON.Animation(
+        "rotationYAnimation",
+        "rotation.y",
+        frameRate,
+        BABYLON.Animation.ANIMATIONTYPE_FLOAT,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+
+    const keys = [
+        { frame: 0, value: mesh.rotation.y },
+        { frame: totalFrames, value: targetRadians }
+    ];
+
+    animation.setKeys(keys);
+
+    mesh.animations = [];
+    mesh.animations.push(animation);
+
+    mesh.getScene().beginAnimation(mesh, 0, totalFrames, false);
 }
 
 /**

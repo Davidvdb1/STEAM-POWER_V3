@@ -4,6 +4,7 @@ import { createSolarPanelSettings } from './solarPanelSettings.js';
 import { createLine } from '../utils/uiElements.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
 import { sunPositionToCartesian } from '../utils/sunCalculator.js';
+import { createWaterWheelSettings } from './waterWheelSettings.js';
 
 /**
  * Creates the main settings panel UI
@@ -12,7 +13,7 @@ import { sunPositionToCartesian } from '../utils/sunCalculator.js';
  * @param {Function} onLocationChange - Callback for when location changes
  * @returns {BABYLON.GUI.AdvancedDynamicTexture} The GUI texture
  */
-export function createSettingsPanel(onBladeCountChange, onLocationChange, onManualRotationChange, onAutoRotateChange, onManualRotationChangeSolar, onAutoRotateChangeSolar) {
+export function createSettingsPanel(onBladeCountChange, onLocationChange, onManualRotationChange, onAutoRotateChange, onManualRotationChangeSolar, onAutoRotateChangeSolar, position) {
     // creates a full-screen 2D GUI layer over the whole 3D scene
     const GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
@@ -110,6 +111,8 @@ export function createSettingsPanel(onBladeCountChange, onLocationChange, onManu
     createWindmillSettings(page1, onBladeCountChange, onManualRotationChange, onAutoRotateChange)
 
     createSolarPanelSettings(page2, onManualRotationChangeSolar, onAutoRotateChangeSolar)
+
+    createWaterWheelSettings(page2, position)
 
     return GUI;
 }

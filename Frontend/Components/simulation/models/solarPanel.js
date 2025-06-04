@@ -63,10 +63,8 @@ export async function updateAutoRotateChangeSolar(scene, component, enabledSolar
         const yaw = Math.atan2(dir.x, dir.z) + 1;
         const pitch = Math.asin(dir.y);
 
-        component.solarPanel.rotation = new BABYLON.Vector3(pitch, yaw, 0);
-
-        // Store as new base rotation
-        component.baseSolarRotation = component.solarPanel.rotation.clone();
+        // Animate rotation instead of snapping
+        animateRotation(component.solarPanel, new BABYLON.Vector3(pitch, yaw, 0), 30, 20);
 
         if (component.dragBehaviorSolar) {
             component.dragBehaviorSolar.enabled = false;
@@ -78,6 +76,37 @@ export async function updateAutoRotateChangeSolar(scene, component, enabledSolar
     }
 
     calculateSolarPowerOutput(component.solarPanel);
+}
+
+/**
+ * Animates the rotation of a mesh from current rotation to target rotation
+ * @param {BABYLON.Mesh} mesh 
+ * @param {BABYLON.Vector3} targetRotation 
+ * @param {number} frameRate - Frames per second
+ * @param {number} totalFrames - Duration of animation in frames
+ */
+function animateRotation(mesh, targetRotation, frameRate = 30, totalFrames = 15) {
+    // Create animation
+    const animation = new BABYLON.Animation(
+        "rotationAnimation",
+        "rotation",
+        frameRate,
+        BABYLON.Animation.ANIMATIONTYPE_VECTOR3,
+        BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT
+    );
+
+    // Animation keys from current to target rotation
+    const keys = [
+        { frame: 0, value: mesh.rotation.clone() },
+        { frame: totalFrames, value: targetRotation }
+    ];
+    animation.setKeys(keys);
+
+    // Run animation
+    mesh.animations = [];
+    mesh.animations.push(animation);
+
+    mesh.getScene().beginAnimation(mesh, 0, totalFrames, false);
 }
 
 /**

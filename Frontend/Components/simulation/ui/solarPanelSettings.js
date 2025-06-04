@@ -73,9 +73,10 @@ export function createSolarPanelSettings(page2, onManualRotationChangeSolar, onA
 
     const toggleButton = BABYLON.GUI.Button.CreateSimpleButton("toggleBtn", "Aan");
     toggleButton.width = "90%";
-    toggleButton.height = "40px";
+    toggleButton.height = "60px";
     toggleButton.color = "black";
     toggleButton.background = "white"
+    toggleButton.paddingBottom = "20px"
     page2.addControl(toggleButton);
 
     let autoRotate = true;
@@ -90,4 +91,6 @@ export function createSolarPanelSettings(page2, onManualRotationChangeSolar, onA
             onAutoRotateChangeSolar(false);
         }
     });
+
+    page2.addControl(createLine());
 }
