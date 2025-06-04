@@ -42,7 +42,7 @@ template.innerHTML = /*html*/ `
     <div id="inner-container">
       <shop-sidebar></shop-sidebar>
 
-      <div class="test">
+      <div class="test" style="z-index: 1000;">
         <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
         <div id="inner-text">Ga naar binnenstad</div>
       </div>
