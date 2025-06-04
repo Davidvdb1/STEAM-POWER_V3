@@ -885,7 +885,6 @@ class GameStatisticsRepository {
         currency: {
           update: {
             coins: { increment: achievement.reward },
-            score: { increment: achievement.score },
           },
         },
         achievements: {

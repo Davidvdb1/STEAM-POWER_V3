@@ -7,21 +7,19 @@
  * @param {string} params.title - The title of the achievement.
  * @param {string} params.description - A description of the achievement.
  * @param {number} params.reward - The reward value (must be ≥ 0).
- * @param {number} params.score - The score associated with the achievement.
  * @param {boolean} [validate=true] - Whether to validate the input parameters.
  *
  * @throws {Error} If validation fails for any property.
  */
 class Achievement {
   constructor(
-    { id = undefined, title, description, reward, score },
+    { id = undefined, title, description, reward },
     validate = true
   ) {
     this.id = id;
     this.title = title;
     this.description = description;
     this.reward = reward;
-    this.score = score;
     if (validate) this.validate();
   }
 
@@ -42,9 +40,6 @@ class Achievement {
     if (typeof this.reward !== "number" || this.reward < 0) {
       throw new Error("Invalid reward");
     }
-    if (typeof this.score !== "number") {
-      throw new Error("Invalid score");
-    }
   }
 
   /**
@@ -56,7 +51,6 @@ class Achievement {
    * @param {string} prismaAchievement.title - The title.
    * @param {string} prismaAchievement.description - The description.
    * @param {number} prismaAchievement.reward - The reward value.
-   * @param {number} prismaAchievement.score - The score value.
    * @returns {Achievement} A new `Achievement` instance.
    */
   static from(prismaAchievement) {
@@ -65,7 +59,6 @@ class Achievement {
       title: prismaAchievement.title,
       description: prismaAchievement.description,
       reward: prismaAchievement.reward,
-      score: prismaAchievement.score,
     });
   }
 }
