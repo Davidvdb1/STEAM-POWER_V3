@@ -6,9 +6,17 @@ import {
   handleMapDragging,
 } from "../../utils/phaserSceneUtils.js";
 import { BuildingRegistry } from "../../utils/buildingRegistry.js";
-import { createConfirmationPopup } from "../../utils/uiPopups.js";
+import {
+  createConfirmationPopup,
+  createErrorPopup,
+} from "../../utils/uiPopups.js";
 import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
 import { BUILDING_DEFINITIONS } from "../../utils/buildingDefinitions.js";
+import { handleAchievements } from "../../utils/achievementHandler.js";
+import {
+  upgradeBuilding,
+  toggleGameBuildingRunsOnGreen,
+} from "../../service/gameService.js";
 
 export function createCityScene() {
   return class CityScene extends Phaser.Scene {
@@ -82,8 +90,28 @@ export function createCityScene() {
       // Create the confirmation dialog UI for upgrading a building but set it to hidden initially
       createConfirmationPopup(this);
 
+      createErrorPopup(this);
+
       // Create the checkpoint load popup UI
       createCheckpointLoadPopup(this);
+
+      document.addEventListener(
+        "scene:upgrade-building",
+        (e) => {
+          const GameBuildingId = e.detail.GameBuildingId;
+          this._handleUpgradeRequest(GameBuildingId);
+        },
+        false
+      );
+
+      document.addEventListener(
+        "scene:toggle-building-energy",
+        (e) => {
+          const GameBuildingId = e.detail.GameBuildingId;
+          this._handleToggleEnergyRequest(GameBuildingId);
+        },
+        false
+      );
     }
 
     update(time, delta) {
@@ -125,17 +153,14 @@ export function createCityScene() {
         buildingName,
         tileSelection,
       ] of this.buildingRegistry.buildings.entries()) {
-        // Find bounding box for each building
         const tileW = this.map.tileWidth;
         const tileH = this.map.tileHeight;
 
-        // For each building, calculate its overall bounds
         let minX = Infinity,
           minY = Infinity;
         let maxX = -Infinity,
           maxY = -Infinity;
 
-        // Process all layers of this building
         for (const [layerName, data] of tileSelection.originalTiles.entries()) {
           data.tiles.forEach((tile) => {
             minX = Math.min(minX, tile.x);
@@ -145,7 +170,6 @@ export function createCityScene() {
           });
         }
 
-        // Create a single interactive rectangle that covers the entire building
         if (minX !== Infinity) {
           const rect = this.add
             .rectangle(
@@ -154,15 +178,13 @@ export function createCityScene() {
               (maxX - minX + 1) * tileW,
               (maxY - minY + 1) * tileH,
               0x0000ff,
-              0.0 // Transparent
+              0.0
             )
             .setOrigin(0, 0)
             .setInteractive({ useHandCursor: true })
-            // .setStrokeStyle(2, 0x0000ff, 0.5) // Add a green outline with 50% opacity
             .on("pointerdown", () => {
               this.isDragging = false;
 
-              // Find the building data by name
               const buildingData = this.sys.game.buildingData?.find(
                 (b) =>
                   b.name === buildingName ||
@@ -170,11 +192,9 @@ export function createCityScene() {
               );
 
               if (buildingData) {
-                // Emit the building ID instead of name
                 this.game.events.emit("buildingClicked", buildingData.id);
               } else {
                 console.warn(`No building data found for ${buildingName}`);
-                // Fallback to the original behavior
                 this.game.events.emit("buildingClicked", buildingName);
               }
             });
@@ -197,6 +217,77 @@ export function createCityScene() {
         tileSel.removeGrayscale();
       } else {
         tileSel.applyGrayscale(1);
+      }
+    }
+
+    async _handleUpgradeRequest(GameBuildingId) {
+      const building = this.sys.game.buildingData.find(
+        (b) => b.id === GameBuildingId
+      );
+      if (!building) return;
+
+      const currentLevel = building.level.level;
+      const nextLevel = currentLevel + 1;
+      const cost = building.level.upgradeCost;
+      const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${cost} coins?`;
+
+      // ← Dispatch & re‐render must happen inside this callback
+      this.showConfirmation(msg, async (confirmed) => {
+        if (!confirmed) return;
+
+        try {
+          const response = await upgradeBuilding(
+            GameBuildingId,
+            { nextLevel: building.level.level + 1 },
+            this.sys.game.token
+          );
+          Object.assign(building, response.gameBuilding);
+
+          this.setBuildingColor(building);
+          handleAchievements(response, this.game.canvas);
+          this.game.events.emit("forceStatsUpdate");
+
+          // ← Refresh the detail‐panel for this exact building:
+          document.dispatchEvent(
+            new CustomEvent("scene:refresh-detail", {
+              detail: { type: "building", id: GameBuildingId },
+              bubbles: true,
+              composed: true,
+            })
+          );
+        } catch (err) {
+          console.error("Error upgrading building in scene:", err);
+          this.showError("Kon gebouw niet upgraden: " + err.message);
+        }
+      });
+    }
+
+    async _handleToggleEnergyRequest(GameBuildingId) {
+      const building = this.sys.game.buildingData.find(
+        (b) => b.id === GameBuildingId
+      );
+      if (!building) return;
+      try {
+        const response = await toggleGameBuildingRunsOnGreen(
+          GameBuildingId,
+          this.sys.game.token
+        );
+        Object.assign(building, response);
+
+        this.setBuildingColor(building);
+        handleAchievements(response, this.game.canvas);
+        this.game.events.emit("forceStatsUpdate");
+
+        document.dispatchEvent(
+          new CustomEvent("scene:refresh-detail", {
+            detail: { type: "building", id: GameBuildingId },
+            bubbles: true,
+            composed: true,
+          })
+        );
+      } catch (err) {
+        console.error("Error toggling building energy in scene:", err);
+        this.showError("Kon gebouw niet updaten: " + err.message);
       }
     }
   };

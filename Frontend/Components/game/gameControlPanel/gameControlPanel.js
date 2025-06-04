@@ -6,8 +6,6 @@ import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
 import {
   fetchGameStatistics,
   updateCurrency,
-  upgradeBuilding,
-  toggleGameBuildingRunsOnGreen,
   recordCheckpoint,
   refactorGameStatistics,
 } from "../service/gameService.js";
@@ -22,7 +20,6 @@ import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
 import { animateWrapperAndStats } from "../utils/animationHelpers.js";
 import { showDetail } from "../utils/detailHelper.js";
-import { handleAchievements } from "../utils/achievementHandler.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -141,6 +138,21 @@ class GameControlPanel extends HTMLElement {
       this._detailContainer.classList.add("hidden");
       this._detailContainer.innerHTML = "";
     });
+
+    document.addEventListener(
+      "scene:refresh-detail",
+      (e) => {
+        const { type, id } = e.detail;
+        showDetail(
+          this._detailContainer,
+          this._game.buildingData,
+          this._game.assetData,
+          type,
+          id
+        );
+      },
+      false
+    );
 
     const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
     if (bluetooth) {
@@ -330,89 +342,6 @@ class GameControlPanel extends HTMLElement {
       offsetX,
       onComplete
     );
-  }
-
-  _confirmUpgradeBuilding(GameBuildingId) {
-    const building = this._game.buildingData.find(
-      (b) => b.id === GameBuildingId
-    );
-    if (!building) return;
-
-    const currentLevel = building.level.level;
-    const nextLevel = currentLevel + 1;
-    const cost = building.level.upgradeCost;
-    const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${cost} coins?`;
-
-    const scene = this._game.scene.getScene("CityScene");
-    scene.showConfirmation(msg, (confirmed) => {
-      if (confirmed) {
-        this._performUpgradeBuilding(GameBuildingId);
-      }
-    });
-  }
-
-  async _performUpgradeBuilding(GameBuildingId) {
-    try {
-      const building = this._game.buildingData.find(
-        (b) => b.id === GameBuildingId
-      );
-      if (!building) throw new Error("Building not found");
-
-      const response = await upgradeBuilding(
-        GameBuildingId,
-        { nextLevel: building.level.level + 1 },
-        this._game.token
-      );
-      Object.assign(building, response.gameBuilding);
-
-      const cityScene = this._game.scene.getScene("CityScene");
-      if (cityScene && cityScene.setBuildingColor) {
-        cityScene.setBuildingColor(building);
-      }
-      handleAchievements(response, this._gameContainer);
-      this._updateStatistics();
-
-      this._detailContainer.querySelector("building-detail").data = building;
-    } catch (err) {
-      throw new Error(`Error upgrading building: ${err.message}`);
-    }
-  }
-
-  _confirmToggleBuildingEnergy(GameBuildingId) {
-    const building = this._game.buildingData.find(
-      (b) => b.id === GameBuildingId
-    );
-    if (!building) return;
-
-    this._performToggleBuildingEnergy(GameBuildingId);
-  }
-
-  async _performToggleBuildingEnergy(GameBuildingId) {
-    try {
-      const building = this._game.buildingData.find(
-        (b) => b.id === GameBuildingId
-      );
-      if (!building) throw new Error("Building not found");
-
-      const response = await toggleGameBuildingRunsOnGreen(
-        GameBuildingId,
-        this._game.token
-      );
-
-      Object.assign(building, response);
-
-      const cityScene = this._game.scene.getScene("CityScene");
-      if (cityScene && typeof cityScene.setBuildingColor === "function") {
-        cityScene.setBuildingColor(building);
-      }
-
-      handleAchievements(response, this._gameContainer);
-      this._updateStatistics();
-
-      this._detailContainer.querySelector("building-detail").data = building;
-    } catch (err) {
-      throw new Error(`Error toggling building energy: ${err.message}`);
-    }
   }
 
   _onSaveCheckpoint() {
