@@ -104,7 +104,7 @@ export function createWindmillSettings(layout, onBladeCountChange, onManualRotat
     slider.onValueChangedObservable.add((value) => {
         sliderValueText.text = `${Math.round(value)}°`;
         if (onManualRotationChange) {
-            onManualRotationChange(value);
+            onManualRotationChange(value)
         }
     });
 

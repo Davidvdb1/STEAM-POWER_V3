@@ -22,6 +22,8 @@ export async function loadWindmill(scene, component, bladeCount = 3) {
 
                 try {
                     const degrees = await fetchWindDirection();
+                    const initialDegrees = (degrees + 180) % 360;
+                    component.initialWindmillDirection = initialDegrees;
                     const radians = BABYLON.Angle.FromDegrees(degrees + 180).radians();
                     component.windmill.rotation = new BABYLON.Vector3(0, radians, 0);
                 } catch (error) {
@@ -49,6 +51,19 @@ export async function loadWindmill(scene, component, bladeCount = 3) {
  */
 export async function updateWindmillBlades(scene, component, bladeCount) {
     await loadWindmill(scene, component, bladeCount);
+}
+
+export async function updateWindmillRotation(scene, component, manualDegrees) {
+    if (!component.windmill || component.initialWindmillDirection === undefined) return;
+
+    // Calculate total rotation degrees
+    const totalDegrees = (component.initialWindmillDirection + manualDegrees) % 360;
+
+    // Convert to radians for Babylon
+    const radians = BABYLON.Angle.FromDegrees(totalDegrees).radians();
+
+    // Update the windmill rotation
+    component.windmill.rotation.y = radians;
 }
 
 /**

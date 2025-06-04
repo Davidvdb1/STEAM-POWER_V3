@@ -1,6 +1,7 @@
 import { createSettingsPanel } from '../ui/settingsPanel.js';
 import { loadModels, updateSunAndSolarPanel } from '../models/modelLoader.js';
 import { updateWindmillBlades } from '../models/windmill.js';
+import { updateWindmillRotation } from '../models/windmill.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
 
 //#region TEMPLATE
@@ -163,10 +164,9 @@ export class SimulationComponent extends HTMLElement {
 
         // Create settings UI
         createSettingsPanel(
-            this.scene,
-            this,
             (bladeCount) => this._handleBladeCountChange(bladeCount),
-            (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal)
+            (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal),
+            (degrees) => this._handleWindmillRotation(degrees)
         );
 
         // Load all models
@@ -213,6 +213,10 @@ export class SimulationComponent extends HTMLElement {
   
     async _handleBladeCountChange(bladeCount) {
         await updateWindmillBlades(this.scene, this, bladeCount);
+    }
+
+    async _handleWindmillRotation(degrees) {
+        await updateWindmillRotation(this.scene, this, degrees)
     }
 }
 //#endregion CLASS

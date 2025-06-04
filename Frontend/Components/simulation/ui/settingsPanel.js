@@ -11,7 +11,7 @@ import { sunPositionToCartesian } from '../utils/sunCalculator.js';
  * @param {Function} onLocationChange - Callback for when location changes
  * @returns {BABYLON.GUI.AdvancedDynamicTexture} The GUI texture
  */
-export function createSettingsPanel(scene, component, onBladeCountChange, onLocationChange) {
+export function createSettingsPanel(onBladeCountChange, onLocationChange, onManualRotationChange) {
     // creates a full-screen 2D GUI layer over the whole 3D scene
     const GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
@@ -43,11 +43,7 @@ export function createSettingsPanel(scene, component, onBladeCountChange, onLoca
     createLocationSettings(layout, onLocationChange);
     
     // Add windmill settings section
-    createWindmillSettings(layout, onBladeCountChange, (degrees) => {
-        if (component.windmill) {
-            component.windmill.rotation.y = BABYLON.Angle.FromDegrees(degrees).radians();
-        }
-    });
+    createWindmillSettings(layout, onBladeCountChange, onManualRotationChange)
 
     return GUI;
 }
