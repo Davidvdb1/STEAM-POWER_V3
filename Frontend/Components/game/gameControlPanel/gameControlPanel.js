@@ -23,6 +23,7 @@ import {
 import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
 import { animateWrapperAndStats } from "../utils/animationHelpers.js";
+import { showDetail } from "../utils/detailHelper.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -170,9 +171,24 @@ class GameControlPanel extends HTMLElement {
     window.phaserGame = this._game;
     window.gameContainer = this._gameContainer;
     this._game.events.on("buildingClicked", (id) =>
-      this._showBuildingDetail(id)
+      showDetail(
+        this._detailContainer,
+        this._game.buildingData,
+        this._game.assetData,
+        "building",
+        id
+      )
     );
-    this._game.events.on("assetClicked", (id) => this._showAssetDetail(id));
+
+    this._game.events.on("assetClicked", (id) =>
+      showDetail(
+        this._detailContainer,
+        this._game.buildingData,
+        this._game.assetData,
+        "asset",
+        id
+      )
+    );
   }
 
   async _updateStatistics() {
@@ -302,23 +318,6 @@ class GameControlPanel extends HTMLElement {
       offsetX,
       onComplete
     );
-  }
-  _showBuildingDetail(id) {
-    this._detailContainer.innerHTML = "";
-    const detail = document.createElement("building-detail");
-    const building = this._game.buildingData.find((b) => b.id === id);
-    if (building) detail.data = building;
-    this._detailContainer.appendChild(detail);
-    this._detailContainer.classList.remove("hidden");
-  }
-
-  _showAssetDetail(id) {
-    this._detailContainer.innerHTML = "";
-    const detail = document.createElement("asset-detail");
-    const asset = this._game.assetData.find((a) => a.id === id);
-    if (asset) detail.data = asset;
-    this._detailContainer.appendChild(detail);
-    this._detailContainer.classList.remove("hidden");
   }
 
   _confirmDestroyAsset(assetId) {
@@ -534,10 +533,25 @@ class GameControlPanel extends HTMLElement {
       this._updateStatistics();
 
       this._game.events.off("assetClicked");
-      this._game.events.on("assetClicked", (id) => this._showAssetDetail(id));
+      this._game.events.on("assetClicked", (id) =>
+        showDetail(
+          this._detailContainer,
+          this._game.buildingData,
+          this._game.assetData,
+          "asset",
+          id
+        )
+      );
+
       this._game.events.off("buildingClicked");
       this._game.events.on("buildingClicked", (id) =>
-        this._showBuildingDetail(id)
+        showDetail(
+          this._detailContainer,
+          this._game.buildingData,
+          this._game.assetData,
+          "building",
+          id
+        )
       );
     } catch (err) {
       console.error("Error loading checkpoint:", err);
