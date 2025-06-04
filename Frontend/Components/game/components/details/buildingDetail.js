@@ -85,9 +85,9 @@ class BuildingDetail extends HTMLElement {
     }
 
     const buildingName = this._data.name;
-    const num = lvl.level; // numeric level
-    const cost = lvl.energyCost; // kW
-    const upgCost = lvl.upgradeCost; // coins
+    const num = lvl.level;
+    const cost = lvl.energyCost;
+    const upgCost = lvl.upgradeCost;
 
     // populate basics
     this._nameEl.textContent =
