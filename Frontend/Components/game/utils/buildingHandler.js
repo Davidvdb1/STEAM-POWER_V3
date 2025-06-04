@@ -108,9 +108,7 @@ export async function handleUpgradeRequest(scene, gameBuildingId) {
 
       Object.assign(buildingObj, response.gameBuilding);
 
-      setBuildingColor(scene, buildingObj);
-
-      handleAchievements(response, scene.game.canvas);
+      handleAchievements(response, window.gameContainer);
 
       scene.game.events.emit("forceStatsUpdate");
 
