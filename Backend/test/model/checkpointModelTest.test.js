@@ -1,135 +1,133 @@
-const Checkpoint = require('../../model/checkpoint');
-const Currency   = require('../../model/currency');
-const Building   = require('../../model/building');
-const Asset      = require('../../model/asset');
-const Level      = require('../../model/level');
+const Checkpoint = require("../../model/checkpoint");
+const Currency = require("../../model/currency");
+const GameBuildings = require("../../model/gameBuildings");
+const Asset = require("../../model/asset");
 
-describe('Checkpoint model tests', () => {
-  const validCurrency = new Currency({
-    greenEnergy: 10,
-    greyEnergy: 20,
-    coins: 1000
-  });
-
-  const validLevel = new Level({
-    level: 1,
-    upgradeCost: 100,
-    energyCost: 10
-  });
-
-  const validBuilding = new Building({
-    xLocation: 1,
-    yLocation: 2,
-    xSize: 2,
-    ySize: 2,
-    level: validLevel
-  });
-
+describe("Checkpoint model tests", () => {
+  const validCurrency = new Currency({ name: "Gold", amount: 1000 });
+  const validGameBuilding = new GameBuildings(
+    {
+      building: null,
+      buildingLevel: {
+        level: 1,
+        energyCost: 10,
+        upgradeCost: 20,
+        scoreDeduction: 0,
+      },
+    },
+    false
+  ); // skip validation for simplicity
   const validAsset = new Asset({
-    buildCost: 50,
-    destroyCost: 10,
-    energy: 5,
-    xLocation: 0,
-    yLocation: 0,
-    xSize: 1,
-    ySize: 1,
-    type: 'solar'
+    name: "Truck",
+    value: 500,
+    buildCost: 1000,
+    destroyCost: 200,
+    energy: 50,
+    xLocation: 5,
+    yLocation: 10,
+    xSize: 2,
+    ySize: 3,
+    type: "Windmolen", // of een andere geldige type uit allowedTypes
   });
 
   const validData = {
+    id: "cp-1",
     currency: validCurrency,
-    buildings: [validBuilding],
-    assets: [validAsset]
+    gameBuildings: [validGameBuilding],
+    assets: [validAsset],
+    gameStatisticsId: "gs-99",
   };
 
-  test('creates Checkpoint with valid data', () => {
+  test("creates Checkpoint with valid data", () => {
     const cp = new Checkpoint(validData);
     expect(cp).toBeInstanceOf(Checkpoint);
-    expect(cp.currency).toBeInstanceOf(Currency);
-    expect(cp.buildings[0]).toBeInstanceOf(Building);
-    expect(cp.assets[0]).toBeInstanceOf(Asset);
+    expect(cp.currency).toBe(validCurrency);
+    expect(Array.isArray(cp.gameBuildings)).toBe(true);
+    expect(cp.gameBuildings[0]).toBe(validGameBuilding);
+    expect(Array.isArray(cp.assets)).toBe(true);
+    expect(cp.assets[0]).toBe(validAsset);
+    expect(cp.gameStatisticsId).toBe("gs-99");
   });
 
-  test('throws error for invalid currency', () => {
+  test("defaults gameBuildings and assets to empty arrays", () => {
+    const cp = new Checkpoint({ currency: validCurrency });
+    expect(Array.isArray(cp.gameBuildings)).toBe(true);
+    expect(cp.gameBuildings.length).toBe(0);
+    expect(Array.isArray(cp.assets)).toBe(true);
+    expect(cp.assets.length).toBe(0);
+  });
+
+  test("throws error if currency is not instance of Currency", () => {
     expect(() => {
-      new Checkpoint({ ...validData, currency: {} });
-    }).toThrow('Invalid currency (must be Currency)');
+      new Checkpoint({ currency: {} });
+    }).toThrow("Invalid currency (must be Currency)");
   });
 
-  test('throws error for non-array buildings', () => {
+  test("throws error if gameBuildings is not array", () => {
     expect(() => {
-      new Checkpoint({ ...validData, buildings: 'not an array' });
-    }).toThrow('Invalid buildings (must be Building[])');
+      new Checkpoint({ currency: validCurrency, gameBuildings: {} });
+    }).toThrow("Invalid gameBuildings (must be GameBuildings[])");
   });
 
-  test('throws error for buildings with wrong types', () => {
+  test("throws error if gameBuildings contains non-GameBuildings instances", () => {
     expect(() => {
-      new Checkpoint({ ...validData, buildings: [{}] });
-    }).toThrow('Invalid buildings (must be Building[])');
+      new Checkpoint({ currency: validCurrency, gameBuildings: [{}] });
+    }).toThrow("Invalid gameBuildings (must be GameBuildings[])");
   });
 
-  test('throws error for non-array assets', () => {
+  test("throws error if assets is not array", () => {
     expect(() => {
-      new Checkpoint({ ...validData, assets: 'nope' });
-    }).toThrow('Invalid assets (must be Asset[])');
+      new Checkpoint({ currency: validCurrency, assets: {} });
+    }).toThrow("Invalid assets (must be Asset[])");
   });
 
-  test('throws error for assets with wrong types', () => {
+  test("throws error if assets contains non-Asset instances", () => {
     expect(() => {
-      new Checkpoint({ ...validData, assets: [{}] });
-    }).toThrow('Invalid assets (must be Asset[])');
+      new Checkpoint({ currency: validCurrency, assets: [{}] });
+    }).toThrow("Invalid assets (must be Asset[])");
   });
 
-  test('skips validation when validate = false', () => {
-    expect(() => {
-      new Checkpoint({ currency: {}, buildings: [{}], assets: [{}] }, false);
-    }).not.toThrow();
-  });
-
-  test('from() creates Checkpoint from prisma-like object', () => {
+  test("from() creates Checkpoint from prisma object", () => {
     const prismaCp = {
-      id: 99,
-      currency: {
-        id: 1,
-        greenEnergy: 10,
-        greyEnergy: 20,
-        coins: 1000
-      },
-      buildings: [
+      id: "cp-2",
+      currency: { name: "Silver", amount: 500 },
+      gameBuildings: [
         {
-          id: 2,
-          xLocation: 1,
-          yLocation: 2,
-          xSize: 2,
-          ySize: 2,
-          level: {
-            id: 3,
-            level: 1,
-            upgradeCost: 100,
-            energyCost: 10
-          }
-        }
+          id: "gb-1",
+          runsOnGreen: true,
+          building: null,
+          buildingLevel: {
+            level: 2,
+            energyCost: 200,
+            upgradeCost: 400,
+            scoreDeduction: 10,
+          },
+        },
       ],
-      assets: [
-        {
-          id: 4,
-          buildCost: 50,
-          destroyCost: 10,
-          energy: 5,
-          xLocation: 0,
-          yLocation: 0,
-          xSize: 1,
-          ySize: 1,
-          type: 'solar'
-        }
-      ]
+      assets: [{ id: "a-1", name: "Car", value: 1000 }],
+      gameStatisticsId: "gs-55",
     };
 
     const cp = Checkpoint.from(prismaCp);
     expect(cp).toBeInstanceOf(Checkpoint);
+    expect(cp.id).toBe("cp-2");
     expect(cp.currency).toBeInstanceOf(Currency);
-    expect(cp.buildings[0]).toBeInstanceOf(Building);
+    expect(cp.gameBuildings.length).toBe(1);
+    expect(cp.gameBuildings[0]).toBeInstanceOf(GameBuildings);
+    expect(cp.assets.length).toBe(1);
     expect(cp.assets[0]).toBeInstanceOf(Asset);
-    expect(cp.id).toBe(99);
+    expect(cp.gameStatisticsId).toBe("gs-55");
+  });
+
+  test("from() handles missing optional arrays gracefully", () => {
+    const prismaCp = {
+      id: "cp-3",
+      currency: { name: "Bronze", amount: 250 },
+      gameStatisticsId: "gs-77",
+    };
+
+    const cp = Checkpoint.from(prismaCp);
+    expect(cp.gameBuildings).toEqual([]);
+    expect(cp.assets).toEqual([]);
   });
 });
