@@ -10,6 +10,7 @@ import {
   createAssetSprite,
   reserveTiles,
   releaseTiles,
+  requestDestroyAsset,
 } from "../../utils/assetHandler.js";
 import {
   createErrorPopup,
@@ -79,6 +80,15 @@ export function createOuterCityScene() {
       setupAssetDragAndDrop(this);
 
       this.loadExistingAssets();
+
+      document.addEventListener(
+        "scene:destroy-asset",
+        (e) => {
+          const assetId = e.detail.assetId;
+          requestDestroyAsset(this, assetId);
+        },
+        false
+      );
     }
 
     clearAllAssets() {
@@ -162,65 +172,10 @@ export function createOuterCityScene() {
 
     update(time, delta) {
       handleMovementKeys(this, delta);
-    }
 
-    _onRequestDestroyAsset(assetId) {
-      const asset = this.assetObjects.find((o) => o.id === assetId);
-      if (!asset) {
-        console.warn(`Tried to delete asset ${assetId}, but couldn’t find it.`);
-        return;
-      }
-
-      const type = asset.image.texture.key;
-      const fullAssetData =
-        this.sys.game.assetData?.find((a) => a.id === assetId) || {};
-      const cost = fullAssetData.destroyCost ?? 0;
-      const msg = `Wil je deze ${type} slopen voor ${cost} coins?`;
-
-      this.showConfirmation(msg, (confirmed) => {
-        if (confirmed) {
-          this._performDestroyAsset(assetId);
-        }
-      });
-    }
-
-    async _performDestroyAsset(assetId) {
-      try {
-        const token = this.sys.game.token;
-        const currencyId = this.sys.game.currencyId;
-
-        const response = await removeAsset(assetId, token);
-
-        handleAchievements(response, this.game.canvas);
-
-        const cur = await getCurrencyById(currencyId, token);
-
-        const fullAssetData =
-          this.sys.game.assetData.find((a) => a.id === assetId) || {};
-        const greyDelta =
-          fullAssetData.type === "Kerncentrale" ? fullAssetData.energy : 0;
-
-        const updatedCurrency = {
-          greenEnergy: cur.greenEnergy,
-          greyEnergy: cur.greyEnergy - greyDelta,
-          coins: cur.coins - (fullAssetData.destroyCost || 0),
-          score: cur.score,
-        };
-
-        await updateCurrency(currencyId, updatedCurrency, token);
-
-        const idx = this.assetObjects.findIndex((o) => o.id === assetId);
-        if (idx > -1) {
-          const toRem = this.assetObjects[idx];
-          toRem.image.destroy();
-          releaseTiles(this.tileAssetMap, toRem.tx, toRem.ty, toRem.size);
-          this.assetObjects.splice(idx, 1);
-        }
-
-        this._currencyNeedsRefresh = true;
-      } catch (err) {
-        console.error("Error destroying asset in scene:", err);
-        this.showError("Kon asset niet slopen: " + err.message);
+      if (this._currencyNeedsRefresh) {
+        this._currencyNeedsRefresh = false;
+        this.game.events.emit("forceStatsUpdate");
       }
     }
   };
