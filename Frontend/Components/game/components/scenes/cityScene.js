@@ -6,6 +6,7 @@ import {
   setMovementKeys,
   handleMovementKeys,
   handleMapDragging,
+  setupMenuButton
 } from "../../utils/phaserSceneUtils.js";
 
 import {
@@ -87,6 +88,9 @@ export function createCityScene() {
       createConfirmationPopup(this);
       createErrorPopup(this);
       createCheckpointLoadPopup(this);
+
+      // Add menu button to top right corner
+      setupMenuButton(this);
 
       document.addEventListener(
         "scene:upgrade-building",

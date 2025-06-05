@@ -683,4 +683,34 @@ router.get("/:gameStatisticsId/achievements/check/:title", async (req, res) => {
   }
 });
 
+
+/**
+ * GET /gameStatistics/achievements/overview/:groupId<br>
+ * Retrieves a list of all achievements and their completion status for a specific group.
+ *
+ * @function getAchievementsOverviewByGroupId
+ * @memberof module:controller/gameStatisticsController.Controller_Achievements
+ * @param {express.Request}  req - Express request object.
+ * @param {string}           req.params.groupId - The unique identifier of the group.
+ * @param {express.Response} res - Express response object.
+ * @returns {Achievement[]}
+ */
+router.get("/achievements/overview/:groupId", async (req, res) => {
+  const { groupId } = req.params;
+  try {
+    const achievements =
+      await gameStatisticsService.getAchievementsOverviewByGroupId(groupId);
+    res.status(200).json(achievements);
+  } catch (error) {
+    console.error(
+      `Error fetching achievements overview for group ${groupId}:`,
+      error
+    );
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+
+
 module.exports = router;

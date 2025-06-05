@@ -973,6 +973,49 @@ class GameStatisticsService {
     // Return the achievement object that was already looked up
     return achievement;
   }
+
+
+  /**
+   * Retrieves a list of all achievements and their completion status for a specific group..
+   *
+   * @async
+   * @function getAchievementsOverviewByGroupId
+   * @memberof module:service/gameStatisticsService.Service_Achievements
+   * @param {string} groupId - The unique identifier of the group.
+   * @returns {Promise<Array<{id: number, title: string, description: string, reward: number, isReached: boolean}>>}
+   *   A promise that resolves to an array of achievement objects, each containing its id, title, description, reward, and a boolean indicating if it has been reached by the group.
+   * @throws {Error} If game statistics for the specified group are not found.
+   */
+  async getAchievementsOverviewByGroupId(groupId) {
+    const gameStatistics = await gameStatisticsRepository.findByGroupId(groupId, {
+      includeCurrency: false,
+      includeGameBuildings: false,
+      includeAssets: false,
+      includeCheckpoints: false,
+      includeGroup: false,
+    });
+
+    if (!gameStatistics) {
+      throw new Error(`Game statistics for group ${groupId} not found`);
+    }
+
+    const [achievements, reachedAchievements] = await Promise.all([
+      gameStatisticsRepository.findAllAchievements(),
+      gameStatisticsRepository.getGameStatisticsAchievements(gameStatistics.id)
+    ]);
+
+    const reachedAchievementIds = new Set(
+      reachedAchievements.map(achievement => achievement.id)
+    );
+    
+    return achievements.map(achievement => ({
+      id: achievement.id,
+      title: achievement.title,
+      description: achievement.description,
+      reward: achievement.reward,
+      isReached: reachedAchievementIds.has(achievement.id)
+    }));
+  }
 }
 
 module.exports = new GameStatisticsService();

@@ -3,6 +3,7 @@
 import { createLogoScene } from "../components/scenes/logoScene.js";
 import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
+import { createMenuScene } from "../components/scenes/menuScene.js";
 import {
   fetchGameStatistics,
   updateCurrency,
@@ -29,6 +30,9 @@ import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
+
+import { handleAchievements } from "../utils/achievementHandler.js";
+import { showAchievementsOverview } from "../utils/achievementOverview.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -127,6 +131,10 @@ class GameControlPanel extends HTMLElement {
     );
     document.addEventListener("asset-placed", this._boundAssetPlacedHandler);
 
+    this._gameContainer.addEventListener('show-achievements', () => {
+      showAchievementsOverview(this._wrapper, this._shadow);
+    });
+
     this._loadPhaser().then(() => this._initializeGame());
 
     this._shadow.addEventListener("destroy-asset", (e) => {
@@ -183,13 +191,14 @@ class GameControlPanel extends HTMLElement {
     const LogoScene = createLogoScene(this._startButton);
     const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();
+    const MenuScene = createMenuScene();
 
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: this._shadow.getElementById("game-container"),
       width: 140 * 16,
       height: 70 * 16,
-      scene: [LogoScene, CityScene, OuterCityScene],
+      scene: [LogoScene, CityScene, OuterCityScene, MenuScene],
       backgroundColor: "#9bd5e4",
       pixelArt: true,
       scale: {

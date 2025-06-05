@@ -1006,6 +1006,20 @@ class GameStatisticsRepository {
       ? gameStatistics.achievements.map(Achievement.from)
       : null;
   }
+
+
+  /**
+   * Retrieves all achievements from the database and maps them to Achievement instances.
+   *
+   * @async
+   * @function findAllAchievements
+   * @memberof module:repository/gameStatisticsRepository.Repository_Achievements
+   * @returns {Promise<Achievement[]>} A promise that resolves to an array of Achievement objects.
+   */
+  async findAllAchievements() {
+    const achievements = await this.prisma.achievement.findMany();
+    return achievements.map((ach) => Achievement.from(ach));
+  }
 }
 
 module.exports = new GameStatisticsRepository();

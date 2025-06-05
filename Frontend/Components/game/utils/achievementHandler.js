@@ -182,7 +182,7 @@ function getStylesText() {
       min-height: 10%;
       height: auto;
 
-      background-color: rgba(50, 50, 50, 0.9);
+      background-color: rgba(0, 128, 0, 0.8);
       color: white;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.5);
