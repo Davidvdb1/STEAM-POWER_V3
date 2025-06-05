@@ -193,7 +193,7 @@ export function createMenuButton(scene, callback) {
  */
 export function setupMenuButton(scene) {
   createMenuButton(scene, () => {
-    scene.scene.sleep(scene.scene.key);
-    scene.scene.run('MenuScene', { previousScene: scene.scene.key });
+    scene.scene.pause();
+    scene.scene.run('MenuScene', { sourceScene: scene.scene.key });
   });
 }

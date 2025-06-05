@@ -13,8 +13,7 @@ export function createMenuScene() {
 
 
     init(data) {
-      // Store the scene we came from so we can return to it
-      this.previousScene = data.previousScene || 'CityScene';
+      this.sourceScene = data.sourceScene;
 
       // Get the center coordinates and dimensions
       // Phaser calculates width and height based on the center,
@@ -67,10 +66,14 @@ export function createMenuScene() {
     /**
      * Switches back to the previous scene in the game.
      *
+     * @function returnToGame
+     * @memberOf MenuScene
      * @returns {void}
      */
     returnToGame() {
-      this.scene.switch(this.previousScene);
+      const targetScene = this.sourceScene || 'CityScene';
+      this.scene.stop();
+      this.scene.resume(targetScene);
     }
 
 
