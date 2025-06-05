@@ -193,6 +193,13 @@ export function createMenuButton(scene, callback) {
  */
 export function setupMenuButton(scene) {
   createMenuButton(scene, () => {
+    // Dispatch an event to hide navigation buttons and the detail container
+    scene.game.canvas.dispatchEvent(new CustomEvent('menu-opened', {
+      bubbles: true,
+      composed: true
+    }));
+    
+    // Switch to menu scene
     scene.scene.pause();
     scene.scene.run('MenuScene', { sourceScene: scene.scene.key });
   });

@@ -135,6 +135,23 @@ class GameControlPanel extends HTMLElement {
       showAchievementsOverview(this._wrapper, this._shadow);
     });
 
+    this._gameContainer.addEventListener("menu-opened", () => {
+      // Hide navigation buttons and detail container when menu opens
+      this._innerContainer.style.display = "none";
+      this._outerContainer.style.display = "none";
+      this._detailContainer.style.display = "none";
+    });
+
+    this._gameContainer.addEventListener("menu-closed", (e) => {
+      // Show the appropriate navigation button based on current scene
+      if (e.detail.targetScene === "CityScene") {
+        this._outerContainer.style.display = "flex";
+      } else {
+        this._innerContainer.style.display = "flex";
+      }
+      this._detailContainer.style.display = "block";
+    });
+
     this._loadPhaser().then(() => this._initializeGame());
 
     this._shadow.addEventListener("destroy-asset", (e) => {
