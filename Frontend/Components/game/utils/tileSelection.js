@@ -207,7 +207,7 @@ export class TileSelection {
   applyGrayscale(intensity = 1) {
     this.buildingLayers.forEach((layer) => {
       if (layer.postFX) {
-        layer.postFX.clear();
+        // layer.postFX.clear();
         layer.postFX.addColorMatrix().grayscale(intensity);
       } else {
         console.warn(`PostFX not available for layer in "${this.name}"`);
