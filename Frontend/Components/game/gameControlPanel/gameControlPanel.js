@@ -33,6 +33,7 @@ import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
 import { handleAchievements } from "../utils/achievementHandler.js";
+import { showAchievementsOverview } from "../utils/achievementOverview.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -131,6 +132,10 @@ class GameControlPanel extends HTMLElement {
       this._onLoadCheckpoint()
     );
     document.addEventListener("asset-placed", this._boundAssetPlacedHandler);
+
+    this._gameContainer.addEventListener('show-achievements', () => {
+      showAchievementsOverview(this._wrapper, this._shadow);
+    });
 
     this._loadPhaser().then(() => this._initializeGame());
 
