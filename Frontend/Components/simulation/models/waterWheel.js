@@ -24,8 +24,8 @@ export async function updateWaterWheelPosition(scene, component, position) {
     // Define the target positions and rotations for each slot (position 1, 2, 3)
     const positions = [
         new BABYLON.Vector3(1, 0.07, 0.7),
-        new BABYLON.Vector3(-0.68, 0.07, -0.5),
-        new BABYLON.Vector3(-1.6, 0.07, -1.5)
+        new BABYLON.Vector3(-0.68, 0.1, -0.5),
+        new BABYLON.Vector3(-1.6, 0.3, -1.5)
     ];
 
     // Rotation angles in radians for each position (Euler angles: x,y,z)

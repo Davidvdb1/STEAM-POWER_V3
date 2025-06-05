@@ -20,11 +20,12 @@ export function createWaterWheelSettings(page2, position) {
     // === Grid setup ===
     const stepperGrid = new BABYLON.GUI.Grid();
     stepperGrid.width = "90%";
-    stepperGrid.height = "40px";
+    stepperGrid.height = "60px";
     stepperGrid.addColumnDefinition(0.2); // 20% for left
     stepperGrid.addColumnDefinition(0.6); // 60% for center
     stepperGrid.addColumnDefinition(0.2); // 20% for right
     stepperGrid.background = "transparent"; // Or set if you want
+    stepperGrid.paddingBottom = "20px"
     page2.addControl(stepperGrid);
 
     let currentPosition = 1;
@@ -80,4 +81,13 @@ export function createWaterWheelSettings(page2, position) {
             position(currentPosition);
         }
     });
+
+    page2.addControl(createLine())
+
+    const waterTitle3 = new BABYLON.GUI.TextBlock();
+    waterTitle3.text = "Verander de diepte.";
+    waterTitle3.fontSize = 18;
+    waterTitle3.color = "white";
+    waterTitle3.height = "60px";
+    page2.addControl(waterTitle3);
 }
