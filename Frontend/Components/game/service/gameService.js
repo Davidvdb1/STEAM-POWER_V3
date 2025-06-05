@@ -263,6 +263,8 @@ export async function toggleAllBuildingsRunsOnGreenFalse(
         (errBody.error ? ` - ${errBody.error}` : "")
     );
   }
+  return res.json();
+}
 
 /**
  * Retrieves a list of all achievements and their completion status for a specific group.
@@ -288,3 +290,4 @@ export async function getAchievementsOverviewByGroupId(groupId, token) {
 
   return res.json();
 }
+
