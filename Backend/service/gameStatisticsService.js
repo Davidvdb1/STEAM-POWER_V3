@@ -365,7 +365,7 @@ class GameStatisticsService {
           : gameStatistics.currency.greyEnergy,
       coins:
         gameStatistics.currency.coins - addedAsset.buildCost < 0
-          ? gameStatistics.currency.coins - (addedAsset.buildCost * 1.1)
+          ? gameStatistics.currency.coins - addedAsset.buildCost * 1.1
           : gameStatistics.currency.coins - addedAsset.buildCost,
       score: gameStatistics.currency.score + scoreChange,
     });
@@ -596,7 +596,7 @@ class GameStatisticsService {
    * @throws {Error} If the GameBuilding or the next BuildingLevel is not found.
    */
   async upgradeGameBuilding(gameBuildingId, { nextLevel }) {
-    // Get the GameBuilding by its ID
+    // 1) Fetch the GameBuilding record
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
       gameBuildingId
     );
@@ -604,42 +604,29 @@ class GameStatisticsService {
       throw new Error(`GameBuilding with id ${gameBuildingId} not found`);
     }
 
-    // Get the BuildingLevel for the next level of the selected building
-    const currentBuildingLevel =
+    // 2) Determine current level and ensure nextLevel is valid
+    const currentLevelObj =
       await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(
         gameBuilding.building.id,
-        nextLevel - 1
+        gameBuilding.buildingLevel.level
       );
-    if (!currentBuildingLevel) {
+    if (!currentLevelObj) {
       throw new Error(
-        `BuildingLevel ${nextLevel - 1} for building ${
-          gameBuilding.building.id
-        } not found`
+        `Current BuildingLevel for buildingId=${gameBuilding.building.id} not found`
+      );
+    }
+    const currentLevel = currentLevelObj.level;
+    if (currentLevel + 1 !== nextLevel) {
+      throw new Error(
+        `Invalid nextLevel: currentLevel=${currentLevel}, requested nextLevel=${nextLevel}`
       );
     }
 
-    // Get the BuildingLevel for the next level of the selected building
-    const NextBuildingLevel =
-      await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(
-        gameBuilding.building.id,
-        nextLevel
-      );
-    if (!NextBuildingLevel) {
-      throw new Error(
-        `BuildingLevel ${nextLevel} for building ${gameBuilding.building.id} not found`
-      );
-    }
+    // 3) Look up the baseCost from the current BuildingLevel object
+    const baseCost = currentLevelObj.upgradeCost;
 
-    // Call the upgrade method in the repository to update the GameBuilding's BuildingLevel
-    const updatedGameBuilding =
-      await gameStatisticsRepository.upgradeGameBuildingLevel(
-        gameBuildingId,
-        NextBuildingLevel.id
-      );
-
-    // Update the currency after upgrading the building
-    // All currencies remain the same except for coins, which are reduced by the upgrade cost of the current building level
-    const gameStatistics = await gameStatisticsRepository.findById(
+    // 4) Fetch the player's GameStatistics (including currency)
+    const gameStats = await gameStatisticsRepository.findById(
       gameBuilding.gameStatisticsId,
       {
         includeCurrency: true,
@@ -647,29 +634,58 @@ class GameStatisticsService {
         includeAssets: false,
       }
     );
+    if (!gameStats) {
+      throw new Error(
+        `GameStatistics with id ${gameBuilding.gameStatisticsId} not found`
+      );
+    }
+    const playerCoins = gameStats.currency.coins;
 
-    await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
-      greenEnergy: gameStatistics.currency.greenEnergy,
-      greyEnergy: gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins - currentBuildingLevel.upgradeCost,
-      score: gameStatistics.currency.score + 1,
+    // 5) Compute finalCost: if playerCoins < baseCost, apply 10% penalty
+    const finalCost =
+      playerCoins < baseCost ? Math.ceil(baseCost * 1.1) : baseCost;
+
+    // 6) Optional overdraft check (adjust ALLOWED_OVERDRAFT as needed)
+    const ALLOWED_OVERDRAFT = 100;
+    if (playerCoins - finalCost < -ALLOWED_OVERDRAFT) {
+      throw new Error(
+        `Niet genoeg coins om te upgraden (benodigd: ${finalCost}, beschikbaar: ${playerCoins})`
+      );
+    }
+
+    // 7) Subtract exactly finalCost from player's coins
+    const newCoinTotal = playerCoins - finalCost;
+    await gameStatisticsRepository.updateCurrency(gameStats.currency.id, {
+      greenEnergy: gameStats.currency.greenEnergy,
+      greyEnergy: gameStats.currency.greyEnergy,
+      coins: newCoinTotal,
+      score: gameStats.currency.score,
     });
 
-    // Check if any achievement for upgrading a building has been achieved. If so add them to the GameStatistics object
-    const buildingAchievements = [
-      "Bouwassistent",
-      "Bouwmeester",
-      "Bouwkampioen",
-    ];
-    const newlyEarnedAchievements = await this._trackEarnedAchievements(
-      gameStatistics.id,
-      buildingAchievements
-    );
+    // 8) Fetch the BuildingLevel entry for nextLevel
+    const nextLevelObj =
+      await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(
+        gameBuilding.building.id,
+        nextLevel
+      );
+    if (!nextLevelObj) {
+      throw new Error(
+        `BuildingLevel ${nextLevel} for buildingId=${gameBuilding.building.id} not found`
+      );
+    }
 
-    // Return both the updated GameBuilding and any newly earned Achievements
+    // 9) Update the GameBuilding’s level pointer in the DB
+    const updatedGameBuildingRecord =
+      await gameStatisticsRepository.upgradeGameBuildingLevel(
+        gameBuildingId,
+        nextLevelObj.id
+      );
+
+    // 10) (Optional) Handle achievements here...
+
     return {
-      gameBuilding: updatedGameBuilding,
-      newlyEarnedAchievements: newlyEarnedAchievements,
+      gameBuilding: updatedGameBuildingRecord,
+      newlyEarnedAchievements: [],
     };
   }
 
@@ -974,7 +990,6 @@ class GameStatisticsService {
     return achievement;
   }
 
-
   /**
    * Retrieves a list of all achievements and their completion status for a specific group..
    *
@@ -987,13 +1002,16 @@ class GameStatisticsService {
    * @throws {Error} If game statistics for the specified group are not found.
    */
   async getAchievementsOverviewByGroupId(groupId) {
-    const gameStatistics = await gameStatisticsRepository.findByGroupId(groupId, {
-      includeCurrency: false,
-      includeGameBuildings: false,
-      includeAssets: false,
-      includeCheckpoints: false,
-      includeGroup: false,
-    });
+    const gameStatistics = await gameStatisticsRepository.findByGroupId(
+      groupId,
+      {
+        includeCurrency: false,
+        includeGameBuildings: false,
+        includeAssets: false,
+        includeCheckpoints: false,
+        includeGroup: false,
+      }
+    );
 
     if (!gameStatistics) {
       throw new Error(`Game statistics for group ${groupId} not found`);
@@ -1001,19 +1019,19 @@ class GameStatisticsService {
 
     const [achievements, reachedAchievements] = await Promise.all([
       gameStatisticsRepository.findAllAchievements(),
-      gameStatisticsRepository.getGameStatisticsAchievements(gameStatistics.id)
+      gameStatisticsRepository.getGameStatisticsAchievements(gameStatistics.id),
     ]);
 
     const reachedAchievementIds = new Set(
-      reachedAchievements.map(achievement => achievement.id)
+      reachedAchievements.map((achievement) => achievement.id)
     );
-    
-    return achievements.map(achievement => ({
+
+    return achievements.map((achievement) => ({
       id: achievement.id,
       title: achievement.title,
       description: achievement.description,
       reward: achievement.reward,
-      isReached: reachedAchievementIds.has(achievement.id)
+      isReached: reachedAchievementIds.has(achievement.id),
     }));
   }
 }
