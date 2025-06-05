@@ -410,6 +410,8 @@ class GameStatisticsService {
       }
     );
 
+    console.log(`${gameStatistics.currency.coins} - ${removedAsset.destroyCost} = ${gameStatistics.currency.coins - removedAsset.destroyCost}`)
+
     let scoreChange = 0;
 
     if (Nature.allowedTypes.includes(removedAsset.type)) {
@@ -429,7 +431,7 @@ class GameStatisticsService {
         removedAsset.type === "Kerncentrale"
           ? gameStatistics.currency.greyEnergy - removedAsset.energy
           : gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins + removedAsset.destroyCost,
+      coins: gameStatistics.currency.coins,
       score: gameStatistics.currency.score + scoreChange,
     });
 
