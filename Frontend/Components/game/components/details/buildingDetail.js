@@ -1,5 +1,5 @@
-// import gameStatisticsService from "../../../../../Backend/service/gameStatisticsService.js";
 import { BUILDING_NAME_TRANSLATIONS } from "../../utils/buildingDefinitions.js";
+
 const cssResponse = await fetch(
   "./Components/game/components/details/style.css"
 );
@@ -10,7 +10,6 @@ template.innerHTML = /*html*/ `
   <style>
     ${cssText}
   </style>
-
   <button class="close">&times;</button>
   <div class="info">
     <p><strong><span class="name"></span></strong></p>
@@ -20,10 +19,10 @@ template.innerHTML = /*html*/ `
       Upgrade kost: <span class="upgrade-cost"></span> coins
     </p>
     <div class="buttons">
-        <button class="upgrade">
-          Upgrade
-        </button>
-        <button class="toggleEnergy"></button>
+      <button class="upgrade">
+        Upgrade
+      </button>
+      <button class="toggleEnergy"></button>
     </div>
   </div>
 `;
@@ -43,7 +42,6 @@ class BuildingDetail extends HTMLElement {
     this._upgradeBtn = shadow.querySelector(".upgrade");
     this._toggleEnergyBtn = shadow.querySelector(".toggleEnergy");
     this._data = null;
-    this._runsOnGreen = false;
   }
 
   set data(value) {
@@ -68,13 +66,39 @@ class BuildingDetail extends HTMLElement {
         if (b) this.data = b;
       }
     }
+
+    document.addEventListener("currencyUpdate", (e) => {
+      if (this._data) {
+        this._render();
+      }
+    });
+  }
+
+  _getCurrentCoins() {
+    return window.phaserGame?.currency?.coins || 0;
+  }
+
+  _calculateFinalUpgradeCost(baseCost) {
+    const currentCoins = this._getCurrentCoins();
+    return currentCoins < baseCost ? Math.ceil(baseCost * 1.1) : baseCost;
+  }
+
+  _applyCostStyling(finalCost, baseCost) {
+    const hasInsufficientFunds = this._getCurrentCoins() < baseCost;
+
+    if (hasInsufficientFunds) {
+      this._upgradeCostEl.style.color = "#ff6b6b";
+      this._upgradeCostEl.style.fontWeight = "bold";
+    } else {
+      this._upgradeCostEl.style.color = "";
+      this._upgradeCostEl.style.fontWeight = "";
+    }
   }
 
   _render() {
     if (!this._data) return;
 
     const { runsOnGreen } = this._data;
-
     this.setAttribute("runsOnGreen", runsOnGreen);
 
     const lvl = this._data.buildingLevel || this._data.level;
@@ -86,7 +110,7 @@ class BuildingDetail extends HTMLElement {
     const buildingName = this._data.name;
     const num = lvl.level;
     const cost = lvl.energyCost;
-    const upgCost = lvl.upgradeCost;
+    const baseUpgradeCost = lvl.upgradeCost;
 
     this._nameEl.textContent =
       BUILDING_NAME_TRANSLATIONS[buildingName] || buildingName;
@@ -95,7 +119,6 @@ class BuildingDetail extends HTMLElement {
     this._toggleEnergyBtn.textContent = `Op ${
       this._data.runsOnGreen ? "grijze energie" : "groene energie"
     } runnen`;
-
     this._toggleEnergyBtn.onclick = () => {
       document.dispatchEvent(
         new CustomEvent("scene:toggle-building-energy", {
@@ -107,12 +130,19 @@ class BuildingDetail extends HTMLElement {
     };
 
     if (num < 5) {
-      this._upgradeLine.textContent = `Upgrade kost: ${upgCost} coins`;
+      const finalUpgradeCost = this._calculateFinalUpgradeCost(baseUpgradeCost);
+
+      this._upgradeCostEl.textContent = finalUpgradeCost;
+      this._applyCostStyling(finalUpgradeCost, baseUpgradeCost);
+
       this._upgradeBtn.style.display = "";
       this._upgradeBtn.onclick = () => {
         document.dispatchEvent(
           new CustomEvent("scene:upgrade-building", {
-            detail: { GameBuildingId: this._data.id },
+            detail: {
+              GameBuildingId: this._data.id,
+              upgradeCost: finalUpgradeCost,
+            },
             bubbles: true,
             composed: true,
           })
@@ -121,6 +151,8 @@ class BuildingDetail extends HTMLElement {
     } else {
       this._upgradeLine.textContent = "Max level";
       this._upgradeBtn.style.display = "none";
+      this._upgradeCostEl.style.color = "";
+      this._upgradeCostEl.style.fontWeight = "";
     }
   }
 }
