@@ -371,10 +371,6 @@ class GameControlPanel extends HTMLElement {
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
   }
 
-  async _updateCurrency() {
-    await this._updateStatistics();
-  }
-
   _transitionToOuterCity() {
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
