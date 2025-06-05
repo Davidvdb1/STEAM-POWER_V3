@@ -363,7 +363,10 @@ class GameStatisticsService {
         addedAsset.type === "Kerncentrale"
           ? gameStatistics.currency.greyEnergy + addedAsset.energy
           : gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins - addedAsset.buildCost,
+      coins:
+        gameStatistics.currency.coins - addedAsset.buildCost < 0
+          ? gameStatistics.currency.coins - (addedAsset.buildCost * 1.1)
+          : gameStatistics.currency.coins - addedAsset.buildCost,
       score: gameStatistics.currency.score + scoreChange,
     });
 
@@ -410,7 +413,11 @@ class GameStatisticsService {
       }
     );
 
-    console.log(`${gameStatistics.currency.coins} - ${removedAsset.destroyCost} = ${gameStatistics.currency.coins - removedAsset.destroyCost}`)
+    console.log(
+      `${gameStatistics.currency.coins} - ${removedAsset.destroyCost} = ${
+        gameStatistics.currency.coins - removedAsset.destroyCost
+      }`
+    );
 
     let scoreChange = 0;
 
@@ -431,7 +438,11 @@ class GameStatisticsService {
         removedAsset.type === "Kerncentrale"
           ? gameStatistics.currency.greyEnergy - removedAsset.energy
           : gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins,
+      coins:
+        gameStatistics.currency.coins - removedAsset.destroyCost < 0
+          ? gameStatistics.currency.coins -
+            (removedAsset.destroyCost / 100) * 10
+          : gameStatistics.currency.coins,
       score: gameStatistics.currency.score + scoreChange,
     });
 

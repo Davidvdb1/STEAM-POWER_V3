@@ -27,10 +27,15 @@ class AssetDetail extends HTMLElement {
     this._destroyBtn = shadow.querySelector("button.destroy");
     this._infoContainer = shadow.querySelector(".info");
     this._data = null;
+    this._currentCoins = 0;
+    this._basedDestroyCost = 0;
   }
 
   set data(value) {
     this._data = value;
+    if (value && value.destroyCost) {
+      this._basedDestroyCost = value.destroyCost;
+    }
     this._render();
   }
   get data() {
@@ -42,6 +47,11 @@ class AssetDetail extends HTMLElement {
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
     );
 
+    document.addEventListener("currencyUpdate", (e) => {
+      this._currentCoins = e.detail.coins;
+      this._updateDestroyCost();
+    });
+
     const raw = this.getAttribute("asset-id");
     if (raw && !this._data) {
       const id = parseInt(raw, 10);
@@ -50,6 +60,29 @@ class AssetDetail extends HTMLElement {
         if (a) this.data = a;
       }
     }
+  }
+
+    _updateDestroyCost() {
+    if (!this._data || !this._basedDestroyCost) return;
+
+    let finalDestroyCost = this._basedDestroyCost;
+    
+    if (this._currentCoins < this._basedDestroyCost) {
+      finalDestroyCost = Math.ceil(this._basedDestroyCost * 1.1);
+      this._destroyCostEl.style.color = '#ff6b6b';
+      this._destroyCostEl.style.fontWeight = 'bold';
+    } else {
+      this._destroyCostEl.style.color = ''; 
+      this._destroyCostEl.style.fontWeight = '';
+    }
+    
+    this._destroyCostEl.textContent = finalDestroyCost;
+  
+  }
+
+  setCoins(coins) {
+    this._currentCoins = coins;
+    this._updateDestroyCost();
   }
 
   _render() {
@@ -77,6 +110,8 @@ class AssetDetail extends HTMLElement {
       this._energyEl.textContent = energy;
       this._infoContainer.classList.remove("nature");
     }
+
+    this._updateDestroyCost();
 
     // destroy-button koppelen
     this._destroyBtn.onclick = () => {

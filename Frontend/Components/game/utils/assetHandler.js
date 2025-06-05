@@ -364,7 +364,13 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
     return { success: false, reason: "Onvoldoende saldo" };
   }
 
-  const msg = `Wil je hier een ${type} plaatsen voor ${cost} coins?`;
+  let msg;
+
+  if (currentCoins - cost < 0) {
+    msg = `Wil je hier een ${type} plaatsen voor ${cost + cost/100*10} coins?`;
+  } else {
+    msg = `Wil je hier een ${type} plaatsen voor ${cost} coins?`;
+  }
 
   return new Promise((resolve) => {
     scene.showConfirmation(msg, async (confirmed) => {
@@ -544,7 +550,14 @@ export async function requestDestroyAsset(scene, assetId) {
     return;
   }
 
-  const msg = `Wil je deze ${textureKey} slopen voor ${cost} coins?`;
+  let msg;
+
+  if (currentCoins - cost < 0) {
+    msg = `Wil je deze ${textureKey} slopen voor ${cost + cost / 100 * 10} coins?`;
+  } else {
+    msg = `Wil je deze ${textureKey} slopen voor ${cost} coins?`;
+  }
+
   scene.showConfirmation(msg, (confirmed) => {
     if (confirmed) {
       performDestroyAsset(scene, assetId);

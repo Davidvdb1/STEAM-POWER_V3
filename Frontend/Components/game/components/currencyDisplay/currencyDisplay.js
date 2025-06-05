@@ -144,6 +144,11 @@ class CurrencyDisplay extends HTMLElement {
       } else {
         this.coinsEl.style.color = "";
       }
+      document.dispatchEvent(
+        new CustomEvent("currencyUpdate", {
+          detail: { coins: Number(coins) },
+        })
+      );
     }
     if (score != null) {
       this.scoreEl.textContent = score;
