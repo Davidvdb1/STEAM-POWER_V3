@@ -139,9 +139,9 @@ class GameStatisticsService {
 
     await gameStatisticsRepository.updateCurrency(gamestats.currency.id, {
       greenEnergy: gamestats.currency.greenEnergy,
-      greyEnergy: gamestats.currency.greyEnergy + totalGreyEnergy, 
+      greyEnergy: gamestats.currency.greyEnergy + totalGreyEnergy,
       coins: gamestats.currency.coins,
-      score: gamestats.currency.score + totalScoreChange, 
+      score: gamestats.currency.score + totalScoreChange,
     });
 
     return await gameStatisticsRepository.findById(gamestats.id, {
@@ -363,7 +363,10 @@ class GameStatisticsService {
         addedAsset.type === "Kerncentrale"
           ? gameStatistics.currency.greyEnergy + addedAsset.energy
           : gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins - addedAsset.buildCost,
+      coins:
+        gameStatistics.currency.coins - addedAsset.buildCost < 0
+          ? gameStatistics.currency.coins - (addedAsset.buildCost * 1.1)
+          : gameStatistics.currency.coins - addedAsset.buildCost,
       score: gameStatistics.currency.score + scoreChange,
     });
 
@@ -410,6 +413,12 @@ class GameStatisticsService {
       }
     );
 
+    console.log(
+      `${gameStatistics.currency.coins} - ${removedAsset.destroyCost} = ${
+        gameStatistics.currency.coins - removedAsset.destroyCost
+      }`
+    );
+
     let scoreChange = 0;
 
     if (Nature.allowedTypes.includes(removedAsset.type)) {
@@ -429,7 +438,11 @@ class GameStatisticsService {
         removedAsset.type === "Kerncentrale"
           ? gameStatistics.currency.greyEnergy - removedAsset.energy
           : gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins + removedAsset.destroyCost,
+      coins:
+        gameStatistics.currency.coins - removedAsset.destroyCost < 0
+          ? gameStatistics.currency.coins -
+            (removedAsset.destroyCost / 100) * 10
+          : gameStatistics.currency.coins,
       score: gameStatistics.currency.score + scoreChange,
     });
 
@@ -702,6 +715,49 @@ class GameStatisticsService {
     return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
+  }
+
+  /**
+   * Fetches all game‐buildings under a given gameStatisticsId where runsOnGreen is true,
+   * subtracts 1 from the score for each of those buildings, then flips all of them to false.
+   *
+   * @async
+   * @function toggleAllGameBuildingsRunsOnGreenFalse
+   * @memberof module:service/gameStatisticsService.Service_GameBuildings
+   * @param {string} gameStatisticsId
+   * @returns {Promise<GameBuildings[]>} The list of updated GameBuilding objects
+   */
+  async toggleAllGameBuildingsRunsOnGreenFalse(gameStatisticsId) {
+    const gameStatistics = await gameStatisticsRepository.findById(
+      gameStatisticsId
+    );
+    if (!gameStatistics) {
+      throw new Error(`No GameStatistics found for id=${gameStatisticsId}`);
+    }
+
+    const buildingsOnGreen = await gameStatisticsRepository.findGameBuildings({
+      gameStatisticsId: gameStatisticsId,
+      runsOnGreen: true,
+    });
+
+    if (buildingsOnGreen.length > 0) {
+      const currentCurrency = gameStatistics.currency;
+      const decrementAmount = buildingsOnGreen.length;
+
+      await gameStatisticsRepository.updateCurrency(currentCurrency.id, {
+        greenEnergy: currentCurrency.greenEnergy,
+        greyEnergy: currentCurrency.greyEnergy,
+        coins: currentCurrency.coins,
+        score: currentCurrency.score - decrementAmount,
+      });
+    }
+
+    const updatedBuildings =
+      await gameStatisticsRepository.toggleAllGameBuildingsRunsOnGreenFalse(
+        gameStatisticsId
+      );
+
+    return updatedBuildings;
   }
 
   /**

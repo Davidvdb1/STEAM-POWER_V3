@@ -357,7 +357,20 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
 
   const size = ASSETS[type];
   const cost = size.cost;
-  const msg = `Wil je hier een ${type} plaatsen voor ${cost} coins?`;
+
+  const currentCoins = scene.sys.game.currency?.coins ?? 0;
+  if (currentCoins - cost < -100) {
+    scene.showError(`Je hebt niet genoeg coins om een ${type} te plaatsen.`);
+    return { success: false, reason: "Onvoldoende saldo" };
+  }
+
+  let msg;
+
+  if (currentCoins - cost < 0) {
+    msg = `Wil je hier een ${type} plaatsen voor ${cost + cost/100*10} coins?`;
+  } else {
+    msg = `Wil je hier een ${type} plaatsen voor ${cost} coins?`;
+  }
 
   return new Promise((resolve) => {
     scene.showConfirmation(msg, async (confirmed) => {
@@ -529,7 +542,22 @@ export async function requestDestroyAsset(scene, assetId) {
       : null) || {};
   const cost = fullAssetData.destroyCost || 0;
 
-  const msg = `Wil je deze ${textureKey} slopen voor ${cost} coins?`;
+  const currentCoins = scene.sys.game.currency?.coins ?? 0;
+  if (currentCoins - cost < -100) {
+    scene.showError(
+      `Je hebt niet genoeg coins om deze ${textureKey} te slopen.`
+    );
+    return;
+  }
+
+  let msg;
+
+  if (currentCoins - cost < 0) {
+    msg = `Wil je deze ${textureKey} slopen voor ${cost + cost / 100 * 10} coins?`;
+  } else {
+    msg = `Wil je deze ${textureKey} slopen voor ${cost} coins?`;
+  }
+
   scene.showConfirmation(msg, (confirmed) => {
     if (confirmed) {
       performDestroyAsset(scene, assetId);

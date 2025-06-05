@@ -8,12 +8,12 @@ import {
   updateCurrency,
   recordCheckpoint,
   refactorGameStatistics,
+  toggleAllBuildingsRunsOnGreenFalse,
 } from "../service/gameService.js";
 import {
   transformBuildingData,
   buildCurrencyDisplayPayload,
   calculateTotalGreenCost,
-  calculateTotalGreenProduction,
   unpackCheckpointPayload,
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";
@@ -81,6 +81,8 @@ class GameControlPanel extends HTMLElement {
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
 
+    this._currentDetail = { type: null, id: null };
+
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
@@ -108,6 +110,7 @@ class GameControlPanel extends HTMLElement {
     this._shadow.addEventListener("close-detail", () => {
       this._detailContainer.classList.add("hidden");
       this._detailContainer.innerHTML = "";
+      this._currentDetail = { type: null, id: null };
     });
 
     this._shadow.addEventListener("upgrade-build", (e) => {
@@ -155,6 +158,12 @@ class GameControlPanel extends HTMLElement {
       false
     );
 
+    // this._shadow.addEventListener("close-detail", () => {
+    //   this._detailContainer.classList.add("hidden");
+    //   this._detailContainer.innerHTML = "";
+    //   this._currentDetail = { type: null, id: null };
+    // });
+
     const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
     if (bluetooth) {
       this._interval = setInterval(() => {
@@ -191,25 +200,30 @@ class GameControlPanel extends HTMLElement {
 
     window.phaserGame = this._game;
     window.gameContainer = this._gameContainer;
-    this._game.events.on("buildingClicked", (id) =>
+
+    this._game.events.on("buildingClicked", (id) => {
+      this._currentDetail = { type: "building", id };
+      this._detailContainer.innerHTML = "";
       showDetail(
         this._detailContainer,
         this._game.buildingData,
         this._game.assetData,
         "building",
         id
-      )
-    );
+      );
+    });
 
-    this._game.events.on("assetClicked", (id) =>
+    this._game.events.on("assetClicked", (id) => {
+      this._currentDetail = { type: "asset", id };
+      this._detailContainer.innerHTML = "";
       showDetail(
         this._detailContainer,
         this._game.buildingData,
         this._game.assetData,
         "asset",
         id
-      )
-    );
+      );
+    });
 
     this._game.events.on("forceStatsUpdate", () => {
       this._updateStatistics();
@@ -229,6 +243,7 @@ class GameControlPanel extends HTMLElement {
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
+      this._game.currency = gs.currency;
 
       const payload = buildCurrencyDisplayPayload({
         buildings: this._game.buildingData,
@@ -255,7 +270,6 @@ class GameControlPanel extends HTMLElement {
   async _updateEnergy() {
     try {
       const { token, groupId } = getAuthFromSession();
-
       const gs = await fetchGameStatistics(groupId, token);
 
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
@@ -274,9 +288,48 @@ class GameControlPanel extends HTMLElement {
         gs.currency,
         totalGreenCost
       );
+
+      if (currencyPayload.greenEnergy < 0) {
+        currencyPayload.greenEnergy = 0;
+      }
+
       await updateCurrency(currencyId, currencyPayload, token);
 
-      this._updateStatistics();
+      await this._updateStatistics();
+
+      //if greenEnergy is now zero, force all buildings off green, recolor, refresh detail ===
+      if (this._game.currency.greenEnergy <= 0) {
+        await toggleAllBuildingsRunsOnGreenFalse(
+          this._game.gameStatisticsId,
+          token
+        );
+
+        await this._updateStatistics();
+
+        const cityScene = this._game.scene.getScene("CityScene");
+        if (cityScene) {
+          for (const b of this._game.buildingData) {
+            setBuildingColor(cityScene, b);
+          }
+        }
+        // If the detail pane is currently showing a BUILDING, tear it down and re-render:
+        const { type, id } = this._currentDetail;
+        if (
+          type === "building" &&
+          id != null &&
+          !this._detailContainer.classList.contains("hidden")
+        ) {
+          // Clear whatever was inside detail‐container, then call showDetail(...) again:
+          this._detailContainer.innerHTML = "";
+          showDetail(
+            this._detailContainer,
+            this._game.buildingData,
+            this._game.assetData,
+            "building",
+            id
+          );
+        }
+      }
     } catch (e) {
       console.error("Error updating energy:", e);
     }
@@ -305,7 +358,7 @@ class GameControlPanel extends HTMLElement {
       console.error("Error fetching stats:", e);
     }
 
-    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
+    this._energyInterval = setInterval(() => this._updateEnergy(), 10_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
   }
 
