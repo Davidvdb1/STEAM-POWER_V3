@@ -295,28 +295,24 @@ class GameControlPanel extends HTMLElement {
 
       await updateCurrency(currencyId, currencyPayload, token);
 
-      // Refresh numbers & stats on screen
       await this._updateStatistics();
 
-      // === New: if greenEnergy is now zero, force all buildings off green, recolor, refresh detail ===
+      //if greenEnergy is now zero, force all buildings off green, recolor, refresh detail ===
       if (this._game.currency.greenEnergy <= 0) {
-        // 1) Tell server to set runsOnGreen=false for EVERY building
         await toggleAllBuildingsRunsOnGreenFalse(
           this._game.gameStatisticsId,
           token
         );
 
-        // 2) Re-fetch stats so this._game.buildingData has runsOnGreen=false everywhere
         await this._updateStatistics();
 
-        // 3) Re-render all buildings in the city scene:
         const cityScene = this._game.scene.getScene("CityScene");
         if (cityScene) {
           for (const b of this._game.buildingData) {
             setBuildingColor(cityScene, b);
           }
         }
-        // 5) If the detail pane is currently showing a BUILDING, tear it down and re-render:
+        // If the detail pane is currently showing a BUILDING, tear it down and re-render:
         const { type, id } = this._currentDetail;
         if (
           type === "building" &&
