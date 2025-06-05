@@ -321,6 +321,15 @@ class GameControlPanel extends HTMLElement {
             setBuildingColor(cityScene, b);
           }
         }
+
+        const actieveScenes = this._game.scene.getScenes(true);
+        actieveScenes.forEach(function (scene) {
+          if (typeof scene.showError === "function") {
+            scene.showError(
+              "Groene energie is op. Alle gebouwen gebruiken nu grijze energie."
+            );
+          }
+        });
         // If the detail pane is currently showing a BUILDING, tear it down and re-render:
         const { type, id } = this._currentDetail;
         if (
