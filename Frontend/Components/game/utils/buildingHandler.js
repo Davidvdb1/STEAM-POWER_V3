@@ -86,55 +86,66 @@ export function setBuildingColor(scene, buildingObj) {
   }
 }
 
-export async function handleUpgradeRequest(scene, gameBuildingId) {
+export async function handleUpgradeRequest(
+  scene,
+  gameBuildingId,
+  finalUpgradeCost
+) {
+  // 1) Find the building object as before
   const buildingList = scene.sys.game.buildingData || [];
   const buildingObj = buildingList.find((b) => b.id === gameBuildingId);
   if (!buildingObj) return;
 
   const currentLevel = buildingObj.level.level;
   const nextLevel = currentLevel + 1;
-  const upgCost = buildingObj.level.upgradeCost;
 
+  // 2) baseUpgradeCost for reference (if you still need it elsewhere)
+  const baseUpgradeCost = buildingObj.level.upgradeCost;
+
+  // 3) Pull current player coins
   const currentCoins = scene.sys.game.currency?.coins ?? 0;
-  if (currentCoins - upgCost < -100) {
+
+  // 4) Show an error if even the penalized cost would overdraft too far
+  //    (based on your original < -100 logic; adjust as needed)
+  if (currentCoins - finalUpgradeCost < -100) {
     scene.showError(
       `Je hebt niet genoeg coins om naar niveau ${nextLevel} te gaan.`
     );
     return;
   }
 
-  const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${upgCost} coins?`;
+  // 5) Show the confirmation using finalUpgradeCost (not baseUpgradeCost)
+  const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${finalUpgradeCost} coins?`;
 
   scene.showConfirmation(msg, async (confirmed) => {
     if (!confirmed) return;
 
     try {
+      // 6) Pass finalUpgradeCost into your upgradeBuilding call
       const response = await upgradeBuilding(
         gameBuildingId,
-        { nextLevel: currentLevel + 1 },
+        {
+          nextLevel: nextLevel,
+          cost: finalUpgradeCost, // <–– send penalized cost
+        },
         scene.sys.game.token
       );
 
+      // 7) Update buildingObj locally as before
       Object.assign(buildingObj, response.gameBuilding);
 
       handleAchievements(response, window.gameContainer);
 
-      // Create a promise that resolves when stats update is complete
+      // 8) Wait for stats to update, then refresh the detail panel
       await new Promise((resolve) => {
-        // Create a one-time listener for stats update completion
         const statsUpdateListener = () => {
           resolve();
           scene.game.events.off("statsUpdateComplete", statsUpdateListener);
         };
-
-        // Add the listener before emitting the event
         scene.game.events.on("statsUpdateComplete", statsUpdateListener);
-
-        // Trigger the stats update
         scene.game.events.emit("forceStatsUpdate");
       });
 
-      // Now that stats are updated, refresh the detail panel
       document.dispatchEvent(
         new CustomEvent("scene:refresh-detail", {
           detail: { type: "building", id: gameBuildingId },

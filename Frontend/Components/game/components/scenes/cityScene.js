@@ -6,7 +6,7 @@ import {
   setMovementKeys,
   handleMovementKeys,
   handleMapDragging,
-  setupMenuButton
+  setupMenuButton,
 } from "../../utils/phaserSceneUtils.js";
 
 import {
@@ -95,7 +95,11 @@ export function createCityScene() {
       document.addEventListener(
         "scene:upgrade-building",
         (e) => {
-          handleUpgradeRequest(this, e.detail.GameBuildingId);
+          handleUpgradeRequest(
+            this,
+            e.detail.GameBuildingId,
+            e.detail.upgradeCost
+          );
         },
         false
       );
