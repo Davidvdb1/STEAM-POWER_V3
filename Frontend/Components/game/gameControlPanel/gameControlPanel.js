@@ -8,12 +8,12 @@ import {
   updateCurrency,
   recordCheckpoint,
   refactorGameStatistics,
+  toggleAllBuildingsRunsOnGreenFalse,
 } from "../service/gameService.js";
 import {
   transformBuildingData,
   buildCurrencyDisplayPayload,
   calculateTotalGreenCost,
-  calculateTotalGreenProduction,
   unpackCheckpointPayload,
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";
@@ -275,9 +275,22 @@ class GameControlPanel extends HTMLElement {
         gs.currency,
         totalGreenCost
       );
+
+      if (currencyPayload.greenEnergy < 0) {
+        currencyPayload.greenEnergy = 0;
+      }
+
       await updateCurrency(currencyId, currencyPayload, token);
 
-      this._updateStatistics();
+      await this._updateStatistics();
+
+      if (this._game.currency.greenEnergy <= 0) {
+        await toggleAllBuildingsRunsOnGreenFalse(
+          this._game.gameStatisticsId,
+          token
+        );
+        await this._updateStatistics();
+      }
     } catch (e) {
       console.error("Error updating energy:", e);
     }
@@ -306,7 +319,7 @@ class GameControlPanel extends HTMLElement {
       console.error("Error fetching stats:", e);
     }
 
-    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
+    this._energyInterval = setInterval(() => this._updateEnergy(), 10_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
   }
 

@@ -723,10 +723,8 @@ class GameStatisticsService {
     }
 
     const buildingsOnGreen = await gameStatisticsRepository.findGameBuildings({
-      where: {
-        gameStatisticsId: gameStatisticsId,
-        runsOnGreen: true,
-      },
+      gameStatisticsId: gameStatisticsId,
+      runsOnGreen: true,
     });
 
     if (buildingsOnGreen.length > 0) {
