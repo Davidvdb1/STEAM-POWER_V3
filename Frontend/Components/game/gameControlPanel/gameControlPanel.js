@@ -6,24 +6,22 @@ import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
 import { createMenuScene } from "../components/scenes/menuScene.js";
 import {
   fetchGameStatistics,
-  removeAsset,
-  getCurrencyById,
   updateCurrency,
-  upgradeBuilding,
-  toggleGameBuildingRunsOnGreen,
   recordCheckpoint,
   refactorGameStatistics,
+  toggleAllBuildingsRunsOnGreenFalse,
 } from "../service/gameService.js";
 import {
   transformBuildingData,
   buildCurrencyDisplayPayload,
   calculateTotalGreenCost,
-  calculateTotalGreenProduction,
   unpackCheckpointPayload,
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
-import { animateWrapperAndStats } from "../utils/animationHelpers.js";
+import { animateWrapperAndStats } from "../utils/animationHandler.js";
+import { showDetail } from "../utils/detailHelper.js";
+import { setBuildingColor } from "../utils/buildingHandler.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -32,6 +30,7 @@ import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
+
 import { handleAchievements } from "../utils/achievementHandler.js";
 import { showAchievementsOverview } from "../utils/achievementOverview.js";
 
@@ -48,7 +47,7 @@ template.innerHTML = /*html*/ `
     <div id="inner-container">
       <shop-sidebar></shop-sidebar>
 
-      <div class="test">
+      <div class="test" style="z-index: 1000;">
         <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
         <div id="inner-text">Ga naar binnenstad</div>
       </div>
@@ -86,6 +85,8 @@ class GameControlPanel extends HTMLElement {
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
 
+    this._currentDetail = { type: null, id: null };
+
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
@@ -113,10 +114,7 @@ class GameControlPanel extends HTMLElement {
     this._shadow.addEventListener("close-detail", () => {
       this._detailContainer.classList.add("hidden");
       this._detailContainer.innerHTML = "";
-    });
-
-    this._shadow.addEventListener("destroy-asset", (e) => {
-      this._confirmDestroyAsset(e.detail.assetId);
+      this._currentDetail = { type: null, id: null };
     });
 
     this._shadow.addEventListener("upgrade-build", (e) => {
@@ -138,6 +136,41 @@ class GameControlPanel extends HTMLElement {
     });
 
     this._loadPhaser().then(() => this._initializeGame());
+
+    this._shadow.addEventListener("destroy-asset", (e) => {
+      const assetId = e.detail.assetId;
+      document.dispatchEvent(
+        new CustomEvent("scene:destroy-asset", {
+          detail: { assetId },
+        })
+      );
+    });
+
+    document.addEventListener("asset-deleted", () => {
+      this._detailContainer.classList.add("hidden");
+      this._detailContainer.innerHTML = "";
+    });
+
+    document.addEventListener(
+      "scene:refresh-detail",
+      (e) => {
+        const { type, id } = e.detail;
+        showDetail(
+          this._detailContainer,
+          this._game.buildingData,
+          this._game.assetData,
+          type,
+          id
+        );
+      },
+      false
+    );
+
+    // this._shadow.addEventListener("close-detail", () => {
+    //   this._detailContainer.classList.add("hidden");
+    //   this._detailContainer.innerHTML = "";
+    //   this._currentDetail = { type: null, id: null };
+    // });
 
     const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
     if (bluetooth) {
@@ -176,10 +209,34 @@ class GameControlPanel extends HTMLElement {
 
     window.phaserGame = this._game;
     window.gameContainer = this._gameContainer;
-    this._game.events.on("buildingClicked", (id) =>
-      this._showBuildingDetail(id)
-    );
-    this._game.events.on("assetClicked", (id) => this._showAssetDetail(id));
+
+    this._game.events.on("buildingClicked", (id) => {
+      this._currentDetail = { type: "building", id };
+      this._detailContainer.innerHTML = "";
+      showDetail(
+        this._detailContainer,
+        this._game.buildingData,
+        this._game.assetData,
+        "building",
+        id
+      );
+    });
+
+    this._game.events.on("assetClicked", (id) => {
+      this._currentDetail = { type: "asset", id };
+      this._detailContainer.innerHTML = "";
+      showDetail(
+        this._detailContainer,
+        this._game.buildingData,
+        this._game.assetData,
+        "asset",
+        id
+      );
+    });
+
+    this._game.events.on("forceStatsUpdate", () => {
+      this._updateStatistics();
+    });
   }
 
   async _updateStatistics() {
@@ -195,6 +252,7 @@ class GameControlPanel extends HTMLElement {
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
+      this._game.currency = gs.currency;
 
       const payload = buildCurrencyDisplayPayload({
         buildings: this._game.buildingData,
@@ -208,15 +266,19 @@ class GameControlPanel extends HTMLElement {
       });
       this._statsContainer.data = payload;
       this._statsContainer.classList.remove("hidden");
+
+      // Emit event when statistics update is complete
+      this._game.events.emit("statsUpdateComplete");
     } catch (e) {
       console.error("Error fetching stats:", e);
+      // Still emit the event to prevent hanging
+      this._game.events.emit("statsUpdateComplete");
     }
   }
 
   async _updateEnergy() {
     try {
       const { token, groupId } = getAuthFromSession();
-
       const gs = await fetchGameStatistics(groupId, token);
 
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
@@ -228,20 +290,55 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
-      const totalGreenCost = calculateTotalGreenCost(this._game.buildingData);
-      const totalGreenProduction = calculateTotalGreenProduction(
-        gs.assets,
-        /* microbitValue= */ 1
-      );
+      const totalGreenCost =
+        calculateTotalGreenCost(this._game.buildingData) / 60;
 
       const { id: currencyId, payload: currencyPayload } = buildUpdatedCurrency(
         gs.currency,
-        totalGreenProduction,
         totalGreenCost
       );
+
+      if (currencyPayload.greenEnergy < 0) {
+        currencyPayload.greenEnergy = 0;
+      }
+
       await updateCurrency(currencyId, currencyPayload, token);
 
-      this._updateStatistics();
+      await this._updateStatistics();
+
+      //if greenEnergy is now zero, force all buildings off green, recolor, refresh detail ===
+      if (this._game.currency.greenEnergy <= 0) {
+        await toggleAllBuildingsRunsOnGreenFalse(
+          this._game.gameStatisticsId,
+          token
+        );
+
+        await this._updateStatistics();
+
+        const cityScene = this._game.scene.getScene("CityScene");
+        if (cityScene) {
+          for (const b of this._game.buildingData) {
+            setBuildingColor(cityScene, b);
+          }
+        }
+        // If the detail pane is currently showing a BUILDING, tear it down and re-render:
+        const { type, id } = this._currentDetail;
+        if (
+          type === "building" &&
+          id != null &&
+          !this._detailContainer.classList.contains("hidden")
+        ) {
+          // Clear whatever was inside detail‐container, then call showDetail(...) again:
+          this._detailContainer.innerHTML = "";
+          showDetail(
+            this._detailContainer,
+            this._game.buildingData,
+            this._game.assetData,
+            "building",
+            id
+          );
+        }
+      }
     } catch (e) {
       console.error("Error updating energy:", e);
     }
@@ -261,16 +358,16 @@ class GameControlPanel extends HTMLElement {
     try {
       await this._updateStatistics();
 
-      if (cityScene.setBuildingColor) {
+      if (setBuildingColor) {
         for (const b of this._game.buildingData) {
-          cityScene.setBuildingColor(b);
+          setBuildingColor(cityScene, b);
         }
       }
     } catch (e) {
       console.error("Error fetching stats:", e);
     }
 
-    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
+    this._energyInterval = setInterval(() => this._updateEnergy(), 10_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
   }
 
@@ -309,156 +406,6 @@ class GameControlPanel extends HTMLElement {
       offsetX,
       onComplete
     );
-  }
-  _showBuildingDetail(id) {
-    this._detailContainer.innerHTML = "";
-    const detail = document.createElement("building-detail");
-    const building = this._game.buildingData.find((b) => b.id === id);
-    if (building) detail.data = building;
-    this._detailContainer.appendChild(detail);
-    this._detailContainer.classList.remove("hidden");
-  }
-
-  _showAssetDetail(id) {
-    this._detailContainer.innerHTML = "";
-    const detail = document.createElement("asset-detail");
-    const asset = this._game.assetData.find((a) => a.id === id);
-    if (asset) detail.data = asset;
-    this._detailContainer.appendChild(detail);
-    this._detailContainer.classList.remove("hidden");
-  }
-
-  _confirmDestroyAsset(assetId) {
-    const asset = this._game.assetData.find((a) => a.id === assetId);
-    if (!asset) return;
-
-    const msg = `Wil je deze ${asset.type} slopen voor ${asset.destroyCost} coins?`;
-    const outer = this._game.scene.getScene("OuterCityScene");
-    outer.showConfirmation(msg, (confirmed) => {
-      if (confirmed) this._performDestroyAsset(assetId);
-    });
-  }
-
-  async _performDestroyAsset(assetId) {
-    try {
-      const token = this._game.token;
-      const currencyId = this._game.currencyId;
-      const asset = this._game.assetData.find((a) => a.id === assetId);
-      if (!asset) throw new Error("Asset not found");
-
-      const response = await removeAsset(assetId, token);
-
-      handleAchievements(response, this._gameContainer);
-
-      const cur = await getCurrencyById(currencyId, token);
-
-      const greyDelta = asset.type === "Kerncentrale" ? asset.energy : 0;
-      const updatedCurrency = {
-        greenEnergy: cur.greenEnergy,
-        greyEnergy: cur.greyEnergy - greyDelta,
-        coins: cur.coins - asset.destroyCost,
-        score: cur.score,
-      };
-
-      await updateCurrency(currencyId, updatedCurrency, token);
-      this._updateStatistics();
-
-      const outer = this._game.scene.getScene("OuterCityScene");
-      outer._removeAsset({
-        id: assetId,
-        tx: asset.xLocation,
-        ty: asset.yLocation,
-        size: { width: asset.xSize, height: asset.ySize },
-      });
-
-      this._detailContainer.classList.add("hidden");
-      this._detailContainer.innerHTML = "";
-    } catch (err) {
-      console.error("Error destroying asset:", err);
-    }
-  }
-
-  _confirmUpgradeBuilding(GameBuildingId) {
-    const building = this._game.buildingData.find(
-      (b) => b.id === GameBuildingId
-    );
-    if (!building) return;
-
-    const currentLevel = building.level.level;
-    const nextLevel = currentLevel + 1;
-    const cost = building.level.upgradeCost;
-    const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${cost} coins?`;
-
-    const scene = this._game.scene.getScene("CityScene");
-    scene.showConfirmation(msg, (confirmed) => {
-      if (confirmed) {
-        this._performUpgradeBuilding(GameBuildingId);
-      }
-    });
-  }
-
-  async _performUpgradeBuilding(GameBuildingId) {
-    try {
-      const building = this._game.buildingData.find(
-        (b) => b.id === GameBuildingId
-      );
-      if (!building) throw new Error("Building not found");
-
-      const response = await upgradeBuilding(
-        GameBuildingId,
-        { nextLevel: building.level.level + 1 },
-        this._game.token
-      );
-      Object.assign(building, response.gameBuilding);
-
-      const cityScene = this._game.scene.getScene("CityScene");
-      if (cityScene && cityScene.setBuildingColor) {
-        cityScene.setBuildingColor(building);
-      }
-      handleAchievements(response, this._gameContainer);
-      this._updateStatistics();
-
-      this._detailContainer.querySelector("building-detail").data = building;
-    } catch (err) {
-      throw new Error(`Error upgrading building: ${err.message}`);
-    }
-  }
-
-  _confirmToggleBuildingEnergy(GameBuildingId) {
-    const building = this._game.buildingData.find(
-      (b) => b.id === GameBuildingId
-    );
-    if (!building) return;
-
-    this._performToggleBuildingEnergy(GameBuildingId);
-  }
-
-  async _performToggleBuildingEnergy(GameBuildingId) {
-    try {
-      const building = this._game.buildingData.find(
-        (b) => b.id === GameBuildingId
-      );
-      if (!building) throw new Error("Building not found");
-
-      const response = await toggleGameBuildingRunsOnGreen(
-        GameBuildingId,
-        this._game.token
-      );
-
-      Object.assign(building, response);
-
-      const cityScene = this._game.scene.getScene("CityScene");
-      if (cityScene && typeof cityScene.setBuildingColor === "function") {
-        cityScene.setBuildingColor(building);
-      }
-
-      handleAchievements(response, this._gameContainer);
-      this._updateStatistics();
-
-      this._detailContainer.querySelector("building-detail").data = building;
-    } catch (err) {
-      throw new Error(`Error toggling building energy: ${err.message}`);
-    }
   }
 
   _onSaveCheckpoint() {
@@ -530,7 +477,7 @@ class GameControlPanel extends HTMLElement {
           name: b.building.name,
           runsOnGreen: b.runsOnGreen,
         };
-        cityScene.setBuildingColor(buildingInCorrectFormat);
+        setBuildingColor(cityScene, buildingInCorrectFormat);
       }
 
       const outer = this._game.scene.getScene("OuterCityScene");
@@ -541,10 +488,25 @@ class GameControlPanel extends HTMLElement {
       this._updateStatistics();
 
       this._game.events.off("assetClicked");
-      this._game.events.on("assetClicked", (id) => this._showAssetDetail(id));
+      this._game.events.on("assetClicked", (id) =>
+        showDetail(
+          this._detailContainer,
+          this._game.buildingData,
+          this._game.assetData,
+          "asset",
+          id
+        )
+      );
+
       this._game.events.off("buildingClicked");
       this._game.events.on("buildingClicked", (id) =>
-        this._showBuildingDetail(id)
+        showDetail(
+          this._detailContainer,
+          this._game.buildingData,
+          this._game.assetData,
+          "building",
+          id
+        )
       );
     } catch (err) {
       console.error("Error loading checkpoint:", err);

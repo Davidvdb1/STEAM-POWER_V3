@@ -1,6 +1,8 @@
 // import gameStatisticsService from "../../../../../Backend/service/gameStatisticsService.js";
 import { BUILDING_NAME_TRANSLATIONS } from "../../utils/buildingDefinitions.js";
-const cssResponse = await fetch('./Components/game/components/details/style.css');
+const cssResponse = await fetch(
+  "./Components/game/components/details/style.css"
+);
 const cssText = await cssResponse.text();
 
 const template = document.createElement("template");
@@ -53,7 +55,6 @@ class BuildingDetail extends HTMLElement {
     return this._data;
   }
 
-
   connectedCallback() {
     this._closeBtn.addEventListener("click", () =>
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
@@ -74,9 +75,8 @@ class BuildingDetail extends HTMLElement {
 
     const { runsOnGreen } = this._data;
 
-    this.setAttribute('runsOnGreen', runsOnGreen);
+    this.setAttribute("runsOnGreen", runsOnGreen);
 
-    // Ensure we have level data
     const lvl = this._data.buildingLevel || this._data.level;
     if (!lvl) {
       console.error("Building has no level data:", this._data);
@@ -84,41 +84,41 @@ class BuildingDetail extends HTMLElement {
     }
 
     const buildingName = this._data.name;
-    const num = lvl.level; // numeric level
-    const cost = lvl.energyCost; // kW
-    const upgCost = lvl.upgradeCost; // coins
+    const num = lvl.level;
+    const cost = lvl.energyCost;
+    const upgCost = lvl.upgradeCost;
 
-    // populate basics
     this._nameEl.textContent =
       BUILDING_NAME_TRANSLATIONS[buildingName] || buildingName;
     this._levelEl.textContent = num;
     this._energyCostEl.textContent = cost;
-    this._toggleEnergyBtn.textContent = `Op ${this._data.runsOnGreen ? 'grijze energie' : 'groene energie'} runnen`;
-
+    this._toggleEnergyBtn.textContent = `Op ${
+      this._data.runsOnGreen ? "grijze energie" : "groene energie"
+    } runnen`;
 
     this._toggleEnergyBtn.onclick = () => {
-      this.dispatchEvent(
-        new CustomEvent("toggle-building-energy", {
+      document.dispatchEvent(
+        new CustomEvent("scene:toggle-building-energy", {
           detail: { GameBuildingId: this._data.id },
           bubbles: true,
+          composed: true,
         })
       );
     };
 
     if (num < 5) {
-      // under max: show cost & button
       this._upgradeLine.textContent = `Upgrade kost: ${upgCost} coins`;
       this._upgradeBtn.style.display = "";
       this._upgradeBtn.onclick = () => {
-        this.dispatchEvent(
-          new CustomEvent("upgrade-build", {
+        document.dispatchEvent(
+          new CustomEvent("scene:upgrade-building", {
             detail: { GameBuildingId: this._data.id },
             bubbles: true,
+            composed: true,
           })
         );
       };
     } else {
-      // at max: replace line and hide button
       this._upgradeLine.textContent = "Max level";
       this._upgradeBtn.style.display = "none";
     }

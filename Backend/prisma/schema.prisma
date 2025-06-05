@@ -205,7 +205,6 @@ model Achievement {
   title       String @unique
   description String
   reward      Int
-  score       Int
   
   // Achievement can be earned by multiple GameStatistics
   gameStatistics GameStatistics[]

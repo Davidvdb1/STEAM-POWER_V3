@@ -18,6 +18,70 @@ const Checkpoint = require("../model/checkpoint");
 const GameBuildings = require("../model/gameBuildings");
 const Achievement = require("../model/achievement");
 
+const scoreCost = {
+  buildingOnGreen: 1,
+  Nature: {
+    Beuk: 4,
+    Eik: 3,
+    Buxus: 2,
+    Hulst: 1,
+  },
+  ActiveGreenSource: {
+    Windmolen: 1,
+    Zonnepaneel: 1,
+    Waterrad: 1,
+  },
+  buildingOnGrey: -1,
+  ActiveGreySource: -2,
+  energyBuildingLevel: {
+    1: -4,
+    2: -3,
+    3: -2,
+    4: -1,
+    5: 0,
+  },
+};
+
+const beginAssetCoordinates = [
+  {
+    xLocation: 65,
+    yLocation: 42,
+  },
+  {
+    xLocation: 82,
+    yLocation: 32,
+  },
+  {
+    xLocation: 128,
+    yLocation: 42,
+  },
+  {
+    xLocation: 46,
+    yLocation: 24,
+  },
+  {
+    xLocation: 123,
+    yLocation: 59,
+  },
+  {
+    xLocation: 61,
+    yLocation: 59,
+  },
+  {
+    xLocation: 91,
+    yLocation: 59,
+  },
+];
+
+const defaultKernCentrale = {
+  type: "Kerncentrale",
+  energy: 250,
+  buildCost: 20,
+  destroyCost: 20,
+  xSize: 12,
+  ySize: 10,
+};
+
 class GameStatisticsService {
   //########################################################################
   //                            GAME STATISTICS
@@ -51,7 +115,42 @@ class GameStatisticsService {
       coins: coins ?? Currency.STARTING_COINS,
       score: score ?? Currency.STARTING_SCORE,
     });
-    return await gameStatisticsRepository.create({ groupId, currency });
+    const gamestats = await gameStatisticsRepository.create({
+      groupId,
+      currency,
+    });
+
+    for (let i = 0; i < beginAssetCoordinates.length && i < 7; i++) {
+      const assetData = {
+        ...defaultKernCentrale,
+        xLocation: beginAssetCoordinates[i].xLocation,
+        yLocation: beginAssetCoordinates[i].yLocation,
+        gameStatisticsId: gamestats.id,
+      };
+
+      const assetInstance = new Asset(assetData);
+
+      await gameStatisticsRepository.addAsset(gamestats.id, assetInstance);
+    }
+
+    const totalKerncentrales = 7;
+    const totalScoreChange = scoreCost.ActiveGreySource * totalKerncentrales;
+    const totalGreyEnergy = defaultKernCentrale.energy * totalKerncentrales;
+
+    await gameStatisticsRepository.updateCurrency(gamestats.currency.id, {
+      greenEnergy: gamestats.currency.greenEnergy,
+      greyEnergy: gamestats.currency.greyEnergy + totalGreyEnergy,
+      coins: gamestats.currency.coins,
+      score: gamestats.currency.score + totalScoreChange,
+    });
+
+    return await gameStatisticsRepository.findById(gamestats.id, {
+      includeCurrency: true,
+      includeGameBuildings: true,
+      includeAssets: true,
+      includeCheckpoints: false,
+      includeGroup: false,
+    });
   }
 
   // USED FOR MANUAL TESTING
@@ -238,18 +337,37 @@ class GameStatisticsService {
 
     // Update the currency after adding the asset
     const gameStatistics = await gameStatisticsRepository.findById(statsId, {
-      includeCurrency: true, 
-      includeGameBuildings: false, 
-      includeAssets: false, 
-      includeCheckpoints: false, 
-      includeGroup: false
+      includeCurrency: true,
+      includeGameBuildings: false,
+      includeAssets: false,
+      includeCheckpoints: false,
+      includeGroup: false,
     });
 
+    let scoreChange = 0;
+
+    if (Nature.allowedTypes.includes(addedAsset.type)) {
+      scoreChange = scoreCost.Nature[addedAsset.type] || 0;
+    } else if (scoreCost.ActiveGreenSource[addedAsset.type]) {
+      scoreChange = scoreCost.ActiveGreenSource[addedAsset.type];
+    } else if (addedAsset.type === "Kerncentrale") {
+      scoreChange = scoreCost.ActiveGreySource;
+    }
+
     await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
-      greenEnergy: addedAsset.type !== "Kerncentrale" ? gameStatistics.currency.greenEnergy + addedAsset.energy : gameStatistics.currency.greenEnergy,
-      greyEnergy: addedAsset.type === "Kerncentrale" ? gameStatistics.currency.greyEnergy + addedAsset.energy : gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins - addedAsset.buildCost,
-      score: gameStatistics.currency.score,
+      greenEnergy:
+        addedAsset.type !== "Kerncentrale"
+          ? gameStatistics.currency.greenEnergy + addedAsset.energy
+          : gameStatistics.currency.greenEnergy,
+      greyEnergy:
+        addedAsset.type === "Kerncentrale"
+          ? gameStatistics.currency.greyEnergy + addedAsset.energy
+          : gameStatistics.currency.greyEnergy,
+      coins:
+        gameStatistics.currency.coins - addedAsset.buildCost < 0
+          ? gameStatistics.currency.coins - (addedAsset.buildCost * 1.1)
+          : gameStatistics.currency.coins - addedAsset.buildCost,
+      score: gameStatistics.currency.score + scoreChange,
     });
 
     // Check if any achievement for placing an asset has been achieved. If so add them to the GameStatistics object
@@ -280,18 +398,60 @@ class GameStatisticsService {
    * @param {string} assetId - The id of the asset to remove.
    * @returns {Promise<{asset: Asset, newlyEarnedAchievements: Achievement[]}>} The removed Asset object and any newly earned achievements.
    */
+
   async removeAsset(assetId) {
-    // Remove the asset from the GameStatistics object
     const removedAsset = await gameStatisticsRepository.removeAsset(assetId);
 
-    // Check if any achievement for destroying an asset has been achieved. If so add them to the GameStatistics object
+    const gameStatistics = await gameStatisticsRepository.findById(
+      removedAsset.gameStatisticsId,
+      {
+        includeCurrency: true,
+        includeGameBuildings: false,
+        includeAssets: false,
+        includeCheckpoints: false,
+        includeGroup: false,
+      }
+    );
+
+    console.log(
+      `${gameStatistics.currency.coins} - ${removedAsset.destroyCost} = ${
+        gameStatistics.currency.coins - removedAsset.destroyCost
+      }`
+    );
+
+    let scoreChange = 0;
+
+    if (Nature.allowedTypes.includes(removedAsset.type)) {
+      scoreChange = -(scoreCost.Nature[removedAsset.type] || 0);
+    } else if (scoreCost.ActiveGreenSource[removedAsset.type]) {
+      scoreChange = -scoreCost.ActiveGreenSource[removedAsset.type];
+    } else if (removedAsset.type === "Kerncentrale") {
+      scoreChange = -scoreCost.ActiveGreySource;
+    }
+
+    await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
+      greenEnergy:
+        removedAsset.type !== "Kerncentrale"
+          ? gameStatistics.currency.greenEnergy - removedAsset.energy
+          : gameStatistics.currency.greenEnergy,
+      greyEnergy:
+        removedAsset.type === "Kerncentrale"
+          ? gameStatistics.currency.greyEnergy - removedAsset.energy
+          : gameStatistics.currency.greyEnergy,
+      coins:
+        gameStatistics.currency.coins - removedAsset.destroyCost < 0
+          ? gameStatistics.currency.coins -
+            (removedAsset.destroyCost / 100) * 10
+          : gameStatistics.currency.coins,
+      score: gameStatistics.currency.score + scoreChange,
+    });
+
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       removedAsset.gameStatisticsId,
       ["Milieuheld"],
       removedAsset
     );
 
-    // Return both the removed Asset and any newly earned Achievements
     return {
       asset: removedAsset,
       newlyEarnedAchievements: newlyEarnedAchievements,
@@ -336,7 +496,8 @@ class GameStatisticsService {
    */
   async recordCheckpoint(statsId) {
     const gameStatistics = await gameStatisticsRepository.findById(statsId);
-    const achievements = await gameStatisticsRepository.getGameStatisticsAchievements(statsId);
+    const achievements =
+      await gameStatisticsRepository.getGameStatisticsAchievements(statsId);
 
     return await gameStatisticsRepository.recordCheckpoint(
       gameStatistics.id,
@@ -385,8 +546,12 @@ class GameStatisticsService {
    * @returns {Promise<GameStatistics>} The restored GameStatistics object.
    */
   async refactorGameStatistics(checkpointId) {
-    const checkpoint = await gameStatisticsRepository.findCheckpointById(checkpointId);
-    return await gameStatisticsRepository.refactorGameStatistics({checkpoint});
+    const checkpoint = await gameStatisticsRepository.findCheckpointById(
+      checkpointId
+    );
+    return await gameStatisticsRepository.refactorGameStatistics({
+      checkpoint,
+    });
   }
 
   //########################################################################
@@ -482,11 +647,12 @@ class GameStatisticsService {
         includeAssets: false,
       }
     );
+
     await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
       greenEnergy: gameStatistics.currency.greenEnergy,
       greyEnergy: gameStatistics.currency.greyEnergy,
       coins: gameStatistics.currency.coins - currentBuildingLevel.upgradeCost,
-      score: gameStatistics.currency.score,
+      score: gameStatistics.currency.score + 1,
     });
 
     // Check if any achievement for upgrading a building has been achieved. If so add them to the GameStatistics object
@@ -518,9 +684,80 @@ class GameStatisticsService {
    * @returns {Promise<GameBuildings>} The updated GameBuilding object with the toggled 'runsOnGreen' status.
    */
   async toggleGameBuildingRunsOnGreen(gameBuildingId) {
+    const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
+      gameBuildingId
+    );
+    const gameStatistics = await gameStatisticsRepository.findById(
+      gameBuilding.gameStatisticsId
+    );
+    if (gameBuilding.runsOnGreen) {
+      await gameStatisticsRepository.updateCurrency(
+        gameStatistics.currency.id,
+        {
+          greenEnergy: gameStatistics.currency.greenEnergy,
+          greyEnergy: gameStatistics.currency.greyEnergy,
+          coins: gameStatistics.currency.coins,
+          score: gameStatistics.currency.score - 1,
+        }
+      );
+    } else {
+      await gameStatisticsRepository.updateCurrency(
+        gameStatistics.currency.id,
+        {
+          greenEnergy: gameStatistics.currency.greenEnergy,
+          greyEnergy: gameStatistics.currency.greyEnergy,
+          coins: gameStatistics.currency.coins,
+          score: gameStatistics.currency.score + 1,
+        }
+      );
+    }
+
     return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
+  }
+
+  /**
+   * Fetches all game‐buildings under a given gameStatisticsId where runsOnGreen is true,
+   * subtracts 1 from the score for each of those buildings, then flips all of them to false.
+   *
+   * @async
+   * @function toggleAllGameBuildingsRunsOnGreenFalse
+   * @memberof module:service/gameStatisticsService.Service_GameBuildings
+   * @param {string} gameStatisticsId
+   * @returns {Promise<GameBuildings[]>} The list of updated GameBuilding objects
+   */
+  async toggleAllGameBuildingsRunsOnGreenFalse(gameStatisticsId) {
+    const gameStatistics = await gameStatisticsRepository.findById(
+      gameStatisticsId
+    );
+    if (!gameStatistics) {
+      throw new Error(`No GameStatistics found for id=${gameStatisticsId}`);
+    }
+
+    const buildingsOnGreen = await gameStatisticsRepository.findGameBuildings({
+      gameStatisticsId: gameStatisticsId,
+      runsOnGreen: true,
+    });
+
+    if (buildingsOnGreen.length > 0) {
+      const currentCurrency = gameStatistics.currency;
+      const decrementAmount = buildingsOnGreen.length;
+
+      await gameStatisticsRepository.updateCurrency(currentCurrency.id, {
+        greenEnergy: currentCurrency.greenEnergy,
+        greyEnergy: currentCurrency.greyEnergy,
+        coins: currentCurrency.coins,
+        score: currentCurrency.score - decrementAmount,
+      });
+    }
+
+    const updatedBuildings =
+      await gameStatisticsRepository.toggleAllGameBuildingsRunsOnGreenFalse(
+        gameStatisticsId
+      );
+
+    return updatedBuildings;
   }
 
   /**
@@ -732,23 +969,6 @@ class GameStatisticsService {
       gameStatisticsId,
       achievement
     );
-
-    // Get and update the currency after adding the achievement
-    const gameStatistics = await gameStatisticsRepository.findById(
-      gameStatisticsId,
-      {
-        includeCurrency: true,
-        includeGameBuildings: false,
-        includeAssets: false,
-      }
-    );
-
-    await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
-      greenEnergy: gameStatistics.currency.greenEnergy,
-      greyEnergy: gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins,
-      score: gameStatistics.currency.score + 1,
-    });
 
     // Return the achievement object that was already looked up
     return achievement;

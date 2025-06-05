@@ -235,6 +235,34 @@ export async function createGameBuildings(gameStatsId, token) {
   return res.json();
 }
 
+/**
+ * PUT /gameStatistics/:gameStatisticsId/buildings/green/reset
+ * Resets runsOnGreen = false on all buildings under this GameStatistics.
+ *
+ * @param {string} gameStatisticsId – the ID of the GameStatistics whose buildings you want to reset
+ * @param {string} token            – bearer token for authorization
+ * @returns {Promise<GameBuildings[]>} the updated array of GameBuilding objects
+ */
+export async function toggleAllBuildingsRunsOnGreenFalse(
+  gameStatisticsId,
+  token
+) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatisticsId}/buildings/green/reset`;
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const errBody = await res.json().catch(() => ({}));
+    throw new Error(
+      `Failed to reset runsOnGreen on all buildings: HTTP ${res.status}` +
+        (errBody.error ? ` - ${errBody.error}` : "")
+    );
+  }
 
 /**
  * Retrieves a list of all achievements and their completion status for a specific group.

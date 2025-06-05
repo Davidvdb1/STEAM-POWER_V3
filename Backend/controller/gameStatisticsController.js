@@ -397,13 +397,19 @@ router.delete("/checkpoints/:checkpointId", async (req, res) => {
  */
 router.put("/refactor/:checkpointId", async (req, res) => {
   const { checkpointId } = req.params;
-  console.log("→ [gameStatistics] refactoring game statistics for checkpointId:", checkpointId);
+  console.log(
+    "→ [gameStatistics] refactoring game statistics for checkpointId:",
+    checkpointId
+  );
 
   try {
     const gs = await gameStatisticsService.refactorGameStatistics(checkpointId);
     res.status(200).json(gs);
   } catch (error) {
-    console.error("✖ [gameStatistics] ERROR in PUT /refactor/:checkpointId →", error );
+    console.error(
+      "✖ [gameStatistics] ERROR in PUT /refactor/:checkpointId →",
+      error
+    );
     const statusCode = error.statusCode || 500;
     res.status(statusCode).json({ error: error.message });
   }
@@ -480,7 +486,6 @@ router.get(
   }
 );
 
-
 /**
  * PUT /gameStatistics/buildings/:gameBuildingId/green<br>
  * Toggles the runsOnGreen property of a GameBuilding object.
@@ -492,46 +497,73 @@ router.get(
  * @param {express.Response} res - Express response object.
  * @returns {GameBuildings} The updated GameBuilding object in the response body.
  */
-router.put(
-  "/buildings/:gameBuildingId/green",
-  async (req, res) => {
-    try {
-      const building =
-        await gameStatisticsService.toggleGameBuildingRunsOnGreen(
-          req.params.gameBuildingId
-        );
-      res.status(200).json(building);
-    } catch (error) {
-      console.error(
-        `Error setting gameBuilding ${req.params.gameBuildingId} to green:`,
-        error
-      );
-      const statusCode = error.statusCode || 400;
-      res.status(statusCode).json({ error: error.message });
-    }
+router.put("/buildings/:gameBuildingId/green", async (req, res) => {
+  try {
+    const building = await gameStatisticsService.toggleGameBuildingRunsOnGreen(
+      req.params.gameBuildingId
+    );
+    res.status(200).json(building);
+  } catch (error) {
+    console.error(
+      `Error setting gameBuilding ${req.params.gameBuildingId} to green:`,
+      error
+    );
+    const statusCode = error.statusCode || 400;
+    res.status(statusCode).json({ error: error.message });
   }
-);
-
+});
 
 /**
- *  
- *  
+ * PUT /gameStatistics/:gameStatisticsId/buildings/green/reset<br>
+ * This will force all GameBuildings under the GameStatistics to runOnGreen = false.
+ *
+ * @function toggleAllGameBuildingsRunsOnGreenFalse
+ * @memberof module:controller/gameStatisticsController.Controller_GameBuildings
+ * @param {express.Request} req
+ * @param {string}           req.params.gameStatisticsId – the GameStatistics ID whose buildings you want to reset
+ * @param {express.Response} res
+ * @returns {GameBuildings[]} The updated array of GameBuilding objects
+ */
+router.put("/:gameStatisticsId/buildings/green/reset", async (req, res) => {
+  try {
+    const gameStatisticsId = req.params.gameStatisticsId;
+    const updatedBuildings =
+      await gameStatisticsService.toggleAllGameBuildingsRunsOnGreenFalse(
+        gameStatisticsId
+      );
+
+    res.status(200).json(updatedBuildings);
+  } catch (error) {
+    console.error(
+      `Error resetting runsOnGreen for all buildings under gameStatistics ${req.params.gameStatisticsId}:`,
+      error
+    );
+    const statusCode = error.statusCode || 400;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
+/**
+ *
+ *
  * POST /gameBuildings/:gameStatisticsId<br>
  * Creates GameBuildings for a GameStatistics object.
- *  
+ *
  * @function createGameBuildings
  * @memberof module:controller/gameStatisticsController.Controller_GameBuildings
  * @param {express.Request} req - Express request object.
  * @param {string}           req.params.gameStatisticsId - The unique identifier of the GameStatistics object.
  * @param {express.Response} res - Express response object.
- *  
+ *
  * @returns {GameBuildings[]} An array of created GameBuildings objects.
  * */
 
 router.post("/gameBuildings/:gameStatisticsId", async (req, res) => {
   try {
     const gameStatisticsId = req.params.gameStatisticsId;
-    const gameBuildings = await gameStatisticsService.createGameBuildings(gameStatisticsId);
+    const gameBuildings = await gameStatisticsService.createGameBuildings(
+      gameStatisticsId
+    );
     res.status(201).json(gameBuildings);
   } catch (error) {
     console.error(
@@ -542,7 +574,6 @@ router.post("/gameBuildings/:gameStatisticsId", async (req, res) => {
     res.status(statusCode).json({ error: error.message });
   }
 });
-
 
 //########################################################################
 //                              ACHIEVEMENTS

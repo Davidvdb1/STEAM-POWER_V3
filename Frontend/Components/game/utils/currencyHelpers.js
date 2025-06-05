@@ -2,12 +2,11 @@ import { computeUpdatedGreenEnergy } from "./gameDataHelpers.js";
 
 export function buildUpdatedCurrency(
   oldCurrency,
-  totalGreenProduction,
   totalGreenCost
 ) {
   const newGreen = computeUpdatedGreenEnergy({
     oldGreenEnergy: oldCurrency.greenEnergy,
-    totalGreenProduction,
+    totalGreenProduction: 0,
     totalGreenCost,
   });
 
