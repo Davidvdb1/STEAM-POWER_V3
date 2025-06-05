@@ -81,6 +81,8 @@ class GameControlPanel extends HTMLElement {
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
 
+    this._currentDetail = { type: null, id: null };
+
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
@@ -108,6 +110,7 @@ class GameControlPanel extends HTMLElement {
     this._shadow.addEventListener("close-detail", () => {
       this._detailContainer.classList.add("hidden");
       this._detailContainer.innerHTML = "";
+      this._currentDetail = { type: null, id: null };
     });
 
     this._shadow.addEventListener("upgrade-build", (e) => {
@@ -155,6 +158,12 @@ class GameControlPanel extends HTMLElement {
       false
     );
 
+    // this._shadow.addEventListener("close-detail", () => {
+    //   this._detailContainer.classList.add("hidden");
+    //   this._detailContainer.innerHTML = "";
+    //   this._currentDetail = { type: null, id: null };
+    // });
+
     const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
     if (bluetooth) {
       this._interval = setInterval(() => {
@@ -191,25 +200,30 @@ class GameControlPanel extends HTMLElement {
 
     window.phaserGame = this._game;
     window.gameContainer = this._gameContainer;
-    this._game.events.on("buildingClicked", (id) =>
+
+    this._game.events.on("buildingClicked", (id) => {
+      this._currentDetail = { type: "building", id };
+      this._detailContainer.innerHTML = "";
       showDetail(
         this._detailContainer,
         this._game.buildingData,
         this._game.assetData,
         "building",
         id
-      )
-    );
+      );
+    });
 
-    this._game.events.on("assetClicked", (id) =>
+    this._game.events.on("assetClicked", (id) => {
+      this._currentDetail = { type: "asset", id };
+      this._detailContainer.innerHTML = "";
       showDetail(
         this._detailContainer,
         this._game.buildingData,
         this._game.assetData,
         "asset",
         id
-      )
-    );
+      );
+    });
 
     this._game.events.on("forceStatsUpdate", () => {
       this._updateStatistics();
@@ -256,7 +270,6 @@ class GameControlPanel extends HTMLElement {
   async _updateEnergy() {
     try {
       const { token, groupId } = getAuthFromSession();
-
       const gs = await fetchGameStatistics(groupId, token);
 
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
@@ -282,14 +295,44 @@ class GameControlPanel extends HTMLElement {
 
       await updateCurrency(currencyId, currencyPayload, token);
 
+      // Refresh numbers & stats on screen
       await this._updateStatistics();
 
+      // === New: if greenEnergy is now zero, force all buildings off green, recolor, refresh detail ===
       if (this._game.currency.greenEnergy <= 0) {
+        // 1) Tell server to set runsOnGreen=false for EVERY building
         await toggleAllBuildingsRunsOnGreenFalse(
           this._game.gameStatisticsId,
           token
         );
+
+        // 2) Re-fetch stats so this._game.buildingData has runsOnGreen=false everywhere
         await this._updateStatistics();
+
+        // 3) Re-render all buildings in the city scene:
+        const cityScene = this._game.scene.getScene("CityScene");
+        if (cityScene) {
+          for (const b of this._game.buildingData) {
+            setBuildingColor(cityScene, b);
+          }
+        }
+        // 5) If the detail pane is currently showing a BUILDING, tear it down and re-render:
+        const { type, id } = this._currentDetail;
+        if (
+          type === "building" &&
+          id != null &&
+          !this._detailContainer.classList.contains("hidden")
+        ) {
+          // Clear whatever was inside detail‐container, then call showDetail(...) again:
+          this._detailContainer.innerHTML = "";
+          showDetail(
+            this._detailContainer,
+            this._game.buildingData,
+            this._game.assetData,
+            "building",
+            id
+          );
+        }
       }
     } catch (e) {
       console.error("Error updating energy:", e);
