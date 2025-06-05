@@ -117,12 +117,6 @@ class GameControlPanel extends HTMLElement {
       this._currentDetail = { type: null, id: null };
     });
 
-    this._shadow.addEventListener("upgrade-build", (e) => {
-      this._confirmUpgradeBuilding(e.detail.GameBuildingId);
-    });
-    this._shadow.addEventListener("toggle-building-energy", (e) => {
-      this._confirmToggleBuildingEnergy(e.detail.GameBuildingId);
-    });
     this._statsContainer.addEventListener("saveCheckpoint", () =>
       this._onSaveCheckpoint()
     );
