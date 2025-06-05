@@ -1,6 +1,6 @@
 import { createLine } from '../utils/uiElements.js';
 
-export function createWaterWheelSettings(page2, position) {
+export function createWaterWheelSettings(page2, position, depth) {
     const waterTitle = new BABYLON.GUI.TextBlock();
     waterTitle.text = "Waterrad";
     waterTitle.fontSize = 22;
@@ -21,18 +21,17 @@ export function createWaterWheelSettings(page2, position) {
     const stepperGrid = new BABYLON.GUI.Grid();
     stepperGrid.width = "90%";
     stepperGrid.height = "60px";
-    stepperGrid.addColumnDefinition(0.2); // 20% for left
-    stepperGrid.addColumnDefinition(0.6); // 60% for center
-    stepperGrid.addColumnDefinition(0.2); // 20% for right
-    stepperGrid.background = "transparent"; // Or set if you want
-    stepperGrid.paddingBottom = "20px"
+    stepperGrid.addColumnDefinition(0.2);
+    stepperGrid.addColumnDefinition(0.6);
+    stepperGrid.addColumnDefinition(0.2);
+    stepperGrid.background = "transparent";
+    stepperGrid.paddingBottom = "20px";
     page2.addControl(stepperGrid);
 
     let currentPosition = 1;
     const minPosition = 1;
     const maxPosition = 3;
 
-    // === Left Button ===
     const leftButton = BABYLON.GUI.Button.CreateSimpleButton("leftButton", "←");
     leftButton.width = "100%";
     leftButton.height = "100%";
@@ -40,13 +39,11 @@ export function createWaterWheelSettings(page2, position) {
     leftButton.background = "white";
     stepperGrid.addControl(leftButton, 0, 0);
 
-    // === Center Value Box ===
     const valueBox = new BABYLON.GUI.Rectangle();
     valueBox.width = "100%";
     valueBox.height = "100%";
     valueBox.color = "black";
     valueBox.background = "white";
-
 
     const valueText = new BABYLON.GUI.TextBlock();
     valueText.text = `Positie ${currentPosition}`;
@@ -54,10 +51,8 @@ export function createWaterWheelSettings(page2, position) {
     valueText.fontSize = 18;
     valueText.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     valueBox.addControl(valueText);
-
     stepperGrid.addControl(valueBox, 0, 1);
 
-    // === Right Button ===
     const rightButton = BABYLON.GUI.Button.CreateSimpleButton("rightButton", "→");
     rightButton.width = "100%";
     rightButton.height = "100%";
@@ -65,12 +60,16 @@ export function createWaterWheelSettings(page2, position) {
     rightButton.background = "white";
     stepperGrid.addControl(rightButton, 0, 2);
 
-    // === Logic ===
     leftButton.onPointerUpObservable.add(() => {
         if (currentPosition > minPosition) {
             currentPosition--;
             valueText.text = `Positie ${currentPosition}`;
             position(currentPosition);
+
+            // Reset depth slider and label to 0
+            depthSlider.value = 0;
+            depthValueLabel.text = "0.00";
+            depth(0);  // Call the depth update function with 0
         }
     });
 
@@ -79,10 +78,15 @@ export function createWaterWheelSettings(page2, position) {
             currentPosition++;
             valueText.text = `Positie ${currentPosition}`;
             position(currentPosition);
+
+            // Reset depth slider and label to 0
+            depthSlider.value = 0;
+            depthValueLabel.text = "0.00";
+            depth(0);  // Call the depth update function with 0
         }
     });
 
-    page2.addControl(createLine())
+    page2.addControl(createLine());
 
     const waterTitle3 = new BABYLON.GUI.TextBlock();
     waterTitle3.text = "Verander de diepte.";
@@ -90,4 +94,34 @@ export function createWaterWheelSettings(page2, position) {
     waterTitle3.color = "white";
     waterTitle3.height = "60px";
     page2.addControl(waterTitle3);
+
+    // === Slider ===
+    const depthSlider = new BABYLON.GUI.Slider();
+    depthSlider.minimum = 0;
+    depthSlider.maximum = 0.5;
+    depthSlider.value = 0;
+    depthSlider.step = 0.01;
+    depthSlider.height = "20px";
+    depthSlider.width = "90%";
+    depthSlider.color = "white";
+    depthSlider.background = "gray";
+    depthSlider.thumbColor = "white";
+    page2.addControl(depthSlider);
+
+    // === Display value below slider ===
+    const depthValueLabel = new BABYLON.GUI.TextBlock();
+    depthValueLabel.text = `${depthSlider.value.toFixed(2)}`;
+    depthValueLabel.fontSize = 18;
+    depthValueLabel.color = "white";
+    depthValueLabel.height = "60px";
+    depthValueLabel.paddingBottom = "10px"
+    page2.addControl(depthValueLabel);
+
+    // === Update value label and callback ===
+    depthSlider.onValueChangedObservable.add((value) => {
+        depthValueLabel.text = `${value.toFixed(2)}`;
+        depth(value);
+    });
+
+    page2.addControl(createLine());
 }

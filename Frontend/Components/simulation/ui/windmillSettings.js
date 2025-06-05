@@ -34,8 +34,8 @@ export function createWindmillSettings(page1, onBladeCountChange, onManualRotati
     bladeSlider.width = "90%";
     bladeSlider.color = "white";
     bladeSlider.background = "gray";
-    bladeSlider.thumbColor = "rgba(30, 30, 30, 1.0)";
-    bladeSlider.borderColor = "rgba(30, 30, 30, 1.0)";
+    bladeSlider.thumbColor = "white";
+    bladeSlider.borderColor = "white";
     page1.addControl(bladeSlider);
 
     bladeSlider.onValueChangedObservable.add((value) => {

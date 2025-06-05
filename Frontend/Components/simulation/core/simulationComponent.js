@@ -4,6 +4,7 @@ import { updateWindmillBlades } from '../models/windmill.js';
 import { updateWindmillRotation } from '../models/windmill.js';
 import { updateAutoRotateChange } from '../models/windmill.js';
 import { updateAutoRotateChangeSolar } from '../models/solarPanel.js';
+import { updateWaterWheelDepth } from '../models/waterWheel.js';
 import { updateSolarRotation } from '../models/solarPanel.js';
 import { updateWaterWheelPosition } from '../models/waterWheel.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
@@ -174,7 +175,8 @@ export class SimulationComponent extends HTMLElement {
             (autoRotate) => this._handleAutoRotateChange(autoRotate),
             (degreesSolar) => this._handleSolarRotation(degreesSolar),
             (autoRotateSolar) => this._handleAutoRotateChangeSolar(autoRotateSolar),
-            (position) => this._handleWaterWheelPosition(position)
+            (position) => this._handleWaterWheelPosition(position),
+            (depth) => this._handleWaterWheelDepth(depth)
         );
 
         // Load all models
@@ -241,6 +243,10 @@ export class SimulationComponent extends HTMLElement {
 
     async _handleWaterWheelPosition(position) {
         await updateWaterWheelPosition(this.scene, this, position)
+    }
+
+    async _handleWaterWheelDepth(depth) {
+        await updateWaterWheelDepth(this.scene, this, depth)
     }
 }
 //#endregion CLASS
