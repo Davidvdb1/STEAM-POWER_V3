@@ -170,23 +170,18 @@ export function createButton(scene, x, y, width, height, borderRadius, text, bgC
  * @param {Function} callback - The function to call when the button is clicked
  */
 export function createMenuButton(scene, callback) {
-  const container = scene.add.container(scene.sys.game.config.width - 60, 60);
-  
   // Now we pass scene as the first parameter
   createButton(
-    scene,            // scene
-    0,                // x
-    0,                // y
-    80,               // width
-    80,               // height
-    15,               // border radius
-    'Menu',           // button text
-    0x008000,         // background color
-    callback          // callback function
+    scene,      // scene
+    scene.sys.game.config.width - 60, // x
+    60,         // y
+    90,         // width
+    50,         // height
+    15,         // border radius
+    'Menu',     // button text
+    0x008000,   // background color
+    callback    // callback function
   );
-  
-  // Set the container to a high depth so it's always on top
-  container.setDepth(1100);
 }
 
 
