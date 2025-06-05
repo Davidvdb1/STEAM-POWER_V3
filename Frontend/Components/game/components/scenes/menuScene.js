@@ -4,7 +4,6 @@ export function createMenuScene() {
   return class MenuScene extends Phaser.Scene {
     constructor() {
       super('MenuScene');
-      this.previousScene = null;
       this.width = null;
       this.height = null;
       this.centerX = null;
@@ -71,9 +70,15 @@ export function createMenuScene() {
      * @returns {void}
      */
     returnToGame() {
-      const targetScene = this.sourceScene || 'CityScene';
+      // Dispatch an event to show navigation buttons again
+      this.game.canvas.dispatchEvent(new CustomEvent('menu-closed', {
+        bubbles: true,
+        composed: true,
+        detail: { targetScene: this.sourceScene }
+      }));
+
       this.scene.stop();
-      this.scene.resume(targetScene);
+      this.scene.resume(this.sourceScene);
     }
 
 
