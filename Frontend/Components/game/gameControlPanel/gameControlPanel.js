@@ -131,7 +131,7 @@ class GameControlPanel extends HTMLElement {
     );
     document.addEventListener("asset-placed", this._boundAssetPlacedHandler);
 
-    this._gameContainer.addEventListener('show-achievements', () => {
+    this._gameContainer.addEventListener("show-achievements", () => {
       showAchievementsOverview(this._wrapper, this._shadow);
     });
 
@@ -367,7 +367,7 @@ class GameControlPanel extends HTMLElement {
       console.error("Error fetching stats:", e);
     }
 
-    this._energyInterval = setInterval(() => this._updateEnergy(), 10_000);
+    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
   }
 
