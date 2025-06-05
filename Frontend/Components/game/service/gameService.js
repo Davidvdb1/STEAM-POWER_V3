@@ -234,3 +234,29 @@ export async function createGameBuildings(gameStatsId, token) {
   }
   return res.json();
 }
+
+
+/**
+ * Retrieves a list of all achievements and their completion status for a specific group.
+ *
+ * @async
+ * @function getAchievementsOverviewByGroupId
+ * @memberof gameService
+ * @param {string} groupId - The id of the group.
+ * @param {string} token - The authentication token for the request.
+ * @returns {Promise<Object[]>} The achievements overview data as a JSON object.
+ * @throws {Error} If the HTTP request fails or returns a non-OK status.
+ */
+export async function getAchievementsOverviewByGroupId(groupId, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/achievements/overview/${groupId}`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch achievements overview: HTTP ${res.status}`);
+  }
+
+  return res.json();
+}
