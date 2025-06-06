@@ -389,7 +389,7 @@ class GameControlPanel extends HTMLElement {
 
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
-    this._taxesInterval = setInterval(() => this._handleTaxes(), 10_000);
+    this._taxesInterval = setInterval(() => this._handleTaxes(), 300_000);
   }
 
   _transitionToOuterCity() {
