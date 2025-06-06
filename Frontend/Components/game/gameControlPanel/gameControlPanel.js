@@ -426,19 +426,23 @@ class GameControlPanel extends HTMLElement {
   }
 
   _onSaveCheckpoint() {
-    const activeScene = this._game.scene.getScene("CityScene").scene.isActive()
-      ? this._game.scene.getScene("CityScene")
-      : this._game.scene.getScene("OuterCityScene");
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
 
-    activeScene.showConfirmation(
-      "Wil je je voortgang opslaan?",
-      (confirmed) => {
-        if (confirmed) {
-          this._performSaveCheckpoint();
-          activeScene.showSavedConfirmation(`Checkpoint opgeslagen!`);
-        }
+      // Check if scene is running and the required methods exist
+      if (scene.scene.isActive() && typeof scene.showConfirmation === "function" && typeof scene.showSavedConfirmation === "function") {
+        scene.showConfirmation(
+          "Wil je je voortgang opslaan?",
+          (confirmed) => {
+            if (confirmed) {
+              this._performSaveCheckpoint();
+              scene.showSavedConfirmation(`Checkpoint opgeslagen!`);
+            }
+          }
+        );
+        break;
       }
-    );
+    }
   }
 
   async _performSaveCheckpoint() {
@@ -452,25 +456,32 @@ class GameControlPanel extends HTMLElement {
   }
 
   _onLoadCheckpoint() {
-    const active = this._game.scene.isActive("CityScene")
-      ? this._game.scene.getScene("CityScene")
-      : this._game.scene.getScene("OuterCityScene");
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
 
-    active.showCheckpointList(
-      (selectedCheckpointId, selectedCheckpointName) => {
-        active.showConfirmation(
-          `Wil je ${selectedCheckpointName} laden?`,
-          (confirmed) => {
-            if (confirmed) {
-              this._performLoadCheckpoint(selectedCheckpointId);
-              active.showSavedConfirmation(
-                `Spel geladen van ${selectedCheckpointName}!`
-              );
-            }
+      // Check if scene is running and the required methods exist
+      if (scene.scene.isActive() 
+          && typeof scene.showConfirmation === "function" 
+          && typeof scene.showSavedConfirmation === "function" 
+          && typeof scene.showCheckpointList === "function") {
+        scene.showCheckpointList(
+          (selectedCheckpointId, selectedCheckpointName) => {
+            scene.showConfirmation(
+              `Wil je ${selectedCheckpointName} laden?`,
+              (confirmed) => {
+                if (confirmed) {
+                  this._performLoadCheckpoint(selectedCheckpointId);
+                  scene.showSavedConfirmation(
+                    `Spel geladen van ${selectedCheckpointName}!`
+                  );
+                }
+              }
+            );
           }
         );
+        break;
       }
-    );
+    }
   }
 
   async _performLoadCheckpoint(selectedCheckpointId) {

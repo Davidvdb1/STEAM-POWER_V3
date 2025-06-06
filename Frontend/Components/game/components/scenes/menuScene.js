@@ -1,5 +1,6 @@
 import { createButton } from '../../utils/phaserSceneUtils.js';
-import { createErrorPopup } from "../../utils/uiPopups.js";
+import { createConfirmationPopup, createErrorPopup } from "../../utils/uiPopups.js";
+import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
 
 export function createMenuScene() {
   return class MenuScene extends Phaser.Scene {
@@ -33,7 +34,9 @@ export function createMenuScene() {
       this.createMenuButtons();
       this.createBackButton();
 
+      createConfirmationPopup(this);
       createErrorPopup(this);
+      createCheckpointLoadPopup(this);
     }
 
 
