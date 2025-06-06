@@ -268,7 +268,19 @@ class GameStatisticsService {
    * @returns {Promise<Currency>} The updated Currency instance.
    */
   async updateCurrency(currencyId, payload) {
-    return gameStatisticsRepository.updateCurrency(currencyId, payload);
+    const gameStatistics = 
+    const updatedCurrency = await gameStatisticsRepository.updateCurrency(currencyId, payload);
+
+    const achievements = ["Frisse adem", "Schone lucht"]
+    const newlyEarnedAchievements = await this._trackEarnedAchievements(
+      gameBuilding.gameStatisticsId,
+      achievements
+    );
+
+    return {
+      currency: updatedCurrency,
+      newlyEarnedAchievements: newlyEarnedAchievements,
+    };
   }
 
   /**
@@ -697,7 +709,7 @@ class GameStatisticsService {
    * @function toggleGameBuildingRunsOnGreen
    * @memberof module:service/gameStatisticsService.Service_GameBuildings
    * @param {string} gameBuildingId - The id of the GameBuilding to toggle.
-   * @returns {Promise<GameBuildings>} The updated GameBuilding object with the toggled 'runsOnGreen' status.
+   * @returns {Promise<{gameBuilding: GameBuildings, newlyEarnedAchievements: Achievement[]}>} The updated GameBuilding object and any newly earned achievements.
    */
   async toggleGameBuildingRunsOnGreen(gameBuildingId) {
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
@@ -728,9 +740,20 @@ class GameStatisticsService {
       );
     }
 
-    return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
+    updatedGameBuilding = await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
+
+    const achievements = ["Eerste stap", "Efficiëntie-expert"]
+    const newlyEarnedAchievements = await this._trackEarnedAchievements(
+      gameBuilding.gameStatisticsId,
+      achievements
+    );
+
+    return {
+      gameBuilding: updatedGameBuilding,
+      newlyEarnedAchievements: newlyEarnedAchievements,
+    };
   }
 
   /**
@@ -886,14 +909,6 @@ class GameStatisticsService {
 
     // Cases and logic depend on the existing achievements and their requirements
     switch (title) {
-      case "Eerste stap":
-      // Check if at least one building uses green energy
-      // To be implemented
-
-      case "Efficiëntie-expert":
-      // Check if all buildings use green energy
-      // To be implemented
-
       case "Bouwassistent":
         // Check if any building has been upgraded to level 2
         return gameStatistics.gameBuildings.some(
@@ -937,12 +952,47 @@ class GameStatisticsService {
         // Check if a gray energy source has been destroyed
         return removedAsset ? removedAsset.type === "Kerncentrale" : false;
 
-      // case "EU gemiddelde":
-      //   // Check if more than 25% of total energy comes from green sources
-      //   const totalEnergy = gameStatistics.currency.greenEnergy + gameStatistics.currency.greyEnergy;
-      //   if (totalEnergy === 0) return false;
-      //   const greenPercentage = (gameStatistics.currency.greenEnergy / totalEnergy) * 100;
-      //   return greenPercentage > 25;
+      case "Eerste stap":
+        // Check if at least one building runs on green energy
+        return gameStatistics.gameBuildings.some(
+          (gameBuilding) => gameBuilding.runsOnGreen
+        );
+
+      case "Efficiëntie-expert":
+        // Check if all buildings run on green energy
+        return gameStatistics.gameBuildings.every(
+          (gameBuilding) => gameBuilding.runsOnGreen
+        );
+
+      case "Geen grijs":
+        // Check if no gray energy sources have been built
+        return !gameStatistics.assets.some(
+          (asset) => asset.type === "Kerncentrale"
+        );
+
+      case "Frisse adem":
+        // Check if the air quality (score) is 50 or higher
+        return gameStatistics.currency.score >= 50;
+
+      case "Schone lucht":
+        // Check if the air quality (score) is 100 (or higher)
+        return gameStatistics.currency.score >= 100;
+
+      case "EU gemiddelde":
+        // Check if 25% or more of the total energy used comes from green sources
+        const totalGreenEnergyUsed = 0
+        for (const gameBuilding of gameStatistics.gameBuildings) {
+          if (gameBuilding.runsOnGreen) {
+            totalGreenEnergyUsed += gameBuilding.buildingLevel.energy;
+          }
+        }
+
+        const totalEnergyUsed = 0
+        for (const gameBuilding of gameStatistics.gameBuildings) {
+          totalEnergyUsed += gameBuilding.buildingLevel.energy;
+        }
+
+        return totalGreenEnergyUsed / totalEnergyUsed >= 0.25;
 
       default:
         console.log(`Unknown achievement title: ${title}`);
