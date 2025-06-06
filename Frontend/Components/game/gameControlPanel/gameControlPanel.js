@@ -545,6 +545,7 @@ class GameControlPanel extends HTMLElement {
   async _handleTaxes() {
     // Get the JWT token from the session
     const { token } = getAuthFromSession();
+    const collectedTaxes = Math.floor(this._game.currency.score * 1.9);
 
     // Update the currency with the added tax revenue
     await updateCurrency(
@@ -552,7 +553,7 @@ class GameControlPanel extends HTMLElement {
       {
         greenEnergy: this._game.currency.greenEnergy,
         greyEnergy: this._game.currency.greyEnergy,
-        coins: this._game.currency.coins + Math.floor(this._game.currency.score * 1.9),
+        coins: this._game.currency.coins + collectedTaxes,
         score: this._game.currency.score
       },
       token
