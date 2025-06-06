@@ -6,6 +6,10 @@ import {
   addAsset,
   removeAsset,
 } from "../service/gameService.js";
+import {
+  calculateTotalGreyProduction,
+  calculateTotalGreyCost,
+} from "./gameDataHelpers.js";
 
 /**
  * Checks if an asset can be placed at specified coordinates
@@ -367,7 +371,7 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
   let msg;
 
   if (currentCoins - cost < 0) {
-    msg = `Wil je hier een ${type} plaatsen voor ${
+    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je hier een ${type} plaatsen voor ${
       cost + (cost / 100) * 10
     } coins?`;
   } else {
@@ -523,52 +527,114 @@ function getTileFromEvent(scene, mouseEvent) {
 }
 
 /**
- * Look up the Asset’s data (type, destroyCost, energy, etc.) from scene.sys.game.assetData.
+ * Look up the Asset's data (type, destroyCost, energy, etc.) from scene.sys.game.assetData.
  * Then ask the user via a confirmation popup. On confirm, call performDestroyAsset.
  *
  * @param {Phaser.Scene} scene   – an instance of OuterCityScene (so we can access scene.assetObjects, scene.sys.game, scene.showConfirmation, etc.)
  * @param {number|string} assetId – ID of the asset to delete
  */
-export async function requestDestroyAsset(scene, assetId) {
-  const found = scene.assetObjects.find((o) => o.id === assetId);
-  if (!found) {
-    console.warn(`Asset ${assetId} not found in scene.assetObjects.`);
-    return;
-  }
-
-  const textureKey = found.image.texture.key;
-
-  const fullAssetData =
-    (Array.isArray(scene.sys.game.assetData)
-      ? scene.sys.game.assetData.find((a) => a.id === assetId)
-      : null) || {};
-  const cost = fullAssetData.destroyCost || 0;
+export async function requestDestroyAsset(scene, assetId, destroyCost) {
+  const assets = scene.sys.game.assetData || [];
+  const assetObj = assets.find((a) => a.id === assetId);
+  if (!assetObj) return;
 
   const currentCoins = scene.sys.game.currency?.coins ?? 0;
-  if (currentCoins - cost < -100) {
+  if (currentCoins - destroyCost < -100) {
     scene.showError(
-      `Je hebt niet genoeg coins om een ${textureKey} te slopen.`
+      `Je hebt niet genoeg coins om een ${assetObj.type} te slopen.`
     );
     return;
   }
 
   let msg;
-
-  if (currentCoins - cost < 0) {
-    msg = `Wil je een ${textureKey} slopen voor ${
-      cost + (cost / 100) * 10
-    } coins?`;
+  if (currentCoins - destroyCost < 0) {
+    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
   } else {
-    msg = `Wil je een ${textureKey} slopen voor ${cost} coins?`;
+    msg = `Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
   }
 
-  scene.showConfirmation(msg, (confirmed) => {
-    if (confirmed) {
-      performDestroyAsset(scene, assetId);
+  scene.showConfirmation(msg, async (confirmed) => {
+    if (!confirmed) return;
+
+    try {
+      // 1) Call the API to remove the asset
+      const response = await removeAsset(assetId, scene.sys.game.token);
+
+      // 2) Update the local asset data from the response (if needed)
+      Object.assign(assetObj, response.asset);
+
+      // 3) Handle any achievements triggered by this removal
+      handleAchievements(response, scene.game.canvas);
+
+      // 4) Wait for any pending stats update before adjusting currency
+      await new Promise((resolve) => {
+        const statsUpdateListener = () => {
+          resolve();
+          scene.game.events.off("statsUpdateComplete", statsUpdateListener);
+        };
+        scene.game.events.on("statsUpdateComplete", statsUpdateListener);
+        scene.game.events.emit("forceStatsUpdate");
+      });
+
+      // 5) Fetch the up‐to‐date currency from the backend
+      const currencyId = scene.sys.game.currencyId;
+      const token = scene.sys.game.token;
+      const currentCurrency = await getCurrencyById(currencyId, token);
+
+      // 6) Compute grey‐energy delta if this was a power‐producing asset
+      const allAssets = scene.sys.game.assetData || [];
+      const allBuildings = scene.sys.game.buildingData || [];
+      const greyEnergyProduction = calculateTotalGreyProduction(allAssets);
+      const greyEnergyUse = calculateTotalGreyCost(allBuildings);
+
+      const fullAssetData = allAssets.find((a) => a.id === assetId) || {};
+      const greyDelta =
+        fullAssetData.type === "Kerncentrale" ? fullAssetData.energy : 0;
+
+      // 7) Build the updated currency payload
+      const updatedCurrencyPayload = {
+        greenEnergy: currentCurrency.greenEnergy,
+        greyEnergy: currentCurrency.greyEnergy - greyDelta,
+        coins:
+          currentCurrency.coins - (fullAssetData.destroyCost || destroyCost),
+        score: currentCurrency.score,
+      };
+
+      // 8) Send the new currency totals back to the server
+      await updateCurrency(currencyId, updatedCurrencyPayload, token);
+
+      // 9) Remove the sprite and free up its tiles in the scene
+      const idx = scene.assetObjects.findIndex((o) => o.id === assetId);
+      if (idx > -1) {
+        const toRem = scene.assetObjects[idx];
+        toRem.image.destroy();
+        releaseTiles(scene.tileAssetMap, toRem.tx, toRem.ty, toRem.size);
+        scene.assetObjects.splice(idx, 1);
+      }
+
+      // 10) Signal the scene to refresh currency‐related UI on next update
+      scene._currencyNeedsRefresh = true;
+
+      // 11) Close the detail popup by dispatching the close-detail event
+      document.dispatchEvent(
+        new CustomEvent("close-detail", {
+          bubbles: true,
+          composed: true,
+        })
+      );
+
+      // 12) Show success message
+      scene.showError(`${assetObj.type} succesvol gesloopt!`);
+    } catch (err) {
+      console.error("Error destroying asset in requestDestroyAsset:", err);
+      scene.showError("Kon asset niet slopen: " + err.message);
+      return;
     }
+
+    // 13) Finally, let other parts of the app know the asset is gone
+    document.dispatchEvent(new CustomEvent("asset-deleted"));
   });
 }
-
 /**
  * Actually call the API to delete the asset, update currency, remove the sprite & tiles,
  * then mark the scene so it can re‐fetch stats.
@@ -581,7 +647,32 @@ export async function performDestroyAsset(scene, assetId) {
     const token = scene.sys.game.token;
     const currencyId = scene.sys.game.currencyId;
 
-    const response = await removeAsset(assetId, token);
+    const assets = scene.sys.game.assetData || [];
+    const asset = assets.find((a) => a.id === assetId);
+    const buildingList = scene.sys.game.buildingData || [];
+
+    const greyEnergyProduction = calculateTotalGreyProduction(assets);
+    const greyEnergyUse = calculateTotalGreyCost(buildingList);
+
+    console.log(
+      `Grey energy production: ${greyEnergyProduction}, Grey energy use: ${greyEnergyUse}`
+    );
+
+    let response;
+
+    if (asset.type !== "Kerncentrale") {
+      response = await removeAsset(assetId, token);
+    } else if (
+      greyEnergyProduction - 250 - greyEnergyUse > 0 &&
+      asset.type === "Kerncentrale"
+    ) {
+      response = await removeAsset(assetId, token);
+    } else {
+      scene.showError(
+        "Kon Kerncentrale niet verwijderen omdat de grijze energieproductie dan kleiner is dan het gebruik."
+      );
+      return;
+    }
 
     handleAchievements(response, scene.game.canvas);
 

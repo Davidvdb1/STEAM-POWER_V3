@@ -58,6 +58,12 @@ class BuildingDetail extends HTMLElement {
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
     );
 
+    document.addEventListener("currencyUpdate", (e) => {
+      if (this._data) {
+        this._render();
+      }
+    });
+
     const raw = this.getAttribute("building-id");
     if (raw && !this._data) {
       const id = parseInt(raw, 10);
@@ -66,12 +72,6 @@ class BuildingDetail extends HTMLElement {
         if (b) this.data = b;
       }
     }
-
-    document.addEventListener("currencyUpdate", (e) => {
-      if (this._data) {
-        this._render();
-      }
-    });
   }
 
   _getCurrentCoins() {

@@ -1,5 +1,3 @@
-// src/components/game/GameControlPanel.js
-
 import { createLogoScene } from "../components/scenes/logoScene.js";
 import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
@@ -160,6 +158,7 @@ class GameControlPanel extends HTMLElement {
     document.addEventListener("asset-deleted", () => {
       this._detailContainer.classList.add("hidden");
       this._detailContainer.innerHTML = "";
+      this._currentDetail = { type: null, id: null };
     });
 
     document.addEventListener(

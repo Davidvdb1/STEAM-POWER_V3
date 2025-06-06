@@ -440,8 +440,7 @@ class GameStatisticsService {
           : gameStatistics.currency.greyEnergy,
       coins:
         gameStatistics.currency.coins - removedAsset.destroyCost < 0
-          ? gameStatistics.currency.coins -
-            (removedAsset.destroyCost / 100) * 10
+          ? gameStatistics.currency.coins
           : gameStatistics.currency.coins,
       score: gameStatistics.currency.score + scoreChange,
     });

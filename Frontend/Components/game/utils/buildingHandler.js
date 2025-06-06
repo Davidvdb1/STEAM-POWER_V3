@@ -7,6 +7,10 @@ import {
   toggleGameBuildingRunsOnGreen,
 } from "../service/gameService.js";
 import { handleAchievements } from "./achievementHandler.js";
+import {
+  calculateTotalGreyProduction,
+  calculateTotalGreyCost,
+} from "./gameDataHelpers.js";
 
 export function initializeBuildingRegistry(scene) {
   scene.buildingRegistry = new BuildingRegistry();
@@ -114,8 +118,13 @@ export async function handleUpgradeRequest(
     return;
   }
 
+  let msg;
   // 5) Show the confirmation using finalUpgradeCost (not baseUpgradeCost)
-  const msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${finalUpgradeCost} coins?`;
+  if (currentCoins - finalUpgradeCost < 0) {
+    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${finalUpgradeCost} coins?`;
+  } else {
+    msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${finalUpgradeCost} coins?`;
+  }
 
   scene.showConfirmation(msg, async (confirmed) => {
     if (!confirmed) return;
@@ -165,28 +174,88 @@ export async function handleToggleEnergyRequest(scene, gameBuildingId) {
   const buildingObj = buildingList.find((b) => b.id === gameBuildingId);
   if (!buildingObj) return;
 
-  try {
-    const response = await toggleGameBuildingRunsOnGreen(
-      gameBuildingId,
-      scene.sys.game.token
-    );
+  const energyCost =
+    buildingObj.level?.energyCost || buildingObj.buildingLevel?.energyCost || 0;
+  const availableGreenEnergy = scene.sys.game.currency?.greenEnergy || 0;
+  // const availableGreyEnergy = scene.sys.game.currency?.greyEnergy || 0;
+  const gamebuildingRunsOnGreen = buildingObj.runsOnGreen;
 
-    Object.assign(buildingObj, response);
+  const assets = scene.sys.game.assetData || [];
+  const greyEnergyProduction = calculateTotalGreyProduction(assets);
+  const greyEnergyUse = calculateTotalGreyCost(buildingList);
 
-    setBuildingColor(scene, buildingObj);
-    handleAchievements(response, scene.game.canvas);
-    scene.game.events.emit("forceStatsUpdate");
+  console.log("Available green energy:", availableGreenEnergy);
+  console.log("Building energy cost:", energyCost);
+  console.log("Available grey energy production:", greyEnergyProduction);
+  console.log("Available grey energy use:", greyEnergyUse);
+  console.log(
+    `greyEnergyProduction - greyEnergyUse > energyCost: ${
+      greyEnergyProduction - greyEnergyUse > energyCost
+    }`
+  );
+  // console.log(gamebuilding)
 
-    // Refresh the detail panel for this building
-    document.dispatchEvent(
-      new CustomEvent("scene:refresh-detail", {
-        detail: { type: "building", id: gameBuildingId },
-        bubbles: true,
-        composed: true,
-      })
-    );
-  } catch (err) {
-    console.error("Error toggling building energy in scene:", err);
-    scene.showError("Kon gebouw niet updaten: " + err.message);
+  if (!gamebuildingRunsOnGreen) {
+    if (energyCost / 6 < availableGreenEnergy) {
+      try {
+        const response = await toggleGameBuildingRunsOnGreen(
+          gameBuildingId,
+          scene.sys.game.token
+        );
+
+        Object.assign(buildingObj, response);
+
+        setBuildingColor(scene, buildingObj);
+        handleAchievements(response, scene.game.canvas);
+        scene.game.events.emit("forceStatsUpdate");
+
+        // Refresh the detail panel for this building
+        document.dispatchEvent(
+          new CustomEvent("scene:refresh-detail", {
+            detail: { type: "building", id: gameBuildingId },
+            bubbles: true,
+            composed: true,
+          })
+        );
+      } catch (err) {
+        console.error("Error toggling building energy in scene:", err);
+        scene.showError("Kon gebouw niet updaten: " + err.message);
+      }
+    } else {
+      scene.showError(
+        "Niet genoeg groene energie beschikbaar om deze actie uit te voeren."
+      );
+    }
+  } else {
+    if (greyEnergyProduction - greyEnergyUse > energyCost) {
+      try {
+        const response = await toggleGameBuildingRunsOnGreen(
+          gameBuildingId,
+          scene.sys.game.token
+        );
+
+        Object.assign(buildingObj, response);
+
+        setBuildingColor(scene, buildingObj);
+        handleAchievements(response, scene.game.canvas);
+        scene.game.events.emit("forceStatsUpdate");
+
+        // Refresh the detail panel for this building
+        document.dispatchEvent(
+          new CustomEvent("scene:refresh-detail", {
+            detail: { type: "building", id: gameBuildingId },
+            bubbles: true,
+            composed: true,
+          })
+        );
+      } catch (err) {
+        console.error("Error toggling building energy in scene:", err);
+        scene.showError("Kon gebouw niet updaten: " + err.message);
+      }
+    } else {
+      scene.showError(
+        "Niet genoeg grijze energie beschikbaar om deze actie uit te voeren."
+      );
+    }
   }
 }

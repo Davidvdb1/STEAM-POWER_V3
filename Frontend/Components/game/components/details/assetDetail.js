@@ -1,9 +1,8 @@
 const template = document.createElement("template");
-template.innerHTML = /*html*/ `
+template.innerHTML = `
   <style>
     @import './Components/game/components/details/style.css';
   </style>
-
   <button class="close">&times;</button>
   <div class="info">
     <p><span class="type"></span></p>
@@ -18,7 +17,6 @@ class AssetDetail extends HTMLElement {
     super();
     const shadow = this.attachShadow({ mode: "open" });
     shadow.appendChild(template.content.cloneNode(true));
-
     this._closeBtn = shadow.querySelector("button.close");
     this._typeEl = shadow.querySelector(".type");
     this._energyRow = shadow.querySelector(".energy-row");
@@ -27,17 +25,14 @@ class AssetDetail extends HTMLElement {
     this._destroyBtn = shadow.querySelector("button.destroy");
     this._infoContainer = shadow.querySelector(".info");
     this._data = null;
-    this._currentCoins = 0;
     this._basedDestroyCost = 0;
   }
 
   set data(value) {
     this._data = value;
-    if (value && value.destroyCost) {
-      this._basedDestroyCost = value.destroyCost;
-    }
     this._render();
   }
+
   get data() {
     return this._data;
   }
@@ -48,8 +43,9 @@ class AssetDetail extends HTMLElement {
     );
 
     document.addEventListener("currencyUpdate", (e) => {
-      this._currentCoins = e.detail.coins;
-      this._updateDestroyCost();
+      if (this._data) {
+        this._render();
+      }
     });
 
     const raw = this.getAttribute("asset-id");
@@ -62,62 +58,55 @@ class AssetDetail extends HTMLElement {
     }
   }
 
-    _updateDestroyCost() {
-    if (!this._data || !this._basedDestroyCost) return;
-
-    let finalDestroyCost = this._basedDestroyCost;
-    
-    if (this._currentCoins < this._basedDestroyCost) {
-      finalDestroyCost = Math.ceil(this._basedDestroyCost * 1.1);
-      this._destroyCostEl.style.color = '#ff6b6b';
-      this._destroyCostEl.style.fontWeight = 'bold';
-    } else {
-      this._destroyCostEl.style.color = ''; 
-      this._destroyCostEl.style.fontWeight = '';
-    }
-    
-    this._destroyCostEl.textContent = finalDestroyCost;
-  
+  _getCurrentCoins() {
+    return window.phaserGame?.currency?.coins || 0;
   }
 
-  setCoins(coins) {
-    this._currentCoins = coins;
-    this._updateDestroyCost();
+  _calculateFinalDestroyCost(baseCost) {
+    const currentCoins = this._getCurrentCoins();
+    return currentCoins < baseCost ? Math.ceil(baseCost * 1.1) : baseCost;
+  }
+
+  _applyCostStyling(finalCost, baseCost) {
+    const hasInsufficientFunds = this._getCurrentCoins() < baseCost;
+    if (hasInsufficientFunds) {
+      this._destroyCostEl.style.color = "#ff6b6b";
+      this._destroyCostEl.style.fontWeight = "bold";
+    } else {
+      this._destroyCostEl.style.color = "";
+      this._destroyCostEl.style.fontWeight = "";
+    }
   }
 
   _render() {
     if (!this._data) return;
-
     const { id, type, energy, destroyCost } = this._data;
-
-    // zet het type-attribuut op de host voor styling
     this.setAttribute("type", type);
-
-    // vul de velden
     this._typeEl.textContent = type;
     this._destroyCostEl.textContent = destroyCost;
 
-    // check of het een nature-asset is
     const natureTypes = ["eik", "beuk", "buxus", "hulst"];
     if (natureTypes.includes(type.toLowerCase())) {
-      // verberg energie-rij
       this._energyRow.style.display = "none";
-      // geef achtergrond lichtblauw
       this._infoContainer.classList.add("nature");
     } else {
-      // toon energie-rij normaal
       this._energyRow.style.display = "";
       this._energyEl.textContent = energy;
       this._infoContainer.classList.remove("nature");
     }
 
-    this._updateDestroyCost();
+    const finaldestroyCost = this._calculateFinalDestroyCost(destroyCost);
+    this._destroyCostEl.textContent = finaldestroyCost;
+    this._applyCostStyling(finaldestroyCost, destroyCost);
 
-    // destroy-button koppelen
+    this._destroyBtn.style.display = "";
     this._destroyBtn.onclick = () => {
-      this.dispatchEvent(
-        new CustomEvent("destroy-asset", {
-          detail: { assetId: id },
+      document.dispatchEvent(
+        new CustomEvent("scene:destroy-asset", {
+          detail: {
+            assetId: id,
+            destroyCost: finaldestroyCost,
+          },
           bubbles: true,
           composed: true,
         })

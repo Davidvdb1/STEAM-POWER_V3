@@ -47,6 +47,7 @@ export function buildCurrencyDisplayPayload({
     score: currency.score,
     greenBuildingPercentage,
     multipliers: componentMultipliers,
+    totalGreyProduction
   };
 }
 
