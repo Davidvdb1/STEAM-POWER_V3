@@ -6,6 +6,10 @@ import {
   addAsset,
   removeAsset,
 } from "../service/gameService.js";
+import {
+  calculateTotalGreyProduction,
+  calculateTotalGreyCost,
+} from "./gameDataHelpers.js";
 
 /**
  * Checks if an asset can be placed at specified coordinates
@@ -367,7 +371,7 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
   let msg;
 
   if (currentCoins - cost < 0) {
-    msg = `Wil je hier een ${type} plaatsen voor ${
+    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je hier een ${type} plaatsen voor ${
       cost + (cost / 100) * 10
     } coins?`;
   } else {
@@ -555,7 +559,7 @@ export async function requestDestroyAsset(scene, assetId) {
   let msg;
 
   if (currentCoins - cost < 0) {
-    msg = `Wil je een ${textureKey} slopen voor ${
+    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je een ${textureKey} slopen voor ${
       cost + (cost / 100) * 10
     } coins?`;
   } else {
@@ -581,7 +585,29 @@ export async function performDestroyAsset(scene, assetId) {
     const token = scene.sys.game.token;
     const currencyId = scene.sys.game.currencyId;
 
-    const response = await removeAsset(assetId, token);
+    const assets = scene.sys.game.assetData || [];
+    const asset = assets.find((a) => a.id === assetId);
+    const buildingList = scene.sys.game.buildingData || [];
+
+    const greyEnergyProduction = calculateTotalGreyProduction(assets);
+    const greyEnergyUse = calculateTotalGreyCost(buildingList);
+
+    console.log(
+      `Grey energy production: ${greyEnergyProduction}, Grey energy use: ${greyEnergyUse}`
+    );
+
+    let response;
+
+    if (asset.type !== "Kerncentrale") {
+      response = await removeAsset(assetId, token);
+    } else if ((greyEnergyProduction - 250) - greyEnergyUse > 0 && asset.type === "Kerncentrale") {
+      response = await removeAsset(assetId, token);
+    } else {
+      scene.showError(
+        "Kon Kerncentrale niet verwijderen omdat de grijze energieproductie dan kleiner is dan het gebruik."
+      );
+      return;
+    }
 
     handleAchievements(response, scene.game.canvas);
 
