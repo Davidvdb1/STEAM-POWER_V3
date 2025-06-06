@@ -576,7 +576,7 @@ class GameControlPanel extends HTMLElement {
 
       // Check if scene is running and has the showError method
       if (scene.scene.isActive() && typeof scene.showError === "function") {
-        scene.showError(`De belastingen betaalden de stad ${collectedTaxes} coins uit!`);
+        scene.showError(`De stad verdiende ${collectedTaxes} coins van de belastingen!`);
         break;
       }
     }
