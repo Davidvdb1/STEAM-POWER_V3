@@ -431,16 +431,17 @@ class GameControlPanel extends HTMLElement {
       const scene = this._game.scene.getScene(key);
 
       // Check if scene is running and the required methods exist
-      if (scene.scene.isActive() && typeof scene.showConfirmation === "function" && typeof scene.showSavedConfirmation === "function") {
-        scene.showConfirmation(
-          "Wil je je voortgang opslaan?",
-          (confirmed) => {
-            if (confirmed) {
-              this._performSaveCheckpoint();
-              scene.showSavedConfirmation(`Checkpoint opgeslagen!`);
-            }
+      if (
+        scene.scene.isActive() &&
+        typeof scene.showConfirmation === "function" &&
+        typeof scene.showSavedConfirmation === "function"
+      ) {
+        scene.showConfirmation("Wil je je voortgang opslaan?", (confirmed) => {
+          if (confirmed) {
+            this._performSaveCheckpoint();
+            scene.showSavedConfirmation(`Checkpoint opgeslagen!`);
           }
-        );
+        });
         break;
       }
     }
@@ -457,14 +458,16 @@ class GameControlPanel extends HTMLElement {
   }
 
   _onLoadCheckpoint() {
-    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+    for (const key of ["CityScene", "OuterCityScene", "MenuScene"]) {
       const scene = this._game.scene.getScene(key);
 
       // Check if scene is running and the required methods exist
-      if (scene.scene.isActive() 
-          && typeof scene.showConfirmation === "function" 
-          && typeof scene.showSavedConfirmation === "function" 
-          && typeof scene.showCheckpointList === "function") {
+      if (
+        scene.scene.isActive() &&
+        typeof scene.showConfirmation === "function" &&
+        typeof scene.showSavedConfirmation === "function" &&
+        typeof scene.showCheckpointList === "function"
+      ) {
         scene.showCheckpointList(
           (selectedCheckpointId, selectedCheckpointName) => {
             scene.showConfirmation(
@@ -545,10 +548,9 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
-
   /**
    * Handles the collection of taxes in the game.
-   * 
+   *
    * @async
    * @function _handleTaxes
    * @memberOf GameControlPanel
@@ -566,10 +568,10 @@ class GameControlPanel extends HTMLElement {
         greenEnergy: this._game.currency.greenEnergy,
         greyEnergy: this._game.currency.greyEnergy,
         coins: this._game.currency.coins + collectedTaxes,
-        score: this._game.currency.score
+        score: this._game.currency.score,
       },
       token
-    )
+    );
 
     // Show a popup on the active scene with the collected taxes
     for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
@@ -577,7 +579,9 @@ class GameControlPanel extends HTMLElement {
 
       // Check if scene is running and has the showError method
       if (scene.scene.isActive() && typeof scene.showError === "function") {
-        scene.showError(`De stad verdiende ${collectedTaxes} coins van de belastingen!`);
+        scene.showError(
+          `De stad verdiende ${collectedTaxes} coins van de belastingen!`
+        );
         break;
       }
     }

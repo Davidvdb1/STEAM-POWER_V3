@@ -661,6 +661,15 @@ class GameStatisticsService {
       coins: newCoinTotal,
       score: gameStats.currency.score,
     });
+    const buildingAchievements = [
+      "Bouwassistent",
+      "Bouwmeester",
+      "Bouwkampioen",
+    ];
+    const newlyEarnedAchievements = await this._trackEarnedAchievements(
+      gameStats.id,
+      buildingAchievements
+    );
 
     // 8) Fetch the BuildingLevel entry for nextLevel
     const nextLevelObj =
@@ -685,7 +694,7 @@ class GameStatisticsService {
 
     return {
       gameBuilding: updatedGameBuildingRecord,
-      newlyEarnedAchievements: [],
+      newlyEarnedAchievements: newlyEarnedAchievements,
     };
   }
 
@@ -897,19 +906,19 @@ class GameStatisticsService {
       case "Bouwassistent":
         // Check if any building has been upgraded to level 2
         return gameStatistics.gameBuildings.some(
-          (gameBuilding) => gameBuilding.buildingLevel.level >= 2
+          (gameBuilding) => gameBuilding.buildingLevel.level >= 1
         );
 
       case "Bouwmeester":
         // Check if any building has been upgraded to level 5 (maximum)
         return gameStatistics.gameBuildings.some(
-          (gameBuilding) => gameBuilding.buildingLevel.level === 5
+          (gameBuilding) => gameBuilding.buildingLevel.level === 4
         );
 
       case "Bouwkampioen":
         // Check if all buildings have been upgraded to level 5 (maximum)
         return gameStatistics.gameBuildings.every(
-          (gameBuilding) => gameBuilding.buildingLevel.level === 5
+          (gameBuilding) => gameBuilding.buildingLevel.level === 4
         );
 
       case "Energie-ingenieur":
