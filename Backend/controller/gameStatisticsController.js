@@ -170,12 +170,12 @@ router.get("/:id/currency", async (req, res) => {
 
 /**
  * PUT /gameStatistics/:id/currency<br>
- * Updates the Currency object associated with a GameStatistics entry.
+ * Updates a Currency object.
  *
  * @function updateCurrency
  * @memberof module:controller/gameStatisticsController.Controller_Currency
  * @param {express.Request}  req                      – Express request object.
- * @param {string}           req.params.id            – The unique identifier of the GameStatistics entry.
+ * @param {string}           req.params.currencyId    – The id of the currency object to update.
  * @param {number}           req.body.greenEnergy     – The new green energy value.
  * @param {number}           req.body.greyEnergy      – The new grey energy value.
  * @param {number}           req.body.coins           – The new coins value.
@@ -183,16 +183,16 @@ router.get("/:id/currency", async (req, res) => {
  * @param {express.Response} res                      – Express response object.
  * @returns {Currency}                               – The updated Currency object.
  */
-router.put("/:id/currency", async (req, res) => {
+router.put("/:currencyId/currency", async (req, res) => {
   console.log("updateCurrency payload:", req.body);
   try {
     const updated = await gameStatisticsService.updateCurrency(
-      req.params.id,
+      req.params.currencyId,
       req.body
     );
     res.json(updated);
   } catch (error) {
-    console.error(`Error updating currency ${req.params.id}:`, error);
+    console.error(`Error updating currency ${req.params.currencyId}:`, error);
     res.status(error.statusCode || 400).json({ error: error.message });
   }
 });
