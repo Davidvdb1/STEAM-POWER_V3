@@ -202,14 +202,13 @@ class GameControlPanel extends HTMLElement {
     const LogoScene = createLogoScene(this._startButton);
     const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();
-    const MenuScene = createMenuScene();
 
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: this._shadow.getElementById("game-container"),
       width: 140 * 16,
       height: 70 * 16,
-      scene: [LogoScene, CityScene, OuterCityScene, MenuScene],
+      scene: [LogoScene, CityScene, OuterCityScene],
       backgroundColor: "#9bd5e4",
       pixelArt: true,
       scale: {
