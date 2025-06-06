@@ -83,8 +83,8 @@ export async function removeAsset(assetId, token) {
   return res.json();
 }
 
-export async function updateCurrency(groupId, currencyData, token) {
-  const url = `${window.env.BACKEND_URL}/gameStatistics/${groupId}/currency`;
+export async function updateCurrency(currencyId, currencyData, token) {
+  const url = `${window.env.BACKEND_URL}/gameStatistics/${currencyId}/currency`;
   const res = await fetch(url, {
     method: "PUT",
     headers: {

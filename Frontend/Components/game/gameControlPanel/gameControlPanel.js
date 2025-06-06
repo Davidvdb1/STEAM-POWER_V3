@@ -388,6 +388,7 @@ class GameControlPanel extends HTMLElement {
 
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
+    this._taxesInterval = setInterval(() => this._handleTaxes(), 300_000);
 
     this._game.scene.remove("LogoScene");
   }
@@ -426,19 +427,23 @@ class GameControlPanel extends HTMLElement {
   }
 
   _onSaveCheckpoint() {
-    const activeScene = this._game.scene.getScene("CityScene").scene.isActive()
-      ? this._game.scene.getScene("CityScene")
-      : this._game.scene.getScene("OuterCityScene");
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
 
-    activeScene.showConfirmation(
-      "Wil je je voortgang opslaan?",
-      (confirmed) => {
-        if (confirmed) {
-          this._performSaveCheckpoint();
-          activeScene.showSavedConfirmation(`Checkpoint opgeslagen!`);
-        }
+      // Check if scene is running and the required methods exist
+      if (scene.scene.isActive() && typeof scene.showConfirmation === "function" && typeof scene.showSavedConfirmation === "function") {
+        scene.showConfirmation(
+          "Wil je je voortgang opslaan?",
+          (confirmed) => {
+            if (confirmed) {
+              this._performSaveCheckpoint();
+              scene.showSavedConfirmation(`Checkpoint opgeslagen!`);
+            }
+          }
+        );
+        break;
       }
-    );
+    }
   }
 
   async _performSaveCheckpoint() {
@@ -452,25 +457,32 @@ class GameControlPanel extends HTMLElement {
   }
 
   _onLoadCheckpoint() {
-    const active = this._game.scene.isActive("CityScene")
-      ? this._game.scene.getScene("CityScene")
-      : this._game.scene.getScene("OuterCityScene");
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
 
-    active.showCheckpointList(
-      (selectedCheckpointId, selectedCheckpointName) => {
-        active.showConfirmation(
-          `Wil je ${selectedCheckpointName} laden?`,
-          (confirmed) => {
-            if (confirmed) {
-              this._performLoadCheckpoint(selectedCheckpointId);
-              active.showSavedConfirmation(
-                `Spel geladen van ${selectedCheckpointName}!`
-              );
-            }
+      // Check if scene is running and the required methods exist
+      if (scene.scene.isActive() 
+          && typeof scene.showConfirmation === "function" 
+          && typeof scene.showSavedConfirmation === "function" 
+          && typeof scene.showCheckpointList === "function") {
+        scene.showCheckpointList(
+          (selectedCheckpointId, selectedCheckpointName) => {
+            scene.showConfirmation(
+              `Wil je ${selectedCheckpointName} laden?`,
+              (confirmed) => {
+                if (confirmed) {
+                  this._performLoadCheckpoint(selectedCheckpointId);
+                  scene.showSavedConfirmation(
+                    `Spel geladen van ${selectedCheckpointName}!`
+                  );
+                }
+              }
+            );
           }
         );
+        break;
       }
-    );
+    }
   }
 
   async _performLoadCheckpoint(selectedCheckpointId) {
@@ -531,6 +543,47 @@ class GameControlPanel extends HTMLElement {
       if (outer?.showError)
         outer.showError("Kon checkpoint niet laden: " + err.message);
     }
+  }
+
+
+  /**
+   * Handles the collection of taxes in the game.
+   * 
+   * @async
+   * @function _handleTaxes
+   * @memberOf GameControlPanel
+   * @returns {Promise<void>} Resolves when the tax handling process is complete.
+   */
+  async _handleTaxes() {
+    // Get the JWT token from the session
+    const { token } = getAuthFromSession();
+    const collectedTaxes = Math.floor(this._game.currency.score * 1.9);
+
+    // Update the currency with the added tax revenue
+    await updateCurrency(
+      this._game.currency.id,
+      {
+        greenEnergy: this._game.currency.greenEnergy,
+        greyEnergy: this._game.currency.greyEnergy,
+        coins: this._game.currency.coins + collectedTaxes,
+        score: this._game.currency.score
+      },
+      token
+    )
+
+    // Show a popup on the active scene with the collected taxes
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
+
+      // Check if scene is running and has the showError method
+      if (scene.scene.isActive() && typeof scene.showError === "function") {
+        scene.showError(`De stad verdiende ${collectedTaxes} coins van de belastingen!`);
+        break;
+      }
+    }
+
+    // Update the statistics after collecting taxes to rerender the currency display
+    await this._updateStatistics();
   }
 }
 
