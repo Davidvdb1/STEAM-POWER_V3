@@ -389,6 +389,8 @@ class GameControlPanel extends HTMLElement {
 
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
+
+    this._game.scene.remove("LogoScene");
   }
 
   _transitionToOuterCity() {
