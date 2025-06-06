@@ -4,7 +4,7 @@ import {
   setMovementKeys,
   handleMovementKeys,
   handleMapDragging,
-  setupMenuButton
+  setupMenuButton,
 } from "../../utils/phaserSceneUtils.js";
 import {
   setupAssetDragAndDrop,
@@ -88,8 +88,7 @@ export function createOuterCityScene() {
       document.addEventListener(
         "scene:destroy-asset",
         (e) => {
-          const assetId = e.detail.assetId;
-          requestDestroyAsset(this, assetId);
+          requestDestroyAsset(this, e.detail.assetId, e.detail.destroyCost);
         },
         false
       );
