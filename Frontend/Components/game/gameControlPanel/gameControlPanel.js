@@ -89,6 +89,23 @@ class GameControlPanel extends HTMLElement {
     this.wind = 1;
     this.water = 1;
 
+    this._onAssetDeleted = () => {
+      this._detailContainer.classList.add("hidden");
+      this._detailContainer.innerHTML = "";
+      this._currentDetail = { type: null, id: null };
+    };
+
+    this._onSceneRefreshDetail = (e) => {
+      const { type, id } = e.detail;
+      showDetail(
+        this._detailContainer,
+        this._game.buildingData,
+        this._game.assetData,
+        type,
+        id
+      );
+    };
+
     this._boundAssetPlacedHandler = () => this._updateStatistics();
   }
 
@@ -155,25 +172,10 @@ class GameControlPanel extends HTMLElement {
       );
     });
 
-    document.addEventListener("asset-deleted", () => {
-      this._detailContainer.classList.add("hidden");
-      this._detailContainer.innerHTML = "";
-      this._currentDetail = { type: null, id: null };
-    });
-
+    document.addEventListener("asset-deleted", this._onAssetDeleted);
     document.addEventListener(
       "scene:refresh-detail",
-      (e) => {
-        const { type, id } = e.detail;
-        showDetail(
-          this._detailContainer,
-          this._game.buildingData,
-          this._game.assetData,
-          type,
-          id
-        );
-      },
-      false
+      this._onSceneRefreshDetail
     );
 
     // this._shadow.addEventListener("close-detail", () => {
@@ -191,10 +193,35 @@ class GameControlPanel extends HTMLElement {
   }
 
   disconnectedCallback() {
-    document.removeEventListener("asset-placed", this._boundAssetPlacedHandler);
+    // 1) Destroy Phaser
+    if (this._game && typeof this._game.destroy === "function") {
+      this._game.destroy(true);
+      this._game = null;
+    }
+
+    // 2) Clear all intervals
     clearInterval(this._interval);
     clearInterval(this._energyInterval);
     clearInterval(this._statsInterval);
+
+    // 3) Remove document‐level listeners
+    document.removeEventListener("asset-placed", this._boundAssetPlacedHandler);
+    document.removeEventListener("asset-deleted", this._onAssetDeleted);
+    document.removeEventListener(
+      "scene:refresh-detail",
+      this._onSceneRefreshDetail
+    );
+
+    // 4) Null out references as a courtesy
+    this._boundAssetPlacedHandler = null;
+    this._onAssetDeleted = null;
+    this._onSceneRefreshDetail = null;
+    this._statsContainer = null;
+    this._startButton = null;
+    this._innerContainer = null;
+    this._outerContainer = null;
+    this._wrapper = null;
+    this._detailContainer = null;
   }
 
   _initializeGame() {
@@ -274,7 +301,6 @@ class GameControlPanel extends HTMLElement {
         },
       });
       this._statsContainer.data = payload;
-      this._statsContainer.classList.remove("hidden");
 
       // Emit event when statistics update is complete
       this._game.events.emit("statsUpdateComplete");
@@ -363,29 +389,38 @@ class GameControlPanel extends HTMLElement {
   }
 
   async _onStartClick() {
-    // 1) Hide the “Start” button immediately, but keep LogoScene visible:
+    // 1) Hide the “Start” button immediately (LogoScene still visible).
     this._startButton.classList.add("hidden");
 
-    // 2) Launch CityScene *in the background* (LogoScene remains on screen)
+    // 2) Start CityScene “in the background” (LogoScene stays on top).
     this._game.scene.run("CityScene");
 
-    // 3) Wait until CityScene’s create() hook fires.
-    //    We can grab the scene instance and listen for its "create" event:
+    // 3) Wait for CityScene’s create() to finish.
     const cityScene = this._game.scene.getScene("CityScene");
     await new Promise((resolve) => {
       if (cityScene.sys.isCreated) {
-        // If it’s already created (unlikely), resolve immediately:
         resolve();
       } else {
-        // Otherwise wait for its ‘create’ event
         cityScene.events.once("create", () => resolve());
       }
     });
 
-    // 4) Now that CityScene is “created,” we still keep LogoScene visible.
-    //    Next step: fetch stats, color buildings, etc. (just like you did before).
+    // ───────────────────────────────────────────────────────────────────────
+    // 4) BEFORE fetching stats, set up a one‐time listener for “data-ready”:
+    //    This promise will resolve as soon as <currency-display> finishes rendering.
+    const dataReadyPromise = new Promise((resolve) => {
+      const onDataReady = () => {
+        this._statsContainer.removeEventListener("data-ready", onDataReady);
+        resolve();
+      };
+      this._statsContainer.addEventListener("data-ready", onDataReady);
+    });
+    // ───────────────────────────────────────────────────────────────────────
+
+    // 5) Fetch stats and recolor buildings—but leave <currency-display> hidden.
+    //    As soon as _updateStatistics() sets `this._statsContainer.data = payload`,
+    //    the <currency-display> setter will dispatch “data-ready” that we’re now listening for.
     try {
-      // a) Fetch and apply stats, then recolor buildings in CityScene
       await this._updateStatistics();
       if (typeof setBuildingColor === "function") {
         for (const b of this._game.buildingData) {
@@ -394,18 +429,24 @@ class GameControlPanel extends HTMLElement {
       }
     } catch (err) {
       console.error("Error fetching stats:", err);
-      // In case of error, we still proceed to switch scenes so the user isn't locked on logo.
+      // Even on error, we still allow the flow to continue so the user isn’t stuck on Logo.
     }
 
-    // 5) All data is now in place. Time to remove LogoScene and actually “show” CityScene:
+    // 6) Wait here until <currency-display> has truly rendered:
+    await dataReadyPromise;
+
+    // ───────────────────────────────────────────────────────────────────────
+    // 7) ONLY NOW: un‐hide the currency display, stop LogoScene, and bring CityScene to front.
+    this._statsContainer.classList.remove("hidden");
     this._game.scene.stop("LogoScene");
     this._game.scene.bringToTop("CityScene");
+    // ───────────────────────────────────────────────────────────────────────
 
-    // 6) Now that CityScene is up front, show the “to outer city” button:
+    // 8) Show the “naar buitenstad” button (everything is fully painted).
     this._outerContainer.style.display = "flex";
     this._innerContainer.style.display = "none";
 
-    // 7) Finally, set up your periodic energy/stat updates exactly as before:
+    // 9) Restart your periodic energy/stat updates as before.
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
   }

@@ -95,12 +95,11 @@ class CurrencyDisplay extends HTMLElement {
     this.loadBtn.addEventListener("click", () => this._onLoad());
     this.saveBtn.addEventListener("click", () => this._onSave());
 
-    const observer = new MutationObserver((mutationsList) => {
+    this._observer = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
         if (mutation.type === "childList") {
           const newScore = Number(this.scoreEl.textContent);
           if (!isNaN(newScore)) {
-            const hue = newScore * 1.2;
             let color = "#00ff00"; // groen
             if (newScore < 30) color = "#ff0000"; // rood
             else if (newScore < 60) color = "#ffa500"; // oranje
@@ -110,8 +109,19 @@ class CurrencyDisplay extends HTMLElement {
         }
       }
     });
+    this._observer.observe(this.scoreEl, { childList: true });
+  }
 
-    observer.observe(this.scoreEl, { childList: true });
+  disconnectedCallback() {
+    // 1) Disconnect the MutationObserver so it won't keep running
+    if (this._observer) {
+      this._observer.disconnect();
+      this._observer = null;
+    }
+
+    // 2) Remove the click listeners on the buttons
+    this.loadBtn.removeEventListener("click", () => this._onLoad());
+    this.saveBtn.removeEventListener("click", () => this._onSave());
   }
 
   /**
@@ -163,6 +173,13 @@ class CurrencyDisplay extends HTMLElement {
     if (multipliers) {
       this._updateMultipliers(multipliers);
     }
+
+    this.dispatchEvent(
+      new CustomEvent("data-ready", {
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 
   _updateMultipliers({ solar, water, wind }) {

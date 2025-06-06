@@ -42,6 +42,11 @@ class BuildingDetail extends HTMLElement {
     this._upgradeBtn = shadow.querySelector(".upgrade");
     this._toggleEnergyBtn = shadow.querySelector(".toggleEnergy");
     this._data = null;
+    this._onCurrencyUpdate = () => {
+      if (this._data) {
+        this._render();
+      }
+    };
   }
 
   set data(value) {
@@ -58,11 +63,7 @@ class BuildingDetail extends HTMLElement {
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
     );
 
-    document.addEventListener("currencyUpdate", (e) => {
-      if (this._data) {
-        this._render();
-      }
-    });
+    document.addEventListener("currencyUpdate", this._onCurrencyUpdate);
 
     const raw = this.getAttribute("building-id");
     if (raw && !this._data) {
@@ -72,6 +73,10 @@ class BuildingDetail extends HTMLElement {
         if (b) this.data = b;
       }
     }
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener("currencyUpdate", this._onCurrencyUpdate);
   }
 
   _getCurrentCoins() {

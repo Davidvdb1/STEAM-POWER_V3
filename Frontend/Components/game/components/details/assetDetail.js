@@ -17,6 +17,7 @@ class AssetDetail extends HTMLElement {
     super();
     const shadow = this.attachShadow({ mode: "open" });
     shadow.appendChild(template.content.cloneNode(true));
+
     this._closeBtn = shadow.querySelector("button.close");
     this._typeEl = shadow.querySelector(".type");
     this._energyRow = shadow.querySelector(".energy-row");
@@ -26,6 +27,12 @@ class AssetDetail extends HTMLElement {
     this._infoContainer = shadow.querySelector(".info");
     this._data = null;
     this._basedDestroyCost = 0;
+
+    this._onCurrencyUpdate = () => {
+      if (this._data) {
+        this._render();
+      }
+    };
   }
 
   set data(value) {
@@ -42,11 +49,7 @@ class AssetDetail extends HTMLElement {
       this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
     );
 
-    document.addEventListener("currencyUpdate", (e) => {
-      if (this._data) {
-        this._render();
-      }
-    });
+    document.addEventListener("currencyUpdate", this._onCurrencyUpdate);
 
     const raw = this.getAttribute("asset-id");
     if (raw && !this._data) {
@@ -56,6 +59,10 @@ class AssetDetail extends HTMLElement {
         if (a) this.data = a;
       }
     }
+  }
+
+  disconnectedCallback() {
+    document.removeEventListener("currencyUpdate", this._onCurrencyUpdate);
   }
 
   _getCurrentCoins() {
