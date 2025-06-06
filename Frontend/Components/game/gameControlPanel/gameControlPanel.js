@@ -487,9 +487,9 @@ class GameControlPanel extends HTMLElement {
 
   _onSaveCheckpoint() {
     for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
-      const scene = this._game.scene.getScene(key);
+      const scene = this._game?.scene?.getScene(key);
+      if (!scene) continue; // skip if scene is not yet created
 
-      // Check if scene is running and the required methods exist
       if (
         scene.scene.isActive() &&
         typeof scene.showConfirmation === "function" &&
@@ -518,9 +518,9 @@ class GameControlPanel extends HTMLElement {
 
   _onLoadCheckpoint() {
     for (const key of ["CityScene", "OuterCityScene", "MenuScene"]) {
-      const scene = this._game.scene.getScene(key);
+      const scene = this._game?.scene?.getScene(key);
+      if (!scene) continue; // skip if scene is not yet created
 
-      // Check if scene is running and the required methods exist
       if (
         scene.scene.isActive() &&
         typeof scene.showConfirmation === "function" &&
