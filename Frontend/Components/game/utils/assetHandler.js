@@ -625,7 +625,6 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
 
       // 12) Show success message
       scene.showError(`${assetObj.type} succesvol gesloopt!`);
-
     } catch (err) {
       console.error("Error destroying asset in requestDestroyAsset:", err);
       scene.showError("Kon asset niet slopen: " + err.message);
@@ -634,16 +633,8 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
 
     // 13) Finally, let other parts of the app know the asset is gone
     document.dispatchEvent(new CustomEvent("asset-deleted"));
-    document.dispatchEvent(
-      new CustomEvent("scene:refresh-detail", {
-        detail: { type: "asset", id: assetId },
-        bubbles: true,
-        composed: true,
-      })
-    );
   });
 }
-
 /**
  * Actually call the API to delete the asset, update currency, remove the sprite & tiles,
  * then mark the scene so it can re‐fetch stats.
