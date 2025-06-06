@@ -527,7 +527,7 @@ function getTileFromEvent(scene, mouseEvent) {
 }
 
 /**
- * Look up the Asset’s data (type, destroyCost, energy, etc.) from scene.sys.game.assetData.
+ * Look up the Asset's data (type, destroyCost, energy, etc.) from scene.sys.game.assetData.
  * Then ask the user via a confirmation popup. On confirm, call performDestroyAsset.
  *
  * @param {Phaser.Scene} scene   – an instance of OuterCityScene (so we can access scene.assetObjects, scene.sys.game, scene.showConfirmation, etc.)
@@ -548,9 +548,7 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
 
   let msg;
   if (currentCoins - destroyCost < 0) {
-    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je deze ${
-      assetObj.type
-    } slopen voor ${destroyCost + Math.ceil(destroyCost * 0.1)} coins?`;
+    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
   } else {
     msg = `Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
   }
@@ -616,13 +614,25 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
 
       // 10) Signal the scene to refresh currency‐related UI on next update
       scene._currencyNeedsRefresh = true;
+
+      // 11) Close the detail popup by dispatching the close-detail event
+      document.dispatchEvent(
+        new CustomEvent("close-detail", {
+          bubbles: true,
+          composed: true,
+        })
+      );
+
+      // 12) Show success message
+      scene.showError(`${assetObj.type} succesvol gesloopt!`);
+
     } catch (err) {
       console.error("Error destroying asset in requestDestroyAsset:", err);
       scene.showError("Kon asset niet slopen: " + err.message);
       return;
     }
 
-    // 11) Finally, let other parts of the app know the asset is gone
+    // 13) Finally, let other parts of the app know the asset is gone
     document.dispatchEvent(new CustomEvent("asset-deleted"));
     document.dispatchEvent(
       new CustomEvent("scene:refresh-detail", {
