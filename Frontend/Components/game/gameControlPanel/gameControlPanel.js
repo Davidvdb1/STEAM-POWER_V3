@@ -363,33 +363,51 @@ class GameControlPanel extends HTMLElement {
   }
 
   async _onStartClick() {
+    // 1) Hide the “Start” button immediately, but keep LogoScene visible:
     this._startButton.classList.add("hidden");
-    this._game.scene.start("CityScene");
-    this._outerContainer.style.display = "flex";
-    this._innerContainer.style.display = "none";
 
+    // 2) Launch CityScene *in the background* (LogoScene remains on screen)
+    this._game.scene.run("CityScene");
+
+    // 3) Wait until CityScene’s create() hook fires.
+    //    We can grab the scene instance and listen for its "create" event:
     const cityScene = this._game.scene.getScene("CityScene");
     await new Promise((resolve) => {
-      cityScene.events.once("create", resolve);
+      if (cityScene.sys.isCreated) {
+        // If it’s already created (unlikely), resolve immediately:
+        resolve();
+      } else {
+        // Otherwise wait for its ‘create’ event
+        cityScene.events.once("create", () => resolve());
+      }
     });
 
+    // 4) Now that CityScene is “created,” we still keep LogoScene visible.
+    //    Next step: fetch stats, color buildings, etc. (just like you did before).
     try {
+      // a) Fetch and apply stats, then recolor buildings in CityScene
       await this._updateStatistics();
-
-      if (setBuildingColor) {
+      if (typeof setBuildingColor === "function") {
         for (const b of this._game.buildingData) {
           setBuildingColor(cityScene, b);
         }
       }
-    } catch (e) {
-      console.error("Error fetching stats:", e);
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+      // In case of error, we still proceed to switch scenes so the user isn't locked on logo.
     }
 
+    // 5) All data is now in place. Time to remove LogoScene and actually “show” CityScene:
+    this._game.scene.stop("LogoScene");
+    this._game.scene.bringToTop("CityScene");
+
+    // 6) Now that CityScene is up front, show the “to outer city” button:
+    this._outerContainer.style.display = "flex";
+    this._innerContainer.style.display = "none";
+
+    // 7) Finally, set up your periodic energy/stat updates exactly as before:
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
-    this._taxesInterval = setInterval(() => this._handleTaxes(), 300_000);
-
-    this._game.scene.remove("LogoScene");
   }
 
   _transitionToOuterCity() {
