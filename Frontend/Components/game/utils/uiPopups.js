@@ -26,7 +26,7 @@ export function createErrorPopup(scene) {
       fontStyle: "bold",
     })
     .setOrigin(0.5)
-    .setDepth(200)
+    .setDepth(2000)
     .setScrollFactor(0)
     .setVisible(false);
 

@@ -1,4 +1,5 @@
 import { createButton } from '../../utils/phaserSceneUtils.js';
+import { createErrorPopup } from "../../utils/uiPopups.js";
 
 export function createMenuScene() {
   return class MenuScene extends Phaser.Scene {
@@ -31,6 +32,8 @@ export function createMenuScene() {
     
       this.createMenuButtons();
       this.createBackButton();
+
+      createErrorPopup(this);
     }
 
 

@@ -389,6 +389,7 @@ class GameControlPanel extends HTMLElement {
 
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
+    this._taxesInterval = setInterval(() => this._handleTaxes(), 10_000);
   }
 
   _transitionToOuterCity() {
@@ -530,6 +531,46 @@ class GameControlPanel extends HTMLElement {
       if (outer?.showError)
         outer.showError("Kon checkpoint niet laden: " + err.message);
     }
+  }
+
+
+  /**
+   * Handles the collection of taxes in the game.
+   * 
+   * @async
+   * @function _handleTaxes
+   * @memberOf GameControlPanel
+   * @returns {Promise<void>} Resolves when the tax handling process is complete.
+   */
+  async _handleTaxes() {
+    // Get the JWT token from the session
+    const { token } = getAuthFromSession();
+
+    // Update the currency with the added tax revenue
+    await updateCurrency(
+      this._game.currency.id,
+      {
+        greenEnergy: this._game.currency.greenEnergy,
+        greyEnergy: this._game.currency.greyEnergy,
+        coins: this._game.currency.coins + Math.floor(this._game.currency.score * 1.9),
+        score: this._game.currency.score
+      },
+      token
+    )
+
+    // Show a popup on the active scene with the collected taxes
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
+
+      // Check if scene is running and has the showError method
+      if (scene.scene.isActive() && typeof scene.showError === "function") {
+        scene.showError(`De belastingen betaalden de stad ${collectedTaxes} coins uit!`);
+        break;
+      }
+    }
+
+    // Update the statistics after collecting taxes to rerender the currency display
+    await this._updateStatistics();
   }
 }
 
