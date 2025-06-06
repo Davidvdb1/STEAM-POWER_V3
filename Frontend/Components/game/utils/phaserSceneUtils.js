@@ -1,3 +1,5 @@
+import { createMenuScene } from "../components/scenes/menuScene.js";
+
 /**
  * Sets the camera bounds to match the size of the tilemap in the given Phaser scene.
  *
@@ -11,7 +13,6 @@ export function setCameraBounds(scene) {
     scene.map.heightInPixels // heightInPixels = amount of tiles on y-axis * tileHeight
   );
 }
-
 
 /**
  * Adds mouse wheel zoom functionality to a Phaser scene.
@@ -27,17 +28,15 @@ export function handleZoom(scene, maxZoom = 5) {
   });
 }
 
-
 /**
  * Sets up movement keys for the given Phaser scene.
- * 
+ *
  * @param {Phaser.Scene} scene - The Phaser scene to which movement keys will be added.
  */
 export function setMovementKeys(scene) {
   scene.cursors = scene.input.keyboard.createCursorKeys();
   scene.WASD = scene.input.keyboard.addKeys("Z,S,Q,D");
 }
-
 
 /**
  * Handles camera movement in response to the keys set in setMovementKeys().
@@ -67,23 +66,22 @@ export function handleMovementKeys(scene, delta, speed = 750) {
   // Constrain camera to map boundaries so you can't use the arrow keys or WASD to move outside the map
   cam.scrollX = Phaser.Math.Clamp(
     cam.scrollX,
-    (cam.width / cam.zoom) - scene.map.widthInPixels,
-    scene.map.widthInPixels - (cam.width / cam.zoom)
+    cam.width / cam.zoom - scene.map.widthInPixels,
+    scene.map.widthInPixels - cam.width / cam.zoom
   );
 
   cam.scrollY = Phaser.Math.Clamp(
     cam.scrollY,
-    (cam.height / cam.zoom) - scene.map.heightInPixels,
-    scene.map.heightInPixels - (cam.height / cam.zoom)
+    cam.height / cam.zoom - scene.map.heightInPixels,
+    scene.map.heightInPixels - cam.height / cam.zoom
   );
 }
-
 
 export function handleMapDragging(scene) {
   // Enable camera dragging with right mouse button only
   scene.isDragging = false;
-  
-  scene.input.on('pointerdown', (pointer) => {
+
+  scene.input.on("pointerdown", (pointer) => {
     // Only start dragging with right mouse button (button 2)
     if (pointer.leftButtonDown()) {
       scene.isDragging = true;
@@ -93,8 +91,8 @@ export function handleMapDragging(scene) {
       scene.startScrollY = scene.cameras.main.scrollY;
     }
   });
-  
-  scene.input.on('pointermove', (pointer) => {
+
+  scene.input.on("pointermove", (pointer) => {
     if (scene.isDragging) {
       const deltaX = scene.dragStartX - pointer.x;
       const deltaY = scene.dragStartY - pointer.y;
@@ -102,16 +100,15 @@ export function handleMapDragging(scene) {
       scene.cameras.main.scrollY = scene.startScrollY + deltaY;
     }
   });
-  
-  scene.input.on('pointerup', () => {
+
+  scene.input.on("pointerup", () => {
     scene.isDragging = false;
   });
 }
 
-
 /**
  * Creates a button with rounded corners and text
- * 
+ *
  * @function createButton
  * @param {Phaser.Scene} scene - The scene to add the button to
  * @param {number} x - The x coordinate (center of button)
@@ -124,7 +121,17 @@ export function handleMapDragging(scene) {
  * @param {Function} callback - The function to call when clicked
  * @returns {void}
  */
-export function createButton(scene, x, y, width, height, borderRadius, text, bgColor, callback) {
+export function createButton(
+  scene,
+  x,
+  y,
+  width,
+  height,
+  borderRadius,
+  text,
+  bgColor,
+  callback
+) {
   // Create a graphics object for the button
   const buttonGraphics = scene.add.graphics();
 
@@ -134,37 +141,39 @@ export function createButton(scene, x, y, width, height, borderRadius, text, bgC
   // Draw a rounded rectangle (x, y, width, height, radius)
   // x and y are for the top-left corner, so we offset from center
   buttonGraphics.fillRoundedRect(
-    x - (width / 2), 
-    y - (height / 2), 
-    width, 
-    height, 
+    x - width / 2,
+    y - height / 2,
+    width,
+    height,
     borderRadius
   );
 
   // Make the graphics object interactive
   const hitArea = new Phaser.Geom.Rectangle(0, 0, width, height);
-  buttonGraphics.setInteractive(hitArea, Phaser.Geom.Rectangle.Contains)
-    .on('pointerdown', callback);
+  buttonGraphics
+    .setInteractive(hitArea, Phaser.Geom.Rectangle.Contains)
+    .on("pointerdown", callback);
 
   // Center the hit area on the button
-  buttonGraphics.input.hitArea.x = x - (width / 2);
-  buttonGraphics.input.hitArea.y = y - (height / 2);
+  buttonGraphics.input.hitArea.x = x - width / 2;
+  buttonGraphics.input.hitArea.y = y - height / 2;
 
   // Calculate font size relative to button height
   const fontSize = Math.max(height * 0.4, 16);
 
   // Button text
-  scene.add.text(x, y, text, {
-    fontSize: `${fontSize}px`,
-    fontFamily: 'Arial',
-    color: '#fff'
-  }).setOrigin(0.5);
+  scene.add
+    .text(x, y, text, {
+      fontSize: `${fontSize}px`,
+      fontFamily: "Arial",
+      color: "#fff",
+    })
+    .setOrigin(0.5);
 }
-
 
 /**
  * Creates a menu button in the top right corner of the scene
- * 
+ *
  * @function createMenuButton
  * @param {Phaser.Scene} scene - The scene to add the button to
  * @param {Function} callback - The function to call when the button is clicked
@@ -172,35 +181,43 @@ export function createButton(scene, x, y, width, height, borderRadius, text, bgC
 export function createMenuButton(scene, callback) {
   // Now we pass scene as the first parameter
   createButton(
-    scene,      // scene
+    scene, // scene
     scene.sys.game.config.width - 60, // x
-    60,         // y
-    90,         // width
-    50,         // height
-    15,         // border radius
-    'Menu',     // button text
-    0x008000,   // background color
-    callback    // callback function
+    60, // y
+    90, // width
+    50, // height
+    15, // border radius
+    "Menu", // button text
+    0x008000, // background color
+    callback // callback function
   );
 }
 
-
 /**
  * Sets up a menu button in the top right corner that transitions to the MenuScene
- * 
+ *
  * @function setupMenuButton
  * @param {Phaser.Scene} scene - The scene to add the menu button to
  */
 export function setupMenuButton(scene) {
   createMenuButton(scene, () => {
     // Dispatch an event to hide navigation buttons and the detail container
-    scene.game.canvas.dispatchEvent(new CustomEvent('menu-opened', {
-      bubbles: true,
-      composed: true
-    }));
-    
+    scene.game.canvas.dispatchEvent(
+      new CustomEvent("menu-opened", {
+        bubbles: true,
+        composed: true,
+      })
+    );
+
     // Switch to menu scene
     scene.scene.pause();
-    scene.scene.run('MenuScene', { sourceScene: scene.scene.key });
+
+    if (scene.scene.get("MenuScene")) {
+      scene.scene.stop("MenuScene");
+      scene.scene.remove("MenuScene");
+    }
+
+    scene.scene.add("MenuScene", createMenuScene(), false);
+    scene.scene.run("MenuScene", { sourceScene: scene.scene.key });
   });
 }
