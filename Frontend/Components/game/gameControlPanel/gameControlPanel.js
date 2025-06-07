@@ -639,7 +639,13 @@ class GameControlPanel extends HTMLElement {
       const outer = this._game.scene.getScene("OuterCityScene");
       outer.clearAllAssets();
       outer.checkpointAssets = gameStatistics.assets;
-      outer.reloadCheckpointAssets();
+      if (outer.map) {
+        outer.reloadCheckpointAssets();
+      } else {
+        outer.events.once("create", () => {
+          outer.reloadCheckpointAssets();
+        });
+      }
 
       this._updateStatistics();
 
