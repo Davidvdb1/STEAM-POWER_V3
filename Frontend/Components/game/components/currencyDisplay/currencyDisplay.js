@@ -92,10 +92,13 @@ class CurrencyDisplay extends HTMLElement {
       ".multipliers span:nth-child(4)"
     );
 
-    this.loadBtn.addEventListener("click", () => this._onLoad());
-    this.saveBtn.addEventListener("click", () => this._onSave());
+    this._onLoadBound = this._onLoad.bind(this);
+    this._onSaveBound = this._onSave.bind(this);
 
-    const observer = new MutationObserver((mutationsList) => {
+    this.loadBtn.addEventListener("click", this._onLoadBound);
+    this.saveBtn.addEventListener("click", this._onSaveBound);
+
+    this._observer = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
         if (mutation.type === "childList") {
           const newScore = Number(this.scoreEl.textContent);
@@ -110,8 +113,17 @@ class CurrencyDisplay extends HTMLElement {
         }
       }
     });
+    this._observer.observe(this.scoreEl, { childList: true });
+  }
 
-    observer.observe(this.scoreEl, { childList: true });
+  disconnectedCallback() {
+    if (this._observer) {
+      this._observer.disconnect();
+      this._observer = null;
+    }
+
+    this.loadBtn.removeEventListener("click", this._onLoadBound);
+    this.saveBtn.removeEventListener("click", this._onSaveBound);
   }
 
   /**
@@ -163,6 +175,13 @@ class CurrencyDisplay extends HTMLElement {
     if (multipliers) {
       this._updateMultipliers(multipliers);
     }
+
+    this.dispatchEvent(
+      new CustomEvent("data-ready", {
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 
   _updateMultipliers({ solar, water, wind }) {

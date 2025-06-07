@@ -595,6 +595,9 @@ class GameStatisticsService {
    * @throws {Error} If the GameBuilding or the next BuildingLevel is not found.
    */
   async upgradeGameBuilding(gameBuildingId, { nextLevel }) {
+    console.log(
+      `Upgrading GameBuilding with id=${gameBuildingId} to nextLevel=${nextLevel}`
+    );
     // 1) Fetch the GameBuilding record
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
       gameBuildingId
@@ -660,15 +663,6 @@ class GameStatisticsService {
       coins: newCoinTotal,
       score: gameStats.currency.score,
     });
-    const buildingAchievements = [
-      "Bouwassistent",
-      "Bouwmeester",
-      "Bouwkampioen",
-    ];
-    const newlyEarnedAchievements = await this._trackEarnedAchievements(
-      gameStats.id,
-      buildingAchievements
-    );
 
     // 8) Fetch the BuildingLevel entry for nextLevel
     const nextLevelObj =
@@ -690,7 +684,16 @@ class GameStatisticsService {
       );
 
     // 10) (Optional) Handle achievements here...
-
+    console.log(updatedGameBuildingRecord);
+    const buildingAchievements = [
+      "Bouwassistent",
+      "Bouwmeester",
+      "Bouwkampioen",
+    ];
+    const newlyEarnedAchievements = await this._trackEarnedAchievements(
+      gameStats.id,
+      buildingAchievements
+    );
     return {
       gameBuilding: updatedGameBuildingRecord,
       newlyEarnedAchievements: newlyEarnedAchievements,
@@ -865,6 +868,8 @@ class GameStatisticsService {
         earnedAchievements.push(achievement);
       }
     }
+    console.log(`Earned Achievements: ${earnedAchievements.length}`);
+    console.log(earnedAchievements);
     return earnedAchievements;
   }
 
@@ -905,19 +910,19 @@ class GameStatisticsService {
       case "Bouwassistent":
         // Check if any building has been upgraded to level 2
         return gameStatistics.gameBuildings.some(
-          (gameBuilding) => gameBuilding.buildingLevel.level >= 1
+          (gameBuilding) => gameBuilding.buildingLevel.level >= 2
         );
 
       case "Bouwmeester":
         // Check if any building has been upgraded to level 5 (maximum)
         return gameStatistics.gameBuildings.some(
-          (gameBuilding) => gameBuilding.buildingLevel.level === 4
+          (gameBuilding) => gameBuilding.buildingLevel.level === 5
         );
 
       case "Bouwkampioen":
         // Check if all buildings have been upgraded to level 5 (maximum)
         return gameStatistics.gameBuildings.every(
-          (gameBuilding) => gameBuilding.buildingLevel.level === 4
+          (gameBuilding) => gameBuilding.buildingLevel.level === 5
         );
 
       case "Energie-ingenieur":

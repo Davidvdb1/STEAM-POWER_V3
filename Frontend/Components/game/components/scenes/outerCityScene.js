@@ -23,6 +23,7 @@ export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
     constructor() {
       super("OuterCityScene");
+      this._onDestroyAsset = this._onDestroyAsset.bind(this);
     }
 
     init(data) {
@@ -30,7 +31,13 @@ export function createOuterCityScene() {
         if (this.layer1) this.layer1.destroy();
         if (this.layer2) this.layer2.destroy();
         if (this.map) this.map.destroy();
-        "dragHighlight".forEach((p) => this[p] && this[p].destroy());
+
+        if (this.dragHighlight) this.dragHighlight.destroy();
+
+        document.removeEventListener(
+          "scene:destroy-asset",
+          this._onDestroyAsset
+        );
       });
 
       this.assetObjects = [];
@@ -82,14 +89,11 @@ export function createOuterCityScene() {
 
       this.loadExistingAssets();
 
-      // Add menu button to top right corner
       setupMenuButton(this);
 
       document.addEventListener(
         "scene:destroy-asset",
-        (e) => {
-          requestDestroyAsset(this, e.detail.assetId, e.detail.destroyCost);
-        },
+        this._onDestroyAsset,
         false
       );
     }
@@ -152,7 +156,6 @@ export function createOuterCityScene() {
           { width: a.xSize, height: a.ySize },
           a.id
         );
-
         this.assetObjects.push(assetData);
       });
     }
@@ -164,6 +167,10 @@ export function createOuterCityScene() {
         this._currencyNeedsRefresh = false;
         this.game.events.emit("forceStatsUpdate");
       }
+    }
+
+    _onDestroyAsset(e) {
+      requestDestroyAsset(this, e.detail.assetId, e.detail.destroyCost);
     }
   };
 }

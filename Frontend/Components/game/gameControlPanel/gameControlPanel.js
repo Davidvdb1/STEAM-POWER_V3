@@ -80,6 +80,22 @@ class GameControlPanel extends HTMLElement {
     this._outerButton = this._shadow.getElementById("outer-button");
     this._gameContainer = this._shadow.getElementById("game-container");
 
+    this._onStartClickBound = this._onStartClick.bind(this);
+    this._onOuterClickBound = this._transitionToOuterCity.bind(this);
+    this._onInnerClickBound = this._transitionToCity.bind(this);
+    this._onCloseDetailBound = this._handleCloseDetail.bind(this);
+    this._onDestroyAssetBound = this._handleDestroyAsset.bind(this);
+    this._onSaveCheckpointBound = this._onSaveCheckpoint.bind(this);
+    this._onLoadCheckpointBound = this._onLoadCheckpoint.bind(this);
+
+    this._onShowAchievementsBound = this._handleShowAchievements.bind(this);
+    this._onMenuOpenedBound = this._handleMenuOpened.bind(this);
+    this._onMenuClosedBound = this._handleMenuClosed.bind(this);
+
+    this._onBuildingClickedBound = this._handleBuildingClicked.bind(this);
+    this._onAssetClickedBound = this._handleAssetClicked.bind(this);
+    this._onForceStatsUpdateBound = this._updateStatistics.bind(this);
+
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
 
@@ -89,7 +105,25 @@ class GameControlPanel extends HTMLElement {
     this.wind = 1;
     this.water = 1;
 
+    this._onAssetDeleted = () => {
+      this._detailContainer.classList.add("hidden");
+      this._detailContainer.innerHTML = "";
+      this._currentDetail = { type: null, id: null };
+    };
+
+    this._onSceneRefreshDetail = (e) => {
+      const { type, id } = e.detail;
+      showDetail(
+        this._detailContainer,
+        this._game.buildingData,
+        this._game.assetData,
+        type,
+        id
+      );
+    };
+
     this._boundAssetPlacedHandler = () => this._updateStatistics();
+    this._onAssetPlacedBound = this._boundAssetPlacedHandler;
   }
 
   _loadPhaser() {
@@ -103,98 +137,112 @@ class GameControlPanel extends HTMLElement {
   }
 
   connectedCallback() {
-    this._startButton.addEventListener("click", () => this._onStartClick());
-    this._outerButton.addEventListener("click", () =>
-      this._transitionToOuterCity()
+    this._startButton.addEventListener("click", this._onStartClickBound);
+    this._outerButton.addEventListener("click", this._onOuterClickBound);
+    this._innerButton.addEventListener("click", this._onInnerClickBound);
+
+    this._shadow.addEventListener("close-detail", this._onCloseDetailBound);
+    this._shadow.addEventListener("destroy-asset", this._onDestroyAssetBound);
+
+    this._statsContainer.addEventListener(
+      "saveCheckpoint",
+      this._onSaveCheckpointBound
     );
-    this._innerButton.addEventListener("click", () => this._transitionToCity());
-
-    this._shadow.addEventListener("close-detail", () => {
-      this._detailContainer.classList.add("hidden");
-      this._detailContainer.innerHTML = "";
-      this._currentDetail = { type: null, id: null };
-    });
-
-    this._statsContainer.addEventListener("saveCheckpoint", () =>
-      this._onSaveCheckpoint()
+    this._statsContainer.addEventListener(
+      "loadCheckpoint",
+      this._onLoadCheckpointBound
     );
-    this._statsContainer.addEventListener("loadCheckpoint", () =>
-      this._onLoadCheckpoint()
+
+    this._gameContainer.addEventListener(
+      "show-achievements",
+      this._onShowAchievementsBound
     );
-    document.addEventListener("asset-placed", this._boundAssetPlacedHandler);
+    this._gameContainer.addEventListener(
+      "menu-opened",
+      this._onMenuOpenedBound
+    );
+    this._gameContainer.addEventListener(
+      "menu-closed",
+      this._onMenuClosedBound
+    );
 
-    this._gameContainer.addEventListener("show-achievements", () => {
-      showAchievementsOverview(this._wrapper, this._shadow);
-    });
-
-    this._gameContainer.addEventListener("menu-opened", () => {
-      // Hide navigation buttons and detail container when menu opens
-      this._innerContainer.style.display = "none";
-      this._outerContainer.style.display = "none";
-      this._detailContainer.style.display = "none";
-    });
-
-    this._gameContainer.addEventListener("menu-closed", (e) => {
-      // Show the appropriate navigation button based on current scene
-      if (e.detail.targetScene === "CityScene") {
-        this._outerContainer.style.display = "flex";
-      } else {
-        this._innerContainer.style.display = "flex";
-      }
-      this._detailContainer.style.display = "block";
-    });
+    document.addEventListener("asset-placed", this._onAssetPlacedBound);
+    document.addEventListener("asset-deleted", this._onAssetDeleted);
+    document.addEventListener(
+      "scene:refresh-detail",
+      this._onSceneRefreshDetail
+    );
 
     this._loadPhaser().then(() => this._initializeGame());
 
-    this._shadow.addEventListener("destroy-asset", (e) => {
-      const assetId = e.detail.assetId;
-      document.dispatchEvent(
-        new CustomEvent("scene:destroy-asset", {
-          detail: { assetId },
-        })
-      );
-    });
-
-    document.addEventListener("asset-deleted", () => {
-      this._detailContainer.classList.add("hidden");
-      this._detailContainer.innerHTML = "";
-      this._currentDetail = { type: null, id: null };
-    });
-
-    document.addEventListener(
-      "scene:refresh-detail",
-      (e) => {
-        const { type, id } = e.detail;
-        showDetail(
-          this._detailContainer,
-          this._game.buildingData,
-          this._game.assetData,
-          type,
-          id
-        );
-      },
-      false
-    );
-
-    // this._shadow.addEventListener("close-detail", () => {
-    //   this._detailContainer.classList.add("hidden");
-    //   this._detailContainer.innerHTML = "";
-    //   this._currentDetail = { type: null, id: null };
-    // });
-
-    const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
-    if (bluetooth) {
-      this._interval = setInterval(() => {
-        this._updateStatistics();
-      }, 5000);
+    if (JSON.parse(sessionStorage.getItem("bluetoothEnabled"))) {
+      this._interval = setInterval(() => this._updateStatistics(), 5000);
     }
   }
 
   disconnectedCallback() {
-    document.removeEventListener("asset-placed", this._boundAssetPlacedHandler);
+    this._startButton.removeEventListener("click", this._onStartClickBound);
+    this._outerButton.removeEventListener("click", this._onOuterClickBound);
+    this._innerButton.removeEventListener("click", this._onInnerClickBound);
+
+    this._shadow.removeEventListener("close-detail", this._onCloseDetailBound);
+    this._shadow.removeEventListener(
+      "destroy-asset",
+      this._onDestroyAssetBound
+    );
+
+    this._statsContainer.removeEventListener(
+      "saveCheckpoint",
+      this._onSaveCheckpointBound
+    );
+    this._statsContainer.removeEventListener(
+      "loadCheckpoint",
+      this._onLoadCheckpointBound
+    );
+
+    this._gameContainer.removeEventListener(
+      "show-achievements",
+      this._onShowAchievementsBound
+    );
+    this._gameContainer.removeEventListener(
+      "menu-opened",
+      this._onMenuOpenedBound
+    );
+    this._gameContainer.removeEventListener(
+      "menu-closed",
+      this._onMenuClosedBound
+    );
+
+    document.removeEventListener("asset-placed", this._onAssetPlacedBound);
+    document.removeEventListener("asset-deleted", this._onAssetDeleted);
+    document.removeEventListener(
+      "scene:refresh-detail",
+      this._onSceneRefreshDetail
+    );
+
+    if (this._game) {
+      this._game.events.off("buildingClicked", this._onBuildingClickedBound);
+      this._game.events.off("assetClicked", this._onAssetClickedBound);
+      this._game.events.off("forceStatsUpdate", this._onForceStatsUpdateBound);
+      this._game.destroy(true);
+      this._game = null;
+    }
+
+    // 4) Clear all intervals
     clearInterval(this._interval);
     clearInterval(this._energyInterval);
     clearInterval(this._statsInterval);
+    clearInterval(this._taxesInterval);
+    // 4) Null out references as a courtesy
+    this._boundAssetPlacedHandler = null;
+    this._onAssetDeleted = null;
+    this._onSceneRefreshDetail = null;
+    this._statsContainer = null;
+    this._startButton = null;
+    this._innerContainer = null;
+    this._outerContainer = null;
+    this._wrapper = null;
+    this._detailContainer = null;
   }
 
   _initializeGame() {
@@ -219,33 +267,9 @@ class GameControlPanel extends HTMLElement {
     window.phaserGame = this._game;
     window.gameContainer = this._gameContainer;
 
-    this._game.events.on("buildingClicked", (id) => {
-      this._currentDetail = { type: "building", id };
-      this._detailContainer.innerHTML = "";
-      showDetail(
-        this._detailContainer,
-        this._game.buildingData,
-        this._game.assetData,
-        "building",
-        id
-      );
-    });
-
-    this._game.events.on("assetClicked", (id) => {
-      this._currentDetail = { type: "asset", id };
-      this._detailContainer.innerHTML = "";
-      showDetail(
-        this._detailContainer,
-        this._game.buildingData,
-        this._game.assetData,
-        "asset",
-        id
-      );
-    });
-
-    this._game.events.on("forceStatsUpdate", () => {
-      this._updateStatistics();
-    });
+    this._game.events.on("buildingClicked", this._onBuildingClickedBound);
+    this._game.events.on("assetClicked", this._onAssetClickedBound);
+    this._game.events.on("forceStatsUpdate", this._onForceStatsUpdateBound);
   }
 
   async _updateStatistics() {
@@ -274,7 +298,6 @@ class GameControlPanel extends HTMLElement {
         },
       });
       this._statsContainer.data = payload;
-      this._statsContainer.classList.remove("hidden");
 
       // Emit event when statistics update is complete
       this._game.events.emit("statsUpdateComplete");
@@ -363,33 +386,134 @@ class GameControlPanel extends HTMLElement {
   }
 
   async _onStartClick() {
-    this._startButton.classList.add("hidden");
-    this._game.scene.start("CityScene");
-    this._outerContainer.style.display = "flex";
-    this._innerContainer.style.display = "none";
+    // 1) Hide the “Start” button
+    const spinner = this._createSpinner();
+    this._startButton.replaceWith(spinner);
 
+    // 2) **First load your stats** so buildingData is populated
+    await this._updateStatistics();
+
+    this._game.scene.run("CityScene", {
+      buildings: this._game.buildingData,
+      gameStatisticsId: this._game.gameStatisticsId,
+      token: this._game.token,
+    });
     const cityScene = this._game.scene.getScene("CityScene");
-    await new Promise((resolve) => {
-      cityScene.events.once("create", resolve);
+
+    // 3) Promise for CityScene.create()
+    const createPromise = new Promise((resolve) => {
+      if (cityScene.sys.isCreated) {
+        resolve();
+      } else {
+        cityScene.events.once("create", resolve);
+      }
     });
 
-    try {
-      await this._updateStatistics();
+    // 4) Promise for <currency-display> “data-ready”
+    const dataReadyPromise = new Promise((resolve) => {
+      const onDataReady = () => {
+        this._statsContainer.removeEventListener("data-ready", onDataReady);
+        resolve();
+      };
+      this._statsContainer.addEventListener("data-ready", onDataReady);
+    });
 
-      if (setBuildingColor) {
-        for (const b of this._game.buildingData) {
-          setBuildingColor(cityScene, b);
-        }
-      }
-    } catch (e) {
-      console.error("Error fetching stats:", e);
-    }
+    // 5) Kick off stats fetch (which will dispatch “data-ready” when done)
+    const statsPromise = this._updateStatistics().catch((err) => {
+      console.error("Failed to fetch stats:", err);
+      // resolve anyway so we don’t hang
+    });
 
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
     this._taxesInterval = setInterval(() => this._handleTaxes(), 300_000);
 
-    this._game.scene.remove("LogoScene");
+    // 6) Wait for both scene.create AND stats+render
+    await Promise.all([createPromise, statsPromise, dataReadyPromise]);
+
+    // 7) In one frame: stop the logo, show stats & city
+    requestAnimationFrame(() => {
+      // remove spinner
+      const spinner = this._shadow.getElementById("startSpinner");
+      if (spinner) spinner.remove();
+      // show currency panel
+      this._statsContainer.classList.remove("hidden");
+
+      // stop/logo → city
+      this._game.scene.stop("LogoScene");
+      this._game.scene.bringToTop("CityScene");
+
+      // show the “naar buitenstad” button
+      this._outerContainer.style.display = "flex";
+      this._innerContainer.style.display = "none";
+    });
+  }
+
+  _createSpinner() {
+    const spinner = document.createElement("div");
+    spinner.id = "startSpinner";
+    spinner.classList.add("spinner");
+    return spinner;
+  }
+
+  _handleCloseDetail() {
+    this._detailContainer.classList.add("hidden");
+    this._detailContainer.innerHTML = "";
+    this._currentDetail = { type: null, id: null };
+  }
+
+  _handleDestroyAsset(e) {
+    const assetId = e.detail.assetId;
+    document.dispatchEvent(
+      new CustomEvent("scene:destroy-asset", {
+        detail: { assetId },
+      })
+    );
+  }
+
+  _handleShowAchievements() {
+    showAchievementsOverview(this._wrapper, this._shadow);
+  }
+
+  _handleMenuOpened() {
+    // Hide navigation buttons + detail when menu opens
+    this._innerContainer.style.display = "none";
+    this._outerContainer.style.display = "none";
+    this._detailContainer.style.display = "none";
+  }
+
+  _handleMenuClosed(e) {
+    // Show correct nav button and detail when menu closes
+    if (e.detail.targetScene === "CityScene") {
+      this._outerContainer.style.display = "flex";
+    } else {
+      this._innerContainer.style.display = "flex";
+    }
+    this._detailContainer.style.display = "block";
+  }
+
+  _handleBuildingClicked(id) {
+    this._currentDetail = { type: "building", id };
+    this._detailContainer.innerHTML = "";
+    showDetail(
+      this._detailContainer,
+      this._game.buildingData,
+      this._game.assetData,
+      "building",
+      id
+    );
+  }
+
+  _handleAssetClicked(id) {
+    this._currentDetail = { type: "asset", id };
+    this._detailContainer.innerHTML = "";
+    showDetail(
+      this._detailContainer,
+      this._game.buildingData,
+      this._game.assetData,
+      "asset",
+      id
+    );
   }
 
   _transitionToOuterCity() {
@@ -408,12 +532,13 @@ class GameControlPanel extends HTMLElement {
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
 
+    this._game.scene.switch("OuterCityScene", "CityScene");
+
+    this._innerContainer.style.display = "none";
+    this._outerContainer.style.display = "flex";
+
     const distance = this._wrapper.offsetWidth + 800;
-    this._animateWrapper(distance, () => {
-      this._game.scene.switch("OuterCityScene", "CityScene");
-      this._innerContainer.style.display = "none";
-      this._outerContainer.style.display = "flex";
-    });
+    this._animateWrapper(distance, () => {});
   }
 
   _animateWrapper(offsetX, onComplete) {
@@ -427,9 +552,9 @@ class GameControlPanel extends HTMLElement {
 
   _onSaveCheckpoint() {
     for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
-      const scene = this._game.scene.getScene(key);
+      const scene = this._game?.scene?.getScene(key);
+      if (!scene) continue; // skip if scene is not yet created
 
-      // Check if scene is running and the required methods exist
       if (
         scene.scene.isActive() &&
         typeof scene.showConfirmation === "function" &&
@@ -458,9 +583,9 @@ class GameControlPanel extends HTMLElement {
 
   _onLoadCheckpoint() {
     for (const key of ["CityScene", "OuterCityScene", "MenuScene"]) {
-      const scene = this._game.scene.getScene(key);
+      const scene = this._game?.scene?.getScene(key);
+      if (!scene) continue; // skip if scene is not yet created
 
-      // Check if scene is running and the required methods exist
       if (
         scene.scene.isActive() &&
         typeof scene.showConfirmation === "function" &&
@@ -514,7 +639,13 @@ class GameControlPanel extends HTMLElement {
       const outer = this._game.scene.getScene("OuterCityScene");
       outer.clearAllAssets();
       outer.checkpointAssets = gameStatistics.assets;
-      outer.reloadCheckpointAssets();
+      if (outer.map) {
+        outer.reloadCheckpointAssets();
+      } else {
+        outer.events.once("create", () => {
+          outer.reloadCheckpointAssets();
+        });
+      }
 
       this._updateStatistics();
 
@@ -575,8 +706,8 @@ class GameControlPanel extends HTMLElement {
     // Show a popup on the active scene with the collected taxes
     for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
       const scene = this._game.scene.getScene(key);
+      if (!scene || !scene.scene) continue;
 
-      // Check if scene is running and has the showError method
       if (scene.scene.isActive() && typeof scene.showError === "function") {
         scene.showError(
           `De stad verdiende ${collectedTaxes} coins van de belastingen!`

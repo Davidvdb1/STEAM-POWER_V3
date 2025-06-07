@@ -4,7 +4,7 @@ const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
     @import './Components/game/components/shop/style.css';
-    </style>
+  </style>
 
   <div class="shop">
     <div class="card-asset" data-type="Windmolen" data-base-price="20">
@@ -96,41 +96,61 @@ template.innerHTML = /*html*/ `
 class ShopSidebar extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: "open" }).appendChild(template.content.cloneNode(true));
+    this.attachShadow({ mode: "open" }).appendChild(
+      template.content.cloneNode(true)
+    );
     this.currentCoins = 0;
+
+    this._onCardDragStart = this._onCardDragStart.bind(this);
+    this._onCurrencyUpdate = this._onCurrencyUpdate.bind(this);
   }
 
   connectedCallback() {
-    this.shadowRoot.querySelectorAll(".card-asset").forEach(card => {
-      card.addEventListener("dragstart", e =>
-        e.dataTransfer.setData("text/plain", card.dataset.type)
-      );
+    this._cards = Array.from(this.shadowRoot.querySelectorAll(".card-asset"));
+    this._cards.forEach((card) => {
+      card.addEventListener("dragstart", this._onCardDragStart);
     });
 
-    document.addEventListener('currencyUpdate', (e) => {
-      this.updatePrices(e.detail.coins);
-    });
+    document.addEventListener("currencyUpdate", this._onCurrencyUpdate);
+  }
+
+  disconnectedCallback() {
+    if (this._cards) {
+      this._cards.forEach((card) => {
+        card.removeEventListener("dragstart", this._onCardDragStart);
+      });
+      this._cards = null;
+    }
+
+    document.removeEventListener("currencyUpdate", this._onCurrencyUpdate);
+
+    this.currentCoins = null;
+  }
+
+  _onCardDragStart(e) {
+    e.dataTransfer.setData("text/plain", e.currentTarget.dataset.type);
+  }
+
+  _onCurrencyUpdate(e) {
+    this.updatePrices(e.detail.coins);
   }
 
   updatePrices(coins) {
     this.currentCoins = coins;
-    
-    this.shadowRoot.querySelectorAll(".card-asset").forEach(card => {
-      const basePrice = parseInt(card.dataset.basePrice);
-      const priceElement = card.querySelector('.price');
-      
+    this._cards.forEach((card) => {
+      const basePrice = parseInt(card.dataset.basePrice, 10);
+      const priceElement = card.querySelector(".price");
       let finalPrice = basePrice;
       if (coins < basePrice) {
         finalPrice = Math.ceil(basePrice * 1.1);
-        priceElement.style.color = '#ff6b6b';
-        priceElement.style.fontWeight = 'bold';
+        priceElement.style.color = "#ff6b6b";
+        priceElement.style.fontWeight = "bold";
       } else {
-        priceElement.style.color = '';
-        priceElement.style.fontWeight = '';
+        priceElement.style.color = "";
+        priceElement.style.fontWeight = "";
       }
-      
+
       priceElement.textContent = finalPrice;
-      
     });
   }
   setCoins(coins) {

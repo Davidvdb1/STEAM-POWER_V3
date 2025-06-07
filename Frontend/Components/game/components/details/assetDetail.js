@@ -17,15 +17,35 @@ class AssetDetail extends HTMLElement {
     super();
     const shadow = this.attachShadow({ mode: "open" });
     shadow.appendChild(template.content.cloneNode(true));
+
     this._closeBtn = shadow.querySelector("button.close");
+    this._destroyBtn = shadow.querySelector("button.destroy");
     this._typeEl = shadow.querySelector(".type");
     this._energyRow = shadow.querySelector(".energy-row");
     this._energyEl = shadow.querySelector(".energy");
     this._destroyCostEl = shadow.querySelector(".destroy-cost");
-    this._destroyBtn = shadow.querySelector("button.destroy");
     this._infoContainer = shadow.querySelector(".info");
+
     this._data = null;
     this._basedDestroyCost = 0;
+
+    this._onCloseClick = this._handleCloseClick.bind(this);
+    this._onDestroyClick = this._handleDestroyClick.bind(this);
+    this._onCurrencyUpdate = this._handleCurrencyUpdate.bind(this);
+
+    this._closeBtn.addEventListener("click", this._onCloseClick);
+    this._destroyBtn.addEventListener("click", this._onDestroyClick);
+    document.addEventListener("currencyUpdate", this._onCurrencyUpdate);
+  }
+
+  connectedCallback() {
+    this._tryInitialDataLoad();
+  }
+
+  disconnectedCallback() {
+    this._closeBtn.removeEventListener("click", this._onCloseClick);
+    this._destroyBtn.removeEventListener("click", this._onDestroyClick);
+    document.removeEventListener("currencyUpdate", this._onCurrencyUpdate);
   }
 
   set data(value) {
@@ -37,17 +57,31 @@ class AssetDetail extends HTMLElement {
     return this._data;
   }
 
-  connectedCallback() {
-    this._closeBtn.addEventListener("click", () =>
-      this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
+  _handleCloseClick() {
+    this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }));
+  }
+
+  _handleDestroyClick() {
+    if (!this._data) return;
+    const { id, destroyCost: baseCost } = this._data;
+
+    const current = window.phaserGame?.currency?.coins || 0;
+    const finalCost = current < baseCost ? Math.ceil(baseCost * 1.1) : baseCost;
+
+    document.dispatchEvent(
+      new CustomEvent("scene:destroy-asset", {
+        detail: { assetId: id, destroyCost: finalCost },
+        bubbles: true,
+        composed: true,
+      })
     );
+  }
 
-    document.addEventListener("currencyUpdate", (e) => {
-      if (this._data) {
-        this._render();
-      }
-    });
+  _handleCurrencyUpdate() {
+    if (this._data) this._render();
+  }
 
+  _tryInitialDataLoad() {
     const raw = this.getAttribute("asset-id");
     if (raw && !this._data) {
       const id = parseInt(raw, 10);
@@ -100,18 +134,6 @@ class AssetDetail extends HTMLElement {
     this._applyCostStyling(finaldestroyCost, destroyCost);
 
     this._destroyBtn.style.display = "";
-    this._destroyBtn.onclick = () => {
-      document.dispatchEvent(
-        new CustomEvent("scene:destroy-asset", {
-          detail: {
-            assetId: id,
-            destroyCost: finaldestroyCost,
-          },
-          bubbles: true,
-          composed: true,
-        })
-      );
-    };
   }
 }
 

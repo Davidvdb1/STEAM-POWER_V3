@@ -27,18 +27,23 @@ export function createCityScene() {
   return class CityScene extends Phaser.Scene {
     constructor() {
       super("CityScene");
+      this._onUpgradeBuilding = this._onUpgradeBuilding.bind(this);
+      this._onToggleBuildingEnergy = this._onToggleBuildingEnergy.bind(this);
     }
 
     init(data) {
       this.events.once("shutdown", () => {
-        if (this.layer1) this.layer1.destroy();
-        if (this.layer2) this.layer2.destroy();
-        if (this.layer3) this.layer3.destroy();
-        if (this.layer4) this.layer4.destroy();
-        if (this.layer5) this.layer5.destroy();
-        if (this.map) this.map.destroy();
+        document.removeEventListener(
+          "scene:upgrade-building",
+          this._onUpgradeBuilding
+        );
+        document.removeEventListener(
+          "scene:toggle-building-energy",
+          this._onToggleBuildingEnergy
+        );
       });
 
+      // Carry over checkpoint data (if any)
       if (data.buildings) {
         this.checkpointBuildings = data.buildings;
         this.sys.game.gameStatisticsId = data.gameStatisticsId;
@@ -89,32 +94,29 @@ export function createCityScene() {
       createErrorPopup(this);
       createCheckpointLoadPopup(this);
 
-      // Add menu button to top right corner
+      // Add the menu button last
       setupMenuButton(this);
 
       document.addEventListener(
         "scene:upgrade-building",
-        (e) => {
-          handleUpgradeRequest(
-            this,
-            e.detail.GameBuildingId,
-            e.detail.upgradeCost
-          );
-        },
-        false
+        this._onUpgradeBuilding
       );
-
       document.addEventListener(
         "scene:toggle-building-energy",
-        (e) => {
-          handleToggleEnergyRequest(this, e.detail.GameBuildingId);
-        },
-        false
+        this._onToggleBuildingEnergy
       );
     }
 
     update(time, delta) {
       handleMovementKeys(this, delta);
+    }
+
+    _onUpgradeBuilding(e) {
+      handleUpgradeRequest(this, e.detail.GameBuildingId, e.detail.upgradeCost);
+    }
+
+    _onToggleBuildingEnergy(e) {
+      handleToggleEnergyRequest(this, e.detail.GameBuildingId);
     }
   };
 }
