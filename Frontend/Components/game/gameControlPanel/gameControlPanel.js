@@ -390,8 +390,14 @@ class GameControlPanel extends HTMLElement {
     const spinner = this._createSpinner();
     this._startButton.replaceWith(spinner);
 
-    // 2) Fire up CityScene in the background
-    this._game.scene.run("CityScene");
+    // 2) **First load your stats** so buildingData is populated
+    await this._updateStatistics();
+
+    this._game.scene.run("CityScene", {
+      buildings: this._game.buildingData,
+      gameStatisticsId: this._game.gameStatisticsId,
+      token: this._game.token,
+    });
     const cityScene = this._game.scene.getScene("CityScene");
 
     // 3) Promise for CityScene.create()
@@ -694,8 +700,8 @@ class GameControlPanel extends HTMLElement {
     // Show a popup on the active scene with the collected taxes
     for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
       const scene = this._game.scene.getScene(key);
+      if (!scene || !scene.scene) continue;
 
-      // Check if scene is running and has the showError method
       if (scene.scene.isActive() && typeof scene.showError === "function") {
         scene.showError(
           `De stad verdiende ${collectedTaxes} coins van de belastingen!`

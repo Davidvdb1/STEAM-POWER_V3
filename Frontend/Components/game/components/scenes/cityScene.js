@@ -32,15 +32,7 @@ export function createCityScene() {
     }
 
     init(data) {
-      // cleanup on scene shutdown
       this.events.once("shutdown", () => {
-        if (this.layer1) this.layer1.destroy();
-        if (this.layer2) this.layer2.destroy();
-        if (this.layer3) this.layer3.destroy();
-        if (this.layer4) this.layer4.destroy();
-        if (this.layer5) this.layer5.destroy();
-        if (this.map) this.map.destroy();
-
         document.removeEventListener(
           "scene:upgrade-building",
           this._onUpgradeBuilding
