@@ -103,6 +103,7 @@ class CurrencyDisplay extends HTMLElement {
         if (mutation.type === "childList") {
           const newScore = Number(this.scoreEl.textContent);
           if (!isNaN(newScore)) {
+            const hue = newScore * 1.2;
             let color = "#00ff00"; // groen
             if (newScore < 30) color = "#ff0000"; // rood
             else if (newScore < 60) color = "#ffa500"; // oranje
