@@ -421,6 +421,10 @@ class GameControlPanel extends HTMLElement {
       // resolve anyway so we don’t hang
     });
 
+    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
+    this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
+    this._taxesInterval = setInterval(() => this._handleTaxes(), 300_000);
+
     // 6) Wait for both scene.create AND stats+render
     await Promise.all([createPromise, statsPromise, dataReadyPromise]);
 
