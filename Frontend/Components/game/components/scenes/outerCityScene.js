@@ -28,12 +28,6 @@ export function createOuterCityScene() {
 
     init(data) {
       this.events.once("shutdown", () => {
-        if (this.layer1) this.layer1.destroy();
-        if (this.layer2) this.layer2.destroy();
-        if (this.map) this.map.destroy();
-
-        if (this.dragHighlight) this.dragHighlight.destroy();
-
         document.removeEventListener(
           "scene:destroy-asset",
           this._onDestroyAsset
