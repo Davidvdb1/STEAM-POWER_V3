@@ -39,13 +39,16 @@ class BuildingDetail extends HTMLElement {
     this._energyCostEl = shadow.querySelector(".energy-cost");
     this._upgradeLine = shadow.querySelector(".upgrade-line");
     this._upgradeCostEl = shadow.querySelector(".upgrade-cost");
-    this._upgradeBtn = shadow.querySelector(".upgrade");
-    this._toggleEnergyBtn = shadow.querySelector(".toggleEnergy");
+    this._upgradeBtn = shadow.querySelector("button.upgrade");
+    this._toggleEnergyBtn = shadow.querySelector("button.toggleEnergy");
+
     this._data = null;
+
+    this._onCloseClick = () => {
+      this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }));
+    };
     this._onCurrencyUpdate = () => {
-      if (this._data) {
-        this._render();
-      }
+      if (this._data) this._render();
     };
   }
 
@@ -59,10 +62,7 @@ class BuildingDetail extends HTMLElement {
   }
 
   connectedCallback() {
-    this._closeBtn.addEventListener("click", () =>
-      this.dispatchEvent(new CustomEvent("close-detail", { bubbles: true }))
-    );
-
+    this._closeBtn.addEventListener("click", this._onCloseClick);
     document.addEventListener("currencyUpdate", this._onCurrencyUpdate);
 
     const raw = this.getAttribute("building-id");
@@ -76,7 +76,12 @@ class BuildingDetail extends HTMLElement {
   }
 
   disconnectedCallback() {
+    this._closeBtn.removeEventListener("click", this._onCloseClick);
     document.removeEventListener("currencyUpdate", this._onCurrencyUpdate);
+    if (this._toggleEnergyBtn) this._toggleEnergyBtn.onclick = null;
+    if (this._upgradeBtn) this._upgradeBtn.onclick = null;
+    this._data = null;
+    if (this.shadowRoot) this.shadowRoot.innerHTML = "";
   }
 
   _getCurrentCoins() {

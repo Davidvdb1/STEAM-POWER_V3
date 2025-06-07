@@ -80,6 +80,22 @@ class GameControlPanel extends HTMLElement {
     this._outerButton = this._shadow.getElementById("outer-button");
     this._gameContainer = this._shadow.getElementById("game-container");
 
+    this._onStartClickBound = this._onStartClick.bind(this);
+    this._onOuterClickBound = this._transitionToOuterCity.bind(this);
+    this._onInnerClickBound = this._transitionToCity.bind(this);
+    this._onCloseDetailBound = this._handleCloseDetail.bind(this);
+    this._onDestroyAssetBound = this._handleDestroyAsset.bind(this);
+    this._onSaveCheckpointBound = this._onSaveCheckpoint.bind(this);
+    this._onLoadCheckpointBound = this._onLoadCheckpoint.bind(this);
+
+    this._onShowAchievementsBound = this._handleShowAchievements.bind(this);
+    this._onMenuOpenedBound = this._handleMenuOpened.bind(this);
+    this._onMenuClosedBound = this._handleMenuClosed.bind(this);
+
+    this._onBuildingClickedBound = this._handleBuildingClicked.bind(this);
+    this._onAssetClickedBound = this._handleAssetClicked.bind(this);
+    this._onForceStatsUpdateBound = this._updateStatistics.bind(this);
+
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
 
@@ -107,6 +123,7 @@ class GameControlPanel extends HTMLElement {
     };
 
     this._boundAssetPlacedHandler = () => this._updateStatistics();
+    this._onAssetPlacedBound = this._boundAssetPlacedHandler;
   }
 
   _loadPhaser() {
@@ -120,98 +137,102 @@ class GameControlPanel extends HTMLElement {
   }
 
   connectedCallback() {
-    this._startButton.addEventListener("click", () => this._onStartClick());
-    this._outerButton.addEventListener("click", () =>
-      this._transitionToOuterCity()
+    this._startButton.addEventListener("click", this._onStartClickBound);
+    this._outerButton.addEventListener("click", this._onOuterClickBound);
+    this._innerButton.addEventListener("click", this._onInnerClickBound);
+
+    this._shadow.addEventListener("close-detail", this._onCloseDetailBound);
+    this._shadow.addEventListener("destroy-asset", this._onDestroyAssetBound);
+
+    this._statsContainer.addEventListener(
+      "saveCheckpoint",
+      this._onSaveCheckpointBound
     );
-    this._innerButton.addEventListener("click", () => this._transitionToCity());
-
-    this._shadow.addEventListener("close-detail", () => {
-      this._detailContainer.classList.add("hidden");
-      this._detailContainer.innerHTML = "";
-      this._currentDetail = { type: null, id: null };
-    });
-
-    this._statsContainer.addEventListener("saveCheckpoint", () =>
-      this._onSaveCheckpoint()
+    this._statsContainer.addEventListener(
+      "loadCheckpoint",
+      this._onLoadCheckpointBound
     );
-    this._statsContainer.addEventListener("loadCheckpoint", () =>
-      this._onLoadCheckpoint()
+
+    this._gameContainer.addEventListener(
+      "show-achievements",
+      this._onShowAchievementsBound
     );
-    document.addEventListener("asset-placed", this._boundAssetPlacedHandler);
+    this._gameContainer.addEventListener(
+      "menu-opened",
+      this._onMenuOpenedBound
+    );
+    this._gameContainer.addEventListener(
+      "menu-closed",
+      this._onMenuClosedBound
+    );
 
-    this._gameContainer.addEventListener("show-achievements", () => {
-      showAchievementsOverview(this._wrapper, this._shadow);
-    });
-
-    this._gameContainer.addEventListener("menu-opened", () => {
-      // Hide navigation buttons and detail container when menu opens
-      this._innerContainer.style.display = "none";
-      this._outerContainer.style.display = "none";
-      this._detailContainer.style.display = "none";
-    });
-
-    this._gameContainer.addEventListener("menu-closed", (e) => {
-      // Show the appropriate navigation button based on current scene
-      if (e.detail.targetScene === "CityScene") {
-        this._outerContainer.style.display = "flex";
-      } else {
-        this._innerContainer.style.display = "flex";
-      }
-      this._detailContainer.style.display = "block";
-    });
-
-    this._loadPhaser().then(() => this._initializeGame());
-
-    this._shadow.addEventListener("destroy-asset", (e) => {
-      const assetId = e.detail.assetId;
-      document.dispatchEvent(
-        new CustomEvent("scene:destroy-asset", {
-          detail: { assetId },
-        })
-      );
-    });
-
+    document.addEventListener("asset-placed", this._onAssetPlacedBound);
     document.addEventListener("asset-deleted", this._onAssetDeleted);
     document.addEventListener(
       "scene:refresh-detail",
       this._onSceneRefreshDetail
     );
 
-    // this._shadow.addEventListener("close-detail", () => {
-    //   this._detailContainer.classList.add("hidden");
-    //   this._detailContainer.innerHTML = "";
-    //   this._currentDetail = { type: null, id: null };
-    // });
+    this._loadPhaser().then(() => this._initializeGame());
 
-    const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
-    if (bluetooth) {
-      this._interval = setInterval(() => {
-        this._updateStatistics();
-      }, 5000);
+    if (JSON.parse(sessionStorage.getItem("bluetoothEnabled"))) {
+      this._interval = setInterval(() => this._updateStatistics(), 5000);
     }
   }
 
   disconnectedCallback() {
-    // 1) Destroy Phaser
-    if (this._game && typeof this._game.destroy === "function") {
-      this._game.destroy(true);
-      this._game = null;
-    }
+    this._startButton.removeEventListener("click", this._onStartClickBound);
+    this._outerButton.removeEventListener("click", this._onOuterClickBound);
+    this._innerButton.removeEventListener("click", this._onInnerClickBound);
 
-    // 2) Clear all intervals
-    clearInterval(this._interval);
-    clearInterval(this._energyInterval);
-    clearInterval(this._statsInterval);
+    this._shadow.removeEventListener("close-detail", this._onCloseDetailBound);
+    this._shadow.removeEventListener(
+      "destroy-asset",
+      this._onDestroyAssetBound
+    );
 
-    // 3) Remove document‐level listeners
-    document.removeEventListener("asset-placed", this._boundAssetPlacedHandler);
+    this._statsContainer.removeEventListener(
+      "saveCheckpoint",
+      this._onSaveCheckpointBound
+    );
+    this._statsContainer.removeEventListener(
+      "loadCheckpoint",
+      this._onLoadCheckpointBound
+    );
+
+    this._gameContainer.removeEventListener(
+      "show-achievements",
+      this._onShowAchievementsBound
+    );
+    this._gameContainer.removeEventListener(
+      "menu-opened",
+      this._onMenuOpenedBound
+    );
+    this._gameContainer.removeEventListener(
+      "menu-closed",
+      this._onMenuClosedBound
+    );
+
+    document.removeEventListener("asset-placed", this._onAssetPlacedBound);
     document.removeEventListener("asset-deleted", this._onAssetDeleted);
     document.removeEventListener(
       "scene:refresh-detail",
       this._onSceneRefreshDetail
     );
 
+    if (this._game) {
+      this._game.events.off("buildingClicked", this._onBuildingClickedBound);
+      this._game.events.off("assetClicked", this._onAssetClickedBound);
+      this._game.events.off("forceStatsUpdate", this._onForceStatsUpdateBound);
+      this._game.destroy(true);
+      this._game = null;
+    }
+
+    // 4) Clear all intervals
+    clearInterval(this._interval);
+    clearInterval(this._energyInterval);
+    clearInterval(this._statsInterval);
+    clearInterval(this._taxesInterval);
     // 4) Null out references as a courtesy
     this._boundAssetPlacedHandler = null;
     this._onAssetDeleted = null;
@@ -246,33 +267,9 @@ class GameControlPanel extends HTMLElement {
     window.phaserGame = this._game;
     window.gameContainer = this._gameContainer;
 
-    this._game.events.on("buildingClicked", (id) => {
-      this._currentDetail = { type: "building", id };
-      this._detailContainer.innerHTML = "";
-      showDetail(
-        this._detailContainer,
-        this._game.buildingData,
-        this._game.assetData,
-        "building",
-        id
-      );
-    });
-
-    this._game.events.on("assetClicked", (id) => {
-      this._currentDetail = { type: "asset", id };
-      this._detailContainer.innerHTML = "";
-      showDetail(
-        this._detailContainer,
-        this._game.buildingData,
-        this._game.assetData,
-        "asset",
-        id
-      );
-    });
-
-    this._game.events.on("forceStatsUpdate", () => {
-      this._updateStatistics();
-    });
+    this._game.events.on("buildingClicked", this._onBuildingClickedBound);
+    this._game.events.on("assetClicked", this._onAssetClickedBound);
+    this._game.events.on("forceStatsUpdate", this._onForceStatsUpdateBound);
   }
 
   async _updateStatistics() {
@@ -451,6 +448,66 @@ class GameControlPanel extends HTMLElement {
     spinner.id = "startSpinner";
     spinner.classList.add("spinner");
     return spinner;
+  }
+
+  _handleCloseDetail() {
+    this._detailContainer.classList.add("hidden");
+    this._detailContainer.innerHTML = "";
+    this._currentDetail = { type: null, id: null };
+  }
+
+  _handleDestroyAsset(e) {
+    const assetId = e.detail.assetId;
+    document.dispatchEvent(
+      new CustomEvent("scene:destroy-asset", {
+        detail: { assetId },
+      })
+    );
+  }
+
+  _handleShowAchievements() {
+    showAchievementsOverview(this._wrapper, this._shadow);
+  }
+
+  _handleMenuOpened() {
+    // Hide navigation buttons + detail when menu opens
+    this._innerContainer.style.display = "none";
+    this._outerContainer.style.display = "none";
+    this._detailContainer.style.display = "none";
+  }
+
+  _handleMenuClosed(e) {
+    // Show correct nav button and detail when menu closes
+    if (e.detail.targetScene === "CityScene") {
+      this._outerContainer.style.display = "flex";
+    } else {
+      this._innerContainer.style.display = "flex";
+    }
+    this._detailContainer.style.display = "block";
+  }
+
+  _handleBuildingClicked(id) {
+    this._currentDetail = { type: "building", id };
+    this._detailContainer.innerHTML = "";
+    showDetail(
+      this._detailContainer,
+      this._game.buildingData,
+      this._game.assetData,
+      "building",
+      id
+    );
+  }
+
+  _handleAssetClicked(id) {
+    this._currentDetail = { type: "asset", id };
+    this._detailContainer.innerHTML = "";
+    showDetail(
+      this._detailContainer,
+      this._game.buildingData,
+      this._game.assetData,
+      "asset",
+      id
+    );
   }
 
   _transitionToOuterCity() {

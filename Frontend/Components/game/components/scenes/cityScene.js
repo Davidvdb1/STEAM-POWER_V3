@@ -27,21 +27,12 @@ export function createCityScene() {
   return class CityScene extends Phaser.Scene {
     constructor() {
       super("CityScene");
-
-      this._onUpgradeBuilding = (e) => {
-        handleUpgradeRequest(
-          this,
-          e.detail.GameBuildingId,
-          e.detail.upgradeCost
-        );
-      };
-
-      this._onToggleBuildingEnergy = (e) => {
-        handleToggleEnergyRequest(this, e.detail.GameBuildingId);
-      };
+      this._onUpgradeBuilding = this._onUpgradeBuilding.bind(this);
+      this._onToggleBuildingEnergy = this._onToggleBuildingEnergy.bind(this);
     }
 
     init(data) {
+      // cleanup on scene shutdown
       this.events.once("shutdown", () => {
         if (this.layer1) this.layer1.destroy();
         if (this.layer2) this.layer2.destroy();
@@ -126,6 +117,14 @@ export function createCityScene() {
 
     update(time, delta) {
       handleMovementKeys(this, delta);
+    }
+
+    _onUpgradeBuilding(e) {
+      handleUpgradeRequest(this, e.detail.GameBuildingId, e.detail.upgradeCost);
+    }
+
+    _onToggleBuildingEnergy(e) {
+      handleToggleEnergyRequest(this, e.detail.GameBuildingId);
     }
   };
 }

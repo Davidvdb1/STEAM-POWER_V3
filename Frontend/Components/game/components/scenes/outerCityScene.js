@@ -1,5 +1,3 @@
-// src/components/game/scenes/outerCityScene.js
-
 import {
   setCameraBounds,
   handleZoom,
@@ -25,10 +23,7 @@ export function createOuterCityScene() {
   return class OuterCityScene extends Phaser.Scene {
     constructor() {
       super("OuterCityScene");
-
-      this._onDestroyAsset = (e) => {
-        requestDestroyAsset(this, e.detail.assetId, e.detail.destroyCost);
-      };
+      this._onDestroyAsset = this._onDestroyAsset.bind(this);
     }
 
     init(data) {
@@ -172,6 +167,10 @@ export function createOuterCityScene() {
         this._currencyNeedsRefresh = false;
         this.game.events.emit("forceStatsUpdate");
       }
+    }
+
+    _onDestroyAsset(e) {
+      requestDestroyAsset(this, e.detail.assetId, e.detail.destroyCost);
     }
   };
 }

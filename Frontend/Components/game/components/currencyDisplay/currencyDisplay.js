@@ -92,8 +92,11 @@ class CurrencyDisplay extends HTMLElement {
       ".multipliers span:nth-child(4)"
     );
 
-    this.loadBtn.addEventListener("click", () => this._onLoad());
-    this.saveBtn.addEventListener("click", () => this._onSave());
+    this._onLoadBound = this._onLoad.bind(this);
+    this._onSaveBound = this._onSave.bind(this);
+
+    this.loadBtn.addEventListener("click", this._onLoadBound);
+    this.saveBtn.addEventListener("click", this._onSaveBound);
 
     this._observer = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
@@ -113,15 +116,13 @@ class CurrencyDisplay extends HTMLElement {
   }
 
   disconnectedCallback() {
-    // 1) Disconnect the MutationObserver so it won't keep running
     if (this._observer) {
       this._observer.disconnect();
       this._observer = null;
     }
 
-    // 2) Remove the click listeners on the buttons
-    this.loadBtn.removeEventListener("click", () => this._onLoad());
-    this.saveBtn.removeEventListener("click", () => this._onSave());
+    this.loadBtn.removeEventListener("click", this._onLoadBound);
+    this.saveBtn.removeEventListener("click", this._onSaveBound);
   }
 
   /**
