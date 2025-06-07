@@ -390,7 +390,8 @@ class GameControlPanel extends HTMLElement {
 
   async _onStartClick() {
     // 1) Hide the “Start” button
-    this._startButton.remove();
+    const spinner = this._createSpinner();
+    this._startButton.replaceWith(spinner);
 
     // 2) Fire up CityScene in the background
     this._game.scene.run("CityScene");
@@ -425,6 +426,9 @@ class GameControlPanel extends HTMLElement {
 
     // 7) In one frame: stop the logo, show stats & city
     requestAnimationFrame(() => {
+      // remove spinner
+      const spinner = this._shadow.getElementById("startSpinner");
+      if (spinner) spinner.remove();
       // show currency panel
       this._statsContainer.classList.remove("hidden");
 
@@ -436,6 +440,13 @@ class GameControlPanel extends HTMLElement {
       this._outerContainer.style.display = "flex";
       this._innerContainer.style.display = "none";
     });
+  }
+
+  _createSpinner() {
+    const spinner = document.createElement("div");
+    spinner.id = "startSpinner";
+    spinner.classList.add("spinner");
+    return spinner;
   }
 
   _transitionToOuterCity() {
