@@ -48,7 +48,7 @@
 
 #startButton {
   position: absolute;
-  bottom: 10px;
+  bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
   background-color: green;
@@ -61,6 +61,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
   transition: transform 0.1s ease-in-out;
 }
+
 #startButton.hidden {
   display: none;
 }

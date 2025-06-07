@@ -49,7 +49,7 @@
 
 #startButton {
   position: absolute;
-  bottom: 10px;
+  bottom: 28px;
   left: 50%;
   transform: translateX(-50%);
   background-color: green;

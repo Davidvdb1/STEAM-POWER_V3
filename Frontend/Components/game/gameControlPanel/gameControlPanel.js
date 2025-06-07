@@ -389,25 +389,23 @@ class GameControlPanel extends HTMLElement {
   }
 
   async _onStartClick() {
-    // 1) Hide the “Start” button immediately (LogoScene still visible).
-    this._startButton.classList.add("hidden");
+    // 1) Hide the “Start” button
+    this._startButton.remove();
 
-    // 2) Start CityScene “in the background” (LogoScene stays on top).
+    // 2) Fire up CityScene in the background
     this._game.scene.run("CityScene");
-
-    // 3) Wait for CityScene’s create() to finish.
     const cityScene = this._game.scene.getScene("CityScene");
-    await new Promise((resolve) => {
+
+    // 3) Promise for CityScene.create()
+    const createPromise = new Promise((resolve) => {
       if (cityScene.sys.isCreated) {
         resolve();
       } else {
-        cityScene.events.once("create", () => resolve());
+        cityScene.events.once("create", resolve);
       }
     });
 
-    // ───────────────────────────────────────────────────────────────────────
-    // 4) BEFORE fetching stats, set up a one‐time listener for “data-ready”:
-    //    This promise will resolve as soon as <currency-display> finishes rendering.
+    // 4) Promise for <currency-display> “data-ready”
     const dataReadyPromise = new Promise((resolve) => {
       const onDataReady = () => {
         this._statsContainer.removeEventListener("data-ready", onDataReady);
@@ -415,40 +413,29 @@ class GameControlPanel extends HTMLElement {
       };
       this._statsContainer.addEventListener("data-ready", onDataReady);
     });
-    // ───────────────────────────────────────────────────────────────────────
 
-    // 5) Fetch stats and recolor buildings—but leave <currency-display> hidden.
-    //    As soon as _updateStatistics() sets `this._statsContainer.data = payload`,
-    //    the <currency-display> setter will dispatch “data-ready” that we’re now listening for.
-    try {
-      await this._updateStatistics();
-      if (typeof setBuildingColor === "function") {
-        for (const b of this._game.buildingData) {
-          setBuildingColor(cityScene, b);
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching stats:", err);
-      // Even on error, we still allow the flow to continue so the user isn’t stuck on Logo.
-    }
+    // 5) Kick off stats fetch (which will dispatch “data-ready” when done)
+    const statsPromise = this._updateStatistics().catch((err) => {
+      console.error("Failed to fetch stats:", err);
+      // resolve anyway so we don’t hang
+    });
 
-    // 6) Wait here until <currency-display> has truly rendered:
-    await dataReadyPromise;
+    // 6) Wait for both scene.create AND stats+render
+    await Promise.all([createPromise, statsPromise, dataReadyPromise]);
 
-    // ───────────────────────────────────────────────────────────────────────
-    // 7) ONLY NOW: un‐hide the currency display, stop LogoScene, and bring CityScene to front.
-    this._statsContainer.classList.remove("hidden");
-    this._game.scene.stop("LogoScene");
-    this._game.scene.bringToTop("CityScene");
-    // ───────────────────────────────────────────────────────────────────────
+    // 7) In one frame: stop the logo, show stats & city
+    requestAnimationFrame(() => {
+      // show currency panel
+      this._statsContainer.classList.remove("hidden");
 
-    // 8) Show the “naar buitenstad” button (everything is fully painted).
-    this._outerContainer.style.display = "flex";
-    this._innerContainer.style.display = "none";
+      // stop/logo → city
+      this._game.scene.stop("LogoScene");
+      this._game.scene.bringToTop("CityScene");
 
-    // 9) Restart your periodic energy/stat updates as before.
-    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
-    this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
+      // show the “naar buitenstad” button
+      this._outerContainer.style.display = "flex";
+      this._innerContainer.style.display = "none";
+    });
   }
 
   _transitionToOuterCity() {
