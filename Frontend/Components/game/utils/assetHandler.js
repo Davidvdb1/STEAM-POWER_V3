@@ -548,7 +548,7 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
       Object.assign(assetObj, response.asset);
 
       // 3) Handle any achievements triggered by this removal
-      handleAchievements(response, scene.game.canvas);
+      handleAchievements(response, window.gameContainer);
 
       // 4) Wait for any pending stats update before adjusting currency
       await new Promise((resolve) => {
