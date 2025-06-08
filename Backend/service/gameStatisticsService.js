@@ -442,8 +442,7 @@ class GameStatisticsService {
           : gameStatistics.currency.greyEnergy,
       coins:
         gameStatistics.currency.coins - removedAsset.destroyCost < 0
-          ? gameStatistics.currency.coins -
-            (removedAsset.destroyCost / 100) * 10
+          ? gameStatistics.currency.coins
           : gameStatistics.currency.coins,
       score: gameStatistics.currency.score + scoreChange,
     });
@@ -598,6 +597,9 @@ class GameStatisticsService {
    * @throws {Error} If the GameBuilding or the next BuildingLevel is not found.
    */
   async upgradeGameBuilding(gameBuildingId, { nextLevel }) {
+    console.log(
+      `Upgrading GameBuilding with id=${gameBuildingId} to nextLevel=${nextLevel}`
+    );
     // 1) Fetch the GameBuilding record
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
       gameBuildingId
@@ -694,7 +696,7 @@ class GameStatisticsService {
     ];
 
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
-      gameBuilding.gameStatisticsId,
+      gameStats.id,
       buildingAchievements
     );
 
@@ -886,6 +888,8 @@ class GameStatisticsService {
         }      
       }
     }
+    console.log(`Earned Achievements: ${earnedAchievements.length}`);
+    console.log(earnedAchievements);
     return earnedAchievements;
   }
 

@@ -1,3 +1,18 @@
+/**
+ * this file contains the definitions of buildings used in the game.
+ * Each building has a name and a set of layers that define its appearance.
+ * @module buildingDefinitions
+ * @description configuration for various buildings in the game.
+ */
+
+/**
+ * Array of building definitions.
+ * Each building is an object with a `name` and `layers`.
+ * Each layer is an array containing the layer name and its coordinates.
+ * @typedef {Object} BuildingDefinition
+ * @property {string} name - The name of the building.
+ * @property {Array<Array<string, Array<number>>>>} layers - The layers of the building, each defined by a name and coordinates.
+ */
 export const BUILDING_DEFINITIONS = [
   {
     name: "office",
@@ -148,24 +163,27 @@ export const BUILDING_DEFINITIONS = [
   },
 ];
 
-
+/**
+ * Object mapping building names to their translations.
+ * @type {Object<string, string>}
+ */
 export const BUILDING_NAME_TRANSLATIONS = {
-  "office": "Kantoorgebouw",
-  "apartmentBlockTopLeft": "Appartementenblok A",
-  "townhall": "Stadhuis",
-  "gasStation": "Tankstation",
-  "hotdogStand": "Hotdogkraam",
-  "hospital": "Ziekenhuis",
-  "shoppingCenter": "Winkelcentrum",
-  "school": "School",
-  "bakery": "Bakkerij",
-  "fireStation": "Brandweerkazerne",
-  "policeStation": "Politiebureau",
-  "apartmentBlockBottomLeft": "Appartementenblok B",
-  "hotel": "Hotel",
-  "apartmentBlockBottomCenter": "Appartementenblok C",
-  "apartmentBlockBottomRight": "Appartementenblok D",
-  "postOffice": "Postkantoor",
-  "constructionSite": "Bouwterrein",
-  "trainStation": "Treinstation"
+  office: "Kantoorgebouw",
+  apartmentBlockTopLeft: "Appartementenblok A",
+  townhall: "Stadhuis",
+  gasStation: "Tankstation",
+  hotdogStand: "Hotdogkraam",
+  hospital: "Ziekenhuis",
+  shoppingCenter: "Winkelcentrum",
+  school: "School",
+  bakery: "Bakkerij",
+  fireStation: "Brandweerkazerne",
+  policeStation: "Politiebureau",
+  apartmentBlockBottomLeft: "Appartementenblok B",
+  hotel: "Hotel",
+  apartmentBlockBottomCenter: "Appartementenblok C",
+  apartmentBlockBottomRight: "Appartementenblok D",
+  postOffice: "Postkantoor",
+  constructionSite: "Bouwterrein",
+  trainStation: "Treinstation",
 };

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/currencyDisplay/currencyDisplay.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/currencyDisplay/currencyDisplay.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const cssResponse = await fetch(
+  "./Components/game/components/currencyDisplay/style.css"
+);
+const cssText = await cssResponse.text();
+
+const template = document.createElement("template");
+template.innerHTML = /*html*/ `
+  &lt;style>
+    ${cssText}
+  &lt;/style>
+
+  &lt;div class="currency-display">
+    &lt;div class="currency-row">
+      &lt;div class="currency-item score">
+        &lt;span class="unit">Luchtkwaliteit:&lt;/span>
+        &lt;span id="score">&lt;/span>
+        &lt;span class="unit">/100&lt;/span>
+      &lt;/div>
+
+      &lt;div class="currency-item grey-energy">
+        &lt;img src="Assets/images/pixelGreyEnergy.svg" alt="Grey Energy" />
+        &lt;span id="greyEnergy">0&lt;/span>&lt;span class="unit">kW&lt;/span>
+      &lt;/div>
+
+      &lt;div class="currency-item green-energy">
+        &lt;img src="Assets/images/pixelGreenEnergy.svg" alt="Green Energy" />
+        &lt;span id="greenEnergy">0.000&lt;/span>&lt;span class="unit">kWh&lt;/span>
+      &lt;/div>
+
+      &lt;div class="currency-item coins">
+        &lt;img src="Assets/images/pixelCoin.png" alt="Coins" />
+        &lt;span id="coins">0&lt;/span>
+      &lt;/div>
+
+      &lt;div class="currency-actions">
+        &lt;button id="loadBtn">Load&lt;/button>
+        &lt;button id="saveBtn">Save&lt;/button>
+      &lt;/div>
+    &lt;/div>
+
+    &lt;div class="progress-div">
+      &lt;div class="progress-row">
+        &lt;div class="currency-item green-buildings">
+          &lt;span class="unit">Groene Stad:&lt;/span>
+        &lt;/div>
+
+        &lt;div class="progress-container">
+          &lt;div id="progressBar" class="progress-bar">&lt;/div>
+        &lt;/div>
+
+        &lt;div class="currency-item progress-percent">
+          &lt;span id="progressPercentText">0%&lt;/span>
+        &lt;/div>
+      &lt;/div>
+
+      &lt;div class="multipliers">
+        &lt;span>Bonus:&lt;/span>
+        &lt;span>&lt;/span>
+        &lt;span>&lt;/span>
+        &lt;span>&lt;/span>
+      &lt;/div>
+    &lt;/div>
+  &lt;/div>
+`;
+
+/**
+ * A Web Component that displays currency-related metrics for the game:
+ * air quality score, grey and green energy, coins, green-building progress,
+ * and multipliers, with buttons to load and save checkpoints.
+ */
+class CurrencyDisplay extends HTMLElement {
+  constructor() {
+    super();
+    this._shadow = this.attachShadow({ mode: "open" });
+    this._shadow.appendChild(template.content.cloneNode(true));
+
+    this.greyEl = this._shadow.getElementById("greyEnergy");
+    this.greenEl = this._shadow.getElementById("greenEnergy");
+    this.coinsEl = this._shadow.getElementById("coins");
+    this.scoreEl = this._shadow.getElementById("score");
+    this.loadBtn = this._shadow.getElementById("loadBtn");
+    this.saveBtn = this._shadow.getElementById("saveBtn");
+    this._progressBar = this._shadow.getElementById("progressBar");
+    this._progressPercentText = this._shadow.getElementById(
+      "progressPercentText"
+    );
+
+    this.solarSpan = this._shadow.querySelector(
+      ".multipliers span:nth-child(2)"
+    );
+    this.waterSpan = this._shadow.querySelector(
+      ".multipliers span:nth-child(3)"
+    );
+    this.windSpan = this._shadow.querySelector(
+      ".multipliers span:nth-child(4)"
+    );
+
+    this._onLoadBound = this._onLoad.bind(this);
+    this._onSaveBound = this._onSave.bind(this);
+
+    this.loadBtn.addEventListener("click", this._onLoadBound);
+    this.saveBtn.addEventListener("click", this._onSaveBound);
+
+    this._observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === "childList") {
+          const newScore = Number(this.scoreEl.textContent);
+          if (!isNaN(newScore)) {
+            const hue = newScore * 1.2;
+            let color = "#00ff00"; // groen
+            if (newScore &lt; 30) color = "#ff0000"; // rood
+            else if (newScore &lt; 60) color = "#ffa500"; // oranje
+            else if (newScore &lt; 80) color = "#ffff00"; // geel
+            this.scoreEl.style.color = color;
+          }
+        }
+      }
+    });
+    this._observer.observe(this.scoreEl, { childList: true });
+  }
+
+  /**
+   * Lifecycle callback when the element is removed from the DOM.
+   * Cleans up the MutationObserver and removes button listeners.
+   */
+  disconnectedCallback() {
+    if (this._observer) {
+      this._observer.disconnect();
+      this._observer = null;
+    }
+
+    this.loadBtn.removeEventListener("click", this._onLoadBound);
+    this.saveBtn.removeEventListener("click", this._onSaveBound);
+  }
+
+  /**
+   * Setter for component data. Updates displayed values and dispatches events.
+   */
+  set data({
+    greyEnergy,
+    greenEnergy,
+    coins,
+    score,
+    greenBuildingPercentage,
+    multipliers,
+  }) {
+    if (greyEnergy != null) {
+      this.greyEl.textContent = greyEnergy;
+    }
+    if (greenEnergy != null) {
+      this.greenEl.textContent = Number(greenEnergy).toFixed(3);
+    }
+    if (coins != null) {
+      this.coinsEl.textContent = coins;
+      if (Number(coins) &lt; 0) {
+        this.coinsEl.style.color = "#ff0000";
+      } else {
+        this.coinsEl.style.color = "";
+      }
+      document.dispatchEvent(
+        new CustomEvent("currencyUpdate", {
+          detail: { coins: Number(coins) },
+        })
+      );
+    }
+    if (score != null) {
+      this.scoreEl.textContent = score;
+    }
+
+    if (greenBuildingPercentage != null) {
+      const pct = Math.max(0, Math.min(100, greenBuildingPercentage));
+      this._progressBar.style.width = `${pct}%`;
+      this._progressPercentText.textContent = `${pct}%`;
+    }
+
+    if (multipliers) {
+      this._updateMultipliers(multipliers);
+    }
+
+    this.dispatchEvent(
+      new CustomEvent("data-ready", {
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  /**
+   * Updates the UI for solar, water, and wind multipliers.
+   * @param {Object} multipliers - An object containing the multipliers for solar, water, and wind.
+   * @param {number} multipliers.solar - The solar multiplier.
+   * @param {number} multipliers.water - The water multiplier.
+   * @param {number} multipliers.wind - The wind multiplier.
+   */
+  _updateMultipliers({ solar, water, wind }) {
+    if (solar != null) {
+      this.solarSpan.innerHTML = `&lt;img src="Assets/images/solar_panel.png" alt="Solar Panel"> ${solar}x`;
+    }
+    if (water != null) {
+      this.waterSpan.innerHTML = `&lt;img src="Assets/images/waterrad.png" alt="Water Wheel"> ${water}x`;
+    }
+    if (wind != null) {
+      this.windSpan.innerHTML = `&lt;img src="Assets/images/windturbine.png" alt="Wind Turbine"> ${wind}x`;
+    }
+  }
+
+  /**
+   * Dispatches a "loadCheckpoint" event when the Load button is clicked.
+   */
+  _onLoad() {
+    this.dispatchEvent(
+      new CustomEvent("loadCheckpoint", { bubbles: true, composed: true })
+    );
+  }
+
+  /**
+   * Dispatches a "saveCheckpoint" event when the Save button is clicked.
+   */
+  _onSave() {
+    this.dispatchEvent(
+      new CustomEvent("saveCheckpoint", { bubbles: true, composed: true })
+    );
+  }
+}
+
+window.customElements.define("currency-display", CurrencyDisplay);
+export default CurrencyDisplay;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AnimationHandler.html">AnimationHandler</a></li><li><a href="module-AssetConfig.html">AssetConfig</a></li><li><a href="module-achievementHandler.html">achievementHandler</a></li><li><a href="module-achievementOverview.html">achievementOverview</a></li><li><a href="module-assetHandler.html">assetHandler</a></li><li><a href="module-buildingDefinitions.html">buildingDefinitions</a></li><li><a href="module-buildingHandler.html">buildingHandler</a></li><li><a href="module-checkpointLoadPopup.html">checkpointLoadPopup</a></li><li><a href="module-currencyHelpers.html">currencyHelpers</a></li><li><a href="module-detailHelper.html">detailHelper</a></li><li><a href="module-gameDataHelpers.html">gameDataHelpers</a></li><li><a href="module-gameService.html">gameService</a></li><li><a href="module-gameadminpanel.html">gameadminpanel</a></li><li><a href="module-hoverUtils.html">hoverUtils</a></li><li><a href="module-phaserSceneUtils.html">phaserSceneUtils</a></li><li><a href="module-sessionHelper.html">sessionHelper</a></li><li><a href="module-uiPopups.html">uiPopups</a></li></ul><h3>Classes</h3><ul><li><a href="AssetDetail.html">AssetDetail</a></li><li><a href="BuildingDetail.html">BuildingDetail</a></li><li><a href="BuildingRegistry.html">BuildingRegistry</a></li><li><a href="CityScene.html">CityScene</a></li><li><a href="CurrencyDisplay.html">CurrencyDisplay</a></li><li><a href="GameControlPanel.html">GameControlPanel</a></li><li><a href="LogoScene.html">LogoScene</a></li><li><a href="MenuScene.html">MenuScene</a></li><li><a href="OuterCityScene.html">OuterCityScene</a></li><li><a href="ShopSidebar.html">ShopSidebar</a></li><li><a href="TileSelection.html">TileSelection</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Jun 08 2025 16:36:57 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

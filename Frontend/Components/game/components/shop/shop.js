@@ -4,7 +4,7 @@ const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
     @import './Components/game/components/shop/style.css';
-    </style>
+  </style>
 
   <div class="shop">
     <div class="card-asset" data-type="Windmolen" data-base-price="20">
@@ -93,46 +93,108 @@ template.innerHTML = /*html*/ `
   </div>
 `;
 
+/**
+ * ShopSidebar component for displaying a sidebar with various cards representing assets.
+ * Each card can be dragged and dropped, and the prices are updated based on the current coins available.
+ * The component listens for currency updates to adjust the prices accordingly.
+ */
 class ShopSidebar extends HTMLElement {
+  /**
+   * Creates an instance of ShopSidebar.
+   * Initializes the shadow DOM and sets up event listeners for card drag events and currency updates.
+   */
   constructor() {
     super();
-    this.attachShadow({ mode: "open" }).appendChild(template.content.cloneNode(true));
+    this.attachShadow({ mode: "open" }).appendChild(
+      template.content.cloneNode(true)
+    );
     this.currentCoins = 0;
+
+    this._onCardDragStart = this._onCardDragStart.bind(this);
+    this._onCurrencyUpdate = this._onCurrencyUpdate.bind(this);
   }
 
+  /**
+   * Called when the element is added to the DOM.
+   * It initializes the cards and sets up event listeners for drag events.
+   * @returns {void}
+   */
   connectedCallback() {
-    this.shadowRoot.querySelectorAll(".card-asset").forEach(card => {
-      card.addEventListener("dragstart", e =>
-        e.dataTransfer.setData("text/plain", card.dataset.type)
-      );
+    this._cards = Array.from(this.shadowRoot.querySelectorAll(".card-asset"));
+    this._cards.forEach((card) => {
+      card.addEventListener("dragstart", this._onCardDragStart);
     });
 
-    document.addEventListener('currencyUpdate', (e) => {
-      this.updatePrices(e.detail.coins);
-    });
+    document.addEventListener("currencyUpdate", this._onCurrencyUpdate);
   }
 
+  /**
+   * Called when the element is removed from the DOM.
+   * It cleans up the event listeners and resets the cards.
+   * @returns {void}
+   * */
+  disconnectedCallback() {
+    if (this._cards) {
+      this._cards.forEach((card) => {
+        card.removeEventListener("dragstart", this._onCardDragStart);
+      });
+      this._cards = null;
+    }
+
+    document.removeEventListener("currencyUpdate", this._onCurrencyUpdate);
+
+    this.currentCoins = null;
+  }
+
+  /**
+   * Handles the drag start event for each card.
+   * Sets the data to be transferred during the drag operation.
+   * @param {DragEvent} e - The drag event triggered when a card is dragged.
+   * @return {void}
+   * */
+  _onCardDragStart(e) {
+    e.dataTransfer.setData("text/plain", e.currentTarget.dataset.type);
+  }
+
+  /**
+   * Handles the currency update event.
+   * Updates the prices of the cards based on the current coins available.
+   * @param {CustomEvent} e - The custom event containing the updated coin value.
+   * @return {void}
+   * */
+  _onCurrencyUpdate(e) {
+    this.updatePrices(e.detail.coins);
+  }
+
+  /**
+   * Updates the prices of the cards based on the current coins available.
+   * If the coins are less than the base price of a card, it increases the price by 10% and styles the price element accordingly.
+   * @param {number} coins - The current amount of coins available.
+   * @return {void}
+   */
   updatePrices(coins) {
     this.currentCoins = coins;
-    
-    this.shadowRoot.querySelectorAll(".card-asset").forEach(card => {
-      const basePrice = parseInt(card.dataset.basePrice);
-      const priceElement = card.querySelector('.price');
-      
+    this._cards.forEach((card) => {
+      const basePrice = parseInt(card.dataset.basePrice, 10);
+      const priceElement = card.querySelector(".price");
       let finalPrice = basePrice;
       if (coins < basePrice) {
         finalPrice = Math.ceil(basePrice * 1.1);
-        priceElement.style.color = '#ff6b6b';
-        priceElement.style.fontWeight = 'bold';
+        priceElement.style.color = "#ff6b6b";
+        priceElement.style.fontWeight = "bold";
       } else {
-        priceElement.style.color = '';
-        priceElement.style.fontWeight = '';
+        priceElement.style.color = "";
+        priceElement.style.fontWeight = "";
       }
-      
+
       priceElement.textContent = finalPrice;
-      
     });
   }
+  /**
+   * Sets the coins and updates the prices of the cards accordingly.
+   * @param {number} coins - The current amount of coins available.
+   * @return {void}
+   */
   setCoins(coins) {
     this.updatePrices(coins);
   }

@@ -4,7 +4,7 @@ import {
   setMovementKeys,
   handleMovementKeys,
   handleMapDragging,
-  setupMenuButton
+  setupMenuButton,
 } from "../../utils/phaserSceneUtils.js";
 import {
   setupAssetDragAndDrop,
@@ -20,17 +20,37 @@ import {
 import { createCheckpointLoadPopup } from "../../utils/checkpointLoadPopup.js";
 
 export function createOuterCityScene() {
+  /**
+   * Phaser Scene for the outer city map, handling asset management,
+   * camera movement, and UI popups.
+   * @class OuterCityScene
+   * @extends Phaser.Scene
+   */
   return class OuterCityScene extends Phaser.Scene {
+    /**
+     * Creates a new OuterCityScene instance.
+     * @constructor
+     * @memberof OuterCityScene
+     */
     constructor() {
       super("OuterCityScene");
+      this._onDestroyAsset = this._onDestroyAsset.bind(this);
     }
 
+    /**
+     * Initializes the scene with checkpoint data if available.
+     * @param {Object} data - The checkpoint data containing assets and game statistics.
+     * @param {string} data.gameStatisticsId - The ID of the game statistics.
+     * @param {string} data.token - The token for the game session.
+     * @param {Array} [data.assets] - Optional array of assets to carry over from the checkpoint.
+     * @memberof OuterCityScene
+     */
     init(data) {
       this.events.once("shutdown", () => {
-        if (this.layer1) this.layer1.destroy();
-        if (this.layer2) this.layer2.destroy();
-        if (this.map) this.map.destroy();
-        "dragHighlight".forEach((p) => this[p] && this[p].destroy());
+        document.removeEventListener(
+          "scene:destroy-asset",
+          this._onDestroyAsset
+        );
       });
 
       this.assetObjects = [];
@@ -42,6 +62,10 @@ export function createOuterCityScene() {
       }
     }
 
+    /**
+     * Preloads the assets required for the outer city scene.
+     * @memberof OuterCityScene
+     */
     preload() {
       this.load.tilemapTiledJSON("outerCityMap", "Assets/json/buitenstad.json");
       this.load.image(
@@ -58,6 +82,12 @@ export function createOuterCityScene() {
       this.load.image("Hulst", "Assets/images/Hulst.png");
     }
 
+    /**
+     * Creates the outer city scene, setting up the map, layers,
+     * camera bounds, movement keys, and asset management.
+     * @memberof OuterCityScene
+     * @return {void}
+     * */
     create() {
       this.map = this.make.tilemap({ key: "outerCityMap" });
       const tileset = this.map.addTilesetImage(
@@ -82,19 +112,20 @@ export function createOuterCityScene() {
 
       this.loadExistingAssets();
 
-      // Add menu button to top right corner
       setupMenuButton(this);
 
       document.addEventListener(
         "scene:destroy-asset",
-        (e) => {
-          const assetId = e.detail.assetId;
-          requestDestroyAsset(this, assetId);
-        },
+        this._onDestroyAsset,
         false
       );
     }
 
+    /**
+     * Clears all assets from the scene, removing their images.
+     * @memberof OuterCityScene
+     * @return {void}
+     */
     clearAllAssets() {
       if (this.assetObjects) {
         this.assetObjects.forEach((o) => o.image.destroy());
@@ -103,6 +134,11 @@ export function createOuterCityScene() {
       this.tileAssetMap = {};
     }
 
+    /**
+     * Reloads checkpoint assets into the scene.
+     * @memberof OuterCityScene
+     * @return {void}
+     */
     reloadCheckpointAssets() {
       const assets = Array.isArray(this.checkpointAssets)
         ? this.checkpointAssets
@@ -138,6 +174,12 @@ export function createOuterCityScene() {
       });
     }
 
+    /**
+     * Loads existing assets from the game data
+     * into the scene, creating sprites for each asset.
+     * @memberof OuterCityScene
+     * @return {void}
+     */
     loadExistingAssets() {
       const assets = Array.isArray(this.checkpointAssets)
         ? this.checkpointAssets
@@ -153,11 +195,16 @@ export function createOuterCityScene() {
           { width: a.xSize, height: a.ySize },
           a.id
         );
-
         this.assetObjects.push(assetData);
       });
     }
 
+    /**
+     * Updates the scene, handling movement keys and refreshing currency if needed.
+     * @param {number} time - The current time in milliseconds.
+     * @param {number} delta - The time since the last update in milliseconds.
+     * @memberof OuterCityScene
+     */
     update(time, delta) {
       handleMovementKeys(this, delta);
 
@@ -165,6 +212,16 @@ export function createOuterCityScene() {
         this._currencyNeedsRefresh = false;
         this.game.events.emit("forceStatsUpdate");
       }
+    }
+
+    /**
+     * Handles the destruction of an asset, requesting the server to destroy it
+     * and updating the scene accordingly.
+     * @param {Event} e - The event containing asset details.
+     * @memberof OuterCityScene
+     */
+    _onDestroyAsset(e) {
+      requestDestroyAsset(this, e.detail.assetId, e.detail.destroyCost);
     }
   };
 }
