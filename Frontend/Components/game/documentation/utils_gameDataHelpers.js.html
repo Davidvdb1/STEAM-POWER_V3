@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/gameDataHelpers.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/gameDataHelpers.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module gameDataHelpers
+ * @description Contains utility functions for transforming and calculating game data,
+ * including building and asset data transformations, cost calculations, and currency display payloads.
+ * These functions are used to prepare data for display in the game UI and to compute various statistics related to buildings and assets.
+ */
+
+/**
+ * Transforms raw game building data into a structured format.
+ * @param {Array&lt;Object>} gameBuildings - Array of raw game building objects.
+ * @returns {Array&lt;Object>} An array of transformed building objects with id, name, building, level, and runsOnGreen properties.
+ */
+export function transformBuildingData(gameBuildings) {
+  if (!gameBuildings || !Array.isArray(gameBuildings)) return [];
+
+  return gameBuildings.map((gb) => ({
+    id: gb.id,
+    name: gb.building ? gb.building.name : "Unknown Building",
+    building: gb.building,
+    level: gb.buildingLevel,
+    runsOnGreen: gb.runsOnGreen,
+  }));
+}
+
+/**
+ * Calculates the total grey energy cost from a list of buildings.
+ * @param {Array&lt;Object>} buildings - Array of building objects, each with a level containing energyCost.
+ * @return {number} The total grey energy cost for buildings that do not run on green energy.
+ */
+export function calculateTotalGreyCost(buildings = []) {
+  return buildings
+    .filter((b) => b.runsOnGreen === false)
+    .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
+}
+
+/** * Calculates the total grey energy production from a list of assets.
+ * @param {Array&lt;Object>} assets - Array of asset objects, each with a type and energy property.
+ * @return {number} The total grey energy production from assets of type "Kerncentrale".
+ */
+export function calculateTotalGreyProduction(assets = []) {
+  return assets
+    .filter((a) => a.type === "Kerncentrale")
+    .reduce((sum, a) => sum + (a.energy || 0), 0);
+}
+/** * Calculates the percentage of buildings that run on green energy.
+ * @param {Array&lt;Object>} buildings - Array of building objects, each with a runsOnGreen property.
+ * @return {number} The percentage of buildings that run on green energy, rounded to the nearest integer.
+ */
+export function calculateGreenBuildingPercentage(buildings = []) {
+  const total = buildings.length;
+  if (total === 0) return 0;
+  const greenCount = buildings.filter((b) => b.runsOnGreen).length;
+  return Math.round((greenCount / total) * 100);
+}
+
+/** * Builds a payload for displaying currency information in the game UI.
+ * This function aggregates data from buildings, assets, and currency to create a structured payload
+ * that includes grey energy costs, green energy, coins, score, green building percentage,
+ * multipliers for different components, and total grey production.
+ * @param {Object} params - Parameters containing buildings, assets, currency, and component multipliers.
+ * @returns {Object} A structured payload object for displaying currency information.
+ */
+export function buildCurrencyDisplayPayload({
+  buildings = [],
+  assets = [],
+  currency = { greenEnergy: 0, greyEnergy: 0, coins: 0, score: 0 },
+  componentMultipliers = { solar: 1, wind: 1, water: 1 },
+}) {
+  const totalGreyCost = calculateTotalGreyCost(buildings);
+  const totalGreyProduction = calculateTotalGreyProduction(assets);
+  const greenBuildingPercentage = calculateGreenBuildingPercentage(buildings);
+
+  return {
+    greyEnergy: `${totalGreyCost} / ${totalGreyProduction}`,
+    greenEnergy: currency.greenEnergy,
+    coins: currency.coins,
+    score: currency.score,
+    greenBuildingPercentage,
+    multipliers: componentMultipliers,
+    totalGreyProduction,
+  };
+}
+
+/** * Calculates the total green energy cost from a list of buildings.
+ * @param {Array&lt;Object>} buildings - Array of building objects, each with a level containing energyCost.
+ * @return {number} The total green energy cost for buildings that run on green energy.
+ */
+export function calculateTotalGreenCost(buildings = []) {
+  return buildings
+    .filter((b) => b.runsOnGreen === true)
+    .reduce((sum, b) => sum + (b.level.energyCost || 0), 0);
+}
+
+/** * Calculates the total green energy production from a list of assets.
+ * This function sums the energy produced by assets of type "Windmolen", "Waterrad", and "Zonnepaneel",
+ * and multiplies the result by a microbit value to adjust for game mechanics.
+ * @param {Array&lt;Object>} assets - Array of asset objects, each with a type and energy property.
+ * @param {number} microbitValue - A multiplier for the total green production, default is 1.
+ * @return {number} The total green energy production adjusted by the microbit value.
+ */
+export function calculateTotalGreenProduction(assets = [], microbitValue = 1) {
+  const rawSum = assets
+    .filter(
+      (a) =>
+        a.type === "Windmolen" ||
+        a.type === "Waterrad" ||
+        a.type === "Zonnepaneel"
+    )
+    .reduce((sum, a) => sum + (a.energy || 0), 0);
+  return rawSum * microbitValue;
+}
+
+/** * Computes the updated green energy based on the old green energy,
+ * total green production, and total green cost.
+ * @param {Object} params - Parameters containing old green energy, total green production, and total green cost.
+ * @returns {number} The updated green energy value.
+ */
+export function computeUpdatedGreenEnergy({
+  oldGreenEnergy = 0,
+  totalGreenProduction = 0,
+  totalGreenCost = 0,
+}) {
+  return oldGreenEnergy + totalGreenProduction - totalGreenCost;
+}
+
+/** * Unpacks a raw checkpoint payload into a structured format.
+ * This function extracts relevant data from the raw checkpoint object,
+ * including game statistics ID, currency ID, asset data, and building data.
+ * @param {Object} rawCheckpoint - The raw checkpoint object containing game state data.
+ * @returns {Object} An object containing unpacked game statistics ID, currency ID,
+ * asset data, and transformed building data.
+ */
+export function unpackCheckpointPayload(rawCheckpoint) {
+  return {
+    gameStatisticsId: rawCheckpoint.id,
+    currencyId: rawCheckpoint.currency.id,
+    assetData: rawCheckpoint.assets,
+    buildingData: transformBuildingData(rawCheckpoint.gameBuildings),
+    gameBuildingsRaw: rawCheckpoint.gameBuildings,
+  };
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AnimationHandler.html">AnimationHandler</a></li><li><a href="module-AssetConfig.html">AssetConfig</a></li><li><a href="module-achievementHandler.html">achievementHandler</a></li><li><a href="module-achievementOverview.html">achievementOverview</a></li><li><a href="module-assetHandler.html">assetHandler</a></li><li><a href="module-buildingDefinitions.html">buildingDefinitions</a></li><li><a href="module-buildingHandler.html">buildingHandler</a></li><li><a href="module-checkpointLoadPopup.html">checkpointLoadPopup</a></li><li><a href="module-currencyHelpers.html">currencyHelpers</a></li><li><a href="module-detailHelper.html">detailHelper</a></li><li><a href="module-gameDataHelpers.html">gameDataHelpers</a></li><li><a href="module-gameService.html">gameService</a></li><li><a href="module-gameadminpanel.html">gameadminpanel</a></li><li><a href="module-hoverUtils.html">hoverUtils</a></li><li><a href="module-phaserSceneUtils.html">phaserSceneUtils</a></li><li><a href="module-sessionHelper.html">sessionHelper</a></li><li><a href="module-uiPopups.html">uiPopups</a></li></ul><h3>Classes</h3><ul><li><a href="AssetDetail.html">AssetDetail</a></li><li><a href="BuildingDetail.html">BuildingDetail</a></li><li><a href="BuildingRegistry.html">BuildingRegistry</a></li><li><a href="CityScene.html">CityScene</a></li><li><a href="CurrencyDisplay.html">CurrencyDisplay</a></li><li><a href="GameControlPanel.html">GameControlPanel</a></li><li><a href="LogoScene.html">LogoScene</a></li><li><a href="MenuScene.html">MenuScene</a></li><li><a href="OuterCityScene.html">OuterCityScene</a></li><li><a href="ShopSidebar.html">ShopSidebar</a></li><li><a href="TileSelection.html">TileSelection</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Jun 08 2025 16:36:57 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

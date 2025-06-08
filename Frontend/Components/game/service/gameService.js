@@ -1,6 +1,22 @@
-// gameService.js
+/**
+ * @module gameService
+ * @description
+ *   Service layer for all game-related API calls: statistics, buildings, currency,
+ *   assets, checkpoints, and achievements.
+ */
 
 export async function fetchGameStatistics(groupId, token) {
+  /**
+   * Fetch game statistics for a given group.
+   *
+   * @async
+   * @function fetchGameStatistics
+   * @memberof module:gameService
+   * @param {string} groupId - The ID of the group to fetch stats for.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object|null>} The game statistics object or `null` if not found.
+   * @throws {Error} When the HTTP request fails or returns a non-OK (except 404) status.
+   */
   const url = `${window.env.BACKEND_URL}/gameStatistics/group/${groupId}`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
@@ -18,6 +34,16 @@ export async function fetchGameStatistics(groupId, token) {
 }
 
 export async function getAllGameBuildingsByGroupId(groupId, token) {
+  /**
+   * Fetch all game buildings for a given group ID.
+   * @async
+   * @function getAllGameBuildingsByGroupId
+   * @memberof module:gameService
+   * @param {string} groupId - The ID of the group to fetch buildings for.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object[]>} An array of GameBuilding objects.
+   * @throws {Error} If the HTTP request fails or returns a non-OK status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/gameBuildings/getAllGameBuildingsByGroupId/${groupId}`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
@@ -30,6 +56,16 @@ export async function getAllGameBuildingsByGroupId(groupId, token) {
 }
 
 export async function getCurrencyById(currencyId, token) {
+  /**
+   * Fetch currency data by its ID.
+   * @async
+   * @function getCurrencyById
+   * @memberof module:gameService
+   * @param {string} currencyId - The ID of the currency to fetch.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The currency data object.
+   * @throws {Error} If the HTTP request fails or returns a non-OK status.
+   */
   const url = `${window.env.BACKEND_URL}/gameStatistics/${currencyId}/currency`;
   const res = await fetch(url, {
     method: "GET",
@@ -44,6 +80,17 @@ export async function getCurrencyById(currencyId, token) {
 }
 
 export async function addAsset(gameStatsId, assetData, token) {
+  /**
+   * Add a new asset to the game statistics.
+   * @async
+   * @function addAsset
+   * @memberof module:gameService
+   * @param {string} gameStatsId - The ID of the game statistics to add the asset to.
+   * @param {Object} assetData - The asset data to add.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The created asset object.
+   * @throws {Error} If the HTTP request fails or returns a non-201 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/assets`;
   const res = await fetch(url, {
     method: "POST",
@@ -66,6 +113,16 @@ export async function addAsset(gameStatsId, assetData, token) {
 }
 
 export async function removeAsset(assetId, token) {
+  /**
+   * Remove an asset by its ID.
+   * @async
+   * @function removeAsset
+   * @memberof module:gameService
+   * @param {string} assetId - The ID of the asset to remove.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The response object from the server.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/assets/${assetId}`;
   const res = await fetch(url, {
     method: "DELETE",
@@ -84,6 +141,17 @@ export async function removeAsset(assetId, token) {
 }
 
 export async function updateCurrency(currencyId, currencyData, token) {
+  /**
+   * Update currency data by its ID.
+   * @async
+   * @function updateCurrency
+   * @memberof module:gameService
+   * @param {string} currencyId - The ID of the currency to update.
+   * @param {Object} currencyData - The new currency data to set.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The updated currency object.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/${currencyId}/currency`;
   const res = await fetch(url, {
     method: "PUT",
@@ -106,6 +174,17 @@ export async function updateCurrency(currencyId, currencyData, token) {
 }
 
 export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
+  /**
+   * Upgrade a game building by its ID.
+   * @async
+   * @function upgradeBuilding
+   * @memberof module:gameService
+   * @param {string} GameBuildingId - The ID of the game building to upgrade.
+   * @param {Object} upgradeData - The data for the upgrade.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The updated game building object.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/upgrade`;
   const res = await fetch(url, {
     method: "PUT",
@@ -126,6 +205,16 @@ export async function upgradeBuilding(GameBuildingId, upgradeData, token) {
 }
 
 export async function recordCheckpoint(gameStatsId, token) {
+  /**
+   * Record a checkpoint for game statistics.
+   * @async
+   * @function recordCheckpoint
+   * @memberof module:gameService
+   * @param {string} gameStatsId - The ID of the game statistics to record the checkpoint for.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The created checkpoint object.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/checkpoints`;
   const res = await fetch(url, {
     method: "POST",
@@ -142,6 +231,16 @@ export async function recordCheckpoint(gameStatsId, token) {
 }
 
 export async function refactorGameStatistics(checkpointId, token) {
+  /**
+   * Refactor game statistics to a specific checkpoint.
+   * @async
+   * @function refactorGameStatistics
+   * @memberof module:gameService
+   * @param {string} checkpointId - The ID of the checkpoint to refactor to.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The updated game statistics object.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/refactor/${checkpointId}`;
   const res = await fetch(url, {
     method: "PUT",
@@ -158,6 +257,16 @@ export async function refactorGameStatistics(checkpointId, token) {
 }
 
 export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
+  /**
+   * Fetch checkpoints for a specific game statistics ID.
+   * @async
+   * @function getCheckpointsByGameStatisticsId
+   * @memberof module:gameService
+   * @param {string} gameStatsId - The ID of the game statistics to fetch checkpoints for.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object[]>} An array of checkpoint objects.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}/checkpoints`;
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
@@ -171,6 +280,16 @@ export async function getCheckpointsByGameStatisticsId(gameStatsId, token) {
 }
 
 export async function toggleGameBuildingRunsOnGreen(GameBuildingId, token) {
+  /**
+   * Toggle the `runsOnGreen` property of a game building.
+   * @async
+   * @function toggleGameBuildingRunsOnGreen
+   * @memberof module:gameService
+   * @param {string} GameBuildingId - The ID of the game building to toggle.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The updated game building object.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/buildings/${GameBuildingId}/green`;
   const res = await fetch(url, {
     method: "PUT",
@@ -190,6 +309,16 @@ export async function toggleGameBuildingRunsOnGreen(GameBuildingId, token) {
 }
 
 export async function createGameStatistics(groupId, token) {
+  /**
+   * Create a new GameStatistics entry for a specific group.
+   * @async
+   * @function createGameStatistics
+   * @memberof module:gameService
+   * @param {string} groupId - The ID of the group to create statistics for.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The created GameStatistics object.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics`;
   const res = await fetch(url, {
     method: "POST",
@@ -220,6 +349,16 @@ export async function createGameStatistics(groupId, token) {
 }
 
 export async function createGameBuildings(gameStatsId, token) {
+  /**
+   * Create initial game buildings for a specific GameStatistics ID.
+   * @async
+   * @function createGameBuildings
+   * @memberof module:gameService
+   * @param {string} gameStatsId - The ID of the GameStatistics to create buildings for.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object[]>} An array of created GameBuilding objects.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/gameBuildings/${gameStatsId}`;
   const res = await fetch(url, {
     method: "POST",
@@ -235,18 +374,20 @@ export async function createGameBuildings(gameStatsId, token) {
   return res.json();
 }
 
-/**
- * PUT /gameStatistics/:gameStatisticsId/buildings/green/reset
- * Resets runsOnGreen = false on all buildings under this GameStatistics.
- *
- * @param {string} gameStatisticsId – the ID of the GameStatistics whose buildings you want to reset
- * @param {string} token            – bearer token for authorization
- * @returns {Promise<GameBuildings[]>} the updated array of GameBuilding objects
- */
 export async function toggleAllBuildingsRunsOnGreenFalse(
   gameStatisticsId,
   token
 ) {
+  /**
+   * Reset the `runsOnGreen` property for all buildings in a GameStatistics entry.
+   * @async
+   * @function toggleAllBuildingsRunsOnGreenFalse
+   * @memberof module:gameService
+   * @param {string} gameStatisticsId - The ID of the GameStatistics to reset buildings for.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The response object from the server.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
   const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatisticsId}/buildings/green/reset`;
   const res = await fetch(url, {
     method: "PUT",
@@ -266,18 +407,17 @@ export async function toggleAllBuildingsRunsOnGreenFalse(
   return res.json();
 }
 
-/**
- * Retrieves a list of all achievements and their completion status for a specific group.
- *
- * @async
- * @function getAchievementsOverviewByGroupId
- * @memberof gameService
- * @param {string} groupId - The id of the group.
- * @param {string} token - The authentication token for the request.
- * @returns {Promise<Object[]>} The achievements overview data as a JSON object.
- * @throws {Error} If the HTTP request fails or returns a non-OK status.
- */
 export async function getAchievementsOverviewByGroupId(groupId, token) {
+  /**
+   * Fetch achievements overview for a specific group ID.
+   * @async
+   * @function getAchievementsOverviewByGroupId
+   * @memberof module:gameService
+   * @param {string} groupId - The ID of the group to fetch achievements for.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The achievements overview object.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   */
   const url = `${window.env.BACKEND_URL}/gameStatistics/achievements/overview/${groupId}`;
   const res = await fetch(url, {
     method: "GET",
@@ -285,9 +425,10 @@ export async function getAchievementsOverviewByGroupId(groupId, token) {
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to fetch achievements overview: HTTP ${res.status}`);
+    throw new Error(
+      `Failed to fetch achievements overview: HTTP ${res.status}`
+    );
   }
 
   return res.json();
 }
-

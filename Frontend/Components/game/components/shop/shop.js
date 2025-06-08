@@ -93,7 +93,16 @@ template.innerHTML = /*html*/ `
   </div>
 `;
 
+/**
+ * ShopSidebar component for displaying a sidebar with various cards representing assets.
+ * Each card can be dragged and dropped, and the prices are updated based on the current coins available.
+ * The component listens for currency updates to adjust the prices accordingly.
+ */
 class ShopSidebar extends HTMLElement {
+  /**
+   * Creates an instance of ShopSidebar.
+   * Initializes the shadow DOM and sets up event listeners for card drag events and currency updates.
+   */
   constructor() {
     super();
     this.attachShadow({ mode: "open" }).appendChild(
@@ -105,6 +114,11 @@ class ShopSidebar extends HTMLElement {
     this._onCurrencyUpdate = this._onCurrencyUpdate.bind(this);
   }
 
+  /**
+   * Called when the element is added to the DOM.
+   * It initializes the cards and sets up event listeners for drag events.
+   * @returns {void}
+   */
   connectedCallback() {
     this._cards = Array.from(this.shadowRoot.querySelectorAll(".card-asset"));
     this._cards.forEach((card) => {
@@ -114,6 +128,11 @@ class ShopSidebar extends HTMLElement {
     document.addEventListener("currencyUpdate", this._onCurrencyUpdate);
   }
 
+  /**
+   * Called when the element is removed from the DOM.
+   * It cleans up the event listeners and resets the cards.
+   * @returns {void}
+   * */
   disconnectedCallback() {
     if (this._cards) {
       this._cards.forEach((card) => {
@@ -127,14 +146,32 @@ class ShopSidebar extends HTMLElement {
     this.currentCoins = null;
   }
 
+  /**
+   * Handles the drag start event for each card.
+   * Sets the data to be transferred during the drag operation.
+   * @param {DragEvent} e - The drag event triggered when a card is dragged.
+   * @return {void}
+   * */
   _onCardDragStart(e) {
     e.dataTransfer.setData("text/plain", e.currentTarget.dataset.type);
   }
 
+  /**
+   * Handles the currency update event.
+   * Updates the prices of the cards based on the current coins available.
+   * @param {CustomEvent} e - The custom event containing the updated coin value.
+   * @return {void}
+   * */
   _onCurrencyUpdate(e) {
     this.updatePrices(e.detail.coins);
   }
 
+  /**
+   * Updates the prices of the cards based on the current coins available.
+   * If the coins are less than the base price of a card, it increases the price by 10% and styles the price element accordingly.
+   * @param {number} coins - The current amount of coins available.
+   * @return {void}
+   */
   updatePrices(coins) {
     this.currentCoins = coins;
     this._cards.forEach((card) => {
@@ -153,6 +190,11 @@ class ShopSidebar extends HTMLElement {
       priceElement.textContent = finalPrice;
     });
   }
+  /**
+   * Sets the coins and updates the prices of the cards accordingly.
+   * @param {number} coins - The current amount of coins available.
+   * @return {void}
+   */
   setCoins(coins) {
     this.updatePrices(coins);
   }

@@ -1,3 +1,10 @@
+/**
+ * Utility functions for managing Phaser scenes, camera bounds, zoom, and movement.
+ * @module phaserSceneUtils
+ * @description Contains functions to set camera bounds, handle zoom, manage movement keys,
+ * and create buttons for the Phaser game engine.
+ */
+
 import { createMenuScene } from "../components/scenes/menuScene.js";
 
 /**
@@ -77,6 +84,11 @@ export function handleMovementKeys(scene, delta, speed = 750) {
   );
 }
 
+/** * Handles dragging the map using the right mouse button.
+ * Allows the user to click and drag to move the camera view.
+ *
+ * @param {Phaser.Scene} scene - The Phaser scene to enable dragging in.
+ */
 export function handleMapDragging(scene) {
   // Enable camera dragging with right mouse button only
   scene.isDragging = false;

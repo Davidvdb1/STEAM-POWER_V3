@@ -1,3 +1,16 @@
+/**
+ * Utility functions to create UI popups in a Phaser game.
+ * These functions create error and confirmation popups with customizable messages and actions.
+ * @module uiPopups
+ * @description Provides functions to create error and confirmation popups in a Phaser game scene.
+ */
+
+/**
+ * Creates an error popup in the specified Phaser scene.
+ * The popup displays an error message and fades out after a short duration.
+ * @param {Phaser.Scene} scene - The Phaser scene where the popup will be created.
+ * @returns {void}
+ */
 export function createErrorPopup(scene) {
   const { width, height } = scene.cameras.main;
   const popupWidth = 700,
@@ -47,6 +60,12 @@ export function createErrorPopup(scene) {
   };
 }
 
+/**
+ * Creates a confirmation popup in the specified Phaser scene.
+ * The popup allows the user to confirm or cancel an action with "Ja" and "Nee" buttons.
+ * @param {Phaser.Scene} scene - The Phaser scene where the popup will be created.
+ * @returns {void}
+ */
 export function createConfirmationPopup(scene) {
   const { width, height } = scene.cameras.main;
   const popupWidth = 700,
