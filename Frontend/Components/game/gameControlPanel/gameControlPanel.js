@@ -826,7 +826,10 @@ class GameControlPanel extends HTMLElement {
   async _handleTaxes() {
     // Get the JWT token from the session
     const { token } = getAuthFromSession();
-    const collectedTaxes = Math.floor(this._game.currency.score * 1.9);
+
+    // 1 coin for each score point, plus a base tax revenue of 10 coins
+    // If the score is negative, we still collect a base tax revenue of 10 coins
+    const collectedTaxes = this._game.currency.score <= 0 ? 10 : 10 + this._game.currency.score;
 
     // Update the currency with the added tax revenue
     await updateCurrency(
