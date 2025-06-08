@@ -41,27 +41,27 @@ template.innerHTML = /*html*/ `
   </style>
 
   <div id="wrapper">
-    <div id="detail-container" class="hidden"></div>
+    <div id="detail-container" data-cy="detail-container" class="hidden"></div>
     <div id="inner-container">
-      <shop-sidebar></shop-sidebar>
+      <shop-sidebar data-cy="shop-sidebar"></shop-sidebar>
 
       <div class="test" style="z-index: 1000;">
-        <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
+        <img id="inner-button" data-cy="inner-city-btn" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
         <div id="inner-text">Ga naar binnenstad</div>
       </div>
     </div>
 
-    <div id="game-container"></div>
+    <div id="game-container" data-cy="game-container"></div>
 
     <div id="outer-container">
-      <img id="outer-button" src="Assets/images/toOuter.png" alt="Ga naar buitenstad" />
+      <img id="outer-button" data-cy="outer-city-btn" src="Assets/images/toOuter.png" alt="Ga naar buitenstad" />
       <div id="outer-text">Ga naar buitenstad</div>
     </div>
 
-    <button id="startButton" class="hidden">Start</button>
+    <button id="startButton" data-cy="start-game-btn" class="hidden">Start</button>
   </div>
 
-  <currency-display id="stats" class="hidden"></currency-display>
+  <currency-display id="stats" data-cy="currency-display" class="hidden"></currency-display>
 `;
 
 class GameControlPanel extends HTMLElement {
