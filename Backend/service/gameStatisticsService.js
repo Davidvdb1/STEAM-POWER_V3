@@ -209,7 +209,7 @@ class GameStatisticsService {
    * @param {boolean} [includeAssets=true] - Whether to include assets in the result.
    * @param {boolean} [includeCheckpoints=true] - Whether to include checkpoints in the result.
    * @param {boolean} [includeGroup=false] - Whether to include group details in the result.
-   * @returns {Promise<GameStatistics|null>} The found GameStatistics instance or null if not found.
+   * @returns {Promise<GameStatistics>} The Gamestatistics object.
    */
   async getByGroupId(
     groupId,
@@ -265,10 +265,10 @@ class GameStatisticsService {
    * @param {number} payload.greyEnergy - The updated amount of grey energy.
    * @param {number} payload.coins - The updated amount of coins.
    * @param {number} payload.score - The updated score value.
-   * @returns {Promise<Currency>} The updated Currency instance.
+   * @returns {Promise<Currency>} The updated Currency object.
    */
   async updateCurrency(currencyId, payload) {
-    return gameStatisticsRepository.updateCurrency(currencyId, payload);
+    return await gameStatisticsRepository.updateCurrency(currencyId, payload);
   }
 
   /**
@@ -375,6 +375,8 @@ class GameStatisticsService {
       "Energie-ingenieur",
       "Energie-architect",
       "Groene vingers",
+      "Frisse adem", 
+      "Schone lucht"
     ];
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       statsId,
@@ -447,7 +449,7 @@ class GameStatisticsService {
 
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       removedAsset.gameStatisticsId,
-      ["Milieuheld"],
+      ["Milieuheld", "Geen grijs", "Frisse adem", "Schone lucht"],
       removedAsset
     );
 
@@ -682,18 +684,23 @@ class GameStatisticsService {
         gameBuildingId,
         nextLevelObj.id
       );
-
-    // 10) (Optional) Handle achievements here...
-    console.log(updatedGameBuildingRecord);
+    
+    // Check if any achievement for upgrading a building has been achieved. If so add them to the GameStatistics object
     const buildingAchievements = [
       "Bouwassistent",
       "Bouwmeester",
       "Bouwkampioen",
+      "Frisse adem", 
+      "Schone lucht",
+      "EU gemiddelde"
     ];
+
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       gameStats.id,
       buildingAchievements
     );
+
+    // Return both the updated GameBuilding and any newly earned Achievements
     return {
       gameBuilding: updatedGameBuildingRecord,
       newlyEarnedAchievements: newlyEarnedAchievements,
@@ -708,7 +715,7 @@ class GameStatisticsService {
    * @function toggleGameBuildingRunsOnGreen
    * @memberof module:service/gameStatisticsService.Service_GameBuildings
    * @param {string} gameBuildingId - The id of the GameBuilding to toggle.
-   * @returns {Promise<GameBuildings>} The updated GameBuilding object with the toggled 'runsOnGreen' status.
+   * @returns {Promise<{gameBuilding: GameBuildings, newlyEarnedAchievements: Achievement[]}>} The updated GameBuilding object and any newly earned achievements.
    */
   async toggleGameBuildingRunsOnGreen(gameBuildingId) {
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
@@ -739,9 +746,20 @@ class GameStatisticsService {
       );
     }
 
-    return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
+    const updatedGameBuilding = await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
+
+    const achievements = ["Eerste stap", "Efficiëntie-expert", "Frisse adem", "Schone lucht", "EU gemiddelde"]
+    const newlyEarnedAchievements = await this._trackEarnedAchievements(
+      gameBuilding.gameStatisticsId,
+      achievements
+    );
+
+    return {
+      gameBuilding: updatedGameBuilding,
+      newlyEarnedAchievements: newlyEarnedAchievements,
+    };
   }
 
   /**
@@ -865,7 +883,9 @@ class GameStatisticsService {
         );
 
         // Add the achievement to the list of earned achievements if it exists
-        earnedAchievements.push(achievement);
+        if (achievement) {
+          earnedAchievements.push(achievement);
+        }      
       }
     }
     console.log(`Earned Achievements: ${earnedAchievements.length}`);
@@ -899,14 +919,6 @@ class GameStatisticsService {
 
     // Cases and logic depend on the existing achievements and their requirements
     switch (title) {
-      case "Eerste stap":
-      // Check if at least one building uses green energy
-      // To be implemented
-
-      case "Efficiëntie-expert":
-      // Check if all buildings use green energy
-      // To be implemented
-
       case "Bouwassistent":
         // Check if any building has been upgraded to level 2
         return gameStatistics.gameBuildings.some(
@@ -950,15 +962,48 @@ class GameStatisticsService {
         // Check if a gray energy source has been destroyed
         return removedAsset ? removedAsset.type === "Kerncentrale" : false;
 
-      // case "EU gemiddelde":
-      //   // Check if more than 25% of total energy comes from green sources
-      //   const totalEnergy = gameStatistics.currency.greenEnergy + gameStatistics.currency.greyEnergy;
-      //   if (totalEnergy === 0) return false;
-      //   const greenPercentage = (gameStatistics.currency.greenEnergy / totalEnergy) * 100;
-      //   return greenPercentage > 25;
+      case "Eerste stap":
+        // Check if at least one building runs on green energy
+        return gameStatistics.gameBuildings.some(
+          (gameBuilding) => gameBuilding.runsOnGreen
+        );
+
+      case "Efficiëntie-expert":
+        // Check if all buildings run on green energy
+        return gameStatistics.gameBuildings.every(
+          (gameBuilding) => gameBuilding.runsOnGreen
+        );
+
+      case "Geen grijs":
+        // Check if no gray energy sources have been built
+        return !gameStatistics.assets.some(
+          (asset) => asset.type === "Kerncentrale"
+        );
+
+      case "Frisse adem":
+        // Check if the air quality (score) is 50 or higher
+        return gameStatistics.currency.score >= 50;
+
+      case "Schone lucht":
+        // Check if the air quality (score) is 100 (or higher)
+        return gameStatistics.currency.score >= 100;
+
+      case "EU gemiddelde":
+        // Check if 25% or more of the total energy used comes from green sources
+        let totalGreenEnergyUsed = 0;
+        let totalEnergyUsed = 0;
+
+        for (const gameBuilding of gameStatistics.gameBuildings) {
+          totalEnergyUsed += gameBuilding.buildingLevel?.energyCost;
+          if (gameBuilding.runsOnGreen) {
+            totalGreenEnergyUsed += gameBuilding.buildingLevel?.energyCost;
+          }
+        }
+
+        return totalEnergyUsed > 0 && (totalGreenEnergyUsed / totalEnergyUsed) >= 0.25;
 
       default:
-        console.log(`Unknown achievement title: ${title}`);
+        console.error(`Unknown achievement title: ${title}`);
         return false;
     }
   }

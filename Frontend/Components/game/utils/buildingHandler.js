@@ -243,7 +243,6 @@ export async function handleToggleEnergyRequest(scene, gameBuildingId) {
   const availableGreenEnergy = scene.sys.game.currency?.greenEnergy || 0;
   // const availableGreyEnergy = scene.sys.game.currency?.greyEnergy || 0;
   const gamebuildingRunsOnGreen = buildingObj.runsOnGreen;
-
   const assets = scene.sys.game.assetData || [];
   const greyEnergyProduction = calculateTotalGreyProduction(assets);
   const greyEnergyUse = calculateTotalGreyCost(buildingList);
@@ -267,10 +266,10 @@ export async function handleToggleEnergyRequest(scene, gameBuildingId) {
           scene.sys.game.token
         );
 
-        Object.assign(buildingObj, response);
+        Object.assign(buildingObj, response.gameBuilding);
 
         setBuildingColor(scene, buildingObj);
-        handleAchievements(response, scene.game.canvas);
+        handleAchievements(response, window.gameContainer);
         scene.game.events.emit("forceStatsUpdate");
 
         // Refresh the detail panel for this building
