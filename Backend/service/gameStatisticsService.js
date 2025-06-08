@@ -209,7 +209,7 @@ class GameStatisticsService {
    * @param {boolean} [includeAssets=true] - Whether to include assets in the result.
    * @param {boolean} [includeCheckpoints=true] - Whether to include checkpoints in the result.
    * @param {boolean} [includeGroup=false] - Whether to include group details in the result.
-   * @returns {Promise<GameStatistics|null>} The found GameStatistics instance or null if not found.
+   * @returns {Promise<GameStatistics>} The Gamestatistics object.
    */
   async getByGroupId(
     groupId,
@@ -265,22 +265,10 @@ class GameStatisticsService {
    * @param {number} payload.greyEnergy - The updated amount of grey energy.
    * @param {number} payload.coins - The updated amount of coins.
    * @param {number} payload.score - The updated score value.
-   * @returns {Promise<Currency>} The updated Currency instance.
+   * @returns {Promise<Currency>} The updated Currency object.
    */
   async updateCurrency(currencyId, payload) {
-    const gameStatistics = 
-    const updatedCurrency = await gameStatisticsRepository.updateCurrency(currencyId, payload);
-
-    const achievements = ["Frisse adem", "Schone lucht"]
-    const newlyEarnedAchievements = await this._trackEarnedAchievements(
-      gameBuilding.gameStatisticsId,
-      achievements
-    );
-
-    return {
-      currency: updatedCurrency,
-      newlyEarnedAchievements: newlyEarnedAchievements,
-    };
+    return await gameStatisticsRepository.updateCurrency(currencyId, payload);
   }
 
   /**
@@ -387,6 +375,8 @@ class GameStatisticsService {
       "Energie-ingenieur",
       "Energie-architect",
       "Groene vingers",
+      "Frisse adem", 
+      "Schone lucht"
     ];
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       statsId,
@@ -460,7 +450,7 @@ class GameStatisticsService {
 
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       removedAsset.gameStatisticsId,
-      ["Milieuheld"],
+      ["Milieuheld", "Geen grijs", "Frisse adem", "Schone lucht"],
       removedAsset
     );
 
@@ -692,12 +682,26 @@ class GameStatisticsService {
         gameBuildingId,
         nextLevelObj.id
       );
+    
+    // Check if any achievement for upgrading a building has been achieved. If so add them to the GameStatistics object
+    const buildingAchievements = [
+      "Bouwassistent",
+      "Bouwmeester",
+      "Bouwkampioen",
+      "Frisse adem", 
+      "Schone lucht",
+      "EU gemiddelde"
+    ];
 
-    // 10) (Optional) Handle achievements here...
+    const newlyEarnedAchievements = await this._trackEarnedAchievements(
+      gameBuilding.gameStatisticsId,
+      buildingAchievements
+    );
 
+    // Return both the updated GameBuilding and any newly earned Achievements
     return {
       gameBuilding: updatedGameBuildingRecord,
-      newlyEarnedAchievements: [],
+      newlyEarnedAchievements: newlyEarnedAchievements,
     };
   }
 
@@ -740,11 +744,11 @@ class GameStatisticsService {
       );
     }
 
-    updatedGameBuilding = await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
+    const updatedGameBuilding = await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
 
-    const achievements = ["Eerste stap", "Efficiëntie-expert"]
+    const achievements = ["Eerste stap", "Efficiëntie-expert", "Frisse adem", "Schone lucht", "EU gemiddelde"]
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       gameBuilding.gameStatisticsId,
       achievements
@@ -877,7 +881,9 @@ class GameStatisticsService {
         );
 
         // Add the achievement to the list of earned achievements if it exists
-        earnedAchievements.push(achievement);
+        if (achievement) {
+          earnedAchievements.push(achievement);
+        }      
       }
     }
     return earnedAchievements;
@@ -980,22 +986,20 @@ class GameStatisticsService {
 
       case "EU gemiddelde":
         // Check if 25% or more of the total energy used comes from green sources
-        const totalGreenEnergyUsed = 0
+        let totalGreenEnergyUsed = 0;
+        let totalEnergyUsed = 0;
+
         for (const gameBuilding of gameStatistics.gameBuildings) {
+          totalEnergyUsed += gameBuilding.buildingLevel?.energyCost;
           if (gameBuilding.runsOnGreen) {
-            totalGreenEnergyUsed += gameBuilding.buildingLevel.energy;
+            totalGreenEnergyUsed += gameBuilding.buildingLevel?.energyCost;
           }
         }
 
-        const totalEnergyUsed = 0
-        for (const gameBuilding of gameStatistics.gameBuildings) {
-          totalEnergyUsed += gameBuilding.buildingLevel.energy;
-        }
-
-        return totalGreenEnergyUsed / totalEnergyUsed >= 0.25;
+        return totalEnergyUsed > 0 && (totalGreenEnergyUsed / totalEnergyUsed) >= 0.25;
 
       default:
-        console.log(`Unknown achievement title: ${title}`);
+        console.error(`Unknown achievement title: ${title}`);
         return false;
     }
   }

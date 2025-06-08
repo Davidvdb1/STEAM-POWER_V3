@@ -583,7 +583,7 @@ export async function performDestroyAsset(scene, assetId) {
 
     const response = await removeAsset(assetId, token);
 
-    handleAchievements(response, scene.game.canvas);
+    handleAchievements(response, window.gameContainer);
 
     const currentCurrency = await getCurrencyById(currencyId, token);
 
