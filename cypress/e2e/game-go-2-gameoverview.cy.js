@@ -83,7 +83,7 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
         const grey = shadow.querySelector("#greyEnergy");
 
         expect(score?.textContent).to.match(/^\d*$/);
-        expect(coins?.textContent).to.match(/^\d*$/);
+        expect(coins?.textContent).to.match(/^-?\d+$/);
         expect(green?.textContent).to.not.be.empty;
         expect(grey?.textContent).to.not.be.empty;
       });
