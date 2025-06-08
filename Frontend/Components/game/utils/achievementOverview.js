@@ -1,10 +1,13 @@
-import { getAuthFromSession } from './sessionHelper.js';
+/**
+ * @module achievementOverview
+ * @description Handles the display of achievements overview in the game
+ */
+
+import { getAuthFromSession } from "./sessionHelper.js";
 
 /**
  * Creates and displays an overview of achievements
- * 
- * @function showAchievementsOverview
- * @memberof gameUtils
+ *
  * @param {HTMLElement} wrapper - The wrapper element to attach the overview to
  * @param {ShadowRoot} shadow - The shadow DOM root to append styles to
  * @returns {Promise<void>}
@@ -12,66 +15,63 @@ import { getAuthFromSession } from './sessionHelper.js';
 export async function showAchievementsOverview(wrapper, shadow) {
   try {
     const { token, groupId } = getAuthFromSession();
-    
+
     // Get or create the overlay element
     const achievementsOverlay = getOrCreateOverlay(wrapper, shadow);
-    
+
     // Show the overlay and initialize it
     showOverlay(achievementsOverlay);
-    
+
     // Fetch and render achievements
     await fetchAndRenderAchievements(achievementsOverlay, groupId, token);
   } catch (error) {
-    console.error('Error displaying achievements:', error);
+    console.error("Error displaying achievements:", error);
     showErrorMessage(wrapper);
   }
 }
 
-
 /**
  * Gets the existing overlay or creates a new one if it doesn't exist
- * 
+ *
  * @param {HTMLElement} wrapper - The wrapper element
  * @param {ShadowRoot} shadow - The shadow DOM root
  * @returns {HTMLElement} The achievements overlay element
  */
 function getOrCreateOverlay(wrapper, shadow) {
-  let achievementsOverlay = wrapper.querySelector('.achievements-overlay');
-  
+  let achievementsOverlay = wrapper.querySelector(".achievements-overlay");
+
   // Create overlay container if it doesn't exist
   if (!achievementsOverlay) {
-    achievementsOverlay = document.createElement('div');
-    achievementsOverlay.className = 'achievements-overlay';
+    achievementsOverlay = document.createElement("div");
+    achievementsOverlay.className = "achievements-overlay";
     wrapper.appendChild(achievementsOverlay);
-    
+
     // Add styles to shadow DOM
     ensureStylesExist(shadow);
   }
-  
+
   return achievementsOverlay;
 }
 
-
 /**
  * Ensures the styles for the achievements overlay exist in the shadow DOM
- * 
+ *
  * @param {ShadowRoot} shadow - The shadow DOM root
  */
 function ensureStylesExist(shadow) {
-  if (shadow.querySelector('#achievements-overlay-styles')) {
+  if (shadow.querySelector("#achievements-overlay-styles")) {
     return; // Styles already exist
   }
-  
-  const style = document.createElement('style');
-  style.id = 'achievements-overlay-styles';
+
+  const style = document.createElement("style");
+  style.id = "achievements-overlay-styles";
   style.textContent = getStylesText();
   shadow.appendChild(style);
 }
 
-
 /**
  * Returns the CSS styles for the achievements overlay
- * 
+ *
  * @returns {string} The CSS text
  */
 function getStylesText() {
@@ -175,27 +175,25 @@ function getStylesText() {
   `;
 }
 
-
 /**
  * Shows the overlay and initializes its content with a loading state
- * 
+ *
  * @param {HTMLElement} overlay - The overlay element
  */
 function showOverlay(overlay) {
   // Show the overlay (make sure to remove the hidden class if it exists)
-  overlay.classList.remove('hidden');
-  
+  overlay.classList.remove("hidden");
+
   // Initialize with loading state
   overlay.innerHTML = createOverlayHTML();
-  
+
   // Setup event handlers
   setupEventHandlers(overlay);
 }
 
-
 /**
  * Creates the HTML for the overlay
- * 
+ *
  * @returns {string} The HTML string
  */
 function createOverlayHTML() {
@@ -212,23 +210,22 @@ function createOverlayHTML() {
   `;
 }
 
-
 /**
  * Sets up event handlers for the overlay
- * 
+ *
  * @param {HTMLElement} overlay - The overlay element
  */
 function setupEventHandlers(overlay) {
   // Add close handler
-  const closeButton = overlay.querySelector('.close-button');
+  const closeButton = overlay.querySelector(".close-button");
   if (closeButton) {
-    closeButton.addEventListener('click', () => {
-      overlay.classList.add('hidden');
+    closeButton.addEventListener("click", () => {
+      overlay.classList.add("hidden");
     });
   }
-  
+
   // Make the overlay block all events from passing through
-  overlay.addEventListener('click', (e) => {
+  overlay.addEventListener("click", (e) => {
     // Only prevent propagation if the click is directly on the overlay
     // and not on a child element
     if (e.target === overlay) {
@@ -237,87 +234,89 @@ function setupEventHandlers(overlay) {
   });
 }
 
-
 /**
  * Fetches achievements data and renders it in the overlay
- * 
+ *
  * @param {HTMLElement} overlay - The overlay element
  * @param {string} groupId - The group ID
  * @param {string} token - The authentication token
  */
 async function fetchAndRenderAchievements(overlay, groupId, token) {
   // Fetch achievements
-  const { getAchievementsOverviewByGroupId } = await import('../service/gameService.js');
+  const { getAchievementsOverviewByGroupId } = await import(
+    "../service/gameService.js"
+  );
   const achievements = await getAchievementsOverviewByGroupId(groupId, token);
-  
+
   // Get the content element
-  const contentEl = overlay.querySelector('#achievements-content');
+  const contentEl = overlay.querySelector("#achievements-content");
   if (!contentEl) return;
-  
+
   // Handle empty achievements
   if (!achievements || achievements.length === 0) {
     contentEl.innerHTML = createEmptyAchievementsHTML();
     return;
   }
-  
+
   // Render achievements
   contentEl.innerHTML = createAchievementsListHTML(achievements);
 }
 
-
 /**
  * Creates HTML for when no achievements are found
- * 
+ *
  * @returns {string} The HTML string
  */
 function createEmptyAchievementsHTML() {
   return '<div style="text-align: center; padding: 20px;">Geen doelstellingen gevonden</div>';
 }
 
-
 /**
  * Creates HTML for the list of achievements
- * 
+ *
  * @param {Array} achievements - The achievements data
  * @returns {string} The HTML string
  */
 function createAchievementsListHTML(achievements) {
-  return achievements.map(achievement => 
-    createAchievementItemHTML(achievement)
-  ).join('');
+  return achievements
+    .map((achievement) => createAchievementItemHTML(achievement))
+    .join("");
 }
-
 
 /**
  * Creates HTML for a single achievement item
- * 
+ *
  * @param {Object} achievement - The achievement data
  * @returns {string} The HTML string
  */
 function createAchievementItemHTML(achievement) {
   return `
-    <div class="achievement-item ${achievement.isReached ? 'achievement-completed' : ''}">
+    <div class="achievement-item ${
+      achievement.isReached ? "achievement-completed" : ""
+    }">
       <div class="achievement-header">
-        <div>${achievement.title} (+${achievement.reward} <img class="coin-icon" src="Assets/images/pixelCoin.png" alt="coins"/>)</div>
-        ${achievement.isReached ? '<div>✓</div>' : ''}
+        <div>${achievement.title} (+${
+    achievement.reward
+  } <img class="coin-icon" src="Assets/images/pixelCoin.png" alt="coins"/>)</div>
+        ${achievement.isReached ? "<div>✓</div>" : ""}
       </div>
       <div class="achievement-description">${achievement.description}</div>
     </div>
   `;
 }
 
-
 /**
  * Shows an error message in the overlay
- * 
+ *
  * @param {HTMLElement} wrapper - The wrapper element
  */
 function showErrorMessage(wrapper) {
-  const achievementsOverlay = wrapper.querySelector('.achievements-overlay');
+  const achievementsOverlay = wrapper.querySelector(".achievements-overlay");
   if (!achievementsOverlay) return;
-  
-  const contentEl = achievementsOverlay.querySelector('#achievements-content');
+
+  const contentEl = achievementsOverlay.querySelector("#achievements-content");
   if (!contentEl) return;
-  
-  contentEl.innerHTML = '<div style="text-align: center; color: red; padding: 20px;">Fout bij het laden van doelstellingen</div>';
+
+  contentEl.innerHTML =
+    '<div style="text-align: center; color: red; padding: 20px;">Fout bij het laden van doelstellingen</div>';
 }

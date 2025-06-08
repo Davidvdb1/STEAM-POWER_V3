@@ -26,8 +26,15 @@ template.innerHTML = /*html*/ `
     </div>
   </div>
 `;
-
+/*
+ * Web Component showing details for a selected building,
+ * including name, level, energy cost, upgrade cost, and actions.
+ */
 class BuildingDetail extends HTMLElement {
+  /**
+   * Attach shadow DOM, clone template,
+   * cache elements, bind event handlers.
+   */
   constructor() {
     super();
     const shadow = this.attachShadow({ mode: "open" });
@@ -51,16 +58,27 @@ class BuildingDetail extends HTMLElement {
       if (this._data) this._render();
     };
   }
-
+  /**
+   * Sets the building data and triggers a re-render.
+   * @param {Object} value - The building data object.
+   */
   set data(value) {
     this._data = value;
     this._render();
   }
 
+  /**
+   * Gets the current building data.
+   * @returns {Object|null} The building data object or null if not set.
+   */
   get data() {
     return this._data;
   }
-
+  /**
+   * Called when the element is added to the DOM.
+   * Sets up event listeners and attempts to load initial data.
+   * @returns {void}
+   * */
   connectedCallback() {
     this._closeBtn.addEventListener("click", this._onCloseClick);
     document.addEventListener("currencyUpdate", this._onCurrencyUpdate);
@@ -74,7 +92,11 @@ class BuildingDetail extends HTMLElement {
       }
     }
   }
-
+  /**
+   * Called when the element is removed from the DOM.
+   * Cleans up event listeners and resets data.
+   * @returns {void}
+   * */
   disconnectedCallback() {
     this._closeBtn.removeEventListener("click", this._onCloseClick);
     document.removeEventListener("currencyUpdate", this._onCurrencyUpdate);
@@ -84,15 +106,31 @@ class BuildingDetail extends HTMLElement {
     if (this.shadowRoot) this.shadowRoot.innerHTML = "";
   }
 
+  /**
+   * Gets the current coins from the game state.
+   * @returns {number} The current coin count.
+   */
   _getCurrentCoins() {
     return window.phaserGame?.currency?.coins || 0;
   }
 
+  /**
+   * Calculates the final upgrade cost based on current coins.
+   * @param {number} baseCost - The base upgrade cost.
+   * @returns {number} The final upgrade cost, adjusted if current coins are insufficient.
+   * */
   _calculateFinalUpgradeCost(baseCost) {
     const currentCoins = this._getCurrentCoins();
     return currentCoins < baseCost ? Math.ceil(baseCost * 1.1) : baseCost;
   }
 
+  /**
+   * Applies styling to the upgrade cost element based on current coins.
+   * If insufficient funds, styles it in red and bold.
+   * @param {number} finalCost - The final cost to display.
+   * @param {number} baseCost - The base cost of the upgrade.
+   * @returns {void}
+   * */
   _applyCostStyling(finalCost, baseCost) {
     const hasInsufficientFunds = this._getCurrentCoins() < baseCost;
 
@@ -105,6 +143,12 @@ class BuildingDetail extends HTMLElement {
     }
   }
 
+  /**
+   * Renders the building details in the component.
+   * Sets the name, level, energy cost, upgrade cost,
+   * and toggles energy button text and actions.
+   * @returns {void}
+   * */
   _render() {
     if (!this._data) return;
 

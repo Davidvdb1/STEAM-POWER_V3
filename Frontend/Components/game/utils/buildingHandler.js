@@ -1,4 +1,8 @@
-// src/utils/buildingHandler.js
+/**
+ * @module buildingHandler
+ * @description Handles building interactions, upgrades, and energy toggling in the game.
+ * This module provides functions to initialize buildings, make them interactive, handle upgrades, and toggle energy usage.
+ */
 
 import { BuildingRegistry } from "./buildingRegistry.js";
 import { BUILDING_DEFINITIONS } from "./buildingDefinitions.js";
@@ -12,6 +16,11 @@ import {
   calculateTotalGreyCost,
 } from "./gameDataHelpers.js";
 
+/**
+ * Initializes the building registry in the given scene.
+ * This function creates a new BuildingRegistry and populates it with predefined building definitions.
+ * @param {Phaser.Scene} scene - The Phaser scene where the building registry will be initialized.
+ */
 export function initializeBuildingRegistry(scene) {
   scene.buildingRegistry = new BuildingRegistry();
 
@@ -24,6 +33,14 @@ export function initializeBuildingRegistry(scene) {
   });
 }
 
+/** * Makes all buildings in the scene interactive.
+ * This function iterates through the buildings registered in the scene and adds a rectangle
+ * over each building's tile selection area.
+ * Each rectangle is set to be interactive, allowing players to click on buildings.
+ * @param {Phaser.Scene} scene - The Phaser scene where buildings will be made interactive.
+ * @description Each rectangle is clickable and emits a "buildingClicked" event with the building's ID or name.
+ * If the building data is found, it emits the building's ID; otherwise, it logs a warning.
+ */
 export function makeBuildingsInteractive(scene) {
   const tileW = scene.map.tileWidth;
   const tileH = scene.map.tileHeight;
@@ -79,6 +96,15 @@ export function makeBuildingsInteractive(scene) {
   }
 }
 
+/**
+ * Sets the color of a building based on its energy usage.
+ * If the building runs on green energy, it removes any grayscale effect.
+ * If it runs on grey energy, it applies a grayscale effect.
+ * @param {Phaser.Scene} scene - The Phaser scene containing the building registry.
+ * @param {Object} buildingObj - The building object containing its properties.
+ * @description This function retrieves the building from the registry and applies the appropriate color effect.
+ * If the building is not found in the registry, it does nothing.
+ */
 export function setBuildingColor(scene, buildingObj) {
   const tileSel = scene.buildingRegistry.getBuilding(buildingObj.name);
   if (!tileSel) return;
@@ -90,6 +116,25 @@ export function setBuildingColor(scene, buildingObj) {
   }
 }
 
+/**
+ * Handles the upgrade request for a building.
+ * This function checks if the player has enough coins to upgrade the building,
+ * shows a confirmation dialog, and processes the upgrade if confirmed.
+ * @param {Phaser.Scene} scene - The Phaser scene where the building is located.
+ * @param {number} gameBuildingId - The ID of the building to upgrade.
+ * @param {number} finalUpgradeCost - The final cost of the upgrade, potentially penalized.
+ * @returns {Promise<void>} A promise that resolves when the upgrade process is complete.
+ * @description
+ * 1) Finds the building object in the scene's building data.
+ * 2) Checks the current level and calculates the next level.
+ * 3) Retrieves the base upgrade cost from the building object.
+ * 4) Checks the player's current coins.
+ * 5) If the penalized cost would overdraft too far, shows an error message.
+ * 6) Shows a confirmation dialog with the final upgrade cost.
+ * 7) If confirmed, calls the `upgradeBuilding` service with the building ID and final cost.
+ * 8) Updates the building object with the response from the service.
+ * 9) Waits for stats to update and refreshes the building detail panel.
+ */
 export async function handleUpgradeRequest(
   scene,
   gameBuildingId,
@@ -169,6 +214,25 @@ export async function handleUpgradeRequest(
   });
 }
 
+/**
+ * Handles the toggle energy request for a building.
+ * This function checks if the building can switch between green and grey energy,
+ * and performs the toggle operation if conditions are met.
+ * @param {Phaser.Scene} scene - The Phaser scene where the building is located.
+ * @param {number} gameBuildingId - The ID of the building to toggle energy for.
+ * @returns {Promise<void>} A promise that resolves when the toggle operation is complete.
+ * @description
+ * 1) Finds the building object in the scene's building data.
+ * 2) Checks the energy cost for the building.
+ * 3) Retrieves the available green energy and grey energy production/use.
+ * 4) If the building runs on grey energy, checks if enough green energy is available.
+ * 5) If the building runs on green energy, checks if enough grey energy is available.
+ * 6) If conditions are met, calls the `toggleGameBuildingRunsOnGreen` service.
+ * 7) Updates the building object with the response from the service.
+ * 8) Sets the building color based on the new energy state.
+ * 9) Handles achievements and forces a stats update.
+ * 10) Refreshes the detail panel for the building.
+ */
 export async function handleToggleEnergyRequest(scene, gameBuildingId) {
   const buildingList = scene.sys.game.buildingData || [];
   const buildingObj = buildingList.find((b) => b.id === gameBuildingId);

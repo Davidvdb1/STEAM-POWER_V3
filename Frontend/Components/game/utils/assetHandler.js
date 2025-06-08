@@ -1,3 +1,11 @@
+/**
+ * @module assetHandler
+ * @description Provides functions to verify, place, and manage assets on the game map.
+ * Handles tile reservation, placement validation, and asset creation.
+ * Includes drag-and-drop functionality for asset placement.
+ * Handles achievements related to asset placement.
+ */
+
 import { handleAchievements } from "./achievementHandler.js";
 import { ASSETS } from "./assetConfig.js";
 import {
@@ -14,8 +22,6 @@ import {
 /**
  * Checks if an asset can be placed at specified coordinates
  *
- * @function canPlaceAsset
- * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -61,8 +67,6 @@ function canPlaceAsset(tileAssetMap, tx, ty, size) {
 /**
  * Marks tiles as occupied in the tile asset map
  *
- * @function reserveTiles
- * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -80,8 +84,6 @@ export function reserveTiles(tileAssetMap, tx, ty, size) {
 /**
  * Releases occupied tiles so they can be reused
  *
- * @function releaseTiles
- * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -99,8 +101,6 @@ export function releaseTiles(tileAssetMap, tx, ty, size) {
 /**
  * Verifies if an asset can be placed at specified location
  *
- * @function verifyAssetPlacement
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -159,8 +159,6 @@ function verifyAssetPlacement(scene, type, tx, ty) {
  * Verifies if a water mill can be placed at the specified location.
  * Water mills can only be placed along specific water edges
  *
- * @function checkWaterMillPlacement
- * @memberof game.utils.assetPlacer
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -196,8 +194,6 @@ function verifyWaterMillPlacement(size, tx, ty) {
 /**
  * Verifies whether an asset can be placed on tiles with any of the specified indices
  *
- * @function verifyAssetPlacedOnTileIndices
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
@@ -241,8 +237,6 @@ function verifyAssetPlacedOnTileIndices(
 /**
  * Verifies if an asset of a given type can be placed at the specified tile coordinates.
  *
- * @function verifyAssetTypePlacement
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
@@ -278,8 +272,6 @@ function verifyAssetTypePlacement(scene, type, size, tx, ty) {
 /**
  * Draws a highlight showing if an asset can be placed
  *
- * @function highlightPlacementArea
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -312,8 +304,6 @@ function highlightPlacementArea(scene, type, tx, ty, graphics) {
 /**
  * Adds the asset's image on the map to visually represent it
  *
- * @function createAssetSprite
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -343,8 +333,6 @@ export function createAssetSprite(scene, type, tx, ty, size, assetId) {
 /**
  * Places an asset after backend confirmation
  *
- * @function placeAsset
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -449,8 +437,6 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
 /**
  * Sets up drag and drop for asset placement
  *
- * @function setupAssetDragAndDrop
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @returns {void} This function doesn't return a value
  */
@@ -507,8 +493,6 @@ export function setupAssetDragAndDrop(scene) {
 /**
  * Gets tile coordinates from mouse event
  *
- * @function getTileFromEvent
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {Event} mouseEvent - Mouse event
  * @returns {number[]} Array with [tx, ty] coordinates

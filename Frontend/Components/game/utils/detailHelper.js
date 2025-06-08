@@ -1,4 +1,9 @@
 /**
+ * @module detailHelper
+ * @description Contains utility functions for rendering detailed views of buildings and assets.
+ */
+
+/**
  * Renders either a <building-detail> or <asset-detail> inside `detailContainer`.
  *
  * @param {HTMLElement}  detailContainer – the <div> where we insert the detail element

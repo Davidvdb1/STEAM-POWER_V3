@@ -1,8 +1,24 @@
+/**
+ * Creates a popup for loading checkpoints in a Phaser game scene.
+ * Displays a list of checkpoints fetched from the server, allowing the player to select one to load.
+ * Includes a close button, title, dropdown for checkpoint selection, and handles user interactions.
+ * @module checkpointLoadPopup
+ * @description
+ * This module provides a function to create a checkpoint load popup in a Phaser scene.
+ */
+
 import {
   fetchGameStatistics,
   getCheckpointsByGameStatisticsId,
 } from "../service/gameService.js";
 
+/**
+ * Creates a checkpoint load popup in the given Phaser scene.
+ * This popup allows players to select a checkpoint to load from a list fetched from the server.
+ * It includes a close button, title, dropdown for checkpoint selection,
+ * and handles user interactions to load the selected checkpoint.
+ * @param {Phaser.Scene} scene - The Phaser scene where the popup will be created.
+ */
 export function createCheckpointLoadPopup(scene) {
   const { width, height } = scene.cameras.main;
   const popupWidth = 700,
@@ -111,7 +127,7 @@ export function createCheckpointLoadPopup(scene) {
 
   scene.showCheckpointList = async (callback) => {
     // Reset state so the popup works correctly on multiple calls
-    dropdownBg.removeAllListeners('pointerdown');
+    dropdownBg.removeAllListeners("pointerdown");
     hideAll();
 
     const raw = sessionStorage.getItem("loggedInUser");
@@ -230,7 +246,8 @@ export function createCheckpointLoadPopup(scene) {
    * The arrow is positioned relative to the center X coordinate and dropdown Y/height,
    * styled as a white filled triangle, and configured with a high depth, no scroll factor,
    * and initially hidden.
-   *
+   * @inner
+   * @memberof module:checkpointLoadPopup
    * @returns {Phaser.GameObjects.Graphics} The created dropdown arrow graphic object.
    */
   function createDropdownArrow() {
@@ -255,7 +272,8 @@ export function createCheckpointLoadPopup(scene) {
   /**
    * Updates the direction of the dropdown arrow based on the open/closed state.
    * Draws an upward-pointing arrow when open, and a downward-pointing arrow when closed.
-   *
+   * @inner
+   * @memberof module:checkpointLoadPopup
    * @param {boolean} isOpen - Indicates whether the dropdown is open (true) or closed (false).
    */
   function updateArrowDirection(isOpen) {

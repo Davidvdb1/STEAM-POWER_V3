@@ -64,7 +64,15 @@ template.innerHTML = /*html*/ `
   <currency-display id="stats" class="hidden"></currency-display>
 `;
 
+/**
+ * Web Component for the game control panel, managing game state,
+ * statistics, and transitions between city scenes.
+ */
 class GameControlPanel extends HTMLElement {
+  /**
+   * Initializes the game control panel, sets up shadow DOM,
+   * and binds event handlers.
+   */
   constructor() {
     super();
     this._shadow = this.attachShadow({ mode: "open" });
@@ -126,6 +134,10 @@ class GameControlPanel extends HTMLElement {
     this._onAssetPlacedBound = this._boundAssetPlacedHandler;
   }
 
+  /**
+   * Loads the Phaser library asynchronously.
+   * @returns {Promise<void>} Resolves when Phaser is loaded.
+   */
   _loadPhaser() {
     return new Promise((res) => {
       if (window.Phaser) return res();
@@ -136,6 +148,11 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+  /**
+   * Called when the element is added to the DOM.
+   * Sets up event listeners and initializes the game.
+   * @returns {void}
+   */
   connectedCallback() {
     this._startButton.addEventListener("click", this._onStartClickBound);
     this._outerButton.addEventListener("click", this._onOuterClickBound);
@@ -180,6 +197,11 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
+  /**
+   * Called when the element is removed from the DOM.
+   * Cleans up event listeners and destroys the Phaser game instance.
+   * @returns {void}
+   * */
   disconnectedCallback() {
     this._startButton.removeEventListener("click", this._onStartClickBound);
     this._outerButton.removeEventListener("click", this._onOuterClickBound);
@@ -245,6 +267,10 @@ class GameControlPanel extends HTMLElement {
     this._detailContainer = null;
   }
 
+  /**
+   * Initializes the Phaser game instance with scenes and event listeners.
+   * @returns {void}
+   */
   _initializeGame() {
     const LogoScene = createLogoScene(this._startButton);
     const CityScene = createCityScene();
@@ -272,6 +298,13 @@ class GameControlPanel extends HTMLElement {
     this._game.events.on("forceStatsUpdate", this._onForceStatsUpdateBound);
   }
 
+  /**
+   * Updates the game statistics and currency display.
+   * Fetches the latest game statistics, transforms building data,
+   * and updates the currency display payload.
+   * Emits an event when the statistics update is complete.
+   * @returns {Promise<void>}
+   * */
   async _updateStatistics() {
     try {
       const { token, groupId } = getAuthFromSession();
@@ -308,6 +341,13 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
+  /**
+   * Updates the energy levels in the game.
+   * Fetches the latest game statistics, calculates the total green cost,
+   * updates the currency, and toggles buildings off green if necessary.
+   * Handles errors gracefully and updates the UI accordingly.
+   * @returns {Promise<void>}
+   * */
   async _updateEnergy() {
     try {
       const { token, groupId } = getAuthFromSession();
@@ -385,6 +425,12 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
+  /**
+   * Handles the click event on the "Start" button.
+   * Hides the button, fetches game statistics, and transitions to the CityScene.
+   * Sets up promises to ensure the scene and statistics are ready before proceeding.
+   * @returns {Promise<void>}
+   */
   async _onStartClick() {
     // 1) Hide the “Start” button
     const spinner = this._createSpinner();
@@ -449,6 +495,10 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+  /**
+   * Creates a spinner element to indicate loading state.
+   * @returns {HTMLDivElement} The spinner element.
+   * */
   _createSpinner() {
     const spinner = document.createElement("div");
     spinner.id = "startSpinner";
@@ -456,12 +506,23 @@ class GameControlPanel extends HTMLElement {
     return spinner;
   }
 
+  /**
+   * Handles the click event to close the detail container.
+   * Clears the detail container and resets the current detail state.
+   * @returns {void}
+   * */
   _handleCloseDetail() {
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
     this._currentDetail = { type: null, id: null };
   }
 
+  /**
+   * Handles the event to destroy an asset.
+   * Dispatches a custom event with the asset ID to be destroyed.
+   * @param {CustomEvent} e - The event containing the asset ID.
+   * @returns {void}
+   * */
   _handleDestroyAsset(e) {
     const assetId = e.detail.assetId;
     document.dispatchEvent(
@@ -471,10 +532,22 @@ class GameControlPanel extends HTMLElement {
     );
   }
 
+  /**
+   * Handles the event to show achievements overview.
+   * Calls the utility function to display achievements overview
+   * in the game control panel.
+   * @returns {void}
+   * */
   _handleShowAchievements() {
     showAchievementsOverview(this._wrapper, this._shadow);
   }
 
+  /**
+   * Handles the event when the menu is opened.
+   * Hides the inner and outer containers,
+   * and the detail container to prevent interaction with the game.
+   * * @returns {void}
+   */
   _handleMenuOpened() {
     // Hide navigation buttons + detail when menu opens
     this._innerContainer.style.display = "none";
@@ -482,6 +555,13 @@ class GameControlPanel extends HTMLElement {
     this._detailContainer.style.display = "none";
   }
 
+  /**
+   * Handles the event when the menu is closed.
+   * Shows the correct navigation button and detail container
+   * based on the target scene.
+   * @param {CustomEvent} e - The event containing the target scene.
+   * @returns {void}
+   * */
   _handleMenuClosed(e) {
     // Show correct nav button and detail when menu closes
     if (e.detail.targetScene === "CityScene") {
@@ -492,6 +572,13 @@ class GameControlPanel extends HTMLElement {
     this._detailContainer.style.display = "block";
   }
 
+  /**
+   * Handles the click event when a building is clicked.
+   * Updates the current detail to show the building detail,
+   * clears the detail container, and shows the building detail.
+   * @param {number} id - The ID of the clicked building.
+   * @returns {void}
+   */
   _handleBuildingClicked(id) {
     this._currentDetail = { type: "building", id };
     this._detailContainer.innerHTML = "";
@@ -504,6 +591,14 @@ class GameControlPanel extends HTMLElement {
     );
   }
 
+  /**
+   * Handles the click event on an asset.
+   * Sets the current detail to the asset type and ID,
+   * clears the detail container,
+   * and shows the asset detail.
+   * @param {number} id - The ID of the clicked asset.
+   * @returns {void}
+   * */
   _handleAssetClicked(id) {
     this._currentDetail = { type: "asset", id };
     this._detailContainer.innerHTML = "";
@@ -516,6 +611,12 @@ class GameControlPanel extends HTMLElement {
     );
   }
 
+  /**
+   * Handles the click event to transition to the outer city scene.
+   * Hides the detail container, animates the wrapper, and switches to the OuterCityScene.
+   * @param {Event} e - The click event.
+   * @returns {void}
+   * */
   _transitionToOuterCity() {
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
@@ -528,6 +629,12 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+  /**
+   * Handles the click event to transition to the inner city scene.
+   * Hides the detail container, animates the wrapper, and switches to the CityScene.
+   * @param {Event} e - The click event.
+   * @returns {void}
+   * */
   _transitionToCity() {
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
@@ -541,6 +648,13 @@ class GameControlPanel extends HTMLElement {
     this._animateWrapper(distance, () => {});
   }
 
+  /**
+   * Animates the wrapper and statistics container to a new position.
+   * Uses the `animateWrapperAndStats` utility function to perform the animation.
+   * @param {number} offsetX - The horizontal offset to animate to.
+   * @param {Function} onComplete - Callback function to execute when the animation is complete.
+   * @returns {void}
+   * */
   _animateWrapper(offsetX, onComplete) {
     animateWrapperAndStats(
       this._wrapper,
@@ -550,6 +664,12 @@ class GameControlPanel extends HTMLElement {
     );
   }
 
+  /**
+   * Handles the saving of a checkpoint in the game.
+   * Prompts the user for confirmation, performs the save operation,
+   * and shows a confirmation message.
+   * @returns {void}
+   * */
   _onSaveCheckpoint() {
     for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
       const scene = this._game?.scene?.getScene(key);
@@ -571,6 +691,12 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
+  /**
+   * Performs the actual saving of the checkpoint.
+   * Fetches the game statistics, records the checkpoint,
+   * and logs a success message.
+   * @returns {Promise<void>} Resolves when the checkpoint is saved.
+   * */
   async _performSaveCheckpoint() {
     const { token, groupId } = getAuthFromSession();
 
@@ -581,6 +707,12 @@ class GameControlPanel extends HTMLElement {
     console.log("Currency saved successfully!");
   }
 
+  /**
+   * Handles the loading of a checkpoint in the game.
+   * Prompts the user to select a checkpoint,
+   * confirms the selection, and performs the load operation.
+   * @returns {void}
+   * */
   _onLoadCheckpoint() {
     for (const key of ["CityScene", "OuterCityScene", "MenuScene"]) {
       const scene = this._game?.scene?.getScene(key);
@@ -612,6 +744,14 @@ class GameControlPanel extends HTMLElement {
     }
   }
 
+  /**
+   * Performs the actual loading of a checkpoint.
+   * Fetches the game statistics for the selected checkpoint,
+   * updates the game state, and sets up the game scenes accordingly.
+   * Handles errors gracefully and updates the UI.
+   * @param {number} selectedCheckpointId - The ID of the checkpoint to load.
+   * @returns {Promise<void>} Resolves when the checkpoint is loaded.
+   * */
   async _performLoadCheckpoint(selectedCheckpointId) {
     const { token, groupId } = getAuthFromSession();
 
@@ -681,9 +821,6 @@ class GameControlPanel extends HTMLElement {
   /**
    * Handles the collection of taxes in the game.
    *
-   * @async
-   * @function _handleTaxes
-   * @memberOf GameControlPanel
    * @returns {Promise<void>} Resolves when the tax handling process is complete.
    */
   async _handleTaxes() {
