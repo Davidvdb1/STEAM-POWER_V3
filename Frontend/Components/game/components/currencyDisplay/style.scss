@@ -193,4 +193,10 @@
     -webkit-font-smoothing: none;
     text-rendering: geometricPrecision;
   }
+
+  .timer {
+    display: inline-block;
+    min-width: 4ch;
+    text-align: right;
+  }
 }
