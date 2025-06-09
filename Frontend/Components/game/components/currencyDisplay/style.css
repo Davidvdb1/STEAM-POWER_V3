@@ -154,7 +154,9 @@
 }
 .currency-display .currency-display,
 .currency-display .currency-item,
-.currency-display .timer {
+.currency-display .timer,
+.currency-display .currency-item.grey-energy span,
+.currency-display .currency-item.green-energy span {
   backface-visibility: hidden;
   transform: translateZ(0);
   -webkit-font-smoothing: none;
