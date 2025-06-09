@@ -69,6 +69,9 @@ template.innerHTML = /*html*/ `
  * statistics, and transitions between city scenes.
  */
 class GameControlPanel extends HTMLElement {
+  static ENERGY_INTERVAL = 60_000;
+  static TAX_INTERVAL = 300_000;
+
   /**
    * Initializes the game control panel, sets up shadow DOM,
    * and binds event handlers.
@@ -112,6 +115,9 @@ class GameControlPanel extends HTMLElement {
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
+
+    this._lastEnergyTick = Date.now();
+    this._lastTaxTick = Date.now();
 
     this._onAssetDeleted = () => {
       this._detailContainer.classList.add("hidden");
@@ -252,9 +258,10 @@ class GameControlPanel extends HTMLElement {
 
     // 4) Clear all intervals
     clearInterval(this._interval);
-    clearInterval(this._energyInterval);
     clearInterval(this._statsInterval);
+    clearInterval(this._energyInterval);
     clearInterval(this._taxesInterval);
+    clearInterval(this._countdownPulse);
     // 4) Null out references as a courtesy
     this._boundAssetPlacedHandler = null;
     this._onAssetDeleted = null;
@@ -426,6 +433,18 @@ class GameControlPanel extends HTMLElement {
   }
 
   /**
+   * Formats milliseconds into a string representation of minutes and seconds.
+   * @param {number} ms - The time in milliseconds to format.
+   * @return {string} A string in the format "m:ss".
+   */
+  _formatMs(ms) {
+    const totalSec = Math.ceil(ms / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
+  /**
    * Handles the click event on the "Start" button.
    * Hides the button, fetches game statistics, and transitions to the CityScene.
    * Sets up promises to ensure the scene and statistics are ready before proceeding.
@@ -470,9 +489,45 @@ class GameControlPanel extends HTMLElement {
       // resolve anyway so we don’t hang
     });
 
-    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
-    this._taxesInterval = setInterval(() => this._handleTaxes(), 300_000);
+
+    // Single master timer for energy & taxes
+    this._intervalStart = Date.now();
+    this._lastEnergyTick = this._intervalStart;
+    this._lastTaxTick = this._intervalStart;
+    const EI = this.constructor.ENERGY_INTERVAL;
+    const TI = this.constructor.TAX_INTERVAL;
+    let tickCount = 0;
+    const TAX_RATIO = TI / EI;
+
+    const masterInterval = setInterval(async () => {
+      // energy update first
+      await this._updateEnergy();
+      this._lastEnergyTick = Date.now();
+
+      // then taxes every 5th tick
+      if (++tickCount % TAX_RATIO === 0) {
+        await this._handleTaxes();
+        this._lastTaxTick = Date.now();
+      }
+    }, EI);
+
+    this._energyInterval = masterInterval;
+    this._taxesInterval = masterInterval;
+
+    // countdown based on fixed anchor, so no drift on reset
+    this._countdownPulse = setInterval(() => {
+      const now = Date.now();
+      const since = now - this._intervalStart;
+
+      const energyRem = EI - (since % EI);
+      const taxRem = TI - (since % TI);
+
+      const cdRoot = this._statsContainer.shadowRoot;
+      cdRoot.getElementById("greenTimer").textContent =
+        this._formatMs(energyRem);
+      cdRoot.getElementById("taxTimer").textContent = this._formatMs(taxRem);
+    }, 1_000);
 
     // 6) Wait for both scene.create AND stats+render
     await Promise.all([createPromise, statsPromise, dataReadyPromise]);
@@ -829,7 +884,8 @@ class GameControlPanel extends HTMLElement {
 
     // 1 coin for each score point, plus a base tax revenue of 10 coins
     // If the score is negative, we still collect a base tax revenue of 10 coins
-    const collectedTaxes = this._game.currency.score <= 0 ? 10 : 10 + this._game.currency.score;
+    const collectedTaxes =
+      this._game.currency.score <= 0 ? 10 : 10 + this._game.currency.score;
 
     // Update the currency with the added tax revenue
     await updateCurrency(

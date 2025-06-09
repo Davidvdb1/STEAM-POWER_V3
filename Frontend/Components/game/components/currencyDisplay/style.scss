@@ -177,4 +177,28 @@
       }
     }
   }
+
+  .timer {
+    color: #000 !important;
+    font-family: "PixelFont", monospace !important;
+  }
+
+  .currency-display,
+  .currency-item,
+  .timer,
+  .currency-item.grey-energy span,
+  .currency-item.green-energy span {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-font-smoothing: none;
+    text-rendering: geometricPrecision;
+  }
+
+  .timer {
+    display: inline-block;
+    width: 4ch;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    font-family: monospace !important;
+  }
 }
