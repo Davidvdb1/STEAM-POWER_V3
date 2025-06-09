@@ -297,10 +297,9 @@ export async function handleToggleEnergyRequest(scene, gameBuildingId) {
           scene.sys.game.token
         );
 
-        Object.assign(buildingObj, response);
+        Object.assign(buildingObj, response.gameBuilding);
 
         setBuildingColor(scene, buildingObj);
-        handleAchievements(response, scene.game.canvas);
         scene.game.events.emit("forceStatsUpdate");
 
         // Refresh the detail panel for this building
