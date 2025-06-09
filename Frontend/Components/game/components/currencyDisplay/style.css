@@ -147,4 +147,8 @@
 .currency-display .multipliers span img {
   height: 30px;
   margin-right: 6px;
+}
+.currency-display .timer {
+  color: #000 !important;
+  font-family: "PixelFont", monospace !important;
 }/*# sourceMappingURL=style.css.map */

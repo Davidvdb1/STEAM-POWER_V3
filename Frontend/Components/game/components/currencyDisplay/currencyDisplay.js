@@ -13,7 +13,7 @@ template.innerHTML = /*html*/ `
     <div class="currency-row">
       <div class="currency-item score">
         <span class="unit">Luchtkwaliteit:</span>
-        <span id="score"></span>
+        <span id="score"></span> 
         <span class="unit">/100</span>
       </div>
 
@@ -25,11 +25,13 @@ template.innerHTML = /*html*/ `
       <div class="currency-item green-energy">
         <img src="Assets/images/pixelGreenEnergy.svg" alt="Green Energy" />
         <span id="greenEnergy">0.000</span><span class="unit">kWh</span>
+        <span id="greenTimer" class="timer">1:00</span>
       </div>
 
       <div class="currency-item coins">
         <img src="Assets/images/pixelCoin.png" alt="Coins" />
         <span id="coins">0</span>
+        <span id="taxTimer" class="timer">5:00</span>
       </div>
 
       <div class="currency-actions">

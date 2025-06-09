@@ -32,6 +32,16 @@ import "../components/currencyDisplay/currencyDisplay.js";
 import { handleAchievements } from "../utils/achievementHandler.js";
 import { showAchievementsOverview } from "../utils/achievementOverview.js";
 
+const ENERGY_INTERVAL = 60_000;
+const TAX_INTERVAL = 300_000;
+
+function formatMs(ms) {
+  const totalSec = Math.ceil(ms / 1000);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
@@ -112,6 +122,9 @@ class GameControlPanel extends HTMLElement {
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
+
+    this._lastEnergyTick = Date.now();
+    this._lastTaxTick = Date.now();
 
     this._onAssetDeleted = () => {
       this._detailContainer.classList.add("hidden");
@@ -252,9 +265,10 @@ class GameControlPanel extends HTMLElement {
 
     // 4) Clear all intervals
     clearInterval(this._interval);
-    clearInterval(this._energyInterval);
     clearInterval(this._statsInterval);
+    clearInterval(this._energyInterval);
     clearInterval(this._taxesInterval);
+    clearInterval(this._countdownPulse);
     // 4) Null out references as a courtesy
     this._boundAssetPlacedHandler = null;
     this._onAssetDeleted = null;
@@ -470,9 +484,33 @@ class GameControlPanel extends HTMLElement {
       // resolve anyway so we don’t hang
     });
 
-    this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
-    this._taxesInterval = setInterval(() => this._handleTaxes(), 300_000);
+
+    this._lastEnergyTick = Date.now();
+    this._energyInterval = setInterval(() => {
+      this._updateEnergy();
+      this._lastEnergyTick = Date.now();
+    }, ENERGY_INTERVAL);
+
+    this._lastTaxTick = Date.now();
+    this._taxesInterval = setInterval(() => {
+      this._handleTaxes();
+      this._lastTaxTick = Date.now();
+    }, TAX_INTERVAL);
+
+    this._countdownPulse = setInterval(() => {
+      const now = Date.now();
+
+      const energyElapsed = now - this._lastEnergyTick;
+      const taxElapsed = now - this._lastTaxTick;
+
+      const energyRem = ENERGY_INTERVAL - (energyElapsed % ENERGY_INTERVAL);
+      const taxRem = TAX_INTERVAL - (taxElapsed % TAX_INTERVAL);
+
+      const cdRoot = this._statsContainer.shadowRoot;
+      cdRoot.getElementById("greenTimer").textContent = formatMs(energyRem);
+      cdRoot.getElementById("taxTimer").textContent = formatMs(taxRem);
+    }, 1000);
 
     // 6) Wait for both scene.create AND stats+render
     await Promise.all([createPromise, statsPromise, dataReadyPromise]);
@@ -829,7 +867,8 @@ class GameControlPanel extends HTMLElement {
 
     // 1 coin for each score point, plus a base tax revenue of 10 coins
     // If the score is negative, we still collect a base tax revenue of 10 coins
-    const collectedTaxes = this._game.currency.score <= 0 ? 10 : 10 + this._game.currency.score;
+    const collectedTaxes =
+      this._game.currency.score <= 0 ? 10 : 10 + this._game.currency.score;
 
     // Update the currency with the added tax revenue
     await updateCurrency(
