@@ -177,8 +177,18 @@
       }
     }
   }
+
   .timer {
     color: #000 !important;
     font-family: "PixelFont", monospace !important;
+  }
+
+  .currency-display,
+  .currency-item,
+  .timer {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-font-smoothing: none;
+    text-rendering: geometricPrecision;
   }
 }

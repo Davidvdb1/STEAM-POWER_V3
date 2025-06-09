@@ -151,4 +151,12 @@
 .currency-display .timer {
   color: #000 !important;
   font-family: "PixelFont", monospace !important;
+}
+.currency-display .currency-display,
+.currency-display .currency-item,
+.currency-display .timer {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: none;
+  text-rendering: geometricPrecision;
 }/*# sourceMappingURL=style.css.map */
