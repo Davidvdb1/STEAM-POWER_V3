@@ -149,6 +149,7 @@ export function createMenuScene() {
           buttonHeight, // height
           borderRadius, // border radius
           text, // button text
+          Math.max(buttonHeight * 0.4, 16), // font size (40% of height or min 16px)
           0x008000, // background color
           buttonCallbacks[index] // callback function
         );
@@ -180,7 +181,8 @@ export function createMenuScene() {
         buttonWidth, // width
         buttonHeight, // height
         borderRadius, // border radius
-        "Terug naar het spel →", // button text
+        "Terug naar het spel", // button text
+        Math.max(buttonHeight * 0.4, 16), // font size (40% of height or min 16px)
         0x008000, // background color (green)
         () => this.returnToGame() // callback function
       );
