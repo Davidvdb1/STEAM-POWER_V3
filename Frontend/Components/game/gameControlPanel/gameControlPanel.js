@@ -694,13 +694,13 @@ class GameControlPanel extends HTMLElement {
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
 
-    this._game.scene.switch("OuterCityScene", "CityScene");
-
-    this._innerContainer.style.display = "none";
-    this._outerContainer.style.display = "flex";
-
     const distance = this._wrapper.offsetWidth + 800;
-    this._animateWrapper(distance, () => {});
+
+    this._animateWrapper(distance, () => {
+      this._game.scene.switch("OuterCityScene", "CityScene");
+      this._innerContainer.style.display = "none";
+      this._outerContainer.style.display = "flex";
+    });
   }
 
   /**
