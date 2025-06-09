@@ -1,3 +1,11 @@
+/**
+ * @module assetHandler
+ * @description Provides functions to verify, place, and manage assets on the game map.
+ * Handles tile reservation, placement validation, and asset creation.
+ * Includes drag-and-drop functionality for asset placement.
+ * Handles achievements related to asset placement.
+ */
+
 import { handleAchievements } from "./achievementHandler.js";
 import { ASSETS } from "./assetConfig.js";
 import {
@@ -6,12 +14,14 @@ import {
   addAsset,
   removeAsset,
 } from "../service/gameService.js";
+import {
+  calculateTotalGreyProduction,
+  calculateTotalGreyCost,
+} from "./gameDataHelpers.js";
 
 /**
  * Checks if an asset can be placed at specified coordinates
  *
- * @function canPlaceAsset
- * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -57,8 +67,6 @@ function canPlaceAsset(tileAssetMap, tx, ty, size) {
 /**
  * Marks tiles as occupied in the tile asset map
  *
- * @function reserveTiles
- * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -76,8 +84,6 @@ export function reserveTiles(tileAssetMap, tx, ty, size) {
 /**
  * Releases occupied tiles so they can be reused
  *
- * @function releaseTiles
- * @memberof game.utils.assetPlacer
  * @param {Object} tileAssetMap - Map of occupied tiles
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -95,8 +101,6 @@ export function releaseTiles(tileAssetMap, tx, ty, size) {
 /**
  * Verifies if an asset can be placed at specified location
  *
- * @function verifyAssetPlacement
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -155,8 +159,6 @@ function verifyAssetPlacement(scene, type, tx, ty) {
  * Verifies if a water mill can be placed at the specified location.
  * Water mills can only be placed along specific water edges
  *
- * @function checkWaterMillPlacement
- * @memberof game.utils.assetPlacer
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
  * @param {number} ty - The y-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -192,8 +194,6 @@ function verifyWaterMillPlacement(size, tx, ty) {
 /**
  * Verifies whether an asset can be placed on tiles with any of the specified indices
  *
- * @function verifyAssetPlacedOnTileIndices
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
@@ -237,8 +237,6 @@ function verifyAssetPlacedOnTileIndices(
 /**
  * Verifies if an asset of a given type can be placed at the specified tile coordinates.
  *
- * @function verifyAssetTypePlacement
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {{width: number, height: number}} size - The dimensions of the asset to be placed.
@@ -274,8 +272,6 @@ function verifyAssetTypePlacement(scene, type, size, tx, ty) {
 /**
  * Draws a highlight showing if an asset can be placed
  *
- * @function highlightPlacementArea
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -308,8 +304,6 @@ function highlightPlacementArea(scene, type, tx, ty, graphics) {
 /**
  * Adds the asset's image on the map to visually represent it
  *
- * @function createAssetSprite
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -339,8 +333,6 @@ export function createAssetSprite(scene, type, tx, ty, size, assetId) {
 /**
  * Places an asset after backend confirmation
  *
- * @function placeAsset
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {string} type - Type of asset being placed
  * @param {number} tx - The x-coordinate (in tiles) where the asset's top-left corner will be placed.
@@ -357,7 +349,24 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
 
   const size = ASSETS[type];
   const cost = size.cost;
-  const msg = `Wil je hier een ${type} plaatsen voor ${cost} coins?`;
+
+  const currentCoins = scene.sys.game.currency?.coins ?? 0;
+  if (currentCoins - cost < -100) {
+    scene.showError(
+      `Je hebt al te veel schulden om een ${type} te plaatsen. Je kan niet meer lenen.`
+    );
+    return { success: false, reason: "Onvoldoende saldo" };
+  }
+
+  let msg;
+
+  if (currentCoins - cost < 0) {
+    msg = `Je krijgt een extra kost van 10% omdat je al schulden hebt. Wil je hier een ${type} plaatsen voor ${
+      cost + (cost / 100) * 10
+    } coins?`;
+  } else {
+    msg = `Wil je hier een ${type} plaatsen voor ${cost} coins?`;
+  }
 
   return new Promise((resolve) => {
     scene.showConfirmation(msg, async (confirmed) => {
@@ -430,8 +439,6 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
 /**
  * Sets up drag and drop for asset placement
  *
- * @function setupAssetDragAndDrop
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @returns {void} This function doesn't return a value
  */
@@ -488,8 +495,6 @@ export function setupAssetDragAndDrop(scene) {
 /**
  * Gets tile coordinates from mouse event
  *
- * @function getTileFromEvent
- * @memberof game.utils.assetPlacer
  * @param {Object} scene - The Phaser scene
  * @param {Event} mouseEvent - Mouse event
  * @returns {number[]} Array with [tx, ty] coordinates
@@ -508,35 +513,114 @@ function getTileFromEvent(scene, mouseEvent) {
 }
 
 /**
- * Look up the Asset’s data (type, destroyCost, energy, etc.) from scene.sys.game.assetData.
+ * Look up the Asset's data (type, destroyCost, energy, etc.) from scene.sys.game.assetData.
  * Then ask the user via a confirmation popup. On confirm, call performDestroyAsset.
  *
  * @param {Phaser.Scene} scene   – an instance of OuterCityScene (so we can access scene.assetObjects, scene.sys.game, scene.showConfirmation, etc.)
  * @param {number|string} assetId – ID of the asset to delete
  */
-export async function requestDestroyAsset(scene, assetId) {
-  const found = scene.assetObjects.find((o) => o.id === assetId);
-  if (!found) {
-    console.warn(`Asset ${assetId} not found in scene.assetObjects.`);
+export async function requestDestroyAsset(scene, assetId, destroyCost) {
+  const assets = scene.sys.game.assetData || [];
+  const assetObj = assets.find((a) => a.id === assetId);
+  if (!assetObj) return;
+
+  const currentCoins = scene.sys.game.currency?.coins ?? 0;
+  if (currentCoins - destroyCost < -100) {
+    scene.showError(
+      `Je hebt al te veel schulden om een ${assetObj.type} te slopen. Je kan niet meer lenen`
+    );
     return;
   }
 
-  const textureKey = found.image.texture.key;
+  let msg;
+  if (currentCoins - destroyCost < 0) {
+    msg = `Je krijgt een extra kost van 10% omdat je al schulden hebt. Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
+  } else {
+    msg = `Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
+  }
 
-  const fullAssetData =
-    (Array.isArray(scene.sys.game.assetData)
-      ? scene.sys.game.assetData.find((a) => a.id === assetId)
-      : null) || {};
-  const cost = fullAssetData.destroyCost || 0;
+  scene.showConfirmation(msg, async (confirmed) => {
+    if (!confirmed) return;
 
-  const msg = `Wil je deze ${textureKey} slopen voor ${cost} coins?`;
-  scene.showConfirmation(msg, (confirmed) => {
-    if (confirmed) {
-      performDestroyAsset(scene, assetId);
+    try {
+      // 1) Call the API to remove the asset
+      const response = await removeAsset(assetId, scene.sys.game.token);
+
+      // 2) Update the local asset data from the response (if needed)
+      Object.assign(assetObj, response.asset);
+
+      // 3) Handle any achievements triggered by this removal
+      handleAchievements(response, window.gameContainer);
+
+      // 4) Wait for any pending stats update before adjusting currency
+      await new Promise((resolve) => {
+        const statsUpdateListener = () => {
+          resolve();
+          scene.game.events.off("statsUpdateComplete", statsUpdateListener);
+        };
+        scene.game.events.on("statsUpdateComplete", statsUpdateListener);
+        scene.game.events.emit("forceStatsUpdate");
+      });
+
+      // 5) Fetch the up‐to‐date currency from the backend
+      const currencyId = scene.sys.game.currencyId;
+      const token = scene.sys.game.token;
+      const currentCurrency = await getCurrencyById(currencyId, token);
+
+      // 6) Compute grey‐energy delta if this was a power‐producing asset
+      const allAssets = scene.sys.game.assetData || [];
+      const allBuildings = scene.sys.game.buildingData || [];
+      const greyEnergyProduction = calculateTotalGreyProduction(allAssets);
+      const greyEnergyUse = calculateTotalGreyCost(allBuildings);
+
+      const fullAssetData = allAssets.find((a) => a.id === assetId) || {};
+      const greyDelta =
+        fullAssetData.type === "Kerncentrale" ? fullAssetData.energy : 0;
+
+      // 7) Build the updated currency payload
+      const updatedCurrencyPayload = {
+        greenEnergy: currentCurrency.greenEnergy,
+        greyEnergy: currentCurrency.greyEnergy - greyDelta,
+        coins:
+          currentCurrency.coins - (fullAssetData.destroyCost || destroyCost),
+        score: currentCurrency.score,
+      };
+
+      // 8) Send the new currency totals back to the server
+      await updateCurrency(currencyId, updatedCurrencyPayload, token);
+
+      // 9) Remove the sprite and free up its tiles in the scene
+      const idx = scene.assetObjects.findIndex((o) => o.id === assetId);
+      if (idx > -1) {
+        const toRem = scene.assetObjects[idx];
+        toRem.image.destroy();
+        releaseTiles(scene.tileAssetMap, toRem.tx, toRem.ty, toRem.size);
+        scene.assetObjects.splice(idx, 1);
+      }
+
+      // 10) Signal the scene to refresh currency‐related UI on next update
+      scene._currencyNeedsRefresh = true;
+
+      // 11) Close the detail popup by dispatching the close-detail event
+      document.dispatchEvent(
+        new CustomEvent("close-detail", {
+          bubbles: true,
+          composed: true,
+        })
+      );
+
+      // 12) Show success message
+      scene.showError(`${assetObj.type} succesvol gesloopt!`);
+    } catch (err) {
+      console.error("Error destroying asset in requestDestroyAsset:", err);
+      scene.showError("Kon asset niet slopen: " + err.message);
+      return;
     }
+
+    // 13) Finally, let other parts of the app know the asset is gone
+    document.dispatchEvent(new CustomEvent("asset-deleted"));
   });
 }
-
 /**
  * Actually call the API to delete the asset, update currency, remove the sprite & tiles,
  * then mark the scene so it can re‐fetch stats.
@@ -549,9 +633,34 @@ export async function performDestroyAsset(scene, assetId) {
     const token = scene.sys.game.token;
     const currencyId = scene.sys.game.currencyId;
 
-    const response = await removeAsset(assetId, token);
+    const assets = scene.sys.game.assetData || [];
+    const asset = assets.find((a) => a.id === assetId);
+    const buildingList = scene.sys.game.buildingData || [];
 
-    handleAchievements(response, scene.game.canvas);
+    const greyEnergyProduction = calculateTotalGreyProduction(assets);
+    const greyEnergyUse = calculateTotalGreyCost(buildingList);
+
+    console.log(
+      `Grey energy production: ${greyEnergyProduction}, Grey energy use: ${greyEnergyUse}`
+    );
+
+    let response;
+
+    if (asset.type !== "Kerncentrale") {
+      response = await removeAsset(assetId, token);
+    } else if (
+      greyEnergyProduction - 250 - greyEnergyUse > 0 &&
+      asset.type === "Kerncentrale"
+    ) {
+      response = await removeAsset(assetId, token);
+    } else {
+      scene.showError(
+        "Kon Kerncentrale niet verwijderen omdat de grijze energieproductie dan kleiner is dan het gebruik."
+      );
+      return;
+    }
+
+    handleAchievements(response, window.gameContainer);
 
     const currentCurrency = await getCurrencyById(currencyId, token);
 

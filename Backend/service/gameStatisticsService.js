@@ -42,6 +42,46 @@ const scoreCost = {
   },
 };
 
+const beginAssetCoordinates = [
+  {
+    xLocation: 65,
+    yLocation: 42,
+  },
+  {
+    xLocation: 82,
+    yLocation: 32,
+  },
+  {
+    xLocation: 128,
+    yLocation: 42,
+  },
+  {
+    xLocation: 46,
+    yLocation: 24,
+  },
+  {
+    xLocation: 123,
+    yLocation: 59,
+  },
+  {
+    xLocation: 61,
+    yLocation: 59,
+  },
+  {
+    xLocation: 91,
+    yLocation: 59,
+  },
+];
+
+const defaultKernCentrale = {
+  type: "Kerncentrale",
+  energy: 250,
+  buildCost: 20,
+  destroyCost: 20,
+  xSize: 12,
+  ySize: 10,
+};
+
 class GameStatisticsService {
   //########################################################################
   //                            GAME STATISTICS
@@ -75,7 +115,42 @@ class GameStatisticsService {
       coins: coins ?? Currency.STARTING_COINS,
       score: score ?? Currency.STARTING_SCORE,
     });
-    return await gameStatisticsRepository.create({ groupId, currency });
+    const gamestats = await gameStatisticsRepository.create({
+      groupId,
+      currency,
+    });
+
+    for (let i = 0; i < beginAssetCoordinates.length && i < 7; i++) {
+      const assetData = {
+        ...defaultKernCentrale,
+        xLocation: beginAssetCoordinates[i].xLocation,
+        yLocation: beginAssetCoordinates[i].yLocation,
+        gameStatisticsId: gamestats.id,
+      };
+
+      const assetInstance = new Asset(assetData);
+
+      await gameStatisticsRepository.addAsset(gamestats.id, assetInstance);
+    }
+
+    const totalKerncentrales = 7;
+    const totalScoreChange = scoreCost.ActiveGreySource * totalKerncentrales;
+    const totalGreyEnergy = defaultKernCentrale.energy * totalKerncentrales;
+
+    await gameStatisticsRepository.updateCurrency(gamestats.currency.id, {
+      greenEnergy: gamestats.currency.greenEnergy,
+      greyEnergy: gamestats.currency.greyEnergy + totalGreyEnergy,
+      coins: gamestats.currency.coins,
+      score: gamestats.currency.score + totalScoreChange,
+    });
+
+    return await gameStatisticsRepository.findById(gamestats.id, {
+      includeCurrency: true,
+      includeGameBuildings: true,
+      includeAssets: true,
+      includeCheckpoints: false,
+      includeGroup: false,
+    });
   }
 
   // USED FOR MANUAL TESTING
@@ -134,7 +209,7 @@ class GameStatisticsService {
    * @param {boolean} [includeAssets=true] - Whether to include assets in the result.
    * @param {boolean} [includeCheckpoints=true] - Whether to include checkpoints in the result.
    * @param {boolean} [includeGroup=false] - Whether to include group details in the result.
-   * @returns {Promise<GameStatistics|null>} The found GameStatistics instance or null if not found.
+   * @returns {Promise<GameStatistics>} The Gamestatistics object.
    */
   async getByGroupId(
     groupId,
@@ -190,10 +265,10 @@ class GameStatisticsService {
    * @param {number} payload.greyEnergy - The updated amount of grey energy.
    * @param {number} payload.coins - The updated amount of coins.
    * @param {number} payload.score - The updated score value.
-   * @returns {Promise<Currency>} The updated Currency instance.
+   * @returns {Promise<Currency>} The updated Currency object.
    */
   async updateCurrency(currencyId, payload) {
-    return gameStatisticsRepository.updateCurrency(currencyId, payload);
+    return await gameStatisticsRepository.updateCurrency(currencyId, payload);
   }
 
   /**
@@ -288,7 +363,10 @@ class GameStatisticsService {
         addedAsset.type === "Kerncentrale"
           ? gameStatistics.currency.greyEnergy + addedAsset.energy
           : gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins - addedAsset.buildCost,
+      coins:
+        gameStatistics.currency.coins - addedAsset.buildCost < 0
+          ? gameStatistics.currency.coins - addedAsset.buildCost * 1.1
+          : gameStatistics.currency.coins - addedAsset.buildCost,
       score: gameStatistics.currency.score + scoreChange,
     });
 
@@ -297,6 +375,8 @@ class GameStatisticsService {
       "Energie-ingenieur",
       "Energie-architect",
       "Groene vingers",
+      "Frisse adem", 
+      "Schone lucht"
     ];
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       statsId,
@@ -320,7 +400,7 @@ class GameStatisticsService {
    * @param {string} assetId - The id of the asset to remove.
    * @returns {Promise<{asset: Asset, newlyEarnedAchievements: Achievement[]}>} The removed Asset object and any newly earned achievements.
    */
-  
+
   async removeAsset(assetId) {
     const removedAsset = await gameStatisticsRepository.removeAsset(assetId);
 
@@ -333,6 +413,12 @@ class GameStatisticsService {
         includeCheckpoints: false,
         includeGroup: false,
       }
+    );
+
+    console.log(
+      `${gameStatistics.currency.coins} - ${removedAsset.destroyCost} = ${
+        gameStatistics.currency.coins - removedAsset.destroyCost
+      }`
     );
 
     let scoreChange = 0;
@@ -354,13 +440,16 @@ class GameStatisticsService {
         removedAsset.type === "Kerncentrale"
           ? gameStatistics.currency.greyEnergy - removedAsset.energy
           : gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins + removedAsset.destroyCost,
+      coins:
+        gameStatistics.currency.coins - removedAsset.destroyCost < 0
+          ? gameStatistics.currency.coins
+          : gameStatistics.currency.coins,
       score: gameStatistics.currency.score + scoreChange,
     });
 
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
       removedAsset.gameStatisticsId,
-      ["Milieuheld"],
+      ["Milieuheld", "Geen grijs", "Frisse adem", "Schone lucht"],
       removedAsset
     );
 
@@ -508,7 +597,10 @@ class GameStatisticsService {
    * @throws {Error} If the GameBuilding or the next BuildingLevel is not found.
    */
   async upgradeGameBuilding(gameBuildingId, { nextLevel }) {
-    // Get the GameBuilding by its ID
+    console.log(
+      `Upgrading GameBuilding with id=${gameBuildingId} to nextLevel=${nextLevel}`
+    );
+    // 1) Fetch the GameBuilding record
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
       gameBuildingId
     );
@@ -516,42 +608,29 @@ class GameStatisticsService {
       throw new Error(`GameBuilding with id ${gameBuildingId} not found`);
     }
 
-    // Get the BuildingLevel for the next level of the selected building
-    const currentBuildingLevel =
+    // 2) Determine current level and ensure nextLevel is valid
+    const currentLevelObj =
       await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(
         gameBuilding.building.id,
-        nextLevel - 1
+        gameBuilding.buildingLevel.level
       );
-    if (!currentBuildingLevel) {
+    if (!currentLevelObj) {
       throw new Error(
-        `BuildingLevel ${nextLevel - 1} for building ${
-          gameBuilding.building.id
-        } not found`
+        `Current BuildingLevel for buildingId=${gameBuilding.building.id} not found`
+      );
+    }
+    const currentLevel = currentLevelObj.level;
+    if (currentLevel + 1 !== nextLevel) {
+      throw new Error(
+        `Invalid nextLevel: currentLevel=${currentLevel}, requested nextLevel=${nextLevel}`
       );
     }
 
-    // Get the BuildingLevel for the next level of the selected building
-    const NextBuildingLevel =
-      await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(
-        gameBuilding.building.id,
-        nextLevel
-      );
-    if (!NextBuildingLevel) {
-      throw new Error(
-        `BuildingLevel ${nextLevel} for building ${gameBuilding.building.id} not found`
-      );
-    }
+    // 3) Look up the baseCost from the current BuildingLevel object
+    const baseCost = currentLevelObj.upgradeCost;
 
-    // Call the upgrade method in the repository to update the GameBuilding's BuildingLevel
-    const updatedGameBuilding =
-      await gameStatisticsRepository.upgradeGameBuildingLevel(
-        gameBuildingId,
-        NextBuildingLevel.id
-      );
-
-    // Update the currency after upgrading the building
-    // All currencies remain the same except for coins, which are reduced by the upgrade cost of the current building level
-    const gameStatistics = await gameStatisticsRepository.findById(
+    // 4) Fetch the player's GameStatistics (including currency)
+    const gameStats = await gameStatisticsRepository.findById(
       gameBuilding.gameStatisticsId,
       {
         includeCurrency: true,
@@ -559,28 +638,71 @@ class GameStatisticsService {
         includeAssets: false,
       }
     );
+    if (!gameStats) {
+      throw new Error(
+        `GameStatistics with id ${gameBuilding.gameStatisticsId} not found`
+      );
+    }
+    const playerCoins = gameStats.currency.coins;
 
-    await gameStatisticsRepository.updateCurrency(gameStatistics.currency.id, {
-      greenEnergy: gameStatistics.currency.greenEnergy,
-      greyEnergy: gameStatistics.currency.greyEnergy,
-      coins: gameStatistics.currency.coins - currentBuildingLevel.upgradeCost,
-      score: gameStatistics.currency.score + 1,
+    // 5) Compute finalCost: if playerCoins < baseCost, apply 10% penalty
+    const finalCost =
+      playerCoins < baseCost ? Math.ceil(baseCost * 1.1) : baseCost;
+
+    // 6) Optional overdraft check (adjust ALLOWED_OVERDRAFT as needed)
+    const ALLOWED_OVERDRAFT = 100;
+    if (playerCoins - finalCost < -ALLOWED_OVERDRAFT) {
+      throw new Error(
+        `Niet genoeg coins om te upgraden (benodigd: ${finalCost}, beschikbaar: ${playerCoins})`
+      );
+    }
+
+    // 7) Subtract exactly finalCost from player's coins
+    const newCoinTotal = playerCoins - finalCost;
+    await gameStatisticsRepository.updateCurrency(gameStats.currency.id, {
+      greenEnergy: gameStats.currency.greenEnergy,
+      greyEnergy: gameStats.currency.greyEnergy,
+      coins: newCoinTotal,
+      score: gameStats.currency.score,
     });
 
+    // 8) Fetch the BuildingLevel entry for nextLevel
+    const nextLevelObj =
+      await gameStatisticsRepository.findBuildingLevelByBuildingIdAndLevel(
+        gameBuilding.building.id,
+        nextLevel
+      );
+    if (!nextLevelObj) {
+      throw new Error(
+        `BuildingLevel ${nextLevel} for buildingId=${gameBuilding.building.id} not found`
+      );
+    }
+
+    // 9) Update the GameBuilding’s level pointer in the DB
+    const updatedGameBuildingRecord =
+      await gameStatisticsRepository.upgradeGameBuildingLevel(
+        gameBuildingId,
+        nextLevelObj.id
+      );
+    
     // Check if any achievement for upgrading a building has been achieved. If so add them to the GameStatistics object
     const buildingAchievements = [
       "Bouwassistent",
       "Bouwmeester",
       "Bouwkampioen",
+      "Frisse adem", 
+      "Schone lucht",
+      "EU gemiddelde"
     ];
+
     const newlyEarnedAchievements = await this._trackEarnedAchievements(
-      gameStatistics.id,
+      gameStats.id,
       buildingAchievements
     );
 
     // Return both the updated GameBuilding and any newly earned Achievements
     return {
-      gameBuilding: updatedGameBuilding,
+      gameBuilding: updatedGameBuildingRecord,
       newlyEarnedAchievements: newlyEarnedAchievements,
     };
   }
@@ -593,7 +715,7 @@ class GameStatisticsService {
    * @function toggleGameBuildingRunsOnGreen
    * @memberof module:service/gameStatisticsService.Service_GameBuildings
    * @param {string} gameBuildingId - The id of the GameBuilding to toggle.
-   * @returns {Promise<GameBuildings>} The updated GameBuilding object with the toggled 'runsOnGreen' status.
+   * @returns {Promise<{gameBuilding: GameBuildings, newlyEarnedAchievements: Achievement[]}>} The updated GameBuilding object and any newly earned achievements.
    */
   async toggleGameBuildingRunsOnGreen(gameBuildingId) {
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
@@ -624,9 +746,63 @@ class GameStatisticsService {
       );
     }
 
-    return await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
+    const updatedGameBuilding = await gameStatisticsRepository.toggleGameBuildingRunsOnGreen(
       gameBuildingId
     );
+
+    const achievements = ["Eerste stap", "Efficiëntie-expert", "Frisse adem", "Schone lucht", "EU gemiddelde"]
+    const newlyEarnedAchievements = await this._trackEarnedAchievements(
+      gameBuilding.gameStatisticsId,
+      achievements
+    );
+
+    return {
+      gameBuilding: updatedGameBuilding,
+      newlyEarnedAchievements: newlyEarnedAchievements,
+    };
+  }
+
+  /**
+   * Fetches all game‐buildings under a given gameStatisticsId where runsOnGreen is true,
+   * subtracts 1 from the score for each of those buildings, then flips all of them to false.
+   *
+   * @async
+   * @function toggleAllGameBuildingsRunsOnGreenFalse
+   * @memberof module:service/gameStatisticsService.Service_GameBuildings
+   * @param {string} gameStatisticsId
+   * @returns {Promise<GameBuildings[]>} The list of updated GameBuilding objects
+   */
+  async toggleAllGameBuildingsRunsOnGreenFalse(gameStatisticsId) {
+    const gameStatistics = await gameStatisticsRepository.findById(
+      gameStatisticsId
+    );
+    if (!gameStatistics) {
+      throw new Error(`No GameStatistics found for id=${gameStatisticsId}`);
+    }
+
+    const buildingsOnGreen = await gameStatisticsRepository.findGameBuildings({
+      gameStatisticsId: gameStatisticsId,
+      runsOnGreen: true,
+    });
+
+    if (buildingsOnGreen.length > 0) {
+      const currentCurrency = gameStatistics.currency;
+      const decrementAmount = buildingsOnGreen.length;
+
+      await gameStatisticsRepository.updateCurrency(currentCurrency.id, {
+        greenEnergy: currentCurrency.greenEnergy,
+        greyEnergy: currentCurrency.greyEnergy,
+        coins: currentCurrency.coins,
+        score: currentCurrency.score - decrementAmount,
+      });
+    }
+
+    const updatedBuildings =
+      await gameStatisticsRepository.toggleAllGameBuildingsRunsOnGreenFalse(
+        gameStatisticsId
+      );
+
+    return updatedBuildings;
   }
 
   /**
@@ -707,9 +883,13 @@ class GameStatisticsService {
         );
 
         // Add the achievement to the list of earned achievements if it exists
-        earnedAchievements.push(achievement);
+        if (achievement) {
+          earnedAchievements.push(achievement);
+        }      
       }
     }
+    console.log(`Earned Achievements: ${earnedAchievements.length}`);
+    console.log(earnedAchievements);
     return earnedAchievements;
   }
 
@@ -739,14 +919,6 @@ class GameStatisticsService {
 
     // Cases and logic depend on the existing achievements and their requirements
     switch (title) {
-      case "Eerste stap":
-      // Check if at least one building uses green energy
-      // To be implemented
-
-      case "Efficiëntie-expert":
-      // Check if all buildings use green energy
-      // To be implemented
-
       case "Bouwassistent":
         // Check if any building has been upgraded to level 2
         return gameStatistics.gameBuildings.some(
@@ -790,15 +962,48 @@ class GameStatisticsService {
         // Check if a gray energy source has been destroyed
         return removedAsset ? removedAsset.type === "Kerncentrale" : false;
 
-      // case "EU gemiddelde":
-      //   // Check if more than 25% of total energy comes from green sources
-      //   const totalEnergy = gameStatistics.currency.greenEnergy + gameStatistics.currency.greyEnergy;
-      //   if (totalEnergy === 0) return false;
-      //   const greenPercentage = (gameStatistics.currency.greenEnergy / totalEnergy) * 100;
-      //   return greenPercentage > 25;
+      case "Eerste stap":
+        // Check if at least one building runs on green energy
+        return gameStatistics.gameBuildings.some(
+          (gameBuilding) => gameBuilding.runsOnGreen
+        );
+
+      case "Efficiëntie-expert":
+        // Check if all buildings run on green energy
+        return gameStatistics.gameBuildings.every(
+          (gameBuilding) => gameBuilding.runsOnGreen
+        );
+
+      case "Geen grijs":
+        // Check if no gray energy sources have been built
+        return !gameStatistics.assets.some(
+          (asset) => asset.type === "Kerncentrale"
+        );
+
+      case "Frisse adem":
+        // Check if the air quality (score) is 50 or higher
+        return gameStatistics.currency.score >= 50;
+
+      case "Schone lucht":
+        // Check if the air quality (score) is 100 (or higher)
+        return gameStatistics.currency.score >= 100;
+
+      case "EU gemiddelde":
+        // Check if 25% or more of the total energy used comes from green sources
+        let totalGreenEnergyUsed = 0;
+        let totalEnergyUsed = 0;
+
+        for (const gameBuilding of gameStatistics.gameBuildings) {
+          totalEnergyUsed += gameBuilding.buildingLevel?.energyCost;
+          if (gameBuilding.runsOnGreen) {
+            totalGreenEnergyUsed += gameBuilding.buildingLevel?.energyCost;
+          }
+        }
+
+        return totalEnergyUsed > 0 && (totalGreenEnergyUsed / totalEnergyUsed) >= 0.25;
 
       default:
-        console.log(`Unknown achievement title: ${title}`);
+        console.error(`Unknown achievement title: ${title}`);
         return false;
     }
   }
@@ -841,6 +1046,51 @@ class GameStatisticsService {
 
     // Return the achievement object that was already looked up
     return achievement;
+  }
+
+  /**
+   * Retrieves a list of all achievements and their completion status for a specific group..
+   *
+   * @async
+   * @function getAchievementsOverviewByGroupId
+   * @memberof module:service/gameStatisticsService.Service_Achievements
+   * @param {string} groupId - The unique identifier of the group.
+   * @returns {Promise<Array<{id: number, title: string, description: string, reward: number, isReached: boolean}>>}
+   *   A promise that resolves to an array of achievement objects, each containing its id, title, description, reward, and a boolean indicating if it has been reached by the group.
+   * @throws {Error} If game statistics for the specified group are not found.
+   */
+  async getAchievementsOverviewByGroupId(groupId) {
+    const gameStatistics = await gameStatisticsRepository.findByGroupId(
+      groupId,
+      {
+        includeCurrency: false,
+        includeGameBuildings: false,
+        includeAssets: false,
+        includeCheckpoints: false,
+        includeGroup: false,
+      }
+    );
+
+    if (!gameStatistics) {
+      throw new Error(`Game statistics for group ${groupId} not found`);
+    }
+
+    const [achievements, reachedAchievements] = await Promise.all([
+      gameStatisticsRepository.findAllAchievements(),
+      gameStatisticsRepository.getGameStatisticsAchievements(gameStatistics.id),
+    ]);
+
+    const reachedAchievementIds = new Set(
+      reachedAchievements.map((achievement) => achievement.id)
+    );
+
+    return achievements.map((achievement) => ({
+      id: achievement.id,
+      title: achievement.title,
+      description: achievement.description,
+      reward: achievement.reward,
+      isReached: reachedAchievementIds.has(achievement.id),
+    }));
   }
 }
 

@@ -206,8 +206,6 @@ async function main() {
 
   // ACHIEVEMENTS
   const achievements = [
-    { title: "Eerste stap", description: "Schakel een gebouw om naar groene energie", reward: 10 },
-    { title: "Efficiëntie-expert", description: "Schakel alle gebouwen om naar groene energie", reward: 10 },
     { title: "Bouwassistent", description: "Upgrade een gebouw naar niveau 2", reward: 10 },
     { title: "Bouwmeester", description: "Upgrade een gebouw naar het maximum level (5)", reward: 25 },
     { title: "Bouwkampioen", description: "Upgrade alle gebouwen naar het maximum level (5)", reward: 50},
@@ -215,7 +213,12 @@ async function main() {
     { title: "Energie-architect", description: "Heb 10 groene energiebronnen tegelijkertijd", reward: 25},
     { title: "Groene vingers", description: "Plaats een natuurelement", reward: 10 },
     { title: "Milieuheld", description: "Sloop een grijze energiebron", reward: 10 },
-    { title: "EU gemiddelde", description: "Laat meer dan 25% van de totale stroom van groene energiebronnen komen (gemiddelde in de EU)", reward: 10}
+    { title: "Eerste stap", description: "Schakel een gebouw om naar groene energie", reward: 10 },
+    { title: "Efficiëntie-expert", description: "Schakel alle gebouwen om naar groene energie", reward: 10 },
+    { title: "Geen grijs", description: "Sloop alle grijze energiebronnen", reward: 25 },
+    { title: "Frisse adem", description: "Beriek een luchtkwaliteit van 50 of meer", reward: 10 },
+    { title: "Schone lucht", description: "Bereik een luchtkwaliteit van 100", reward: 25 },
+    { title: "EU gemiddelde", description: "Laat 25% of meer van de totale stroom van groene energiebronnen komen (gemiddelde in de EU)", reward: 10}
   ];
 
   const createdAchievements = [];

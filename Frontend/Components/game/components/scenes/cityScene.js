@@ -6,6 +6,7 @@ import {
   setMovementKeys,
   handleMovementKeys,
   handleMapDragging,
+  setupMenuButton,
 } from "../../utils/phaserSceneUtils.js";
 
 import {
@@ -23,21 +24,45 @@ import {
 } from "../../utils/buildingHandler.js";
 
 export function createCityScene() {
+  /**
+   * Phaser Scene for the city map, handling building interactions,
+   * camera movement, and UI popups.
+   * @class CityScene
+   * @extends Phaser.Scene
+   */
   return class CityScene extends Phaser.Scene {
+    /**
+     * Creates a new CityScene instance.
+     * @constructor
+     * @memberof CityScene
+     */
     constructor() {
       super("CityScene");
+      this._onUpgradeBuilding = this._onUpgradeBuilding.bind(this);
+      this._onToggleBuildingEnergy = this._onToggleBuildingEnergy.bind(this);
     }
 
+    /**
+     * Initializes the scene with checkpoint data if available.
+     * @param {Object} data - The checkpoint data containing buildings and game statistics.
+     * @param {string} data.gameStatisticsId - The ID of the game statistics.
+     * @param {string} data.token - The token for the game session.
+     * @param {Array} [data.buildings] - Optional array of buildings to carry over from the checkpoint.
+     * @memberof CityScene
+     */
     init(data) {
       this.events.once("shutdown", () => {
-        if (this.layer1) this.layer1.destroy();
-        if (this.layer2) this.layer2.destroy();
-        if (this.layer3) this.layer3.destroy();
-        if (this.layer4) this.layer4.destroy();
-        if (this.layer5) this.layer5.destroy();
-        if (this.map) this.map.destroy();
+        document.removeEventListener(
+          "scene:upgrade-building",
+          this._onUpgradeBuilding
+        );
+        document.removeEventListener(
+          "scene:toggle-building-energy",
+          this._onToggleBuildingEnergy
+        );
       });
 
+      // Carry over checkpoint data (if any)
       if (data.buildings) {
         this.checkpointBuildings = data.buildings;
         this.sys.game.gameStatisticsId = data.gameStatisticsId;
@@ -45,6 +70,10 @@ export function createCityScene() {
       }
     }
 
+    /**
+     * Preloads assets for the scene.
+     * @memberof CityScene
+     */
     preload() {
       this.load.tilemapTiledJSON("innerCityMap", "Assets/json/binnenstad.json");
       this.load.image(
@@ -53,6 +82,10 @@ export function createCityScene() {
       );
     }
 
+    /**
+     * Creates the scene.
+     * @memberof CityScene
+     */
     create() {
       this.map = this.make.tilemap({ key: "innerCityMap" });
       const tileset = this.map.addTilesetImage(
@@ -88,25 +121,45 @@ export function createCityScene() {
       createErrorPopup(this);
       createCheckpointLoadPopup(this);
 
-      document.addEventListener(
-        "scene:upgrade-building",
-        (e) => {
-          handleUpgradeRequest(this, e.detail.GameBuildingId);
-        },
-        false
-      );
+      // Add the menu button last
+      setupMenuButton(this);
 
       document.addEventListener(
+        "scene:upgrade-building",
+        this._onUpgradeBuilding
+      );
+      document.addEventListener(
         "scene:toggle-building-energy",
-        (e) => {
-          handleToggleEnergyRequest(this, e.detail.GameBuildingId);
-        },
-        false
+        this._onToggleBuildingEnergy
       );
     }
 
+    /**
+     * Updates the scene.
+     * @param {number} time
+     * @param {number} delta
+     * @memberof CityScene
+     */
     update(time, delta) {
       handleMovementKeys(this, delta);
+    }
+
+    /**
+     * Handles building upgrades.
+     * @param {Event} e
+     * @memberof CityScene
+     */
+    _onUpgradeBuilding(e) {
+      handleUpgradeRequest(this, e.detail.GameBuildingId, e.detail.upgradeCost);
+    }
+
+    /**
+     * Handles toggling building energy.
+     * @param {Event} e
+     * @memberof CityScene
+     */
+    _onToggleBuildingEnergy(e) {
+      handleToggleEnergyRequest(this, e.detail.GameBuildingId);
     }
   };
 }

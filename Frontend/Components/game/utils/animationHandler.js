@@ -1,3 +1,16 @@
+/**
+ * @module AnimationHandler
+ * @description Handles animations for transitioning between scenes in the game
+ */
+
+/**
+ * Animates the transition of a wrapper and stats element by sliding them horizontally.
+ * @param {HTMLElement} wrapperEl - The wrapper element to animate.
+ * @param {HTMLElement} statsEl - The stats element to animate.
+ * @param {number} offsetX - The horizontal offset to apply during the animation.
+ * @param {Function} onComplete - Callback function to execute when the animation completes.
+ * @return {void}
+ */
 export function animateWrapperAndStats(
   wrapperEl,
   statsEl,

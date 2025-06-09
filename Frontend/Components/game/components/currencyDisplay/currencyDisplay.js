@@ -1,5 +1,3 @@
-// src/components/currencyDisplay/currencyDisplay.js
-
 const cssResponse = await fetch(
   "./Components/game/components/currencyDisplay/style.css"
 );
@@ -65,6 +63,11 @@ template.innerHTML = /*html*/ `
   </div>
 `;
 
+/**
+ * A Web Component that displays currency-related metrics for the game:
+ * air quality score, grey and green energy, coins, green-building progress,
+ * and multipliers, with buttons to load and save checkpoints.
+ */
 class CurrencyDisplay extends HTMLElement {
   constructor() {
     super();
@@ -92,10 +95,13 @@ class CurrencyDisplay extends HTMLElement {
       ".multipliers span:nth-child(4)"
     );
 
-    this.loadBtn.addEventListener("click", () => this._onLoad());
-    this.saveBtn.addEventListener("click", () => this._onSave());
+    this._onLoadBound = this._onLoad.bind(this);
+    this._onSaveBound = this._onSave.bind(this);
 
-    const observer = new MutationObserver((mutationsList) => {
+    this.loadBtn.addEventListener("click", this._onLoadBound);
+    this.saveBtn.addEventListener("click", this._onSaveBound);
+
+    this._observer = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
         if (mutation.type === "childList") {
           const newScore = Number(this.scoreEl.textContent);
@@ -110,18 +116,25 @@ class CurrencyDisplay extends HTMLElement {
         }
       }
     });
-
-    observer.observe(this.scoreEl, { childList: true });
+    this._observer.observe(this.scoreEl, { childList: true });
   }
 
   /**
-   * Verwacht een object met:
-   *   - greyEnergy (string zoals "10 / 50")
-   *   - greenEnergy (nummer)
-   *   - coins (nummer)
-   *   - score (nummer)
-   *   - greenBuildingPercentage (nummer tussen 0 en 100)
-   *   - multipliers: { solar, water, wind }
+   * Lifecycle callback when the element is removed from the DOM.
+   * Cleans up the MutationObserver and removes button listeners.
+   */
+  disconnectedCallback() {
+    if (this._observer) {
+      this._observer.disconnect();
+      this._observer = null;
+    }
+
+    this.loadBtn.removeEventListener("click", this._onLoadBound);
+    this.saveBtn.removeEventListener("click", this._onSaveBound);
+  }
+
+  /**
+   * Setter for component data. Updates displayed values and dispatches events.
    */
   set data({
     greyEnergy,
@@ -139,6 +152,16 @@ class CurrencyDisplay extends HTMLElement {
     }
     if (coins != null) {
       this.coinsEl.textContent = coins;
+      if (Number(coins) < 0) {
+        this.coinsEl.style.color = "#ff0000";
+      } else {
+        this.coinsEl.style.color = "";
+      }
+      document.dispatchEvent(
+        new CustomEvent("currencyUpdate", {
+          detail: { coins: Number(coins) },
+        })
+      );
     }
     if (score != null) {
       this.scoreEl.textContent = score;
@@ -153,8 +176,22 @@ class CurrencyDisplay extends HTMLElement {
     if (multipliers) {
       this._updateMultipliers(multipliers);
     }
+
+    this.dispatchEvent(
+      new CustomEvent("data-ready", {
+        bubbles: true,
+        composed: true,
+      })
+    );
   }
 
+  /**
+   * Updates the UI for solar, water, and wind multipliers.
+   * @param {Object} multipliers - An object containing the multipliers for solar, water, and wind.
+   * @param {number} multipliers.solar - The solar multiplier.
+   * @param {number} multipliers.water - The water multiplier.
+   * @param {number} multipliers.wind - The wind multiplier.
+   */
   _updateMultipliers({ solar, water, wind }) {
     if (solar != null) {
       this.solarSpan.innerHTML = `<img src="Assets/images/solar_panel.png" alt="Solar Panel"> ${solar}x`;
@@ -167,12 +204,18 @@ class CurrencyDisplay extends HTMLElement {
     }
   }
 
+  /**
+   * Dispatches a "loadCheckpoint" event when the Load button is clicked.
+   */
   _onLoad() {
     this.dispatchEvent(
       new CustomEvent("loadCheckpoint", { bubbles: true, composed: true })
     );
   }
 
+  /**
+   * Dispatches a "saveCheckpoint" event when the Save button is clicked.
+   */
   _onSave() {
     this.dispatchEvent(
       new CustomEvent("saveCheckpoint", { bubbles: true, composed: true })

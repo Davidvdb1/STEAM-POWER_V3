@@ -1,25 +1,25 @@
-// src/components/game/GameControlPanel.js
-
 import { createLogoScene } from "../components/scenes/logoScene.js";
 import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
+import { createMenuScene } from "../components/scenes/menuScene.js";
 import {
   fetchGameStatistics,
   updateCurrency,
   recordCheckpoint,
   refactorGameStatistics,
+  toggleAllBuildingsRunsOnGreenFalse,
 } from "../service/gameService.js";
 import {
   transformBuildingData,
   buildCurrencyDisplayPayload,
   calculateTotalGreenCost,
-  calculateTotalGreenProduction,
   unpackCheckpointPayload,
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
 import { animateWrapperAndStats } from "../utils/animationHandler.js";
 import { showDetail } from "../utils/detailHelper.js";
+import { setBuildingColor } from "../utils/buildingHandler.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -28,6 +28,9 @@ import "../components/details/buildingDetail.js";
 import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
+
+import { handleAchievements } from "../utils/achievementHandler.js";
+import { showAchievementsOverview } from "../utils/achievementOverview.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -42,7 +45,7 @@ template.innerHTML = /*html*/ `
     <div id="inner-container">
       <shop-sidebar></shop-sidebar>
 
-      <div class="test">
+      <div class="test" style="z-index: 1000;">
         <img id="inner-button" src="Assets/images/toInner.png" alt="Ga naar binnenstad" />
         <div id="inner-text">Ga naar binnenstad</div>
       </div>
@@ -61,7 +64,15 @@ template.innerHTML = /*html*/ `
   <currency-display id="stats" class="hidden"></currency-display>
 `;
 
+/**
+ * Web Component for the game control panel, managing game state,
+ * statistics, and transitions between city scenes.
+ */
 class GameControlPanel extends HTMLElement {
+  /**
+   * Initializes the game control panel, sets up shadow DOM,
+   * and binds event handlers.
+   */
   constructor() {
     super();
     this._shadow = this.attachShadow({ mode: "open" });
@@ -77,16 +88,56 @@ class GameControlPanel extends HTMLElement {
     this._outerButton = this._shadow.getElementById("outer-button");
     this._gameContainer = this._shadow.getElementById("game-container");
 
+    this._onStartClickBound = this._onStartClick.bind(this);
+    this._onOuterClickBound = this._transitionToOuterCity.bind(this);
+    this._onInnerClickBound = this._transitionToCity.bind(this);
+    this._onCloseDetailBound = this._handleCloseDetail.bind(this);
+    this._onDestroyAssetBound = this._handleDestroyAsset.bind(this);
+    this._onSaveCheckpointBound = this._onSaveCheckpoint.bind(this);
+    this._onLoadCheckpointBound = this._onLoadCheckpoint.bind(this);
+
+    this._onShowAchievementsBound = this._handleShowAchievements.bind(this);
+    this._onMenuOpenedBound = this._handleMenuOpened.bind(this);
+    this._onMenuClosedBound = this._handleMenuClosed.bind(this);
+
+    this._onBuildingClickedBound = this._handleBuildingClicked.bind(this);
+    this._onAssetClickedBound = this._handleAssetClicked.bind(this);
+    this._onForceStatsUpdateBound = this._updateStatistics.bind(this);
+
     this._outerContainer.style.display = "none";
     this._innerContainer.style.display = "none";
+
+    this._currentDetail = { type: null, id: null };
 
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
 
+    this._onAssetDeleted = () => {
+      this._detailContainer.classList.add("hidden");
+      this._detailContainer.innerHTML = "";
+      this._currentDetail = { type: null, id: null };
+    };
+
+    this._onSceneRefreshDetail = (e) => {
+      const { type, id } = e.detail;
+      showDetail(
+        this._detailContainer,
+        this._game.buildingData,
+        this._game.assetData,
+        type,
+        id
+      );
+    };
+
     this._boundAssetPlacedHandler = () => this._updateStatistics();
+    this._onAssetPlacedBound = this._boundAssetPlacedHandler;
   }
 
+  /**
+   * Loads the Phaser library asynchronously.
+   * @returns {Promise<void>} Resolves when Phaser is loaded.
+   */
   _loadPhaser() {
     return new Promise((res) => {
       if (window.Phaser) return res();
@@ -97,78 +148,129 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+  /**
+   * Called when the element is added to the DOM.
+   * Sets up event listeners and initializes the game.
+   * @returns {void}
+   */
   connectedCallback() {
-    this._startButton.addEventListener("click", () => this._onStartClick());
-    this._outerButton.addEventListener("click", () =>
-      this._transitionToOuterCity()
-    );
-    this._innerButton.addEventListener("click", () => this._transitionToCity());
+    this._startButton.addEventListener("click", this._onStartClickBound);
+    this._outerButton.addEventListener("click", this._onOuterClickBound);
+    this._innerButton.addEventListener("click", this._onInnerClickBound);
 
-    this._shadow.addEventListener("close-detail", () => {
-      this._detailContainer.classList.add("hidden");
-      this._detailContainer.innerHTML = "";
-    });
+    this._shadow.addEventListener("close-detail", this._onCloseDetailBound);
+    this._shadow.addEventListener("destroy-asset", this._onDestroyAssetBound);
 
-    this._shadow.addEventListener("upgrade-build", (e) => {
-      this._confirmUpgradeBuilding(e.detail.GameBuildingId);
-    });
-    this._shadow.addEventListener("toggle-building-energy", (e) => {
-      this._confirmToggleBuildingEnergy(e.detail.GameBuildingId);
-    });
-    this._statsContainer.addEventListener("saveCheckpoint", () =>
-      this._onSaveCheckpoint()
+    this._statsContainer.addEventListener(
+      "saveCheckpoint",
+      this._onSaveCheckpointBound
     );
-    this._statsContainer.addEventListener("loadCheckpoint", () =>
-      this._onLoadCheckpoint()
+    this._statsContainer.addEventListener(
+      "loadCheckpoint",
+      this._onLoadCheckpointBound
     );
-    document.addEventListener("asset-placed", this._boundAssetPlacedHandler);
+
+    this._gameContainer.addEventListener(
+      "show-achievements",
+      this._onShowAchievementsBound
+    );
+    this._gameContainer.addEventListener(
+      "menu-opened",
+      this._onMenuOpenedBound
+    );
+    this._gameContainer.addEventListener(
+      "menu-closed",
+      this._onMenuClosedBound
+    );
+
+    document.addEventListener("asset-placed", this._onAssetPlacedBound);
+    document.addEventListener("asset-deleted", this._onAssetDeleted);
+    document.addEventListener(
+      "scene:refresh-detail",
+      this._onSceneRefreshDetail
+    );
 
     this._loadPhaser().then(() => this._initializeGame());
 
-    this._shadow.addEventListener("destroy-asset", (e) => {
-      const assetId = e.detail.assetId;
-      document.dispatchEvent(
-        new CustomEvent("scene:destroy-asset", {
-          detail: { assetId },
-        })
-      );
-    });
-
-    document.addEventListener("asset-deleted", () => {
-      this._detailContainer.classList.add("hidden");
-      this._detailContainer.innerHTML = "";
-    });
-
-    document.addEventListener(
-      "scene:refresh-detail",
-      (e) => {
-        const { type, id } = e.detail;
-        showDetail(
-          this._detailContainer,
-          this._game.buildingData,
-          this._game.assetData,
-          type,
-          id
-        );
-      },
-      false
-    );
-
-    const bluetooth = JSON.parse(sessionStorage.getItem("bluetoothEnabled"));
-    if (bluetooth) {
-      this._interval = setInterval(() => {
-        this._updateStatistics();
-      }, 5000);
+    if (JSON.parse(sessionStorage.getItem("bluetoothEnabled"))) {
+      this._interval = setInterval(() => this._updateStatistics(), 5000);
     }
   }
 
+  /**
+   * Called when the element is removed from the DOM.
+   * Cleans up event listeners and destroys the Phaser game instance.
+   * @returns {void}
+   * */
   disconnectedCallback() {
-    document.removeEventListener("asset-placed", this._boundAssetPlacedHandler);
+    this._startButton.removeEventListener("click", this._onStartClickBound);
+    this._outerButton.removeEventListener("click", this._onOuterClickBound);
+    this._innerButton.removeEventListener("click", this._onInnerClickBound);
+
+    this._shadow.removeEventListener("close-detail", this._onCloseDetailBound);
+    this._shadow.removeEventListener(
+      "destroy-asset",
+      this._onDestroyAssetBound
+    );
+
+    this._statsContainer.removeEventListener(
+      "saveCheckpoint",
+      this._onSaveCheckpointBound
+    );
+    this._statsContainer.removeEventListener(
+      "loadCheckpoint",
+      this._onLoadCheckpointBound
+    );
+
+    this._gameContainer.removeEventListener(
+      "show-achievements",
+      this._onShowAchievementsBound
+    );
+    this._gameContainer.removeEventListener(
+      "menu-opened",
+      this._onMenuOpenedBound
+    );
+    this._gameContainer.removeEventListener(
+      "menu-closed",
+      this._onMenuClosedBound
+    );
+
+    document.removeEventListener("asset-placed", this._onAssetPlacedBound);
+    document.removeEventListener("asset-deleted", this._onAssetDeleted);
+    document.removeEventListener(
+      "scene:refresh-detail",
+      this._onSceneRefreshDetail
+    );
+
+    if (this._game) {
+      this._game.events.off("buildingClicked", this._onBuildingClickedBound);
+      this._game.events.off("assetClicked", this._onAssetClickedBound);
+      this._game.events.off("forceStatsUpdate", this._onForceStatsUpdateBound);
+      this._game.destroy(true);
+      this._game = null;
+    }
+
+    // 4) Clear all intervals
     clearInterval(this._interval);
     clearInterval(this._energyInterval);
     clearInterval(this._statsInterval);
+    clearInterval(this._taxesInterval);
+    // 4) Null out references as a courtesy
+    this._boundAssetPlacedHandler = null;
+    this._onAssetDeleted = null;
+    this._onSceneRefreshDetail = null;
+    this._statsContainer = null;
+    this._startButton = null;
+    this._innerContainer = null;
+    this._outerContainer = null;
+    this._wrapper = null;
+    this._detailContainer = null;
   }
 
+  /**
+   * Initializes the Phaser game instance with scenes and event listeners.
+   * @returns {void}
+   */
   _initializeGame() {
     const LogoScene = createLogoScene(this._startButton);
     const CityScene = createCityScene();
@@ -190,31 +292,19 @@ class GameControlPanel extends HTMLElement {
 
     window.phaserGame = this._game;
     window.gameContainer = this._gameContainer;
-    this._game.events.on("buildingClicked", (id) =>
-      showDetail(
-        this._detailContainer,
-        this._game.buildingData,
-        this._game.assetData,
-        "building",
-        id
-      )
-    );
 
-    this._game.events.on("assetClicked", (id) =>
-      showDetail(
-        this._detailContainer,
-        this._game.buildingData,
-        this._game.assetData,
-        "asset",
-        id
-      )
-    );
-
-    this._game.events.on("forceStatsUpdate", () => {
-      this._updateStatistics();
-    });
+    this._game.events.on("buildingClicked", this._onBuildingClickedBound);
+    this._game.events.on("assetClicked", this._onAssetClickedBound);
+    this._game.events.on("forceStatsUpdate", this._onForceStatsUpdateBound);
   }
 
+  /**
+   * Updates the game statistics and currency display.
+   * Fetches the latest game statistics, transforms building data,
+   * and updates the currency display payload.
+   * Emits an event when the statistics update is complete.
+   * @returns {Promise<void>}
+   * */
   async _updateStatistics() {
     try {
       const { token, groupId } = getAuthFromSession();
@@ -228,6 +318,7 @@ class GameControlPanel extends HTMLElement {
       this._game.assetData = gs.assets;
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
+      this._game.currency = gs.currency;
 
       const payload = buildCurrencyDisplayPayload({
         buildings: this._game.buildingData,
@@ -240,16 +331,26 @@ class GameControlPanel extends HTMLElement {
         },
       });
       this._statsContainer.data = payload;
-      this._statsContainer.classList.remove("hidden");
+
+      // Emit event when statistics update is complete
+      this._game.events.emit("statsUpdateComplete");
     } catch (e) {
       console.error("Error fetching stats:", e);
+      // Still emit the event to prevent hanging
+      this._game.events.emit("statsUpdateComplete");
     }
   }
 
+  /**
+   * Updates the energy levels in the game.
+   * Fetches the latest game statistics, calculates the total green cost,
+   * updates the currency, and toggles buildings off green if necessary.
+   * Handles errors gracefully and updates the UI accordingly.
+   * @returns {Promise<void>}
+   * */
   async _updateEnergy() {
     try {
       const { token, groupId } = getAuthFromSession();
-
       const gs = await fetchGameStatistics(groupId, token);
 
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
@@ -261,51 +362,261 @@ class GameControlPanel extends HTMLElement {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
-      const totalGreenCost = calculateTotalGreenCost(this._game.buildingData) / 60;
+      const totalGreenCost =
+        calculateTotalGreenCost(this._game.buildingData) / 60;
 
       const { id: currencyId, payload: currencyPayload } = buildUpdatedCurrency(
         gs.currency,
         totalGreenCost
       );
+
+      if (currencyPayload.greenEnergy < 0) {
+        currencyPayload.greenEnergy = 0;
+      }
+
       await updateCurrency(currencyId, currencyPayload, token);
 
-      this._updateStatistics();
+      await this._updateStatistics();
+
+      //if greenEnergy is now zero, force all buildings off green, recolor, refresh detail ===
+      if (this._game.currency.greenEnergy <= 0) {
+        await toggleAllBuildingsRunsOnGreenFalse(
+          this._game.gameStatisticsId,
+          token
+        );
+
+        await this._updateStatistics();
+
+        const cityScene = this._game.scene.getScene("CityScene");
+        if (cityScene) {
+          for (const b of this._game.buildingData) {
+            setBuildingColor(cityScene, b);
+          }
+        }
+
+        const actieveScenes = this._game.scene.getScenes(true);
+        actieveScenes.forEach(function (scene) {
+          if (typeof scene.showError === "function") {
+            scene.showError(
+              "Groene energie is op. Alle gebouwen gebruiken nu grijze energie."
+            );
+          }
+        });
+        // If the detail pane is currently showing a BUILDING, tear it down and re-render:
+        const { type, id } = this._currentDetail;
+        if (
+          type === "building" &&
+          id != null &&
+          !this._detailContainer.classList.contains("hidden")
+        ) {
+          // Clear whatever was inside detail‐container, then call showDetail(...) again:
+          this._detailContainer.innerHTML = "";
+          showDetail(
+            this._detailContainer,
+            this._game.buildingData,
+            this._game.assetData,
+            "building",
+            id
+          );
+        }
+      }
     } catch (e) {
       console.error("Error updating energy:", e);
     }
   }
 
+  /**
+   * Handles the click event on the "Start" button.
+   * Hides the button, fetches game statistics, and transitions to the CityScene.
+   * Sets up promises to ensure the scene and statistics are ready before proceeding.
+   * @returns {Promise<void>}
+   */
   async _onStartClick() {
-    this._startButton.classList.add("hidden");
-    this._game.scene.start("CityScene");
-    this._outerContainer.style.display = "flex";
-    this._innerContainer.style.display = "none";
+    // 1) Hide the “Start” button
+    const spinner = this._createSpinner();
+    this._startButton.replaceWith(spinner);
 
+    // 2) **First load your stats** so buildingData is populated
+    await this._updateStatistics();
+
+    this._game.scene.run("CityScene", {
+      buildings: this._game.buildingData,
+      gameStatisticsId: this._game.gameStatisticsId,
+      token: this._game.token,
+    });
     const cityScene = this._game.scene.getScene("CityScene");
-    await new Promise((resolve) => {
-      cityScene.events.once("create", resolve);
+
+    // 3) Promise for CityScene.create()
+    const createPromise = new Promise((resolve) => {
+      if (cityScene.sys.isCreated) {
+        resolve();
+      } else {
+        cityScene.events.once("create", resolve);
+      }
     });
 
-    try {
-      await this._updateStatistics();
+    // 4) Promise for <currency-display> “data-ready”
+    const dataReadyPromise = new Promise((resolve) => {
+      const onDataReady = () => {
+        this._statsContainer.removeEventListener("data-ready", onDataReady);
+        resolve();
+      };
+      this._statsContainer.addEventListener("data-ready", onDataReady);
+    });
 
-      if (cityScene.setBuildingColor) {
-        for (const b of this._game.buildingData) {
-          cityScene.setBuildingColor(b);
-        }
-      }
-    } catch (e) {
-      console.error("Error fetching stats:", e);
-    }
+    // 5) Kick off stats fetch (which will dispatch “data-ready” when done)
+    const statsPromise = this._updateStatistics().catch((err) => {
+      console.error("Failed to fetch stats:", err);
+      // resolve anyway so we don’t hang
+    });
 
     this._energyInterval = setInterval(() => this._updateEnergy(), 60_000);
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
+    this._taxesInterval = setInterval(() => this._handleTaxes(), 300_000);
+
+    // 6) Wait for both scene.create AND stats+render
+    await Promise.all([createPromise, statsPromise, dataReadyPromise]);
+
+    // 7) In one frame: stop the logo, show stats & city
+    requestAnimationFrame(() => {
+      // remove spinner
+      const spinner = this._shadow.getElementById("startSpinner");
+      if (spinner) spinner.remove();
+      // show currency panel
+      this._statsContainer.classList.remove("hidden");
+
+      // stop/logo → city
+      this._game.scene.stop("LogoScene");
+      this._game.scene.bringToTop("CityScene");
+
+      // show the “naar buitenstad” button
+      this._outerContainer.style.display = "flex";
+      this._innerContainer.style.display = "none";
+    });
   }
 
-  async _updateCurrency() {
-    await this._updateStatistics();
+  /**
+   * Creates a spinner element to indicate loading state.
+   * @returns {HTMLDivElement} The spinner element.
+   * */
+  _createSpinner() {
+    const spinner = document.createElement("div");
+    spinner.id = "startSpinner";
+    spinner.classList.add("spinner");
+    return spinner;
   }
 
+  /**
+   * Handles the click event to close the detail container.
+   * Clears the detail container and resets the current detail state.
+   * @returns {void}
+   * */
+  _handleCloseDetail() {
+    this._detailContainer.classList.add("hidden");
+    this._detailContainer.innerHTML = "";
+    this._currentDetail = { type: null, id: null };
+  }
+
+  /**
+   * Handles the event to destroy an asset.
+   * Dispatches a custom event with the asset ID to be destroyed.
+   * @param {CustomEvent} e - The event containing the asset ID.
+   * @returns {void}
+   * */
+  _handleDestroyAsset(e) {
+    const assetId = e.detail.assetId;
+    document.dispatchEvent(
+      new CustomEvent("scene:destroy-asset", {
+        detail: { assetId },
+      })
+    );
+  }
+
+  /**
+   * Handles the event to show achievements overview.
+   * Calls the utility function to display achievements overview
+   * in the game control panel.
+   * @returns {void}
+   * */
+  _handleShowAchievements() {
+    showAchievementsOverview(this._wrapper, this._shadow);
+  }
+
+  /**
+   * Handles the event when the menu is opened.
+   * Hides the inner and outer containers,
+   * and the detail container to prevent interaction with the game.
+   * * @returns {void}
+   */
+  _handleMenuOpened() {
+    // Hide navigation buttons + detail when menu opens
+    this._innerContainer.style.display = "none";
+    this._outerContainer.style.display = "none";
+    this._detailContainer.style.display = "none";
+  }
+
+  /**
+   * Handles the event when the menu is closed.
+   * Shows the correct navigation button and detail container
+   * based on the target scene.
+   * @param {CustomEvent} e - The event containing the target scene.
+   * @returns {void}
+   * */
+  _handleMenuClosed(e) {
+    // Show correct nav button and detail when menu closes
+    if (e.detail.targetScene === "CityScene") {
+      this._outerContainer.style.display = "flex";
+    } else {
+      this._innerContainer.style.display = "flex";
+    }
+    this._detailContainer.style.display = "block";
+  }
+
+  /**
+   * Handles the click event when a building is clicked.
+   * Updates the current detail to show the building detail,
+   * clears the detail container, and shows the building detail.
+   * @param {number} id - The ID of the clicked building.
+   * @returns {void}
+   */
+  _handleBuildingClicked(id) {
+    this._currentDetail = { type: "building", id };
+    this._detailContainer.innerHTML = "";
+    showDetail(
+      this._detailContainer,
+      this._game.buildingData,
+      this._game.assetData,
+      "building",
+      id
+    );
+  }
+
+  /**
+   * Handles the click event on an asset.
+   * Sets the current detail to the asset type and ID,
+   * clears the detail container,
+   * and shows the asset detail.
+   * @param {number} id - The ID of the clicked asset.
+   * @returns {void}
+   * */
+  _handleAssetClicked(id) {
+    this._currentDetail = { type: "asset", id };
+    this._detailContainer.innerHTML = "";
+    showDetail(
+      this._detailContainer,
+      this._game.buildingData,
+      this._game.assetData,
+      "asset",
+      id
+    );
+  }
+
+  /**
+   * Handles the click event to transition to the outer city scene.
+   * Hides the detail container, animates the wrapper, and switches to the OuterCityScene.
+   * @param {Event} e - The click event.
+   * @returns {void}
+   * */
   _transitionToOuterCity() {
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
@@ -318,18 +629,32 @@ class GameControlPanel extends HTMLElement {
     });
   }
 
+  /**
+   * Handles the click event to transition to the inner city scene.
+   * Hides the detail container, animates the wrapper, and switches to the CityScene.
+   * @param {Event} e - The click event.
+   * @returns {void}
+   * */
   _transitionToCity() {
     this._detailContainer.classList.add("hidden");
     this._detailContainer.innerHTML = "";
 
+    this._game.scene.switch("OuterCityScene", "CityScene");
+
+    this._innerContainer.style.display = "none";
+    this._outerContainer.style.display = "flex";
+
     const distance = this._wrapper.offsetWidth + 800;
-    this._animateWrapper(distance, () => {
-      this._game.scene.switch("OuterCityScene", "CityScene");
-      this._innerContainer.style.display = "none";
-      this._outerContainer.style.display = "flex";
-    });
+    this._animateWrapper(distance, () => {});
   }
 
+  /**
+   * Animates the wrapper and statistics container to a new position.
+   * Uses the `animateWrapperAndStats` utility function to perform the animation.
+   * @param {number} offsetX - The horizontal offset to animate to.
+   * @param {Function} onComplete - Callback function to execute when the animation is complete.
+   * @returns {void}
+   * */
   _animateWrapper(offsetX, onComplete) {
     animateWrapperAndStats(
       this._wrapper,
@@ -339,22 +664,39 @@ class GameControlPanel extends HTMLElement {
     );
   }
 
+  /**
+   * Handles the saving of a checkpoint in the game.
+   * Prompts the user for confirmation, performs the save operation,
+   * and shows a confirmation message.
+   * @returns {void}
+   * */
   _onSaveCheckpoint() {
-    const activeScene = this._game.scene.getScene("CityScene").scene.isActive()
-      ? this._game.scene.getScene("CityScene")
-      : this._game.scene.getScene("OuterCityScene");
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game?.scene?.getScene(key);
+      if (!scene) continue; // skip if scene is not yet created
 
-    activeScene.showConfirmation(
-      "Wil je je voortgang opslaan?",
-      (confirmed) => {
-        if (confirmed) {
-          this._performSaveCheckpoint();
-          activeScene.showSavedConfirmation(`Checkpoint opgeslagen!`);
-        }
+      if (
+        scene.scene.isActive() &&
+        typeof scene.showConfirmation === "function" &&
+        typeof scene.showSavedConfirmation === "function"
+      ) {
+        scene.showConfirmation("Wil je je voortgang opslaan?", (confirmed) => {
+          if (confirmed) {
+            this._performSaveCheckpoint();
+            scene.showSavedConfirmation(`Checkpoint opgeslagen!`);
+          }
+        });
+        break;
       }
-    );
+    }
   }
 
+  /**
+   * Performs the actual saving of the checkpoint.
+   * Fetches the game statistics, records the checkpoint,
+   * and logs a success message.
+   * @returns {Promise<void>} Resolves when the checkpoint is saved.
+   * */
   async _performSaveCheckpoint() {
     const { token, groupId } = getAuthFromSession();
 
@@ -365,28 +707,51 @@ class GameControlPanel extends HTMLElement {
     console.log("Currency saved successfully!");
   }
 
+  /**
+   * Handles the loading of a checkpoint in the game.
+   * Prompts the user to select a checkpoint,
+   * confirms the selection, and performs the load operation.
+   * @returns {void}
+   * */
   _onLoadCheckpoint() {
-    const active = this._game.scene.isActive("CityScene")
-      ? this._game.scene.getScene("CityScene")
-      : this._game.scene.getScene("OuterCityScene");
+    for (const key of ["CityScene", "OuterCityScene", "MenuScene"]) {
+      const scene = this._game?.scene?.getScene(key);
+      if (!scene) continue; // skip if scene is not yet created
 
-    active.showCheckpointList(
-      (selectedCheckpointId, selectedCheckpointName) => {
-        active.showConfirmation(
-          `Wil je ${selectedCheckpointName} laden?`,
-          (confirmed) => {
-            if (confirmed) {
-              this._performLoadCheckpoint(selectedCheckpointId);
-              active.showSavedConfirmation(
-                `Spel geladen van ${selectedCheckpointName}!`
-              );
-            }
+      if (
+        scene.scene.isActive() &&
+        typeof scene.showConfirmation === "function" &&
+        typeof scene.showSavedConfirmation === "function" &&
+        typeof scene.showCheckpointList === "function"
+      ) {
+        scene.showCheckpointList(
+          (selectedCheckpointId, selectedCheckpointName) => {
+            scene.showConfirmation(
+              `Wil je ${selectedCheckpointName} laden?`,
+              (confirmed) => {
+                if (confirmed) {
+                  this._performLoadCheckpoint(selectedCheckpointId);
+                  scene.showSavedConfirmation(
+                    `Spel geladen van ${selectedCheckpointName}!`
+                  );
+                }
+              }
+            );
           }
         );
+        break;
       }
-    );
+    }
   }
 
+  /**
+   * Performs the actual loading of a checkpoint.
+   * Fetches the game statistics for the selected checkpoint,
+   * updates the game state, and sets up the game scenes accordingly.
+   * Handles errors gracefully and updates the UI.
+   * @param {number} selectedCheckpointId - The ID of the checkpoint to load.
+   * @returns {Promise<void>} Resolves when the checkpoint is loaded.
+   * */
   async _performLoadCheckpoint(selectedCheckpointId) {
     const { token, groupId } = getAuthFromSession();
 
@@ -408,13 +773,19 @@ class GameControlPanel extends HTMLElement {
           name: b.building.name,
           runsOnGreen: b.runsOnGreen,
         };
-        cityScene.setBuildingColor(buildingInCorrectFormat);
+        setBuildingColor(cityScene, buildingInCorrectFormat);
       }
 
       const outer = this._game.scene.getScene("OuterCityScene");
       outer.clearAllAssets();
       outer.checkpointAssets = gameStatistics.assets;
-      outer.reloadCheckpointAssets();
+      if (outer.map) {
+        outer.reloadCheckpointAssets();
+      } else {
+        outer.events.once("create", () => {
+          outer.reloadCheckpointAssets();
+        });
+      }
 
       this._updateStatistics();
 
@@ -445,6 +816,48 @@ class GameControlPanel extends HTMLElement {
       if (outer?.showError)
         outer.showError("Kon checkpoint niet laden: " + err.message);
     }
+  }
+
+  /**
+   * Handles the collection of taxes in the game.
+   *
+   * @returns {Promise<void>} Resolves when the tax handling process is complete.
+   */
+  async _handleTaxes() {
+    // Get the JWT token from the session
+    const { token } = getAuthFromSession();
+
+    // 1 coin for each score point, plus a base tax revenue of 10 coins
+    // If the score is negative, we still collect a base tax revenue of 10 coins
+    const collectedTaxes = this._game.currency.score <= 0 ? 10 : 10 + this._game.currency.score;
+
+    // Update the currency with the added tax revenue
+    await updateCurrency(
+      this._game.currency.id,
+      {
+        greenEnergy: this._game.currency.greenEnergy,
+        greyEnergy: this._game.currency.greyEnergy,
+        coins: this._game.currency.coins + collectedTaxes,
+        score: this._game.currency.score,
+      },
+      token
+    );
+
+    // Show a popup on the active scene with the collected taxes
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
+      if (!scene || !scene.scene) continue;
+
+      if (scene.scene.isActive() && typeof scene.showError === "function") {
+        scene.showError(
+          `De stad verdiende ${collectedTaxes} coins van de belastingen!`
+        );
+        break;
+      }
+    }
+
+    // Update the statistics after collecting taxes to rerender the currency display
+    await this._updateStatistics();
   }
 }
 

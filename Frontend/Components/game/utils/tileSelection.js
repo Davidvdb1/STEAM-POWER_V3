@@ -1,9 +1,23 @@
+/**
+ * TileSelection class for managing named selections of tiles in a Phaser Tilemap.
+ * This class allows you to create selections of tiles that represent specific buildings or areas,
+ * apply visual effects like grayscale, and manage the rendering order of layers.
+ */
+
 export class TileSelection {
-  /**
-   * Constructs a named tile selection representing a specific building or area
-   * @param {string} name - Identifier for this selection (e.g., "hospital", "park")
-   * @param {Phaser.Tilemaps.Tilemap} map - The tilemap containing the layers and tiles
-   * @param {Array|Array[]} layerSelections - Array of layer selections in format [layerName, [startX, startY], [endX, endY]]
+  /** * Creates a new TileSelection instance.
+   * @param {string} name - The name of the building or selection.
+   * @param {Phaser.Tilemaps.Tilemap} map - The Phaser Tilemap instance.
+   * @param {Phaser.scene} map.scene - The Phaser Scene where the map is rendered.
+   * @param {Array<Array<string|number>>} layerSelections - An array of selections, each containing:
+   *  *   - Layer name (string)
+   *  *   - Start coordinates (array of two numbers: [x, y])
+   *  *   - End coordinates (array of two numbers: [x, y])
+   * * @example
+   * const selection = new TileSelection("MyBuilding", myMap, [
+   *  ["Layer1", [0, 0], [5, 5]],
+   * ["Layer2", [1, 1], [3, 3]]
+   * ]);
    */
   constructor(name, map, layerSelections) {
     this.name = name;
@@ -150,8 +164,9 @@ export class TileSelection {
     this.fixLayerOrder();
   }
 
-  /**
-   * Fixes the rendering order of map and building layers in the scene when a grayscale effect is applied
+  /** * Restores original tiles in the specified layer
+   * @param {string} layerName - The name of the layer to restore
+   * * @returns {void}
    */
   fixLayerOrder() {
     const allLayers = [];
@@ -207,7 +222,7 @@ export class TileSelection {
   applyGrayscale(intensity = 1) {
     this.buildingLayers.forEach((layer) => {
       if (layer.postFX) {
-        layer.postFX.clear();
+        // layer.postFX.clear();
         layer.postFX.addColorMatrix().grayscale(intensity);
       } else {
         console.warn(`PostFX not available for layer in "${this.name}"`);

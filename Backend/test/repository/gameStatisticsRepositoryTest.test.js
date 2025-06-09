@@ -824,8 +824,8 @@ describe("GameStatisticsRepository", () => {
             id: "cur-1",
             greenEnergy: 100,
             greyEnergy: 50,
-            coins: 300, // increased by achievement reward
-            score: 1050 // increased by achievement score
+            coins: 300,
+            score: 1050
           },
           achievements: [mockAchievement]
         };
@@ -840,7 +840,6 @@ describe("GameStatisticsRepository", () => {
             currency: {
               update: {
                 coins: { increment: 100 },
-                score: { increment: 50 },
               },
             },
             achievements: {

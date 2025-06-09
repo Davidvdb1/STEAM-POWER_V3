@@ -1,3 +1,16 @@
+/**
+ * Utility functions to create UI popups in a Phaser game.
+ * These functions create error and confirmation popups with customizable messages and actions.
+ * @module uiPopups
+ * @description Provides functions to create error and confirmation popups in a Phaser game scene.
+ */
+
+/**
+ * Creates an error popup in the specified Phaser scene.
+ * The popup displays an error message and fades out after a short duration.
+ * @param {Phaser.Scene} scene - The Phaser scene where the popup will be created.
+ * @returns {void}
+ */
 export function createErrorPopup(scene) {
   const { width, height } = scene.cameras.main;
   const popupWidth = 700,
@@ -13,7 +26,7 @@ export function createErrorPopup(scene) {
       popupHeight,
       20
     )
-    .setDepth(199)
+    .setDepth(1999)
     .setScrollFactor(0)
     .setVisible(false);
 
@@ -26,7 +39,7 @@ export function createErrorPopup(scene) {
       fontStyle: "bold",
     })
     .setOrigin(0.5)
-    .setDepth(200)
+    .setDepth(2000)
     .setScrollFactor(0)
     .setVisible(false);
 
@@ -47,6 +60,12 @@ export function createErrorPopup(scene) {
   };
 }
 
+/**
+ * Creates a confirmation popup in the specified Phaser scene.
+ * The popup allows the user to confirm or cancel an action with "Ja" and "Nee" buttons.
+ * @param {Phaser.Scene} scene - The Phaser scene where the popup will be created.
+ * @returns {void}
+ */
 export function createConfirmationPopup(scene) {
   const { width, height } = scene.cameras.main;
   const popupWidth = 700,
@@ -68,7 +87,7 @@ export function createConfirmationPopup(scene) {
       popupHeight,
       20
     )
-    .setDepth(299)
+    .setDepth(1998)
     .setScrollFactor(0)
     .setVisible(false);
 
@@ -81,7 +100,7 @@ export function createConfirmationPopup(scene) {
       wordWrap: { width: popupWidth - 50 },
     })
     .setOrigin(0.5)
-    .setDepth(300)
+    .setDepth(2000)
     .setScrollFactor(0)
     .setVisible(false);
 
@@ -95,7 +114,7 @@ export function createConfirmationPopup(scene) {
       buttonH,
       10
     )
-    .setDepth(300)
+    .setDepth(1999)
     .setScrollFactor(0)
     .setVisible(false)
     .setInteractive(
@@ -116,7 +135,7 @@ export function createConfirmationPopup(scene) {
       fontStyle: "bold",
     })
     .setOrigin(0.5)
-    .setDepth(301)
+    .setDepth(2000)
     .setScrollFactor(0)
     .setVisible(false);
 
@@ -124,7 +143,7 @@ export function createConfirmationPopup(scene) {
     .graphics()
     .fillStyle(0xf44336, 1)
     .fillRoundedRect(centerX + pad, centerY + 40, buttonW, buttonH, 10)
-    .setDepth(300)
+    .setDepth(1999)
     .setScrollFactor(0)
     .setVisible(false)
     .setInteractive(
@@ -140,7 +159,7 @@ export function createConfirmationPopup(scene) {
       fontStyle: "bold",
     })
     .setOrigin(0.5)
-    .setDepth(301)
+    .setDepth(2000)
     .setScrollFactor(0)
     .setVisible(false);
 

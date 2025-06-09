@@ -1,6 +1,11 @@
 /**
+ * @module achievementHandler
+ * @description Handles achievement notifications in the game
+ */
+
+/**
  * Checks a response for earned achievements and displays notifications if any were earned
- * 
+ *
  * @param {Object} response - The API response object containing achievement data
  * @param {HTMLElement} [container = document.body] - The HTML element to append the notification to
  * @returns {void}
@@ -11,17 +16,16 @@ export function handleAchievements(response, container = document.body) {
   }
 
   // Show notification for each earned achievement
-  response.newlyEarnedAchievements.forEach(achievement => {
+  response.newlyEarnedAchievements.forEach((achievement) => {
     if (achievement) {
       showAchievementNotification(achievement, container);
     }
   });
 }
 
-
 /**
  * Displays an achievement notification to the user
- * 
+ *
  * @param {Object} achievement - The achievement object
  * @param {string} achievement.title - Achievement title
  * @param {string} achievement.description - Achievement description
@@ -31,10 +35,10 @@ export function handleAchievements(response, container = document.body) {
 function showAchievementNotification(achievement, container = document.body) {
   // Create and add notification element
   const notification = createNotificationElement(achievement);
-  
+
   // Add styles if not already present
   ensureStylesExist(container);
-  
+
   // Add the notification element to the DOM
   container.appendChild(notification);
 
@@ -42,10 +46,9 @@ function showAchievementNotification(achievement, container = document.body) {
   setupNotificationAnimations(notification, container);
 }
 
-
 /**
  * Creates the notification DOM element
- * 
+ *
  * @param {Object} achievement - The achievement data
  * @param {string} achievement.title - Achievement title
  * @param {string} achievement.description - Achievement description
@@ -53,34 +56,37 @@ function showAchievementNotification(achievement, container = document.body) {
  * @returns {HTMLElement} The notification element
  */
 function createNotificationElement(achievement) {
-  const notification = document.createElement('div');
-  notification.className = 'achievement-notification';
+  const notification = document.createElement("div");
+  notification.className = "achievement-notification";
   notification.innerHTML = `
     <div class="achievement-content">
-      <p class="achievement-title">Doelstelling behaald: ${achievement.title}</p>
-      <p class="achievement-description">${achievement.description || ''}</p>
-      <p class="achievement-reward">Beloning: <img class="coin-icon" src="Assets/images/pixelCoin.png" alt="Coins"/>${achievement.reward || 0}</p>
+      <p class="achievement-title">Doelstelling behaald: ${
+        achievement.title
+      }</p>
+      <p class="achievement-description">${achievement.description || ""}</p>
+      <p class="achievement-reward">Beloning: <img class="coin-icon" src="Assets/images/pixelCoin.png" alt="Coins"/>${
+        achievement.reward || 0
+      }</p>
     </div>
     <span class="close-btn">&times;</span>
   `;
   return notification;
 }
 
-
 /**
  * Ensures the notification styles exist in the document
- * 
+ *
  * @param {HTMLElement} container - The element to append the notification element to
  */
 function ensureStylesExist(container) {
-  if (document.getElementById('achievement-notification-styles')) {
+  if (document.getElementById("achievement-notification-styles")) {
     return; // Styles already exist
   }
-  
-  const styles = document.createElement('style');
-  styles.id = 'achievement-notification-styles';
+
+  const styles = document.createElement("style");
+  styles.id = "achievement-notification-styles";
   styles.textContent = getStylesText();
-  
+
   // Add styles to the appropriate container
   if (container === document.body) {
     document.head.appendChild(styles); // Better to add to head for global styles
@@ -89,10 +95,9 @@ function ensureStylesExist(container) {
   }
 }
 
-
 /**
  * Handles notification animations and removal
- * 
+ *
  * @param {HTMLElement} notification - The notification element
  * @param {HTMLElement} container - The element to append the notification element to
  */
@@ -100,36 +105,34 @@ function setupNotificationAnimations(notification, container) {
   // Show animation (2 requestAnimationFrames because the first one is needed to ensure the notification has reached its initial state)
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      notification.classList.add('show');
+      notification.classList.add("show");
     });
   });
-  
+
   // Add close button functionality
   setupCloseButtonFunctionality(notification);
-  
+
   // Auto-close after 8 seconds
   setupAutoClose(notification, container, 8000);
 }
 
-
 /**
  * Sets up the close button click handler
- * 
+ *
  * @param {HTMLElement} notification - The notification element
  */
 function setupCloseButtonFunctionality(notification) {
-  const closeBtn = notification.querySelector('.close-btn');
+  const closeBtn = notification.querySelector(".close-btn");
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
+    closeBtn.addEventListener("click", () => {
       closeNotification(notification);
     });
   }
 }
 
-
 /**
  * Sets up auto-close functionality
- * 
+ *
  * @param {HTMLElement} notification - The notification element
  * @param {HTMLElement} container - The element to append the notification element to
  * @param {number} delay - Delay in milliseconds before auto-closing
@@ -142,15 +145,14 @@ function setupAutoClose(notification, container, delay) {
   }, delay);
 }
 
-
 /**
  * Closes the notification with animation
- * 
+ *
  * @param {HTMLElement} notification - The notification to close
  */
 function closeNotification(notification) {
-  notification.classList.remove('show');
-  
+  notification.classList.remove("show");
+
   // Wait for animation to complete before removing from DOM
   setTimeout(() => {
     if (notification.parentNode) {
@@ -159,10 +161,9 @@ function closeNotification(notification) {
   }, 1000); // Match the longest transition time (transform: 1s)
 }
 
-
 /**
  * Returns the CSS styles for notifications
- * 
+ *
  * @returns {string} The CSS text
  */
 function getStylesText() {
@@ -182,7 +183,7 @@ function getStylesText() {
       min-height: 10%;
       height: auto;
 
-      background-color: rgba(50, 50, 50, 0.9);
+      background-color: rgba(0, 128, 0, 0.8);
       color: white;
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.5);
