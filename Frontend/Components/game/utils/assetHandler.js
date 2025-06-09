@@ -352,14 +352,16 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
 
   const currentCoins = scene.sys.game.currency?.coins ?? 0;
   if (currentCoins - cost < -100) {
-    scene.showError(`Je hebt niet genoeg coins om een ${type} te plaatsen.`);
+    scene.showError(
+      `Je hebt al te veel schulden om een ${type} te plaatsen. Je kan niet meer lenen.`
+    );
     return { success: false, reason: "Onvoldoende saldo" };
   }
 
   let msg;
 
   if (currentCoins - cost < 0) {
-    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je hier een ${type} plaatsen voor ${
+    msg = `Je krijgt een extra kost van 10% omdat je al schulden hebt. Wil je hier een ${type} plaatsen voor ${
       cost + (cost / 100) * 10
     } coins?`;
   } else {
@@ -525,14 +527,14 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
   const currentCoins = scene.sys.game.currency?.coins ?? 0;
   if (currentCoins - destroyCost < -100) {
     scene.showError(
-      `Je hebt niet genoeg coins om een ${assetObj.type} te slopen.`
+      `Je hebt al te veel schulden om een ${assetObj.type} te slopen. Je kan niet meer lenen`
     );
     return;
   }
 
   let msg;
   if (currentCoins - destroyCost < 0) {
-    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
+    msg = `Je krijgt een extra kost van 10% omdat je al schulden hebt. Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
   } else {
     msg = `Wil je deze ${assetObj.type} slopen voor ${destroyCost} coins?`;
   }

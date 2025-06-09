@@ -158,7 +158,7 @@ export async function handleUpgradeRequest(
   //    (based on your original < -100 logic; adjust as needed)
   if (currentCoins - finalUpgradeCost < -100) {
     scene.showError(
-      `Je hebt niet genoeg coins om naar niveau ${nextLevel} te gaan.`
+      `Je hebt niet genoeg coins om naar niveau ${nextLevel} te gaan. Je kan niet meer lenen.`
     );
     return;
   }
