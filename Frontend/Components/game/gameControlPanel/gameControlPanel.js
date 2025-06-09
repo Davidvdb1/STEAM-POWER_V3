@@ -32,16 +32,6 @@ import "../components/currencyDisplay/currencyDisplay.js";
 import { handleAchievements } from "../utils/achievementHandler.js";
 import { showAchievementsOverview } from "../utils/achievementOverview.js";
 
-const ENERGY_INTERVAL = 60_000;
-const TAX_INTERVAL = 300_000;
-
-function formatMs(ms) {
-  const totalSec = Math.ceil(ms / 1000);
-  const m = Math.floor(totalSec / 60);
-  const s = totalSec % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
   <style>
@@ -79,6 +69,9 @@ template.innerHTML = /*html*/ `
  * statistics, and transitions between city scenes.
  */
 class GameControlPanel extends HTMLElement {
+  static ENERGY_INTERVAL = 60_000;
+  static TAX_INTERVAL = 300_000;
+
   /**
    * Initializes the game control panel, sets up shadow DOM,
    * and binds event handlers.
@@ -440,6 +433,18 @@ class GameControlPanel extends HTMLElement {
   }
 
   /**
+   * Formats milliseconds into a string representation of minutes and seconds.
+   * @param {number} ms - The time in milliseconds to format.
+   * @return {string} A string in the format "m:ss".
+   */
+  _formatMs(ms) {
+    const totalSec = Math.ceil(ms / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
+  /**
    * Handles the click event on the "Start" button.
    * Hides the button, fetches game statistics, and transitions to the CityScene.
    * Sets up promises to ensure the scene and statistics are ready before proceeding.
@@ -518,8 +523,9 @@ class GameControlPanel extends HTMLElement {
       const taxRem = TAX_INTERVAL - (since % TAX_INTERVAL);
 
       const cdRoot = this._statsContainer.shadowRoot;
-      cdRoot.getElementById("greenTimer").textContent = formatMs(energyRem);
-      cdRoot.getElementById("taxTimer").textContent = formatMs(taxRem);
+      cdRoot.getElementById("greenTimer").textContent =
+        this._formatMs(energyRem);
+      cdRoot.getElementById("taxTimer").textContent = this._formatMs(taxRem);
     }, 1_000);
 
     // 6) Wait for both scene.create AND stats+render
