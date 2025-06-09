@@ -88,6 +88,7 @@ function getStylesText() {
       align-items: center;
       justify-content: center;
       z-index: 1500; /* Higher z-index to be above other UI elements */
+      font-family: "PixelFont";
     }
 
     .achievements-panel {
@@ -166,6 +167,7 @@ function getStylesText() {
       /* Position the close button in the center of the footer */
       display: block;
       margin: 0 auto;
+      font-family: "PixelFont";
     }
 
     /* Hide the overlay while maintaining its existence */

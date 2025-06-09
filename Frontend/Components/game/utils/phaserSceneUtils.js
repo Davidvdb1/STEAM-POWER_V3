@@ -129,6 +129,7 @@ export function handleMapDragging(scene) {
  * @param {number} height - The height of the button
  * @param {number} borderRadius - The corner radius
  * @param {string} text - The text to display
+ * @param {number} [fontSize] - The font size of the text (default: 16px or 40% of height)
  * @param {number} bgColor - The background color (hex)
  * @param {Function} callback - The function to call when clicked
  * @returns {void}
@@ -141,6 +142,7 @@ export function createButton(
   height,
   borderRadius,
   text,
+  fontSize = Math.max(height * 0.4, 16),
   bgColor,
   callback
 ) {
@@ -170,14 +172,11 @@ export function createButton(
   buttonGraphics.input.hitArea.x = x - width / 2;
   buttonGraphics.input.hitArea.y = y - height / 2;
 
-  // Calculate font size relative to button height
-  const fontSize = Math.max(height * 0.4, 16);
-
   // Button text
   scene.add
     .text(x, y, text, {
       fontSize: `${fontSize}px`,
-      fontFamily: "Arial",
+      fontFamily: "PixelFont",
       color: "#fff",
     })
     .setOrigin(0.5);
@@ -200,6 +199,7 @@ export function createMenuButton(scene, callback) {
     50, // height
     15, // border radius
     "Menu", // button text
+    Math.max(50 * 0.6, 16), // font size (40% of height or min 16px)
     0x008000, // background color
     callback // callback function
   );
