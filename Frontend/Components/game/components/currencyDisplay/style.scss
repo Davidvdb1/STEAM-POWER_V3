@@ -196,7 +196,9 @@
 
   .timer {
     display: inline-block;
-    min-width: 4ch;
-    text-align: right;
+    width: 4ch;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    font-family: monospace !important;
   }
 }
