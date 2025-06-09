@@ -486,31 +486,41 @@ class GameControlPanel extends HTMLElement {
 
     this._statsInterval = setInterval(() => this._updateStatistics(), 3_000);
 
-    this._lastEnergyTick = Date.now();
-    this._energyInterval = setInterval(() => {
-      this._updateEnergy();
+    // Single master timer for energy & taxes
+    this._intervalStart = Date.now();
+    this._lastEnergyTick = this._intervalStart;
+    this._lastTaxTick = this._intervalStart;
+    let tickCount = 0;
+    const TAX_RATIO = TAX_INTERVAL / ENERGY_INTERVAL;
+
+    const masterInterval = setInterval(async () => {
+      // energy update first
+      await this._updateEnergy();
       this._lastEnergyTick = Date.now();
+
+      // then taxes every 5th tick
+      if (++tickCount % TAX_RATIO === 0) {
+        await this._handleTaxes();
+        this._lastTaxTick = Date.now();
+      }
     }, ENERGY_INTERVAL);
 
-    this._lastTaxTick = Date.now();
-    this._taxesInterval = setInterval(() => {
-      this._handleTaxes();
-      this._lastTaxTick = Date.now();
-    }, TAX_INTERVAL);
+    this._energyInterval = masterInterval;
+    this._taxesInterval = masterInterval;
+    // — end master timer —
 
+    // countdown based on fixed anchor, so no drift on reset
     this._countdownPulse = setInterval(() => {
       const now = Date.now();
+      const since = now - this._intervalStart;
 
-      const energyElapsed = now - this._lastEnergyTick;
-      const taxElapsed = now - this._lastTaxTick;
-
-      const energyRem = ENERGY_INTERVAL - (energyElapsed % ENERGY_INTERVAL);
-      const taxRem = TAX_INTERVAL - (taxElapsed % TAX_INTERVAL);
+      const energyRem = ENERGY_INTERVAL - (since % ENERGY_INTERVAL);
+      const taxRem = TAX_INTERVAL - (since % TAX_INTERVAL);
 
       const cdRoot = this._statsContainer.shadowRoot;
       cdRoot.getElementById("greenTimer").textContent = formatMs(energyRem);
       cdRoot.getElementById("taxTimer").textContent = formatMs(taxRem);
-    }, 1000);
+    }, 1_000);
 
     // 6) Wait for both scene.create AND stats+render
     await Promise.all([createPromise, statsPromise, dataReadyPromise]);
