@@ -166,7 +166,7 @@ export async function handleUpgradeRequest(
   let msg;
   // 5) Show the confirmation using finalUpgradeCost (not baseUpgradeCost)
   if (currentCoins - finalUpgradeCost < 0) {
-    msg = `Je krijgt een extra kost van 10% omdat je niet genoeg coins hebt. Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${finalUpgradeCost} coins?`;
+    msg = `Je krijgt een extra kost van 10% omdat je al schulden hebt. Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${finalUpgradeCost} coins?`;
   } else {
     msg = `Wil je dit gebouw upgraden naar niveau ${nextLevel} voor ${finalUpgradeCost} coins?`;
   }
