@@ -7,6 +7,7 @@
     "@cypress/code-coverage": "^3.14.4",
     "cypress": "^14.4.1",
     "cypress-shadow-dom": "^1.4.1",
+    "cypress-wait-until": "^3.0.2",
     "start-server-and-test": "^2.0.12"
   },
   "scripts": {

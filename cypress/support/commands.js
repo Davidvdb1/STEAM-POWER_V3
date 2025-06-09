@@ -1,4 +1,4 @@
-Cypress.Commands.add('getLoginForm', () => {
+Cypress.Commands.add("getLoginForm", () => {
   return cy
     .get("main-ɮ")
     .shadow()
@@ -14,7 +14,7 @@ Cypress.Commands.add('getLoginForm', () => {
     .shadow();
 });
 
-Cypress.Commands.add('getHeaderNavigation', () => {
+Cypress.Commands.add("getHeaderNavigation", () => {
   return cy
     .get("main-ɮ")
     .shadow()
@@ -28,7 +28,7 @@ Cypress.Commands.add('getHeaderNavigation', () => {
     .shadow();
 });
 
-Cypress.Commands.add('getGameControlPanel', () => {
+Cypress.Commands.add("getGameControlPanel", () => {
   return cy
     .get("main-ɮ")
     .shadow()
@@ -63,3 +63,46 @@ Cypress.Commands.add("loginViaUI", (backendUrl, groupCode) => {
   });
 });
 
+// Game starten tot save/load beschikbaar is
+Cypress.Commands.add("startGameToSaveableState", () => {
+  cy.getHeaderNavigation().within(() => {
+    cy.get('navigationitem-れ[id="gamepage"]').click();
+  });
+
+  cy.url().should("include", "tab=gamepage");
+
+  cy.getGameControlPanel()
+    .shadow()
+    .find('[data-cy="start-game-btn"]')
+    .click({ force: true });
+
+  cy.wait("@gameStats");
+  cy.getGameControlPanel().shadow().find("#startSpinner").should("not.exist");
+
+  cy.getGameControlPanel()
+    .shadow()
+    .find('[data-cy="currency-display"]')
+    .should("exist")
+    .and("be.visible");
+});
+
+Cypress.Commands.add("clickSaveCheckpoint", () => {
+  return cy
+    .getGameControlPanel()
+    .shadow()
+    .find('[data-cy="currency-display"]')
+    .shadow()
+    .find("#saveBtn")
+    .click({ force: true });
+});
+
+// Simpele load command
+Cypress.Commands.add("clickLoadCheckpoint", () => {
+  return cy
+    .getGameControlPanel()
+    .shadow()
+    .find('[data-cy="currency-display"]')
+    .shadow()
+    .find("#loadBtn")
+    .click({ force: true });
+});
