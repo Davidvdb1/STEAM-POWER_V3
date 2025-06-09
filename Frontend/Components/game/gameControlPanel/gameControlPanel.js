@@ -495,8 +495,10 @@ class GameControlPanel extends HTMLElement {
     this._intervalStart = Date.now();
     this._lastEnergyTick = this._intervalStart;
     this._lastTaxTick = this._intervalStart;
+    const EI = this.constructor.ENERGY_INTERVAL;
+    const TI = this.constructor.TAX_INTERVAL;
     let tickCount = 0;
-    const TAX_RATIO = TAX_INTERVAL / ENERGY_INTERVAL;
+    const TAX_RATIO = TI / EI;
 
     const masterInterval = setInterval(async () => {
       // energy update first
@@ -508,19 +510,18 @@ class GameControlPanel extends HTMLElement {
         await this._handleTaxes();
         this._lastTaxTick = Date.now();
       }
-    }, ENERGY_INTERVAL);
+    }, EI);
 
     this._energyInterval = masterInterval;
     this._taxesInterval = masterInterval;
-    // — end master timer —
 
     // countdown based on fixed anchor, so no drift on reset
     this._countdownPulse = setInterval(() => {
       const now = Date.now();
       const since = now - this._intervalStart;
 
-      const energyRem = ENERGY_INTERVAL - (since % ENERGY_INTERVAL);
-      const taxRem = TAX_INTERVAL - (since % TAX_INTERVAL);
+      const energyRem = EI - (since % EI);
+      const taxRem = TI - (since % TI);
 
       const cdRoot = this._statsContainer.shadowRoot;
       cdRoot.getElementById("greenTimer").textContent =
