@@ -29,8 +29,8 @@ import "../components/details/assetDetail.js";
 import "../components/shop/shop.js";
 import "../components/currencyDisplay/currencyDisplay.js";
 
-import { handleAchievements } from "../utils/achievementHandler.js";
 import { showAchievementsOverview } from "../utils/achievementOverview.js";
+import { showGameInstructionsOverlay } from "../utils/gameInstructionsOverlay.js";
 
 const template = document.createElement("template");
 template.innerHTML = /*html*/ `
@@ -100,6 +100,7 @@ class GameControlPanel extends HTMLElement {
     this._onLoadCheckpointBound = this._onLoadCheckpoint.bind(this);
 
     this._onShowAchievementsBound = this._handleShowAchievements.bind(this);
+    this._onShowGameInstructionsBound = this._handleShowGameInstructions.bind(this);
     this._onMenuOpenedBound = this._handleMenuOpened.bind(this);
     this._onMenuClosedBound = this._handleMenuClosed.bind(this);
 
@@ -182,6 +183,10 @@ class GameControlPanel extends HTMLElement {
       this._onShowAchievementsBound
     );
     this._gameContainer.addEventListener(
+      "show-game-instructions",
+      this._onShowGameInstructionsBound
+    );
+    this._gameContainer.addEventListener(
       "menu-opened",
       this._onMenuOpenedBound
     );
@@ -233,6 +238,10 @@ class GameControlPanel extends HTMLElement {
     this._gameContainer.removeEventListener(
       "show-achievements",
       this._onShowAchievementsBound
+    );
+    this._gameContainer.removeEventListener(
+      "show-game-instructions", 
+      this._onShowGameInstructionsBound
     );
     this._gameContainer.removeEventListener(
       "menu-opened",
@@ -610,6 +619,9 @@ class GameControlPanel extends HTMLElement {
    * Handles the event to show achievements overview.
    * Calls the utility function to display achievements overview
    * in the game control panel.
+   * 
+   * @function _handleShowAchievements
+   * @memberOf GameControlPanel
    * @returns {void}
    * */
   _handleShowAchievements() {
@@ -617,10 +629,26 @@ class GameControlPanel extends HTMLElement {
   }
 
   /**
+   * Handles the event to show game instructions.
+   * Calls the utility function to display game instructions
+   * in the game control panel.
+   * 
+   * @function _handleShowGameInstructions
+   * @memberOf GameControlPanel
+   * @returns {void}
+   */
+  _handleShowGameInstructions() {
+    showGameInstructionsOverlay(this._wrapper, this._shadow);
+  }
+
+  /**
    * Handles the event when the menu is opened.
    * Hides the inner and outer containers,
    * and the detail container to prevent interaction with the game.
-   * * @returns {void}
+   * 
+   * @function _handleMenuOpened
+   * @memberOf GameControlPanel
+   * @returns {void}
    */
   _handleMenuOpened() {
     // Hide navigation buttons + detail when menu opens
@@ -633,9 +661,12 @@ class GameControlPanel extends HTMLElement {
    * Handles the event when the menu is closed.
    * Shows the correct navigation button and detail container
    * based on the target scene.
+   * 
+   * @function _handleMenuClosed
+   * @memberOf GameControlPanel
    * @param {CustomEvent} e - The event containing the target scene.
-   * @returns {void}
-   * */
+   * @returns {void} 
+   */
   _handleMenuClosed(e) {
     // Show correct nav button and detail when menu closes
     if (e.detail.targetScene === "CityScene") {
