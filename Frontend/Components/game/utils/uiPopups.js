@@ -43,8 +43,52 @@ export function createErrorPopup(scene) {
     .setScrollFactor(0)
     .setVisible(false);
 
+    // Add a close button (X) in the top-right corner (transparent clickable circle)
+  const closeButton = scene.add
+    .graphics()
+    .fillStyle(0xff0000, 0)
+    .fillCircle(
+      width / 2 + popupWidth / 2 - 30, // X position (right side with margin)
+      height / 2 - popupHeight / 2 + 30, // Y position (top with margin)
+      30 // Circle radius
+    )
+    .setDepth(2001)
+    .setScrollFactor(0)
+    .setVisible(false)
+    .setInteractive(
+      new Phaser.Geom.Circle(
+        width / 2 + popupWidth / 2 - 30,
+        height / 2 - popupHeight / 2 + 30,
+        30
+      ),
+      Phaser.Geom.Circle.Contains
+    );
+
+  // Add pointer cursor on hover
+  closeButton
+    .on('pointerover', () => { scene.game.canvas.style.cursor = 'pointer'; })
+    .on('pointerout', () => { scene.game.canvas.style.cursor = 'default'; });
+
+  // Add the "X" text on the button
+  const closeText = scene.add
+    .text(
+      width / 2 + popupWidth / 2 - 30,
+      height / 2 - popupHeight / 2 + 30,
+      "X",
+      {
+        fontSize: "24px",
+        fontFamily: "Arial",
+        color: "#ffffff",
+        fontStyle: "bold",
+      }
+    )
+    .setOrigin(0.5)
+    .setDepth(2002)
+    .setScrollFactor(0)
+    .setVisible(false);
+
   // Track popup objects for cleanup
-  const popupChildren = [errorBg, errorText];
+  const popupChildren = [errorText];
 
   // Cleanup on scene shutdown
   scene.events.once("shutdown", () => {
@@ -56,18 +100,35 @@ export function createErrorPopup(scene) {
     scene.tweens.killTweensOf(popupChildren);
   });
 
+  // Function to hide the error popup
+  const hideError = () => {
+    errorBg.setVisible(false);
+    errorText.setVisible(false);
+    closeButton.setVisible(false);
+    closeText.setVisible(false);
+  };
+
+  // Add click handler to close button
+  closeButton.on("pointerdown", hideError);
+
   scene.showError = (msg) => {
+    // Show all elements
     errorBg.setVisible(true).setAlpha(1);
     errorText.setText(msg).setVisible(true).setAlpha(1);
-    scene.tweens.killTweensOf([errorBg, errorText]);
+    closeButton.setVisible(true).setAlpha(1);
+    closeText.setVisible(true).setAlpha(1);
+    
+    // Kill any existing tweens
+    scene.tweens.killTweensOf([errorBg, errorText, closeButton, closeText]);
+    
+    // Start the auto-hide tween (will be canceled if X is clicked)
     scene.tweens.add({
-      targets: [errorBg, errorText],
+      targets: [errorBg, errorText, closeButton, closeText],
       alpha: { from: 1, to: 0 },
-      delay: 2000,
+      delay: 4000, // 4 seconds before fading out
       duration: 600,
       onComplete: () => {
-        errorBg.setVisible(false).setAlpha(1);
-        errorText.setVisible(false).setAlpha(1);
+        hideError();
       },
     });
   };
