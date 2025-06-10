@@ -33,6 +33,13 @@ export class SimulationComponent extends HTMLElement {
         this.windmill = null;
         this.sunRoot = null;
         this.wheel = null;
+
+        // Component state
+        this.initialized = false;
+        
+        this.solarWatts = 0;
+        this.windWatts = 0;
+        this.waterWatts = 0;
     }
 
     // component attributes
