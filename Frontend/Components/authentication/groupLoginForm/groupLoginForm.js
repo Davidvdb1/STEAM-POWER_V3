@@ -12,10 +12,10 @@ template.innerHTML = /*html*/ `
     <style>
         @import './Components/authentication/groupLoginForm/style.css';
     </style>
-    <form class="group-login-form">
-        <input type="text" name="code" placeholder="Code" required>
-        <button type="submit">Aanmelden</button>
-        <p class="error-message" style="display: none; color: red;"></p>
+    <form class="group-login-form" data-cy="group-login-form">
+        <input type="text" name="code" placeholder="Code" required data-cy="group-code-input">
+        <button type="submit" data-cy="group-login-btn">Aanmelden</button>
+        <p class="error-message" data-cy="login-error-message" style="display: none; color: red;"></p>
     </form>
 `;
 //#endregion TEMPLATE
