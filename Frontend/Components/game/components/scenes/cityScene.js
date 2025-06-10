@@ -124,6 +124,15 @@ export function createCityScene() {
       // Add the menu button last
       setupMenuButton(this);
 
+      document.removeEventListener(
+        "scene:upgrade-building",
+        this._onUpgradeBuilding
+      );
+      document.removeEventListener(
+        "scene:toggle-building-energy",
+        this._onToggleBuildingEnergy
+      );
+
       document.addEventListener(
         "scene:upgrade-building",
         this._onUpgradeBuilding

@@ -43,6 +43,19 @@ export function createErrorPopup(scene) {
     .setScrollFactor(0)
     .setVisible(false);
 
+  // Track popup objects for cleanup
+  const popupChildren = [errorBg, errorText];
+
+  // Cleanup on scene shutdown
+  scene.events.once("shutdown", () => {
+    // Destroy display objects
+    popupChildren.forEach((child) => child.destroy());
+    // Remove helper to break closures
+    delete scene.showError;
+    // Kill any lingering tweens
+    scene.tweens.killTweensOf(popupChildren);
+  });
+
   scene.showError = (msg) => {
     errorBg.setVisible(true).setAlpha(1);
     errorText.setText(msg).setVisible(true).setAlpha(1);
@@ -162,6 +175,24 @@ export function createConfirmationPopup(scene) {
     .setDepth(2000)
     .setScrollFactor(0)
     .setVisible(false);
+
+  // Track popup objects for cleanup
+  const popupChildren = [
+    confirmBg,
+    confirmText,
+    confirmYesButton,
+    confirmYesText,
+    confirmNoButton,
+    confirmNoText,
+  ];
+
+  // Cleanup on scene shutdown
+  scene.events.once("shutdown", () => {
+    popupChildren.forEach((child) => child.destroy());
+    delete scene.showConfirmation;
+    delete scene.showSavedConfirmation;
+    scene.tweens.killTweensOf(popupChildren);
+  });
 
   scene.showConfirmation = (msg, callback) => {
     confirmBg.setVisible(true);

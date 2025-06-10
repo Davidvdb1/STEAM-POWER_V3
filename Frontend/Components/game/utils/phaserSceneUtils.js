@@ -28,10 +28,16 @@ export function setCameraBounds(scene) {
  * @param {number} maxZoom - The maximum zoom level allowed (default = 5).
  */
 export function handleZoom(scene, maxZoom = 5) {
-  scene.input.on("wheel", (pointer, gameObjects, dx, dy) => {
+  // handler reference for removal
+  const zoomHandler = (pointer, gameObjects, dx, dy) => {
     let newZoom = scene.cameras.main.zoom - dy * 0.001;
     newZoom = Phaser.Math.Clamp(newZoom, 1, maxZoom);
     scene.cameras.main.setZoom(newZoom);
+  };
+
+  scene.input.on("wheel", zoomHandler);
+  scene.events.once("shutdown", () => {
+    scene.input.off("wheel", zoomHandler);
   });
 }
 
@@ -84,7 +90,8 @@ export function handleMovementKeys(scene, delta, speed = 750) {
   );
 }
 
-/** * Handles dragging the map using the right mouse button.
+/**
+ * Handles dragging the map using the right mouse button.
  * Allows the user to click and drag to move the camera view.
  *
  * @param {Phaser.Scene} scene - The Phaser scene to enable dragging in.
@@ -93,8 +100,9 @@ export function handleMapDragging(scene) {
   // Enable camera dragging with right mouse button only
   scene.isDragging = false;
 
-  scene.input.on("pointerdown", (pointer) => {
-    // Only start dragging with right mouse button (button 2)
+  // handler references for removal
+  const pointerDownHandler = (pointer) => {
+    // Only start dragging with left mouse button
     if (pointer.leftButtonDown()) {
       scene.isDragging = true;
       scene.dragStartX = pointer.x;
@@ -102,19 +110,27 @@ export function handleMapDragging(scene) {
       scene.startScrollX = scene.cameras.main.scrollX;
       scene.startScrollY = scene.cameras.main.scrollY;
     }
-  });
-
-  scene.input.on("pointermove", (pointer) => {
+  };
+  const pointerMoveHandler = (pointer) => {
     if (scene.isDragging) {
       const deltaX = scene.dragStartX - pointer.x;
       const deltaY = scene.dragStartY - pointer.y;
       scene.cameras.main.scrollX = scene.startScrollX + deltaX;
       scene.cameras.main.scrollY = scene.startScrollY + deltaY;
     }
-  });
-
-  scene.input.on("pointerup", () => {
+  };
+  const pointerUpHandler = () => {
     scene.isDragging = false;
+  };
+
+  scene.input.on("pointerdown", pointerDownHandler);
+  scene.input.on("pointermove", pointerMoveHandler);
+  scene.input.on("pointerup", pointerUpHandler);
+
+  scene.events.once("shutdown", () => {
+    scene.input.off("pointerdown", pointerDownHandler);
+    scene.input.off("pointermove", pointerMoveHandler);
+    scene.input.off("pointerup", pointerUpHandler);
   });
 }
 
