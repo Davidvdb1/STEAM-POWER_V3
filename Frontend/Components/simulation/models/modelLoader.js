@@ -2,6 +2,7 @@ import { loadSolarPanel, orientSolarPanelTowardsSun } from './solarPanel.js';
 import { loadWindmill } from './windmill.js';
 import { loadWaterWheel } from './waterWheel.js';
 import { getSunPosition, sunPositionToCartesian } from '../utils/sunCalculator.js';
+import { updateAutoRotateChange } from './windmill.js';
 
 /**
  * Loads all models needed for the simulation
@@ -78,6 +79,15 @@ export async function updateSunAndSolarPanel(component, street, city, postal) {
         // Update solar panel orientation
         if (component.solarPanel) {
             await orientSolarPanelTowardsSun(component.solarPanel, street, city, postal);
+        }
+        /* -------------------  WINDMOLEN MEE DRAAIEN  -------------------- */
+        if (component.windmill) {
+            await updateAutoRotateChange(
+                component.scene,
+                component,
+                true,                // auto-mode aan
+                street, city, postal // adres dat net werd ingegeven
+            );
         }
     } catch (error) {
         console.error("Failed to update sun and solar panel:", error);

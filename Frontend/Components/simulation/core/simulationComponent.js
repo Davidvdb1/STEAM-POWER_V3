@@ -27,7 +27,10 @@ export class SimulationComponent extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        
+        this.street = "Geldenaaksebaan 335";
+        this.city   = "Leuven";
+        this.postal = "3001";
+
         // BabylonJS properties
         this.engine = null;
         this.scene = null;
@@ -127,6 +130,11 @@ export class SimulationComponent extends HTMLElement {
     }
 
     async _updateSunAndSolarPanel(street, city, postal) {
+        // Onthoud huidig adres voor later gebruik
+        this.street = street;
+        this.city   = city;
+        this.postal = postal;
+
         await updateSunAndSolarPanel(this, street, city, postal);
     }
     
@@ -230,7 +238,7 @@ export class SimulationComponent extends HTMLElement {
     }
 
     async _handleAutoRotateChange(enabled) {
-        await updateAutoRotateChange(this.scene, this, enabled)
+        await updateAutoRotateChange(this.scene, this, enabled, this.street, this.city, this.postal)
     }
 
     async _handleSolarRotation(degreesSolar) {
