@@ -240,4 +240,25 @@ export class TileSelection {
       }
     });
   }
+
+  /**
+   * Cleans up this selection: restores hidden tiles and destroys the building layers.
+   */
+  destroy() {
+    this.originalTiles.forEach(({ layer: originalLayer, tiles }) => {
+      tiles.forEach(({ x, y, index, flipX, flipY, rotation }) => {
+        const t = originalLayer.putTileAt(index, x, y);
+        if (flipX) t.flipX = true;
+        if (flipY) t.flipY = true;
+        if (rotation) t.rotation = rotation;
+      });
+    });
+
+    this.buildingLayers.forEach((layer) => {
+      layer.destroy();
+    });
+
+    this.buildingLayers = [];
+    this.originalTiles.clear();
+  }
 }

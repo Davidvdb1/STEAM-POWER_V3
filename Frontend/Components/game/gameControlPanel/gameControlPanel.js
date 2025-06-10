@@ -293,6 +293,11 @@ class GameControlPanel extends HTMLElement {
    * @returns {void}
    */
   _initializeGame() {
+    // If we already have a running game, destroy it first
+    if (window.phaserGame) {
+      window.phaserGame.destroy(true);
+      delete window.phaserGame;
+    }
     const LogoScene = createLogoScene(this._startButton);
     const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();

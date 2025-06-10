@@ -56,10 +56,18 @@ export function createCityScene() {
           "scene:upgrade-building",
           this._onUpgradeBuilding
         );
+
         document.removeEventListener(
           "scene:toggle-building-energy",
           this._onToggleBuildingEnergy
         );
+
+        if (
+          this.buildingRegistry &&
+          typeof this.buildingRegistry.clearRegistry === "function"
+        ) {
+          this.buildingRegistry.clearRegistry();
+        }
       });
 
       // Carry over checkpoint data (if any)
