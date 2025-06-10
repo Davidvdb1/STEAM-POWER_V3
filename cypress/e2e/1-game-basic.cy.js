@@ -1,7 +1,7 @@
 describe("Group Login and Game Navigation Test", () => {
   const backendUrl = "http://localhost:3000";
   const testData = {
-    validGroupCode: "2a8fa5", // wel nog aanpassen als je de database verwijdert
+    validGroupCode: "bdce0a", // wel nog aanpassen als je de database verwijdert
     invalidGroupCode: "INVALID999",
   };
 

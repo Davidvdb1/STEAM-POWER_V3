@@ -1,6 +1,6 @@
 describe("Direct Game Overview Navigation Test with sessionStorage", () => {
   const backendUrl = "http://localhost:3000";
-  const groupCode = "2a8fa5";
+  const groupCode = "bdce0a";
 
   beforeEach(() => {
     cy.session("groep-login-session", () => {
@@ -33,7 +33,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
 
     cy.url().should("include", "tab=gamepage");
 
-    // ✅ Toegang tot shadow DOM
     cy.getGameControlPanel()
       .shadow()
       .find('[data-cy="start-game-btn"]')
@@ -41,7 +40,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
 
     cy.wait("@gameStats");
 
-    // ✅ Ook voor andere elementen in shadow DOM
     cy.getGameControlPanel()
       .shadow()
       .find("#startSpinner")

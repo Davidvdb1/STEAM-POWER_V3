@@ -1,6 +1,6 @@
 describe("Game Save and Load Checkpoint Test", () => {
   const backendUrl = "http://localhost:3000";
-  const groupCode = "2a8fa5";
+  const groupCode = "bdce0a";
   let gameStatisticsId;
 
   beforeEach(() => {
@@ -19,15 +19,12 @@ describe("Game Save and Load Checkpoint Test", () => {
       }
     });
 
-    // Intercept gameStats call om gameStatisticsId te krijgen
     cy.intercept("GET", "**/gameStatistics/group/**", (req) => {
       req.headers["cache-control"] = "no-cache";
       req.headers["pragma"] = "no-cache";
     }).as("gameStats");
 
-    // Dynamische intercept voor save checkpoint met echte gameStatisticsId
     cy.intercept("POST", "**/gameStatistics/*/checkpoints", (req) => {
-      // Extract gameStatisticsId from URL
       const urlParts = req.url.split("/");
       const gameStatsIndex = urlParts.findIndex(
         (part) => part === "gameStatistics"

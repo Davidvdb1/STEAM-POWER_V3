@@ -1,7 +1,7 @@
 describe("Direct Game Overview Navigation Test with sessionStorage", () => {
   const backendUrl = "http://localhost:3000";
-  const groupCode = "2a8fa5";
-  let gameStatisticsId; // Voeg deze variabele toe
+  const groupCode = "bdce0a";
+  let gameStatisticsId;
 
   beforeEach(() => {
     cy.session("groep-login-session", () => {
@@ -19,7 +19,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
       }
     });
 
-    // Intercept gameStats call om gameStatisticsId te krijgen
     cy.intercept("GET", "**/gameStatistics/group/**", (req) => {
       req.headers["cache-control"] = "no-cache";
       req.headers["pragma"] = "no-cache";
@@ -47,13 +46,11 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
       .find('[data-cy="outer-city-btn"]')
       .click();
 
-    // Check shop assets
     cy.getGameControlPanel()
       .shadow()
       .find('shop-sidebar[data-cy="shop-sidebar"]')
       .shadow()
       .within(() => {
-        // Verwachte assets met hun data-type en price
         const expectedAssets = [
           { type: "Windmolen", price: "20" },
           { type: "Waterrad", price: "20" },
@@ -65,25 +62,20 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
           { type: "Hulst", price: "10" },
         ];
 
-        // Check dat alle verwachte assets aanwezig zijn
         expectedAssets.forEach((asset) => {
           cy.get(`[data-type="${asset.type}"]`)
             .should("exist")
             //   .and("be.visible")
             .and("have.attr", "data-base-price", asset.price);
 
-          // Check dat de asset naam wordt getoond
           cy.get(`[data-type="${asset.type}"]`)
             .find("p")
             .first()
             .should("contain.text", asset.type);
 
-          // Check dat de prijs wordt getoond
           cy.get(`[data-type="${asset.type}"]`).find(".price").should("exist");
-          //   .and("be.visible");
         });
 
-        // Check totaal aantal assets
         cy.get(".card-asset").should("have.length", expectedAssets.length);
 
         // Check dat energy-producing assets hebben de juiste energy icon
@@ -99,7 +91,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
           .find('.corner-icon img[src*="pixelGreyEnergy.svg"]')
           .should("exist");
 
-        // Check dat bomen/struiken geen energy icon hebben
         const decorativeAssets = ["Eik", "Beuk", "Buxus", "Hulst"];
         decorativeAssets.forEach((assetType) => {
           cy.get(`[data-type="${assetType}"]`)
@@ -112,7 +103,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
   });
   it("should show confirmation dialog when placing a Windmolen at coordinates (44, 22)", () => {
     cy.intercept("POST", "**/gameStatistics/*/assets", (req) => {
-      // Extract gameStatisticsId from URL
       const urlParts = req.url.split("/");
       const gameStatsIndex = urlParts.findIndex(
         (part) => part === "gameStatistics"
@@ -122,7 +112,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
         console.log("Extracted gameStatisticsId:", gameStatisticsId);
       }
 
-      // Log the request for debugging
       console.log("Asset placement request:", req.body);
 
       // Return mock response met de echte request data
@@ -136,7 +125,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
       // });
     }).as("addAsset");
 
-    // Setup stappen
     cy.getHeaderNavigation().within(() => {
       cy.get('navigationitem-れ[id="gamepage"]').click();
     });
@@ -156,9 +144,8 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
       .find('[data-cy="outer-city-btn"]')
       .click();
 
-    cy.wait(2000); // Wacht tot scene volledig geladen is
+    cy.wait(2000);
 
-    // Trigger de confirmation dialog
     cy.window().then(async (win) => {
       const game = win.phaserGame;
       const outerCityScene = game.scene
@@ -185,7 +172,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
 
           console.log("Expected confirmation message:", msg);
 
-          // Trigger de confirmation dialog met een callback die de API call maakt
           outerCityScene.showConfirmation(msg, async (confirmed) => {
             console.log("User response:", confirmed);
 
@@ -220,9 +206,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
                 if (response.ok) {
                   console.log("✅ Asset placed successfully via API");
 
-                  // BELANGRIJKE TOEVOEGING: FORCE SCENE REFRESH
-
-                  // 1. Update statistics via game controller
                   const gameControlPanel =
                     document.querySelector("gamecontrolpanel-れ");
                   if (gameControlPanel && gameControlPanel._updateStatistics) {
@@ -232,7 +215,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
                     await gameControlPanel._updateStatistics();
                   }
 
-                  // 2. FORCE RELOAD ASSETS IN SCENE - dit is cruciaal!
                   if (outerCityScene.loadAssets) {
                     console.log("🔄 Force reloading scene assets...");
                     await outerCityScene.loadAssets();
@@ -243,13 +225,11 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
                     await outerCityScene.reloadAssets();
                   }
 
-                  // 3. Als de scene checkpoint-based is, update checkpoints
                   if (
                     outerCityScene.checkpointAssets &&
                     outerCityScene.reloadCheckpointAssets
                   ) {
                     console.log("🔄 Updating checkpoint assets...");
-                    // Voeg nieuwe asset toe aan checkpoint data
                     outerCityScene.checkpointAssets = [
                       ...(outerCityScene.checkpointAssets || []),
                       {
@@ -265,14 +245,11 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
                     ];
                     outerCityScene.reloadCheckpointAssets();
                   }
-
-                  // 4. Force scene to re-fetch assets from API
                   if (outerCityScene.fetchAssetsFromAPI) {
                     console.log("🔄 Re-fetching assets from API...");
                     await outerCityScene.fetchAssetsFromAPI();
                   }
 
-                  // 5. Trigger scene events that might reload assets
                   outerCityScene.events.emit("assetsUpdated");
                   outerCityScene.events.emit("refreshAssets");
                   outerCityScene.events.emit("reload");
@@ -287,7 +264,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
                         `📢 Showing success message: ${type} succesvol geplaatst!`
                       );
 
-                      // Debug: controleer of popup objecten zijn aangemaakt
                       setTimeout(() => {
                         const allObjects = outerCityScene.children.list;
                         const popupObjects = allObjects.filter(
@@ -311,7 +287,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
                     }
                   }, 1000);
 
-                  // 6. Als laatste redmiddel: restart de hele scene
                   setTimeout(() => {
                     console.log("🔄 Restarting scene as last resort...");
                     outerCityScene.scene.restart();
@@ -334,8 +309,7 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
       }
     });
 
-    // Verifieer confirmation popup zichtbaarheid
-    cy.wait(3000); // Geef scene tijd om te refreshen
+    cy.wait(3000);
 
     cy.window().then((win) => {
       const game = win.phaserGame;
@@ -344,14 +318,12 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
         .find((s) => s.scene.key === "OuterCityScene");
 
       if (scene) {
-        // Zoek naar de nieuwe Windmolen asset in de scene
         const allObjects = scene.children.list;
         console.log(
           "🔍 All objects in scene after refresh:",
           allObjects.length
         );
 
-        // Zoek naar Windmolen texture/sprite
         const windmolenAssets = allObjects.filter(
           (obj) =>
             obj.texture &&
@@ -365,10 +337,8 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
         if (windmolenAssets.length > 0) {
           console.log("✅ Windmolen asset is visible in scene!");
 
-          // Verifieer dat minstens één Windmolen zichtbaar is
           cy.wrap(windmolenAssets.length).should("be.at.least", 1);
 
-          // Log de positie van de eerste Windmolen
           const firstWindmolen = windmolenAssets[0];
           console.log("🎯 First Windmolen position:", {
             x: firstWindmolen.x,
@@ -378,7 +348,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
         } else {
           console.log("❌ No Windmolen assets found in scene");
 
-          // Debug: log alle objecten met texture
           const texturedObjects = allObjects.filter(
             (obj) => obj.texture && obj.texture.key
           );
@@ -395,8 +364,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
       }
     });
 
-    // Verbeterde button detectie
-    // Verbeterde button detectie met retry logic en uitgebreidere debugging
     cy.window().then((win) => {
       const game = win.phaserGame;
       const scene = game.scene
@@ -404,14 +371,12 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
         .find((s) => s.scene.key === "OuterCityScene");
 
       if (scene) {
-        // Uitgebreidere debugging van alle objecten
         const allObjects = scene.children.list;
         const visibleObjects = allObjects.filter((obj) => obj.visible);
 
         console.log("🔍 Total objects in scene:", allObjects.length);
         console.log("🔍 Visible objects:", visibleObjects.length);
 
-        // Log alle objecten met depth tussen 1995-2005 (confirmation popup range)
         const popupRangeObjects = allObjects.filter(
           (obj) => obj.depth >= 1995 && obj.depth <= 2005
         );
@@ -431,10 +396,8 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
           }))
         );
 
-        // Zoek met verschillende criteria
         let yesButton = null;
 
-        // Strategie 1: Originele criteria
         yesButton = visibleObjects.find((obj) => {
           return (
             obj.type === "Graphics" &&
@@ -445,7 +408,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
           );
         });
 
-        // Strategie 2: Alleen op basis van fillColor (groen voor "Ja")
         if (!yesButton) {
           yesButton = visibleObjects.find((obj) => {
             return obj.fillColor === 0x4caf50 && obj.input && obj.visible;
@@ -453,7 +415,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
           console.log("🔍 Strategy 2 - Found by fillColor:", !!yesButton);
         }
 
-        // Strategie 3: Alle interactieve objecten in popup range
         if (!yesButton) {
           const interactiveObjects = visibleObjects.filter(
             (obj) => obj.input && obj.depth >= 1998 && obj.depth <= 2000
@@ -470,20 +431,17 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
             }))
           );
 
-          // Neem de eerste groene button (waarschijnlijk "Ja")
           yesButton = interactiveObjects.find(
             (obj) => obj.fillColor === 0x4caf50
           );
         }
 
-        // Strategie 4: Zoek op basis van positie (meestal links = Ja, rechts = Nee)
         if (!yesButton) {
           const buttons = visibleObjects.filter(
             (obj) => obj.input && obj.type === "Graphics" && obj.depth >= 1998
           );
 
           if (buttons.length >= 2) {
-            // Sorteer op X positie, neem de linker button als "Ja"
             buttons.sort((a, b) => a.x - b.x);
             yesButton = buttons[0];
             console.log("🔍 Strategy 4 - Using left-most button as 'Ja'");
@@ -500,12 +458,10 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
             visible: yesButton.visible,
           });
 
-          // Probeer verschillende event types
           try {
             yesButton.emit("pointerdown");
             console.log("✅ Emitted pointerdown event");
 
-            // Backup: probeer ook pointerup en click
             setTimeout(() => {
               yesButton.emit("pointerup");
               yesButton.emit("click");
@@ -516,7 +472,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
         } else {
           console.log("❌ 'Ja' button still not found with any strategy");
 
-          // Last resort: log alle objecten met input
           const allInteractive = visibleObjects.filter((obj) => obj.input);
           console.log(
             "🔍 All interactive objects:",
@@ -534,7 +489,6 @@ describe("Direct Game Overview Navigation Test with sessionStorage", () => {
       }
     });
 
-    // Verifieer dat de API call is gemaakt
     cy.wait("@addAsset", { timeout: 10000 }).then((interception) => {
       expect(interception.request.method).to.equal("POST");
 

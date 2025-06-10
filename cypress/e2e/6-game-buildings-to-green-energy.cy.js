@@ -1,7 +1,7 @@
 describe("Game Building Green Energy Tests", () => {
   const BACKEND_URL = "http://localhost:3000";
   const FRONTEND_URL = "http://localhost:5500/Frontend/?tab=campoverviewpage";
-  const GROUP_CODE = "2a8fa5";
+  const GROUP_CODE = "bdce0a";
 
   beforeEach(() => {
     cy.session("groep-login-session", () => {
