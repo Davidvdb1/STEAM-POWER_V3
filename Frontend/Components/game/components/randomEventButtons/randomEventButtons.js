@@ -35,45 +35,66 @@ window.customElements.define('randomeventbuttons-れ', class extends HTMLElement
         ];
     }
 
-connectedCallback() {
+    connectedCallback() {
+        this._eventDataMap = {
+            hagelstorm,
+            regenstorm,
+            windvlaag,
+            zonneschijn,
+            stroomstoring,
+            vervuiling
+        };
 
-    this._eventDataMap = {
-        hagelstorm,
-        regenstorm,
-        windvlaag,
-        zonneschijn,
-        stroomstoring,
-        vervuiling
-    };
+        this._eventNames.forEach(name => {
+            const button = this._shadowRoot.getElementById(name);
+            this._buttons[name] = button;
 
-    this._eventNames.forEach(name => {
-        const button = this._shadowRoot.getElementById(name);
-        this._buttons[name] = button;
-
-        button.addEventListener("click", () => {
-            const eventData = this._eventDataMap[name];
-            const groupID = 
-            this.createRandomEvent(eventData);
+            button.addEventListener("click", () => {
+                const eventData = this._eventDataMap[name];
+                this.handleRandomEvent(eventData);
+            });
         });
-    });
-}
-
-//service
-async createRandomEvent(data) {
-    try {
-        const url = window.env.BACKEND_URL;
-        const response = await fetch(url + `/gameStatistics/event`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        });
-
-    } catch (error) {
-        console.error("Error creating random event:", error);
     }
-}
 
+    async handleRandomEvent(data) {
+        await this.updateMultipliersandMessage({ multipliers: data.multipliers, message: data.beschrijving });
+        setTimeout(() => {
+            this.updateMultipliersandMessage({ multipliers: { windmolen: 1, zonnepaneel: 1, waterrad: 1 }, message: data.damage.beschrijving });
+            this.applyDamages(data.damage)
+        }, data.duur);
+    
+    }
+
+    //service
+    async updateMultipliersandMessage(data) {
+        try {
+            const url = window.env.BACKEND_URL;
+            const response = await fetch(url + `/gameStatistics/multiplier`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+        } catch (error) {
+            console.error("Error creating random event:", error);
+        }
+    }
+
+    async applyDamages(data) {
+        try {
+            const url= window.env.BACKEND_URL;
+            const response = await fetch(url + `/gameStatistics/damage`, {
+                method: "PUT",
+                headers:  {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+        } catch (error) {
+            console.error("Error with applying event damages:", error)
+        }
+    }
 });
 //#endregion CLASS

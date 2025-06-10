@@ -238,5 +238,9 @@ model Multiplier {
   solar        Float @default(1.0)
   water        Float @default(1.0)
   wind         Float @default(1.0)
+  solarDamage  Boolean @default(false)
+  waterDamage  Boolean @default(false)
+  windDamage   Boolean @default(false)
+  message      String? @default("")
   gameStatistics GameStatistics? @relation("GS_Multiplier")
 }

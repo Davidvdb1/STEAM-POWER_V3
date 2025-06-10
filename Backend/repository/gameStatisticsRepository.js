@@ -1039,6 +1039,46 @@ class GameStatisticsRepository {
     const achievements = await this.prisma.achievement.findMany();
     return achievements.map((ach) => Achievement.from(ach));
   }
+
+  //########################################################################
+  //                              RANDOM EVENTS
+  //########################################################################
+
+  async updateMultipliersAndMessage(data) {
+    const { zonnepaneel, waterrad, windmolen } = data.multipliers;
+    const message = data.message
+
+    const allMultipliers = await this.prisma.multiplier.findMany();
+
+    for (const multiplier of allMultipliers) {
+      await this.prisma.multiplier.update({
+        where: { id: multiplier.id },
+        data: {
+          solar: zonnepaneel,
+          water: waterrad,
+          wind: windmolen,
+          message: message,
+        },
+      });
+    }
+  }
+
+  async updateDamageAndMessage(data) {
+    const { zonnepaneel, waterrad, windmolen, message } = data;
+    const allMultipliers = await this.prisma.multiplier.findMany();
+
+    for (const multiplier of allMultipliers) {
+      await this.prisma.multiplier.update({
+        where: { id: multiplier.id },
+        data: {
+          solarDamage: zonnepaneel,
+          waterDamage: waterrad,
+          windDamage: windmolen,
+          message: message,
+        },
+      });
+    }
+  }
 }
 
 module.exports = new GameStatisticsRepository();

@@ -1,7 +1,9 @@
 export const hagelstorm = {
-    windmolen: 1,
-    zonnepaneel: 0.8,
-    waterrad: 1.2,
+    multipliers: {
+        windmolen: 1,
+        zonnepaneel: 0.8,
+        waterrad: 1.2,
+    },
     duur: 300_000,
     beschrijving: "Hagelstorm! Er is minder zon voor de zonnepanelen, maar de waterwielen draaien harder.",
     damage: {
@@ -13,9 +15,11 @@ export const hagelstorm = {
 }
 
 export const regenstorm = {
-    windmolen: 1,
-    zonnepaneel: 0.6,
-    waterrad: 1.5,
+    multipliers: {
+        windmolen: 1,
+        zonnepaneel: 0.6,
+        waterrad: 1.5,
+    },
     duur: 300_000,
     beschrijving: "Regenstorm! De waterwielen draaien harder, maar dezonnepanelen leveren minder energie.",
     damage: {
@@ -27,9 +31,11 @@ export const regenstorm = {
 }
 
 export const windvlaag = {
-    windmolen: 1.5,
-    zonnepaneel: 1,
-    waterrad: 1,
+    multipliers: {
+        windmolen: 1.5,
+        zonnepaneel: 1,
+        waterrad: 1,
+    },
     duur: 300_000,
     beschrijving: "Windvlaag! De windmolens draaien harder.",
     damage: {
@@ -41,9 +47,11 @@ export const windvlaag = {
 }
 
 export const zonneschijn = {
-    windmolen: 1,
-    zonnepaneel: 1.5,
-    waterrad: 0.8,
+    multipliers: {
+        windmolen: 1,
+        zonnepaneel: 1.5,
+        waterrad: 0.8,
+    },
     duur: 300_000,
     beschrijving: "Geen wolkje in de lucht! De zonnepanelen leveren meer energie. Maar de waterwielen draaien minder door de droogte.",
     damage: {
@@ -55,9 +63,11 @@ export const zonneschijn = {
 }
 
 export const stroomstoring = {
-    windmolen: 0.8,
-    zonnepaneel: 0.8,
-    waterrad: 0.8,
+    multipliers: {
+        windmolen: 0.8,
+        zonnepaneel: 0.8,
+        waterrad: 0.8,
+    },
     duur: 300_000,
     beschrijving: "Stroomstoring! De energieproductie is tijdelijk verlaagd.",
     damage: {
@@ -69,9 +79,11 @@ export const stroomstoring = {
 }
 
 export const vervuiling = {
-    windmolen: 1,
-    zonnepaneel: 1,
-    waterrad: 0.7,
+    multipliers: {
+        windmolen: 1,
+        zonnepaneel: 1,
+        waterrad: 0.7,
+    },
     duur: 300_000,
     beschrijving: "Vervuiling in de rivier! De waterwielen draaien minder goed.",
     damage: {

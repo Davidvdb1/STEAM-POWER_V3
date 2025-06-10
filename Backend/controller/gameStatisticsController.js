@@ -711,6 +711,38 @@ router.get("/achievements/overview/:groupId", async (req, res) => {
   }
 });
 
+//########################################################################
+//                              RANDOM EVENTS
+//########################################################################
+
+router.put("/multiplier", async (req, res) => {
+  try {
+    const multipliers = await gameStatisticsService.updateMultipliersAndMessage(req.body);
+    res.status(200).json(multipliers)
+  } catch (error) {
+    console.error(
+      `Error updating multipliers for all groups`,
+      error
+    );
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+})
+
+router.put("/damage", async (req, res) => {
+  try {
+    const damage = await gameStatisticsService.updateDamageAndMessage(req.body);
+    res.status(200).json(damage)
+  } catch (error) {
+    console.error(
+      `Error applying damages from event for all groups`,
+      error
+    );
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+})
+
 
 
 module.exports = router;
