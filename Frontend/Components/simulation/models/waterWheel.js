@@ -4,7 +4,7 @@
  * @param {SimulationComponent} component - The parent component
  */
 export function loadWaterWheel(scene, component) {
-    BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/wheel.glb", scene, (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "", "./Assets/GLBs/wheel.glb", scene, (meshes) => {
         component.wheel = meshes.find(m => m.name === "__root__");
         if (component.wheel) {
             component.wheel.scaling = new BABYLON.Vector3(0.15, 0.15, 0.15);

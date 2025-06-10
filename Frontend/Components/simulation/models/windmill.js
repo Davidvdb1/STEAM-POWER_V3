@@ -14,7 +14,7 @@ export async function loadWindmill(scene, component, bladeCount = 3) {
     }
 
     return new Promise((resolve) => {
-        BABYLON.SceneLoader.ImportMesh("", "", `../Frontend/Assets/GLBs/${fileName}`, scene, async (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", `./Assets/GLBs/${fileName}`, scene, async (meshes) => {
             component.windmill = meshes.find(m => m.name === "__root__");
             if (component.windmill) {
                 component.windmill.scaling = new BABYLON.Vector3(5, 5, 5);

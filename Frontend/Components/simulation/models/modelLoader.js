@@ -10,10 +10,10 @@ import { getSunPosition, sunPositionToCartesian } from '../utils/sunCalculator.j
  */
 export async function loadModels(scene, component) {
     // Load environment
-    BABYLON.SceneLoader.Append("", "../Frontend/Assets/GLBs/environment.glb", scene, function () {});
+    BABYLON.SceneLoader.Append("", "./Assets/GLBs/environment.glb", scene, function () {});
 
     // Load House
-    BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/house.glb", scene, (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "", "./Assets/GLBs/house.glb", scene, (meshes) => {
         const houseRoot = meshes.find(m => m.name === "__root__");
         if (houseRoot) {
             houseRoot.scaling = new BABYLON.Vector3(0.00009, 0.00009, 0.00009);
@@ -37,7 +37,7 @@ export async function loadModels(scene, component) {
  * @param {SimulationComponent} component - The parent component for storing references
  */
 function loadSun(scene, component) {
-    BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/sun3.glb", scene, async (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "", "./Assets/GLBs/sun3.glb", scene, async (meshes) => {
         const street = "Geldenaaksebaan 335";
         const city = "Leuven";
         const postal = "3001";
