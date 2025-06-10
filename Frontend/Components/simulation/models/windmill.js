@@ -1,8 +1,11 @@
+import { fetchWindDirection }     from '../utils/weatherData.js';
+import { geocodeAddress }         from '../utils/geocode.js';
 /**
  * Loads and positions the windmill model
  * @param {BABYLON.Scene} scene - The BabylonJS scene
  * @param {SimulationComponent} component - The parent component for storing references
  * @param {number} bladeCount - Number of blades (0-5)
+ * 
  */
 export async function loadWindmill(scene, component, bladeCount = 3) {
     const fileName = `turbine_${bladeCount}_blade${bladeCount === 1 ? '' : 's'}.glb`;
@@ -22,9 +25,9 @@ export async function loadWindmill(scene, component, bladeCount = 3) {
 
                 try {
                     const degrees = await fetchWindDirection();
-                    const initialDegrees = (degrees + 180) % 360;
+                    const initialDegrees = (degrees - 90) % 360;
                     component.initialWindmillDirection = initialDegrees;
-                    const radians = BABYLON.Angle.FromDegrees(degrees + 180).radians();
+                    const radians = BABYLON.Angle.FromDegrees(degrees - 90).radians();
                     component.windmill.rotation = new BABYLON.Vector3(0, radians, 0);
                 } catch (error) {
                     console.error("Error setting windmill direction:", error);
@@ -66,27 +69,48 @@ export async function updateWindmillRotation(scene, component, manualDegrees) {
     component.windmill.rotation.y = radians;
 }
 
-export async function updateAutoRotateChange(scene, component, enabled) {
+/**
+ * Draait de windmolen ± automatisch naar de actuele windrichting
+ * (wind komt *uit* graden X ⇒ molen moet naar X + 90°) kijken).
+ *
+ * @param {BABYLON.Scene} scene
+ * @param {SimulationComponent} component
+ * @param {boolean} enabled           – true = auto-mode aan
+ * @param {string}  street|city|postal – adres van de gebruiker
+ */
+export async function updateAutoRotateChange(
+        scene, component,
+        enabled,
+        street = "Geldenaaksebaan 335",
+        city   = "Leuven",
+        postal = "3001") {
+
     if (!component.windmill) return;
 
-    if (enabled) {
-        try {
-            const degrees = await fetchWindDirection();
-            const adjustedDegrees = (degrees + 180) % 360;
-            component.initialWindmillDirection = adjustedDegrees;
+    if (!enabled) return;          // handmatige modus: niets doen
 
-            // Animate rotation instead of snapping
-            animateRotationY(component.windmill, BABYLON.Angle.FromDegrees(adjustedDegrees).radians(), 30, 20);
+    try {
+        // 1) Adres → coördinaten
+        const { lat, lon } = await geocodeAddress(street, city, postal);
 
-            if (component.rotationSlider) {
-                component.rotationSlider.value = 0;
-            }
-        } catch (error) {
-            console.error("Error fetching wind direction:", error);
-        }
+        // 2) Coördinaten → windrichting (graden vanwaar de wind komt)
+        const deg = await fetchWindDirection(lat, lon);
+
+        // 3) Turbine moet *tegen* de wind in staan ⇒ +180°
+        const facingDeg = (deg - 90) % 360;
+        component.initialWindmillDirection = facingDeg;
+
+        // 4) Vloeiende animatie naar nieuwe hoek
+        animateRotationY(
+            component.windmill,
+            BABYLON.Angle.FromDegrees(facingDeg).radians()
+        );
+
+    } catch (err) {
+        console.error("Auto-rotatie windmolen mislukt:", err);
     }
-    // If disabled, no action needed (manual mode)
 }
+
 
 /**
  * Animates rotation on the Y-axis from current value to target radians
@@ -120,7 +144,7 @@ function animateRotationY(mesh, targetRadians, frameRate = 30, totalFrames = 15)
 /**
  * Fetches current wind direction from the server
  * @returns {Promise<number>} Wind direction in degrees
- */
+ *
 async function fetchWindDirection() {
     try {
         const lat = 50.8798;  // Leuven
@@ -137,4 +161,4 @@ async function fetchWindDirection() {
         console.error("Error fetching wind direction:", error);
         return 0; // Default direction
     }
-}
+}*/
