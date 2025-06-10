@@ -13,7 +13,7 @@ export async function loadModels(scene, component) {
     BABYLON.SceneLoader.Append("", "./Assets/GLBs/environment.glb", scene, function () {});
 
     // Load House
-    BABYLON.SceneLoader.ImportMesh("", "", "./Assets/GLBs/house.glb", scene, (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "", "./Assets/GLBs/House.glb", scene, (meshes) => {
         const houseRoot = meshes.find(m => m.name === "__root__");
         if (houseRoot) {
             houseRoot.scaling = new BABYLON.Vector3(0.00009, 0.00009, 0.00009);
