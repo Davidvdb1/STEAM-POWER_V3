@@ -40,6 +40,7 @@ export class SimulationComponent extends HTMLElement {
         this.solarWatts = 0;
         this.windWatts = 0;
         this.waterWatts = 0;
+        this.intervalId = null; // Store the interval ID
     }
 
     // component attributes
@@ -59,10 +60,27 @@ export class SimulationComponent extends HTMLElement {
         
         // Set up resize observer for high resolution rendering
         this._setupResizeObserver();
+        
+        // Set up the interval to trigger every 2 seconds
+        this._setupInterval();
     }
     
     disconnectedCallback() {
 
+    }
+    
+    _setupInterval() {
+        // Set up an interval that triggers every 2 seconds (2000 milliseconds)
+        this.intervalId = setInterval(() => {
+            this._onIntervalTick();
+        }, 2000);
+    }
+    
+    _calculateGeneratedEnergy() {
+        // Calculate the total generated energy from all sources
+        this.solarWatts = 0;
+        this.windWatts = 0;
+        this.waterWatts = 0;
     }
     
     _preventScroll = (event) => {
