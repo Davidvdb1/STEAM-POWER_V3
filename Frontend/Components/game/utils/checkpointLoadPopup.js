@@ -97,7 +97,6 @@ export function createCheckpointLoadPopup(scene) {
     .fillRoundedRect(dropdownX, dropdownY, dropdownWidth, dropdownHeight, 10)
     .setDepth(1002)
     .setScrollFactor(0)
-    .setVisible(false)
     .setInteractive(
       new Phaser.Geom.Rectangle(
         dropdownX,
@@ -106,7 +105,8 @@ export function createCheckpointLoadPopup(scene) {
         dropdownHeight
       ),
       Phaser.Geom.Rectangle.Contains
-    );
+    )
+    .setVisible(false);
 
   const selectedText = scene.add
     .text(centerX, dropdownY + dropdownHeight / 2, "Kies checkpoint", {
@@ -125,6 +125,39 @@ export function createCheckpointLoadPopup(scene) {
   const optionItems = [];
   let isDropdownOpen = false;
 
+  // Collect all persistent elements for cleanup
+  const popupChildren = [
+    bg,
+    closeBtnBg,
+    closeBtnText,
+    title,
+    dropdownBg,
+    selectedText,
+    dropdownArrow,
+  ];
+
+  // Cleanup on scene shutdown
+  scene.events.once("shutdown", () => {
+    // Hide and destroy all option items
+    optionItems.forEach((item) => {
+      if (item.off) item.off("pointerdown");
+      item.destroy();
+    });
+    optionItems.length = 0;
+    // Destroy persistent elements
+    popupChildren.forEach((child) => child.destroy());
+    // Remove helper method
+    delete scene.showCheckpointList;
+  });
+
+  // Close-button handler
+  closeBtnBg.on("pointerdown", hideAll);
+
+  /**
+   * Shows the checkpoint list popup.
+   * Fetches game stats and checkpoint list, then renders options.
+   * @param {Function} callback - Called with (checkpointId, label) on selection.
+   */
   scene.showCheckpointList = async (callback) => {
     // Reset state so the popup works correctly on multiple calls
     dropdownBg.removeAllListeners("pointerdown");
@@ -156,8 +189,9 @@ export function createCheckpointLoadPopup(scene) {
       return showMessage("Fout bij laden van checkpoints");
     }
 
-    if (!Array.isArray(checkpoints) || checkpoints.length === 0)
+    if (!Array.isArray(checkpoints) || checkpoints.length === 0) {
       return showMessage("Geen checkpoints gevonden");
+    }
 
     // show all UI
     bg.setVisible(true);
@@ -187,11 +221,11 @@ export function createCheckpointLoadPopup(scene) {
         .fillRoundedRect(dropdownX, startY, dropdownWidth, optionH, 5)
         .setDepth(1002)
         .setScrollFactor(0)
-        .setVisible(false)
         .setInteractive(
           new Phaser.Geom.Rectangle(dropdownX, startY, dropdownWidth, optionH),
           Phaser.Geom.Rectangle.Contains
-        );
+        )
+        .setVisible(false);
 
       const optText = scene.add
         .text(centerX, startY + optionH / 2, `Checkpoint ${index + 1}`, {

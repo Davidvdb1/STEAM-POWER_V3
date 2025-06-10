@@ -444,44 +444,41 @@ async function placeAsset(scene, type, tx, ty, successMessage = null) {
  */
 export function setupAssetDragAndDrop(scene) {
   const canvas = scene.game.canvas;
-  let currentType = null;
 
-  canvas.addEventListener("dragenter", (mouseEvent) => {
-    mouseEvent.preventDefault();
+  // 1) Define and store bound handler functions on the scene
+  scene._onDragEnter = (e) => {
+    e.preventDefault();
     try {
-      currentType = mouseEvent.dataTransfer.getData("text/plain");
-      scene.draggedAssetType = currentType;
+      const type = e.dataTransfer.getData("text/plain");
+      scene.draggedAssetType = type;
     } catch {}
-  });
+  };
 
-  canvas.addEventListener("dragover", (mouseEvent) => {
-    mouseEvent.preventDefault();
-    const type = scene.draggedAssetType ?? currentType;
+  scene._onDragOver = (e) => {
+    e.preventDefault();
+    const type = scene.draggedAssetType;
     if (!type) return;
-
-    const [tx, ty] = getTileFromEvent(scene, mouseEvent);
+    const [tx, ty] = getTileFromEvent(scene, e);
     highlightPlacementArea(scene, type, tx, ty, scene.dragHighlight);
-  });
+  };
 
-  canvas.addEventListener("dragleave", () => {
+  scene._onDragLeave = () => {
     scene.dragHighlight.clear();
-  });
+  };
 
-  canvas.addEventListener("drop", async (mouseEvent) => {
-    mouseEvent.preventDefault();
-
+  scene._onDrop = async (e) => {
+    e.preventDefault();
     try {
-      const type = mouseEvent.dataTransfer.getData("text/plain");
+      const type = e.dataTransfer.getData("text/plain");
       if (!type) {
         scene.showError(
           "Kon het object niet herkennen. Probeer het opnieuw of herlaad de pagina."
         );
         return;
       }
-
-      const [tx, ty] = getTileFromEvent(scene, mouseEvent);
+      const [tx, ty] = getTileFromEvent(scene, e);
       await placeAsset(scene, type, tx, ty);
-    } catch (error) {
+    } catch {
       scene.showError(
         "Er is een probleem opgetreden. Probeer het opnieuw of herlaad de pagina."
       );
@@ -489,6 +486,26 @@ export function setupAssetDragAndDrop(scene) {
       scene.dragHighlight.clear();
       scene.draggedAssetType = null;
     }
+  };
+
+  // 2) Attach listeners once
+  canvas.addEventListener("dragenter", scene._onDragEnter);
+  canvas.addEventListener("dragover", scene._onDragOver);
+  canvas.addEventListener("dragleave", scene._onDragLeave);
+  canvas.addEventListener("drop", scene._onDrop);
+
+  // 3) Clean up when the scene shuts down
+  scene.events.once("shutdown", () => {
+    canvas.removeEventListener("dragenter", scene._onDragEnter);
+    canvas.removeEventListener("dragover", scene._onDragOver);
+    canvas.removeEventListener("dragleave", scene._onDragLeave);
+    canvas.removeEventListener("drop", scene._onDrop);
+
+    // clear references
+    scene._onDragEnter = null;
+    scene._onDragOver = null;
+    scene._onDragLeave = null;
+    scene._onDrop = null;
   });
 }
 

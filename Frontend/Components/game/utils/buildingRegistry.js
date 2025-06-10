@@ -133,4 +133,17 @@ export class BuildingRegistry {
       building.removeGrayscale();
     }
   }
+
+  /**
+   * Cleans up all registered TileSelection instances and clears the registry.
+   * Call this in your scene’s shutdown handler to prevent leaks.
+   */
+  clearRegistry() {
+    for (const selection of this.buildings.values()) {
+      if (typeof selection.destroy === "function") {
+        selection.destroy();
+      }
+    }
+    this.buildings.clear();
+  }
 }

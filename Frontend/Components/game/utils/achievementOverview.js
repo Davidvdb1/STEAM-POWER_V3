@@ -48,9 +48,34 @@ function getOrCreateOverlay(wrapper, shadow) {
 
     // Add styles to shadow DOM
     ensureStylesExist(shadow);
+
+    //wire click handlers exactly once
+    initOverlay(achievementsOverlay);
   }
 
   return achievementsOverlay;
+}
+
+/**
+ * One-time initialization of the overlay’s click handlers.
+ * Prevents clicks through the backdrop and handles the close button.
+ *
+ * @param {HTMLElement} overlay
+ */
+function initOverlay(overlay) {
+  // block clicks on backdrop
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      e.stopPropagation();
+    }
+  });
+
+  // delegated close-button handler
+  overlay.addEventListener("click", (e) => {
+    if (e.target.matches(".close-button")) {
+      overlay.classList.add("hidden");
+    }
+  });
 }
 
 /**
@@ -188,9 +213,6 @@ function showOverlay(overlay) {
 
   // Initialize with loading state
   overlay.innerHTML = createOverlayHTML();
-
-  // Setup event handlers
-  setupEventHandlers(overlay);
 }
 
 /**
@@ -210,30 +232,6 @@ function createOverlayHTML() {
       </div>
     </div>
   `;
-}
-
-/**
- * Sets up event handlers for the overlay
- *
- * @param {HTMLElement} overlay - The overlay element
- */
-function setupEventHandlers(overlay) {
-  // Add close handler
-  const closeButton = overlay.querySelector(".close-button");
-  if (closeButton) {
-    closeButton.addEventListener("click", () => {
-      overlay.classList.add("hidden");
-    });
-  }
-
-  // Make the overlay block all events from passing through
-  overlay.addEventListener("click", (e) => {
-    // Only prevent propagation if the click is directly on the overlay
-    // and not on a child element
-    if (e.target === overlay) {
-      e.stopPropagation();
-    }
-  });
 }
 
 /**

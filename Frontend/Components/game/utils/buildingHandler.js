@@ -45,6 +45,9 @@ export function makeBuildingsInteractive(scene) {
   const tileW = scene.map.tileWidth;
   const tileH = scene.map.tileHeight;
 
+  // Track created rectangles for cleanup
+  scene._interactiveRects = [];
+
   for (const [
     buildingName,
     tileSelection,
@@ -54,7 +57,7 @@ export function makeBuildingsInteractive(scene) {
     let maxX = -Infinity,
       maxY = -Infinity;
 
-    for (const [_layerName, data] of tileSelection.originalTiles.entries()) {
+    for (const [, data] of tileSelection.originalTiles.entries()) {
       data.tiles.forEach((tile) => {
         minX = Math.min(minX, tile.x);
         minY = Math.min(minY, tile.y);
@@ -63,37 +66,45 @@ export function makeBuildingsInteractive(scene) {
       });
     }
 
-    if (minX !== Infinity) {
-      scene.add
-        .rectangle(
-          minX * tileW,
-          minY * tileH,
-          (maxX - minX + 1) * tileW,
-          (maxY - minY + 1) * tileH,
-          0x0000ff,
-          0.0
-        )
-        .setOrigin(0, 0)
-        .setInteractive({ useHandCursor: true })
-        .on("pointerdown", () => {
-          scene.isDragging = false;
+    if (minX === Infinity) continue;
 
-          const buildingList = scene.sys.game.buildingData || [];
-          const matched = buildingList.find(
-            (b) =>
-              b.name === buildingName ||
-              (b.building && b.building.name === buildingName)
-          );
+    const rect = scene.add
+      .rectangle(
+        minX * tileW,
+        minY * tileH,
+        (maxX - minX + 1) * tileW,
+        (maxY - minY + 1) * tileH,
+        0x0000ff,
+        0.0
+      )
+      .setOrigin(0, 0)
+      .setInteractive({ useHandCursor: true });
 
-          if (matched) {
-            scene.game.events.emit("buildingClicked", matched.id);
-          } else {
-            console.warn(`No building data found for ${buildingName}`);
-            scene.game.events.emit("buildingClicked", buildingName);
-          }
-        });
-    }
+    scene._interactiveRects.push(rect);
+
+    const handler = () => {
+      scene.isDragging = false;
+      const list = scene.sys.game.buildingData || [];
+      const matched = list.find(
+        (b) => b.name === buildingName || b.building?.name === buildingName
+      );
+      scene.game.events.emit(
+        "buildingClicked",
+        matched ? matched.id : buildingName
+      );
+    };
+
+    rect.on("pointerdown", handler);
   }
+
+  // Cleanup on scene shutdown
+  scene.events.once("shutdown", () => {
+    for (const r of scene._interactiveRects) {
+      r.removeAllListeners();
+      r.destroy();
+    }
+    scene._interactiveRects = null;
+  });
 }
 
 /**

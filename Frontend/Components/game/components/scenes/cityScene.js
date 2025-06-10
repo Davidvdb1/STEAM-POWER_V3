@@ -56,10 +56,18 @@ export function createCityScene() {
           "scene:upgrade-building",
           this._onUpgradeBuilding
         );
+
         document.removeEventListener(
           "scene:toggle-building-energy",
           this._onToggleBuildingEnergy
         );
+
+        if (
+          this.buildingRegistry &&
+          typeof this.buildingRegistry.clearRegistry === "function"
+        ) {
+          this.buildingRegistry.clearRegistry();
+        }
       });
 
       // Carry over checkpoint data (if any)
@@ -123,6 +131,15 @@ export function createCityScene() {
 
       // Add the menu button last
       setupMenuButton(this);
+
+      document.removeEventListener(
+        "scene:upgrade-building",
+        this._onUpgradeBuilding
+      );
+      document.removeEventListener(
+        "scene:toggle-building-energy",
+        this._onToggleBuildingEnergy
+      );
 
       document.addEventListener(
         "scene:upgrade-building",
