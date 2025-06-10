@@ -533,19 +533,17 @@ function getTileFromEvent(scene, mouseEvent) {
  * Look up the Asset's data (type, destroyCost, energy, etc.) from scene.sys.game.assetData.
  * Then ask the user via a confirmation popup. On confirm, call performDestroyAsset.
  *
- * @param {Phaser.Scene} scene   – an instance of OuterCityScene (so we can access scene.assetObjects, scene.sys.game, scene.showConfirmation, etc.)
- * @param {number|string} assetId – ID of the asset to delete
+ * @param {Phaser.Scene} scene – an instance of OuterCityScene (so we can access scene.assetObjects, scene.sys.game, scene.showConfirmation, etc.)
+ * @param {string} assetId – ID of the asset to delete
  */
 export async function requestDestroyAsset(scene, assetId, destroyCost) {
-  const assets = scene.sys.game.assetData || [];
-  const assetObj = assets.find((a) => a.id === assetId);
+  const allAssets = scene.sys.game.assetData;
+  const assetObj = allAssets.find((a) => a.id === assetId);
   if (!assetObj) return;
 
   const currentCoins = scene.sys.game.currency?.coins ?? 0;
   if (currentCoins - destroyCost < -100) {
-    scene.showError(
-      `Je hebt al te veel schulden om een ${assetObj.type} te slopen. Je kan niet meer lenen`
-    );
+    scene.showError(`Je hebt al te veel schulden om een ${assetObj.type} te slopen. Je kan niet meer lenen`);
     return;
   }
 
@@ -561,7 +559,21 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
 
     try {
       // 1) Call the API to remove the asset
-      const response = await removeAsset(assetId, scene.sys.game.token);
+      const allBuildings = scene.sys.game.buildingData;
+      const greyEnergyProduction = calculateTotalGreyProduction(allAssets);
+      const greyEnergyUse = calculateTotalGreyCost(allBuildings);
+      
+      const token = scene.sys.game.token;
+      let response;
+      
+      if (assetObj.type !== "Kerncentrale") {
+        response = await removeAsset(assetId, token);
+      } else if (greyEnergyProduction - 250 - greyEnergyUse > 0 && assetObj.type === "Kerncentrale") {
+        response = await removeAsset(assetId, token);
+      } else {
+        scene.showError("Kon Kerncentrale niet verwijderen omdat de grijze energieproductie dan kleiner is dan het gebruik.");
+        return;
+      }
 
       // 2) Update the local asset data from the response (if needed)
       Object.assign(assetObj, response.asset);
@@ -581,25 +593,16 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
 
       // 5) Fetch the up‐to‐date currency from the backend
       const currencyId = scene.sys.game.currencyId;
-      const token = scene.sys.game.token;
       const currentCurrency = await getCurrencyById(currencyId, token);
 
       // 6) Compute grey‐energy delta if this was a power‐producing asset
-      const allAssets = scene.sys.game.assetData || [];
-      const allBuildings = scene.sys.game.buildingData || [];
-      const greyEnergyProduction = calculateTotalGreyProduction(allAssets);
-      const greyEnergyUse = calculateTotalGreyCost(allBuildings);
-
-      const fullAssetData = allAssets.find((a) => a.id === assetId) || {};
-      const greyDelta =
-        fullAssetData.type === "Kerncentrale" ? fullAssetData.energy : 0;
+      const greyDelta = assetObj.type === "Kerncentrale" ? assetObj.energy : 0;
 
       // 7) Build the updated currency payload
       const updatedCurrencyPayload = {
         greenEnergy: currentCurrency.greenEnergy,
         greyEnergy: currentCurrency.greyEnergy - greyDelta,
-        coins:
-          currentCurrency.coins - (fullAssetData.destroyCost || destroyCost),
+        coins: currentCurrency.coins - (assetObj.destroyCost || destroyCost),
         score: currentCurrency.score,
       };
 
@@ -637,81 +640,4 @@ export async function requestDestroyAsset(scene, assetId, destroyCost) {
     // 13) Finally, let other parts of the app know the asset is gone
     document.dispatchEvent(new CustomEvent("asset-deleted"));
   });
-}
-/**
- * Actually call the API to delete the asset, update currency, remove the sprite & tiles,
- * then mark the scene so it can re‐fetch stats.
- *
- * @param {Phaser.Scene} scene    – OuterCityScene instance
- * @param {number|string} assetId – ID of the asset to delete
- */
-export async function performDestroyAsset(scene, assetId) {
-  try {
-    const token = scene.sys.game.token;
-    const currencyId = scene.sys.game.currencyId;
-
-    const assets = scene.sys.game.assetData || [];
-    const asset = assets.find((a) => a.id === assetId);
-    const buildingList = scene.sys.game.buildingData || [];
-
-    const greyEnergyProduction = calculateTotalGreyProduction(assets);
-    const greyEnergyUse = calculateTotalGreyCost(buildingList);
-
-    console.log(
-      `Grey energy production: ${greyEnergyProduction}, Grey energy use: ${greyEnergyUse}`
-    );
-
-    let response;
-
-    if (asset.type !== "Kerncentrale") {
-      response = await removeAsset(assetId, token);
-    } else if (
-      greyEnergyProduction - 250 - greyEnergyUse > 0 &&
-      asset.type === "Kerncentrale"
-    ) {
-      response = await removeAsset(assetId, token);
-    } else {
-      scene.showError(
-        "Kon Kerncentrale niet verwijderen omdat de grijze energieproductie dan kleiner is dan het gebruik."
-      );
-      return;
-    }
-
-    handleAchievements(response, window.gameContainer);
-
-    const currentCurrency = await getCurrencyById(currencyId, token);
-
-    const fullAssetData =
-      (Array.isArray(scene.sys.game.assetData)
-        ? scene.sys.game.assetData.find((a) => a.id === assetId)
-        : null) || {};
-
-    const greyDelta =
-      fullAssetData.type === "Kerncentrale" ? fullAssetData.energy : 0;
-
-    const updatedCurrencyPayload = {
-      greenEnergy: currentCurrency.greenEnergy,
-      greyEnergy: currentCurrency.greyEnergy - greyDelta,
-      coins: currentCurrency.coins - (fullAssetData.destroyCost || 0),
-      score: currentCurrency.score,
-    };
-
-    await updateCurrency(currencyId, updatedCurrencyPayload, token);
-
-    const idx = scene.assetObjects.findIndex((o) => o.id === assetId);
-    if (idx > -1) {
-      const toRem = scene.assetObjects[idx];
-      toRem.image.destroy();
-      releaseTiles(scene.tileAssetMap, toRem.tx, toRem.ty, toRem.size);
-      scene.assetObjects.splice(idx, 1);
-    }
-
-    scene._currencyNeedsRefresh = true;
-  } catch (err) {
-    console.error("Error destroying asset in helper:", err);
-    if (typeof scene.showError === "function") {
-      scene.showError("Kon asset niet slopen: " + err.message);
-    }
-  }
-  document.dispatchEvent(new CustomEvent("asset-deleted"));
 }
