@@ -804,6 +804,9 @@ class GameControlPanel extends HTMLElement {
               `Wil je ${selectedCheckpointName} laden?`,
               (confirmed) => {
                 if (confirmed) {
+                  this._detailContainer.classList.add("hidden");
+                  this._detailContainer.innerHTML = "";
+
                   this._performLoadCheckpoint(selectedCheckpointId);
                   scene.showSavedConfirmation(
                     `Spel geladen van ${selectedCheckpointName}!`
