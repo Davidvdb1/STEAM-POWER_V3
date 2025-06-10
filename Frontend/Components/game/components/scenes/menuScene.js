@@ -57,16 +57,6 @@ export function createMenuScene() {
     }
 
     /**
-     * Toggles fullscreen mode for the game.
-     * This method is a placeholder and should be implemented to handle
-     * fullscreen functionality.
-     * @memberOf MenuScene
-     */
-    toggleFullscreen() {
-      // To be implemented
-    }
-
-    /**
      * Shows the game instructions.
      * This method is a placeholder and should be implemented to display
      * the game instructions to the player.
@@ -115,7 +105,7 @@ export function createMenuScene() {
 
     /**
      * Creates the main menu buttons for the menu scene, including
-     * "Volledig scherm", "Speluitleg", and "Doelstellingen".
+     * "Speluitleg", and "Doelstellingen".
      * Each button is centered horizontally and vertically aligned with the others
      * and assigned its respective callback for handling user interactions.
      *
@@ -124,11 +114,10 @@ export function createMenuScene() {
      */
     createMenuButtons() {
       // Create menu buttons and configure their callbacks
-      const buttonTexts = ["Volledig scherm", "Speluitleg", "Doelstellingen"];
+      const buttonTexts = ["Speluitleg", "Doelstellingen"];
       const buttonCallbacks = [
-        () => this.toggleFullscreen(),
         () => this.showGameInstructions(),
-        () => this.showObjectives(),
+        () => this.showObjectives()
       ];
 
       // Calculate button dimensions relative to screen size
