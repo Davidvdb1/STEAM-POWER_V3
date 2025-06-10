@@ -148,6 +148,7 @@ class GameControlPanel extends HTMLElement {
     return new Promise((res) => {
       if (window.Phaser) return res();
       const s = document.createElement("script");
+      s.id = "phaser-script";
       s.src = "https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js";
       s.onload = () => res();
       this._shadow.appendChild(s);
@@ -209,6 +210,7 @@ class GameControlPanel extends HTMLElement {
    * @returns {void}
    * */
   disconnectedCallback() {
+    // 1) Remove all event listeners
     this._startButton.removeEventListener("click", this._onStartClickBound);
     this._outerButton.removeEventListener("click", this._onOuterClickBound);
     this._innerButton.removeEventListener("click", this._onInnerClickBound);
@@ -248,6 +250,7 @@ class GameControlPanel extends HTMLElement {
       this._onSceneRefreshDetail
     );
 
+    // 2) Remove the game container from the DOM
     if (this._game) {
       this._game.events.off("buildingClicked", this._onBuildingClickedBound);
       this._game.events.off("assetClicked", this._onAssetClickedBound);
@@ -256,13 +259,24 @@ class GameControlPanel extends HTMLElement {
       this._game = null;
     }
 
-    // 4) Clear all intervals
+    // 3) Clear all intervals
     clearInterval(this._interval);
     clearInterval(this._statsInterval);
     clearInterval(this._energyInterval);
     clearInterval(this._taxesInterval);
     clearInterval(this._countdownPulse);
-    // 4) Null out references as a courtesy
+
+    // 4) Remove the spinner if it exists
+    this._shadow.getElementById("startSpinner")?.remove();
+
+    // 5) Remove the game container from the shadow DOM
+    delete window.phaserGame;
+    delete window.gameContainer;
+
+    // Remove the Phaser script from the shadow DOM
+    this._shadow.getElementById("phaser-script")?.remove();
+
+    // 6) Null out references as a courtesy
     this._boundAssetPlacedHandler = null;
     this._onAssetDeleted = null;
     this._onSceneRefreshDetail = null;
