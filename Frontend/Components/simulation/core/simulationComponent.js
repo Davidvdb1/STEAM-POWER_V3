@@ -3,6 +3,10 @@ import { loadModels, updateSunAndSolarPanel } from '../models/modelLoader.js';
 import { updateWindmillBlades } from '../models/windmill.js';
 import { updateWindmillRotation } from '../models/windmill.js';
 import { updateAutoRotateChange } from '../models/windmill.js';
+import { updateAutoRotateChangeSolar } from '../models/solarPanel.js';
+import { updateWaterWheelDepth } from '../models/waterWheel.js';
+import { updateSolarRotation } from '../models/solarPanel.js';
+import { updateWaterWheelPosition } from '../models/waterWheel.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
 
 //#region TEMPLATE
@@ -168,7 +172,11 @@ export class SimulationComponent extends HTMLElement {
             (bladeCount) => this._handleBladeCountChange(bladeCount),
             (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal),
             (degrees) => this._handleWindmillRotation(degrees),
-            (autoRotate) => this._handleAutoRotateChange(autoRotate)
+            (autoRotate) => this._handleAutoRotateChange(autoRotate),
+            (degreesSolar) => this._handleSolarRotation(degreesSolar),
+            (autoRotateSolar) => this._handleAutoRotateChangeSolar(autoRotateSolar),
+            (position) => this._handleWaterWheelPosition(position),
+            (depth) => this._handleWaterWheelDepth(depth)
         );
 
         // Load all models
@@ -223,6 +231,22 @@ export class SimulationComponent extends HTMLElement {
 
     async _handleAutoRotateChange(enabled) {
         await updateAutoRotateChange(this.scene, this, enabled)
+    }
+
+    async _handleSolarRotation(degreesSolar) {
+        await updateSolarRotation(this.scene, this, degreesSolar)
+    }
+
+    async _handleAutoRotateChangeSolar(enabledSolar) {
+        await updateAutoRotateChangeSolar(this.scene, this, enabledSolar)
+    }
+
+    async _handleWaterWheelPosition(position) {
+        await updateWaterWheelPosition(this.scene, this, position)
+    }
+
+    async _handleWaterWheelDepth(depth) {
+        await updateWaterWheelDepth(this.scene, this, depth)
     }
 }
 //#endregion CLASS
