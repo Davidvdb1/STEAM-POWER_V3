@@ -153,6 +153,10 @@ class GameStatisticsService {
     });
   }
 
+  async deleteGameStatistics(id) {
+    return await gameStatisticsRepository.deleteById(id);
+  }
+
   // USED FOR MANUAL TESTING
   /**
    * Retrieves all game statistics objects from the repository.

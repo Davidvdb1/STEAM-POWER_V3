@@ -45,7 +45,7 @@ class GameStatisticsRepository {
    * @param {number} params.currency.greyEnergy - The amount of grey energy.
    * @param {number} params.currency.coins - The number of coins.
    * @param {number} params.currency.score - The score value.
-   * 
+   *
    * @returns {Promise<GameStatistics>} The created GameStatistics instance.
    */
   async create({ groupId, currency }) {
@@ -72,6 +72,74 @@ class GameStatisticsRepository {
       include: { currency: true },
     });
     return GameStatistics.from(prismaGS);
+  }
+
+async deleteById(id) {
+  // 1. First get the currencyId
+  const gameStats = await this.prisma.gameStatistics.findUnique({
+    where: { id },
+    select: { currencyId: true },
+  });
+
+  // 2. Use findFirst instead of findUnique for checkpoint
+  const checkpoint = await this.prisma.checkpoint.findFirst({
+    where: { gameStatisticsId: id },
+    select: { currencyId: true, id: true },
+  });
+
+  // 3. Delete related records first
+  await this.prisma.checkpoint.deleteMany({
+    where: { gameStatisticsId: id },
+  });
+
+  await this.prisma.gameBuildings.deleteMany({
+    where: { gameStatisticsId: id },
+  });
+
+    await this.prisma.gameBuildings.deleteMany({
+    where: { gameStatisticsId: null, checkpointId: null },
+  });
+  
+  await this.prisma.asset.deleteMany({
+    where: { gameStatisticsId: id },
+  });
+
+  // 4. Delete the main gameStatistics record
+  await this.prisma.gameStatistics.delete({
+    where: { id },
+  });
+
+  // 5. Finally delete currencies if they exist
+  if (gameStats?.currencyId) {
+    await this.prisma.currency.delete({
+      where: { id: gameStats.currencyId },
+    });
+  }
+
+  // Only delete checkpoint currency if it's different from gameStats currency
+  if (checkpoint?.currencyId && checkpoint.currencyId !== gameStats?.currencyId) {
+    await this.prisma.currency.delete({
+      where: { id: checkpoint.currencyId },
+    });
+  }
+
+  // Delete assets that belong to the checkpoint (if checkpoint exists)
+  if (checkpoint?.id) {
+    await this.prisma.asset.deleteMany({
+      where: { checkpointId: checkpoint.id },
+    });
+  }
+}
+
+  /**
+   * Retrieves all game statistics objects from the database, including related currency, assets, and checkpoints.
+   *
+   * @async
+   * @function getAllGameStatistics
+   * @memberof module:repository/gameStatisticsRepository.Repository_GameStatistics
+        where: { id: checkpoint.currencyId },
+      });
+    }
   }
 
   /**
@@ -331,58 +399,63 @@ class GameStatisticsRepository {
     return currency ? Currency.from(currency) : null;
   }
 
-    /**
-     * Increments the green energy value for a group's currency based on the provided green energy amount,
-     * the type of green energy asset, and the energy multiplier of each matching asset owned by the group.
-     *
-     * @async
-     * @param {string|number} groupId - The unique identifier of the group.
-     * @param {number} greenEnergy - The base amount of green energy to increment per asset.
-     * @param {'WIND'|'SOLAR'|'WATER'} type - The type of green energy asset (case-insensitive).
-     * @returns {Promise<Currency>} The updated Currency instance after incrementing green energy.
-     * @throws {Error} If the group statistics, currency, or assets are not found, or if the type is unknown.
-     */
-    async incrementGreenEnergyWithMultiplier(currency, greenEnergy, type, assetMultiplier, assets) {
-      const typeToAssetLabel = {
-        SOLAR: "zonnepaneel",
-        WIND: "windmolen",
-        WATER: "waterrad",
-      };
+  /**
+   * Increments the green energy value for a group's currency based on the provided green energy amount,
+   * the type of green energy asset, and the energy multiplier of each matching asset owned by the group.
+   *
+   * @async
+   * @param {string|number} groupId - The unique identifier of the group.
+   * @param {number} greenEnergy - The base amount of green energy to increment per asset.
+   * @param {'WIND'|'SOLAR'|'WATER'} type - The type of green energy asset (case-insensitive).
+   * @returns {Promise<Currency>} The updated Currency instance after incrementing green energy.
+   * @throws {Error} If the group statistics, currency, or assets are not found, or if the type is unknown.
+   */
+  async incrementGreenEnergyWithMultiplier(
+    currency,
+    greenEnergy,
+    type,
+    assetMultiplier,
+    assets
+  ) {
+    const typeToAssetLabel = {
+      SOLAR: "zonnepaneel",
+      WIND: "windmolen",
+      WATER: "waterrad",
+    };
 
-      const label = typeToAssetLabel[type?.toUpperCase()];
-      if (!label) throw new Error(`Onbekend asset type: ${type}`);
+    const label = typeToAssetLabel[type?.toUpperCase()];
+    if (!label) throw new Error(`Onbekend asset type: ${type}`);
 
-      const relevantAssets = assets.filter(
-        (asset) => asset.type?.toLowerCase() === label
+    const relevantAssets = assets.filter(
+      (asset) => asset.type?.toLowerCase() === label
+    );
+
+    const typeMap = {
+      zonnepaneel: "solar",
+      windmolen: "wind",
+      waterrad: "water",
+    };
+
+    const multiplierKey = typeMap[label];
+    const typeMultiplier = assetMultiplier[multiplierKey];
+
+    if (typeof typeMultiplier !== "number") {
+      throw new Error(
+        `Multiplier ontbreekt of ongeldig voor type ${multiplierKey}`
       );
-
-      const typeMap = {
-        zonnepaneel: "solar",
-        windmolen: "wind",
-        waterrad: "water",
-      };
-
-      const multiplierKey = typeMap[label];
-      const typeMultiplier = assetMultiplier[multiplierKey];
-
-      if (typeof typeMultiplier !== "number") {
-        throw new Error(`Multiplier ontbreekt of ongeldig voor type ${multiplierKey}`);
-      }
-
-      const totalGain = relevantAssets.length * greenEnergy * typeMultiplier;
-
-      const updated = await this.prisma.currency.update({
-        where: { id: currency.id },
-        data: {
-          greenEnergy: { increment: totalGain },
-        },
-      });
-
-      return Currency.from(updated);
     }
 
+    const totalGain = relevantAssets.length * greenEnergy * typeMultiplier;
 
+    const updated = await this.prisma.currency.update({
+      where: { id: currency.id },
+      data: {
+        greenEnergy: { increment: totalGain },
+      },
+    });
 
+    return Currency.from(updated);
+  }
 
   //########################################################################
   //                                 ASSETS
@@ -1026,7 +1099,6 @@ class GameStatisticsRepository {
       : null;
   }
 
-
   /**
    * Retrieves all achievements from the database and maps them to Achievement instances.
    *
@@ -1046,7 +1118,7 @@ class GameStatisticsRepository {
 
   async updateMultipliersAndMessage(data) {
     const { zonnepaneel, waterrad, windmolen } = data.multipliers;
-    const message = data.message
+    const message = data.message;
 
     const allMultipliers = await this.prisma.multiplier.findMany();
 
