@@ -160,12 +160,18 @@ function getStylesText() {
       color: #008000;
     }
     
+    .instructions-content h3 + h4 {
+      margin-top: 0px;
+      margin-bottom: 4px;
+      color: #006600;
+    }
+
     .instructions-content h4 {
       margin-top: 16px;
       margin-bottom: 4px;
       color: #006600;
     }
-    
+
     /* The first heading should have less top margin */
     .instructions-content h3:first-child,
     .instructions-content h4:first-child {
@@ -270,7 +276,7 @@ function createOverlayHTML() {
       <div class="instructions-header">SPELUITLEG</div>
       <div class="instructions-content">
         <p>Welkom bij EcoCity Quest, een spel waarin je bijleert over belangrijke concepten zoals duurzaamheid, hernieuwbare energie en klimaatbewustzijn!</p>
-
+        
         <h3>Het Doel van het spel</h3>
         <p>Bouw een stad die zowel economisch succesvol als ecologisch verantwoord is.</p>
 
@@ -300,6 +306,59 @@ function createOverlayHTML() {
           <li><strong>Binnenstad</strong> - Dit is waar alle gebouwen zoals huizen, bedrijven en diensten zich bevinden. Hier kun je gebouwen upgraden om ze energiezuiniger te maken.</li>
           <li><strong>Buitenstad</strong> - In dit gebied kun je energiebronnen plaatsen (windmolens, zonnepanelen, waterraderen, kerncentrales) en natuurelementen zoals bomen en struiken planten om je luchtkwaliteit te verbeteren.</li>
         </ul>
+
+        <h3>Energiebronnen / Natuurelementen</h3>
+        <h4>Groene energiebronnen</h4>
+        <p> Deze bronnen produceren hernieuwbare energie en verbeteren de luchtkwaliteit elk met 1 punt. 
+        Per geplaatste groene energiebron wordt je groene energieproductie verhoogd met een bepaalde factor die je rechtsonder op het scherm kan bekijken</p>
+
+        <h4>Grijze energiebronnen</h4>
+        <p> Deze bronnen produceren conventionele energie, maar verminderen de luchtkwaliteit elk met 2 punten.
+        Elke kerncentrale produceert 250 kW grijze energie.</p>
+
+        <h4>Natuurelementen</h4>
+        <p>Deze elementen verbeteren de luchtkwaliteit en dragen bij aan een gezondere stad.
+        De luchtkwaliteitsverbetering varieert per type element:</p>
+        <ul>
+          <li><strong>Eik</strong> +3 punten.</li>
+          <li><strong>Beuk</strong> +4 punten.</li>
+          <li><strong>Buxus</strong> +2 punt.</li>
+          <li><strong>Hulst</strong> +1 punt.</li>
+        </ul>
+
+        <h4>Externe factoren met invloed op energieproductie</h4>
+        <p>De energieproductie van hernieuwbare bronnen is afhankelijk van enkele externe factoren:</p>
+        <ul>
+          <li><strong>Hagelstorm</strong> - De zonnepanelen worden tijdelijk minder effectief (x0,8), maar de waterwielen draaien iets harder (x1,2).</li>
+          <li><strong>Regenstorm</strong> - De zonnepanelen worden tijdelijk minder actief (x0,6), maar de waterwielen draaien harder (x1,5).</li>
+          <li><strong>Windvlaag</strong> - De windmolens draaien harder (x1,5) en leveren meer energie op.</li>
+          <li><strong>Zonneschijn</strong> - De zonnepanelen zijn tijdelijk actiever (x1,5), maar de waterwielen krijgen last van de droogte (x0,8).</li>
+          <li><strong>Stroomstoring</strong> - Door een stroomstoring wordt de energieproductie van elke energiebron tijdelijk verlaagd (x0,8).</li>
+          <li><strong>Vervuiling</strong> - Door vervuiling in de rivier draaien de waterwielen trager (x0,7).</li>
+        </ul>
+
+        <h3>Belastingen en inkomsten</h3>
+        <h4>Schulden</h4>
+        <p>Als stad kun je leningen aangaan en schulden maken. Er staat een limiet op 100 coins aan schulden (-100 coins).</p>
+        <p>Let wel op: als je saldo onder de 0 coins komt, dan betaal je een boete van 10% coins op elke uitgave.</p>
+
+        <h4>Belastingen</h4>
+        <p>Elke 5 minuten verzamel je belastinginkomsten van de inwoners van je stad. De formule is: 10 coins (basisbedrag) + luchtkwaliteitsscore.</p>
+        <p>Een hogere luchtkwaliteit betekent dat meer mensen in je stad willen wonen, wat leidt tot hogere belastinginkomsten.</p>
+
+        <h4>Inkomsten</h4>
+        <p>Er zijn verschillende manieren om inkomsten te genereren:</p>
+        <ul>
+          <li><strong>Belastingen</strong> - Elke 5 minuten ontvang je belastinginkomsten gebaseerd op je luchtkwaliteitsscore.</li>
+          <li><strong>Subsidies</strong> - Behaal doelstellingen die gericht zijn op duurzaamheid om extra coins te verdienen.</li>
+          <li><strong>Quizvragen</strong> - Beantwoord quizvragen over duurzaamheid en energie om extra coins te verdienen.</li>
+        </ul>
+
+        <h3>Energieproductie vs energieverbruik</h3>
+        <p>Het is heel belangrijk om een goede balans te vinden tussen energieproductie en energieverbruik.</p>
+        <p>Als je meer groene energie verbruikt dan je produceert, dan worden alle gebouwen automatisch terug omgeschakeld naar grijze energie.</p>
+        <p>Als je ook niet meer genoeg grijze energie hebt, dan moet je extra betalen om energie aan te kopen en krijg je maar 50% van je belastingsinkomsten omdat de inwoners last hadden van een stroompanne.</p>
+        <p>Als je niet meer genoeg coins hebt om energie aan te kopen, dan ligt je stad volledig zonder stroom en vluchten alle inwoners. Je moet in dit geval het spel opnieuw beginnen</p>
 
         <h3>Hoe speel je:</h3>
         <p>1. <strong>Bheer je binnenstad</strong> - Upgrade gebouwen zodat ze energiezuiniger zijn. Elk gebouw heeft specifieke kosten en energieverbruik.</p>
