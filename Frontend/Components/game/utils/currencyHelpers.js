@@ -19,7 +19,7 @@ import { computeUpdatedGreenEnergy } from "./gameDataHelpers.js";
  * @param {number} totalGreenCost   – green‐energy cost this tick
  * @param {Array}  assets           – full list of user assets
  * @param {Array}  buildingList     – transformed building data
- * @return {Object} { id, payload: { greenEnergy, greyEnergy, coins, score } }
+ * @return {Object} { id, payload: { greenEnergy, greyEnergy, coins, score }, fine }
  */
 export function buildUpdatedCurrency(
   oldCurrency,
@@ -53,5 +53,6 @@ export function buildUpdatedCurrency(
       coins: oldCurrency.coins - fine,
       score: oldCurrency.score,
     },
+    fine: fine
   };
 }

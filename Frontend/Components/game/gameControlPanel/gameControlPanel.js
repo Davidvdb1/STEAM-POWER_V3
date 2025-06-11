@@ -399,7 +399,7 @@ class GameControlPanel extends HTMLElement {
       const greenBank = gs.currency.greenEnergy;
 
       // 3) Update green balance on backend
-      const { id: currencyId, payload: currencyPayload } = buildUpdatedCurrency(
+      const { id: currencyId, payload: currencyPayload, fine: fine } = buildUpdatedCurrency(
         gs.currency,
         totalGreenCost,
         gs.assets,
@@ -419,6 +419,7 @@ class GameControlPanel extends HTMLElement {
         calculateTotalGreyCost(this._game.buildingData) / 60;
       const totalGreyProduction = calculateTotalGreyProduction(gs.assets) / 60;
       const isGreyShortGlobal = totalGreyCost > totalGreyProduction;
+      const greyShortMessage = `Te weinig stroomvoorziening: de belastingen worden gehalveerd en het stroomtekort wordt elke minuut betaald met ${fine} coins.`
 
       if (
         !isGreenShort &&
@@ -471,9 +472,7 @@ class GameControlPanel extends HTMLElement {
             );
             setTimeout(() => {
               activeScenes.forEach((s) =>
-                s.showError(
-                  "Te weinig stroomvoorziening: de belastingen worden gehalveerd en de stroomtekort wordt elke minuut betaald met coins."
-                )
+                s.showError(greyShortMessage)
               );
             }, 4000);
             this._greyShortageAlertActive = true;
@@ -481,9 +480,7 @@ class GameControlPanel extends HTMLElement {
           } else {
             // subsequent calls: show grey shortage immediately
             activeScenes.forEach((s) =>
-              s.showError(
-                "Te weinig stroomvoorziening: de belastingen worden gehalveerd en de stroomtekort wordt elke minuut betaald met coins."
-              )
+              s.showError(greyShortMessage)
             );
           }
         } else {
@@ -502,18 +499,14 @@ class GameControlPanel extends HTMLElement {
         // 6) pure grey-shortage (green OK)
         if (!this._greyShortageAlertActive) {
           activeScenes.forEach((s) =>
-            s.showError(
-              "Te weinig stroomvoorziening: de belastingen worden gehalveerd en de stroomtekort wordt elke minuut betaald met coins."
-            )
+            s.showError(greyShortMessage)
           );
           this._greyShortageAlertActive = true;
           this._greyShortageDelayScheduled = false;
         } else {
           // repeat on subsequent ticks
           activeScenes.forEach((s) =>
-            s.showError(
-              "Te weinig stroomvoorziening: de belastingen worden gehalveerd en de stroomtekort wordt elke minuut betaald met coins."
-            )
+            s.showError(greyShortMessage)
           );
         }
       }
