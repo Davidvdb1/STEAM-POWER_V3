@@ -23,6 +23,8 @@ export function createMenuScene() {
 
     /**
      * Initializes the scene with data from the previous scene.
+     * @function init
+     * @memberOf MenuScene
      * @param {Object} data - The data passed from the previous scene.
      * @param {string} data.sourceScene - The name of the scene from which this menu was opened.
      * @memberof MenuScene
@@ -42,6 +44,7 @@ export function createMenuScene() {
 
     /**
      * Creates the menu scene.
+     * @function create
      * @memberof MenuScene
      */
     create() {
@@ -58,18 +61,27 @@ export function createMenuScene() {
 
     /**
      * Shows the game instructions.
-     * This method is a placeholder and should be implemented to display
-     * the game instructions to the player.
+     * This method creates a custom event that is dispatched to the GameControlPanel,
+     * which will handle showing the game instructions.
+     * @function showGameInstructions
      * @memberOf MenuScene
+     * @returns {void}
      */
     showGameInstructions() {
-      // To be implemented
+      // Create and dispatch a custom event to the GameControlPanel 
+      const event = new CustomEvent("show-game-instructions", {
+        bubbles: true,
+        composed: true,
+      });
+    
+      this.game.canvas.dispatchEvent(event);
     }
 
     /**
      * Shows an interactive overview of all achievements with completion status
      * This method creates a custom event that is dispatched to the GameControlPanel,
      * which will handle showing the achievements.
+     * @function showObjectives
      * @memberOf MenuScene
      * @returns {void}
      */
@@ -86,6 +98,7 @@ export function createMenuScene() {
     /**
      * Switches back to the previous scene in the game.
      *
+     * @function returnToGame
      * @memberOf MenuScene
      * @returns {void}
      */
@@ -109,6 +122,7 @@ export function createMenuScene() {
      * Each button is centered horizontally and vertically aligned with the others
      * and assigned its respective callback for handling user interactions.
      *
+     * @function createMenuButtons
      * @memberOf MenuScene
      * @returns {void}
      */
@@ -149,6 +163,7 @@ export function createMenuScene() {
      * Creates a "Back" button in the top-right corner.
      * When clicked, it triggers the `returnToGame` method.
      *
+     * @function createBackButton
      * @memberOf MenuScene
      * @returns {void}
      */
