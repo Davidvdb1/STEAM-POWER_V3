@@ -210,6 +210,8 @@ class GameControlPanel extends HTMLElement {
     if (JSON.parse(sessionStorage.getItem("bluetoothEnabled"))) {
       this._interval = setInterval(() => this._updateStatistics(), 5000);
     }
+
+    this._statsContainer.addEventListener("repair-popup", (e) => this._handleRepairPopup(e.detail));
   }
 
   /**
@@ -261,6 +263,7 @@ class GameControlPanel extends HTMLElement {
       "scene:refresh-detail",
       this._onSceneRefreshDetail
     );
+    this._statsContainer.removeEventListener("repair-popup", (e) => this._handleRepairPopup(e.detail));
 
     // 2) Remove the game container from the DOM
     if (this._game) {
@@ -392,6 +395,9 @@ async _updateStatistics() {
         solar: this._game.multipliers.solar,
         water: this._game.multipliers.water,
         wind: this._game.multipliers.wind,
+        solarDamage: this._game.multipliers.solarDamage,
+        waterDamage: this._game.multipliers.waterDamage,
+        windDamage: this._game.multipliers.windDamage,
       },
     });
     this._statsContainer.data = payload;
@@ -402,11 +408,6 @@ async _updateStatistics() {
     this._game.events.emit("statsUpdateComplete");
   }
 }
-
-
-  async getEventMessage() {
-  
-  }
 
   /**
    * Updates the energy levels in the game.
@@ -999,6 +1000,24 @@ async _updateStatistics() {
 
     // Update the statistics after collecting taxes to rerender the currency display
     await this._updateStatistics();
+  }
+
+  async _handleRepairPopup(type) {
+    const capitalized = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
+
+      if (scene && typeof scene.showConfirmation === "function") {
+        scene.showConfirmation(
+          `Wil je de ${capitalized} weer herstellen voor 20 coins?`,
+          async (confirmed) => {
+            if (!confirmed) return;
+
+          }
+        );
+      }
+    }
   }
 }
 

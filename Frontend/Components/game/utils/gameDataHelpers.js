@@ -64,7 +64,7 @@ export function buildCurrencyDisplayPayload({
   buildings = [],
   assets = [],
   currency = { greenEnergy: 0, greyEnergy: 0, coins: 0, score: 0 },
-  componentMultipliers = { solar: 1, wind: 1, water: 1 },
+  componentMultipliers = { solar: 1, wind: 1, water: 1, solarDamage: false, windDamage: false, waterDamage: false },
 }) {
   const totalGreyCost = calculateTotalGreyCost(buildings);
   const totalGreyProduction = calculateTotalGreyProduction(assets);

@@ -363,13 +363,23 @@ class GameStatisticsRepository {
       };
 
       const multiplierKey = typeMap[label];
-      const typeMultiplier = assetMultiplier[multiplierKey];
+      let typeMultiplier = assetMultiplier[multiplierKey];
 
       if (typeof typeMultiplier !== "number") {
         throw new Error(`Multiplier ontbreekt of ongeldig voor type ${multiplierKey}`);
       }
 
+      // Schade check: halveer multiplier indien schade-flag op true staat
+      const damageKey = `${multiplierKey}Damage`; // bv. "solarDamage"
+      if (assetMultiplier[damageKey] === true) {
+        typeMultiplier *= 0.5;
+      }
+
       const totalGain = relevantAssets.length * greenEnergy * typeMultiplier;
+      console.log(typeMultiplier)
+      console.log(greenEnergy)
+      console.log(relevantAssets.length)
+      console.log(totalGain)
 
       const updated = await this.prisma.currency.update({
         where: { id: currency.id },
@@ -380,9 +390,6 @@ class GameStatisticsRepository {
 
       return Currency.from(updated);
     }
-
-
-
 
   //########################################################################
   //                                 ASSETS
