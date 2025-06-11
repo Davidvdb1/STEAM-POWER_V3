@@ -8,6 +8,13 @@ import { updateWaterWheelDepth } from '../models/waterWheel.js';
 import { updateSolarRotation } from '../models/solarPanel.js';
 import { updateWaterWheelPosition } from '../models/waterWheel.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
+//import { fetchWindSpeed, calcWindPowerKwh } from '../utils/weatherData.js'; //mag weg waardes waren te klein
+//import { fetchWindSpeed, calcWindPowerWh }  from '../utils/weatherData.js';
+import {
+  fetchWindSpeed,
+  calcWindPowerWhTurbine,      // nieuw
+  ROTOR_RADIUS_M               // (alleen als je ‘m ergens wilt tonen)
+} from '../utils/weatherData.js';
 
 //#region TEMPLATE
 let template = document.createElement('template');
@@ -42,6 +49,8 @@ export class SimulationComponent extends HTMLElement {
         this.windmill = null;
         this.sunRoot = null;
         this.wheel = null;
+
+        this.currentBladeCount = 3;              // default
     }
 
     // component attributes
@@ -128,6 +137,20 @@ export class SimulationComponent extends HTMLElement {
             }
         }
     }
+
+    /**
+ * Haalt windsnelheid op en berekent kWh/m²/u op basis van huidig bladeCount
+ */
+async _updateWindEnergy() {
+  try {
+    const v   = await fetchWindSpeed(this.lat ?? 50.8798, this.lon ?? 4.7005);
+    const Wh  = calcWindPowerWhTurbine(v, this.currentBladeCount);
+    console.log(`Wind (${this.currentBladeCount} wieken, R=${ROTOR_RADIUS_M} m): `+`${Wh.toFixed(0)} Wh/u`
+   );    // TODO: schrijf kWh naar energie-paneel wanneer dat er is
+  } catch (err) {
+    console.error('Wind-energie berekening faalde:', err);
+  }
+}
 
     async _updateSunAndSolarPanel(street, city, postal) {
         // Onthoud huidig adres voor later gebruik
@@ -231,6 +254,8 @@ export class SimulationComponent extends HTMLElement {
   
     async _handleBladeCountChange(bladeCount) {
         await updateWindmillBlades(this.scene, this, bladeCount);
+        this.currentBladeCount = bladeCount;
+        await this._updateWindEnergy();
     }
 
     async _handleWindmillRotation(degrees) {
