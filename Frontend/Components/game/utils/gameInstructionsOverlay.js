@@ -288,11 +288,11 @@ function createOverlayHTML() {
           </li>
           <li>
             <img src="Assets/images/pixelGreenEnergy.svg" class="energy-icon" alt="Green Energy" />
-            <strong>Groene Energie (kWh)</strong> - Hernieuwbare energie die door duurzame bronnen zoals windmolens, zonnepanelen en waterraderen wordt opgewekt. Hoe meer groene energie, hoe beter voor je luchtkwaliteit.
+            <strong>Groene Energie (kWh)</strong> - Hernieuwbare energie die door duurzame bronnen zoals windmolens, zonnepanelen en waterwielen wordt opgewekt. Hoe meer groene energie, hoe beter voor je luchtkwaliteit.
           </li>
           <li>
             <img src="Assets/images/pixelGreyEnergy.svg" class="energy-icon" alt="Grey Energy" />
-            <strong>Grijze Energie (kW)</strong> - Conventionele energie die vervuilend is maar minder kost. Hoe meer grijze energie, hoe lager je luchtkwaliteitsscore.
+            <strong>Grijze Energie (kW)</strong> - Vervuilende maar goedkopere. Hoe meer grijze energie, hoe lager je luchtkwaliteitsscore.
           </li>
           <li>
             <strong>Luchtkwaliteit (score)</strong> - Een indicatie voor hoe schoon je stad is. Hoe hoger je luchtkwaliteit, hoe meer mensen de stad aantrekt en hoe meer belastingsgeld je ontvangt.
@@ -303,7 +303,7 @@ function createOverlayHTML() {
         <p>Je stad bestaat uit twee belangrijke zones:</p>
         <ul>
           <li><strong>Binnenstad</strong> - Dit is waar alle gebouwen zoals huizen, bedrijven en diensten zich bevinden. Hier kun je gebouwen upgraden om ze energiezuiniger te maken.</li>
-          <li><strong>Buitenstad</strong> - In dit gebied kun je energiebronnen plaatsen (windmolens, zonnepanelen, waterraderen, kerncentrales) en natuurelementen zoals bomen en struiken planten om je luchtkwaliteit te verbeteren.</li>
+          <li><strong>Buitenstad</strong> - In dit gebied kun je energiebronnen plaatsen (windmolens, zonnepanelen, waterwielen, kerncentrales) en natuurelementen zoals bomen en struiken planten om je luchtkwaliteit te verbeteren.</li>
         </ul>
 
         <h3>Energiebronnen / Natuurelementen</h3>
@@ -312,7 +312,7 @@ function createOverlayHTML() {
         Per geplaatste groene energiebron wordt je groene energieproductie verhoogd met een bepaalde factor die je rechtsonder op het scherm kan bekijken</p>
 
         <h4>Grijze energiebronnen</h4>
-        <p> Deze bronnen produceren conventionele energie, maar verminderen de luchtkwaliteit elk met 2 punten.
+        <p> Deze bronnen produceren grijze energie en verminderen de luchtkwaliteit elk met 2 punten.
         Elke kerncentrale produceert 250 kW grijze energie.</p>
 
         <h4>Natuurelementen</h4>
@@ -367,7 +367,7 @@ function createOverlayHTML() {
         <h3>Hoe speel je:</h3>
         <p>1. <strong>Bheer je binnenstad</strong> - Upgrade gebouwen zodat ze energiezuiniger zijn. Elk gebouw heeft specifieke kosten en energieverbruik.</p>
         <p>2. <strong>Beheer je energie</strong> - Kies tussen grijze energie (goedkoper maar vervuilend) of groene energie (duurder maar schoon). Schakel gebouwen tussen deze opties via de gebouwdetails.</p>
-        <p>3. <strong>Produceer duurzame energie</strong> - Plaats windmolens, zonnepanelen en waterraderen in de buitenstad om groene energie te produceren. Let op: deze hebben wisselende opbrengsten gebaseerd op natuurlijke factoren!</p>
+        <p>3. <strong>Produceer duurzame energie</strong> - Plaats windmolens, zonnepanelen en waterwielen in de buitenstad om groene energie te produceren. Let op: deze hebben wisselende opbrengsten gebaseerd op natuurlijke factoren!</p>
         <p>4. <strong>Plant bomen en natuur</strong> - Verbeter je luchtkwaliteit door natuurelementen zoals bomen en struiken te plaatsen die CO2 absorberen.</p>
         <p>5. <strong>Verzamel belastingen</strong> - Elke 5 minuten verzamel je belastinginkomsten. De formule is: 10 coins (basisbedrag) + je luchtkwaliteitsscore. Een hogere luchtkwaliteit levert dus meer inkomsten op!</p>
         <p>6. <strong>Behaal doelstellingen</strong> - Verdien extra coins (subsidies) door doelstellingen te halen die gericht zijn op duurzaamheid. Je vindt meer info over de doelstellingen op de menupagina.</p>
@@ -386,14 +386,14 @@ function createOverlayHTML() {
         <p>Het belastingsysteem in het spel demonstreert hoe een schonere omgeving economische voordelen kan opleveren, vergelijkbaar met hoe duurzame steden in de werkelijkheid aantrekkelijker zijn voor bewoners en bedrijven.</p>
 
         <h4>Natuurlijke Variabiliteit</h4>
-        <p>De wisselende opbrengst van windmolens, zonnepanelen en waterraderen simuleert de echte uitdagingen van hernieuwbare energie: de wind waait niet altijd, de zon schijnt niet 's nachts, en waterstanden kunnen variëren. Dit leert je over de noodzaak van een gevarieerde energiemix.</p>
+        <p>De wisselende opbrengst van windmolens, zonnepanelen en waterwielen simuleert de echte uitdagingen van hernieuwbare energie: de wind waait niet altijd, de zon schijnt niet 's nachts, en waterstanden kunnen variëren. Dit leert je over de noodzaak van een gevarieerde energiemix.</p>
 
         <h4>Europese Doelstellingen</h4>
         <p>Sommige doelstellingen in het spel zijn gebaseerd op echte EU-richtlijnen voor hernieuwbare energie en CO2-reductie, waardoor je inzicht krijgt in internationale klimaatakkoorden.</p>
 
         <h3>Tips:</h3>
         <ul>
-          <li>Diversifieer je energiebronnen voor een stabiele energievoorziening</li>
+          <li>Zorg voor een mix van energiebronnen voor een stabiele energievoorziening</li>
           <li>Investeer vroeg in het spel in hernieuwbare energiebronnen voor voordelen op lange termijn</li>
           <li>Let op je luchtkwaliteitsscore, die beïnvloedt direct je belastinginkomsten</li>
           <li>Upgrade gebouwen om hun energie-efficiëntie te verbeteren</li>
