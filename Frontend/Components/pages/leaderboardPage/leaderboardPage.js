@@ -55,9 +55,9 @@ window.customElements.define('leaderboard-れ', class extends HTMLElement {
             'Bonus Score': { key: 'bonusScore', sortable: true },
             'Energy': { key: 'energy', sortable: true },
             'Battery Level': { key: 'batteryLevel', sortable: true },
-            'Luchtkwaliteit': { key: 'luchtkwaliteit', sortable: true },
+            'Luchtkwaliteit': { key: 'airQuality', sortable: true },
             'Coins': { key: 'coins', sortable: true },
-            'Groene stad (%)': { key: 'groeneStad', sortable: true }
+            'Groene stad (%)': { key: 'greenPercentage', sortable: true }
         };
     }
 
@@ -143,7 +143,6 @@ window.customElements.define('leaderboard-れ', class extends HTMLElement {
         });
 
         sortedData.forEach(group => {
-            console.log('Rendering group:', group.name, 'with data:', group);
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${group.name}</td>
@@ -151,9 +150,9 @@ window.customElements.define('leaderboard-れ', class extends HTMLElement {
                 <td>${group.bonusScore}</td>
                 <td>${group.energy.toFixed(2)} Wh</td>
                 <td>${group.batteryLevel.toFixed(2)} Wh</td>
-                <td>${group.luchtkwaliteit == 0 ? "/" : group.luchtkwaliteit}</td>
-                <td>${group.coins == 0 ? "/" : group.coins}</td>
-                <td>${group.groeneStad == 0 ? "/" : `${group.groeneStad}%`}</td>
+                <td>${group.airQuality == null ? "/" : group.airQuality}</td>
+                <td>${group.coins == null ? "/" : group.coins}</td>
+                <td>${group.greenPercentage == null ? "/" : `${group.greenPercentage}%`}</td>
             `;
             this.$tbody.appendChild(row);
         });
@@ -182,35 +181,18 @@ window.customElements.define('leaderboard-れ', class extends HTMLElement {
         }
     }
 
-
     async getGameData() {
         const token = getAuthFromSession();
-        console.log('Token:', token);
         const oldGroupData = await this.getGroupData();
-        console.log('Old group data:', oldGroupData);
-        let newGroupData = []
-        for (const group of oldGroupData) {
+        return Promise.all(oldGroupData.map(async (group) => {
             const gameStatistics = await fetchGameStatistics(group.id, token);
-            console.log('Game statistics for group', group.name, ':', gameStatistics);
-
-            let greenPercentage = 0;
-            if (gameStatistics) {
-                greenPercentage = calculateGreenBuildingPercentage(gameStatistics.gameBuildings);
-            }
-            const newGroup = {
-                id: group.id,
-                name: group.name,
-                members: group.members,
-                bonusScore: group.bonusScore,
-                energy: group.energy,
-                batteryLevel: group.batteryLevel,
-                luchtkwaliteit: gameStatistics ? gameStatistics.currency.score : 0,
-                coins: gameStatistics ? gameStatistics.currency.coins : 0,
-                groeneStad: greenPercentage ? greenPercentage : 0,
-            }
-            newGroupData.push(newGroup);
-        }
-        return newGroupData;
+            return {
+                ...group,
+                airQuality: gameStatistics?.currency?.score || null,
+                coins: gameStatistics?.currency?.coins || null,
+                greenPercentage: gameStatistics ? calculateGreenBuildingPercentage(gameStatistics.gameBuildings) : null
+            };
+        }));
     }
 
 });
