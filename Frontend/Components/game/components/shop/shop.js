@@ -24,7 +24,7 @@ template.innerHTML = /*html*/ `
         <img class="img-greenEnergy-card" src="Assets/images/pixelGreenEnergy.svg" alt="">
       </div>
       <img class="windturbine" src="Assets/images/waterrad.png" alt="">
-      <p>Waterrad</p>
+      <p>Waterwiel</p>
       <div class="assetCoinDiv">
         <p class="price">20</p>
         <img class="img-euro" src="Assets/images/pixelCoin.png" alt="pixelCoin">
