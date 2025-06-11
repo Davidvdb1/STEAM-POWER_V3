@@ -161,20 +161,64 @@
   .multipliers {
     display: flex;
     flex-direction: row;
+    align-items: flex-end;
+    margin-top: 10px;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .multipliers .label {
+    font-family: "PixelFont" !important;
+    color: #151515;
+    font-weight: normal !important;
+    margin-bottom: 10px;
+  }
+
+  .multipliers .energy-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 60px;
+    font-family: "PixelFont" !important;
+    color: #151515;
+    font-weight: normal !important;
+  }
+
+  .multipliers .icon-multiplier {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end; /* icoon en 1x onderlijnen */
+    gap: 6px;
+  }
+
+  .multipliers .icon-multiplier img {
+    height: 30px;
+    margin: 0;
+  }
+
+  .multipliers .multiplier-value {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .multipliers .live-value {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #444;
+  }
+  .microbit {
+    display: flex;
+    flex-direction: row;
     align-items: center;
     margin-top: 10px;
     justify-content: center;
     gap: 20px;
-
+    
     span {
       font-family: "PixelFont" !important;
       color: #151515;
       font-weight: normal !important;
-
-      img {
-        height: 30px;
-        margin-right: 6px;
-      }
     }
   }
 }

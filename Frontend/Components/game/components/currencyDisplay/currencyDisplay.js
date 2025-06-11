@@ -52,12 +52,33 @@ template.innerHTML = /*html*/ `
           <span id="progressPercentText">0%</span>
         </div>
       </div>
-
       <div class="multipliers">
-        <span>Bonus:</span>
-        <span></span>
-        <span></span>
-        <span></span>
+        <span class="label">Bonus:</span>
+
+        <span class="energy-block">
+          <div class="icon-multiplier">
+            <img src="Assets/images/solar_panel.png" alt="Solar Panel" />
+            <span class="multiplier-value">1x</span>
+          </div>
+          <span class="live-value">0.000 kW</span>
+        </span>
+
+        <span class="energy-block">
+          <div class="icon-multiplier">
+            <img src="Assets/images/windturbine.png" alt="Wind Turbine" />
+            <span class="multiplier-value">1x</span>
+          </div>
+          <span class="live-value">0.000 kW</span>
+        </span>
+
+        <span class="energy-block">
+          <div class="icon-multiplier">
+            <img src="Assets/images/waterrad.png" alt="Water Wheel" />
+            <span class="multiplier-value">1x</span>
+          </div>
+          <span class="live-value">0.000 kW</span>
+        </span>
+
       </div>
     </div>
   </div>
@@ -80,6 +101,8 @@ class CurrencyDisplay extends HTMLElement {
     this.scoreEl = this._shadow.getElementById("score");
     this.loadBtn = this._shadow.getElementById("loadBtn");
     this.saveBtn = this._shadow.getElementById("saveBtn");
+    this.microbitValue = this._shadow.getElementById("microbitValue");
+    this.multiplier = 1;
     this._progressBar = this._shadow.getElementById("progressBar");
     this._progressPercentText = this._shadow.getElementById(
       "progressPercentText"
@@ -88,15 +111,25 @@ class CurrencyDisplay extends HTMLElement {
     this.solarSpan = this._shadow.querySelector(
       ".multipliers span:nth-child(2)"
     );
-    this.waterSpan = this._shadow.querySelector(
+    this.windSpan = this._shadow.querySelector(
       ".multipliers span:nth-child(3)"
     );
-    this.windSpan = this._shadow.querySelector(
+    this.waterSpan = this._shadow.querySelector(
       ".multipliers span:nth-child(4)"
     );
 
+
+    this.resetTimers = {
+      SOLAR: null,
+      WIND: null,
+      WATER: null
+    };
+
+
     this._onLoadBound = this._onLoad.bind(this);
     this._onSaveBound = this._onSave.bind(this);
+
+    window.addEventListener('rawenergyreading', this._handleEnergyData);
 
     this.loadBtn.addEventListener("click", this._onLoadBound);
     this.saveBtn.addEventListener("click", this._onSaveBound);
@@ -117,6 +150,24 @@ class CurrencyDisplay extends HTMLElement {
       }
     });
     this._observer.observe(this.scoreEl, { childList: true });
+
+    this.getMicrobitMultiplier()
+    setInterval(() => {
+      this.getMicrobitMultiplier()
+    }, 15000);
+
+    this.solarMultiplierEl = this.solarSpan.querySelector(".multiplier-value");
+    this.solarLiveEl = this.solarSpan.querySelector(".live-value");
+
+    this.waterMultiplierEl = this.waterSpan.querySelector(".multiplier-value");
+    this.waterLiveEl = this.waterSpan.querySelector(".live-value");
+
+    this.windMultiplierEl = this.windSpan.querySelector(".multiplier-value");
+    this.windLiveEl = this.windSpan.querySelector(".live-value");
+
+    this.solarLiveEl.textContent = "0.000 kW";
+    this.waterLiveEl.textContent = "0.000 kW";
+    this.windLiveEl.textContent = "0.000 kW";
   }
 
   /**
@@ -129,6 +180,7 @@ class CurrencyDisplay extends HTMLElement {
       this._observer = null;
     }
 
+    window.removeEventListener('rawenergyreading', this._handleEnergyData);
     this.loadBtn.removeEventListener("click", this._onLoadBound);
     this.saveBtn.removeEventListener("click", this._onSaveBound);
   }
@@ -194,15 +246,17 @@ class CurrencyDisplay extends HTMLElement {
    */
   _updateMultipliers({ solar, water, wind }) {
     if (solar != null) {
-      this.solarSpan.innerHTML = `<img src="Assets/images/solar_panel.png" alt="Solar Panel"> ${solar}x`;
+      this.solarMultiplierEl.textContent = `${solar}x`;
     }
     if (water != null) {
-      this.waterSpan.innerHTML = `<img src="Assets/images/waterrad.png" alt="Water Wheel"> ${water}x`;
+      this.waterMultiplierEl.textContent = `${water}x`;
     }
     if (wind != null) {
-      this.windSpan.innerHTML = `<img src="Assets/images/windturbine.png" alt="Wind Turbine"> ${wind}x`;
+      this.windMultiplierEl.textContent = `${wind}x`;
     }
   }
+
+
 
   /**
    * Dispatches a "loadCheckpoint" event when the Load button is clicked.
@@ -221,6 +275,55 @@ class CurrencyDisplay extends HTMLElement {
       new CustomEvent("saveCheckpoint", { bubbles: true, composed: true })
     );
   }
+
+  _handleEnergyData = (e) => {
+    const { type, value } = e.detail;
+    const calculated = value / 1024 * 3 * 0.5 * this.multiplier;
+    const formatted = `${calculated.toFixed(3)} kW`;
+
+    let targetEl;
+
+    switch (type) {
+      case 'SOLAR':
+        targetEl = this.solarLiveEl;
+        break;
+      case 'WATER':
+        targetEl = this.waterLiveEl;
+        break;
+      case 'WIND':
+        targetEl = this.windLiveEl;
+        break;
+      default:
+        return;
+    }
+
+    targetEl.textContent = formatted;
+
+    // Clear existing timeout for this type
+    clearTimeout(this.resetTimers[type]);
+
+    // Set timeout to reset after 5s
+    this.resetTimers[type] = setTimeout(() => {
+      targetEl.textContent = "0.000 kW";
+    }, 5000);
+  };
+
+
+  async getMicrobitMultiplier() {
+        try {
+            const url= window.env.BACKEND_URL;
+            const response = await fetch(url + `/groups/multiplier`, {
+                method: "GET",
+                headers:  {
+                    "Content-Type": "application/json"
+                },
+            })
+            const multiplier = await response.json();
+            this.multiplier = multiplier;
+        } catch (error) {
+            console.error("Error with applying event damages:", error)
+        }
+    }
 }
 
 window.customElements.define("currency-display", CurrencyDisplay);

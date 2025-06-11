@@ -143,15 +143,31 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         pinValues.push({ pin: 0, groupId, value: extract10BitValue(view.getUint8(1)), type: 'SOLAR', time });
         pinValues.push({ pin: 1, groupId, value: extract10BitValue(view.getUint8(3)), type: 'WIND', time });
         pinValues.push({ pin: 2, groupId, value: extract10BitValue(view.getUint8(5)), type: 'WATER', time });
-        pinValues.forEach(async (data) => {
-            if (data.value == 0) return;
-            const response = await this.postEnergyData(data);
-            const body = await response.json();
-            const datapoint = body.energyData;
 
-            const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
-            document.dispatchEvent(event);
+        for (const data of pinValues) {
+        if (data.value === 0) continue;
+
+        // Dispatch raw pin event (optioneel als andere components dit willen gebruiken)
+        const rawEvent = new CustomEvent('rawenergyreading', {
+            detail: data, // bevat pin, type, value, time, groupId
+            bubbles: true,
+            composed: true,
         });
+        window.dispatchEvent(rawEvent);
+
+        // Backend storage + dispatch enriched event
+        const response = await this.postEnergyData(data);
+        const body = await response.json();
+        const datapoint = body.energyData;
+
+        const event = new CustomEvent('energydatareading', {
+            detail: datapoint,
+            bubbles: true,
+            composed: true,
+        });
+        document.dispatchEvent(event);
+}
+
     }
 
     async readMockPinValues() {
