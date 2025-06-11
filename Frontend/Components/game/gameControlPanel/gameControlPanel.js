@@ -408,13 +408,14 @@ class GameControlPanel extends HTMLElement {
 
       //if greenEnergy is now zero, force all buildings off green, recolor, refresh detail ===
       if (this._game.currency.greenEnergy <= 0) {
+        // 1) force off green on all buildings
         await toggleAllBuildingsRunsOnGreenFalse(
           this._game.gameStatisticsId,
           token
         );
-
         await this._updateStatistics();
 
+        // 2) recolor buildings
         const cityScene = this._game.scene.getScene("CityScene");
         if (cityScene) {
           for (const b of this._game.buildingData) {
@@ -422,22 +423,61 @@ class GameControlPanel extends HTMLElement {
           }
         }
 
-        const actieveScenes = this._game.scene.getScenes(true);
-        actieveScenes.forEach(function (scene) {
-          if (typeof scene.showError === "function") {
-            scene.showError(
+        // 3) grab all active scenes with showError()
+        const activeScenes = this._game.scene
+          .getScenes(true)
+          .filter((s) => typeof s.showError === "function");
+
+        // 4) choose which warning(s) to show
+        if (this._game.currency.greyEnergy > 0) {
+          // *** only green shortage ***
+          activeScenes.forEach((s) =>
+            s.showError(
               "Groene energie is op. Alle gebouwen gebruiken nu grijze energie."
-            );
+            )
+          );
+          // if we’d been in a grey-shortage cycle, clear it
+          if (this._greyShortageAlertActive) {
+            clearInterval(this._greyShortageInterval);
+            this._greyShortageInterval = null;
+            this._greyShortageAlertActive = false;
           }
-        });
-        // If the detail pane is currently showing a BUILDING, tear it down and re-render:
+        } else {
+          // *** both green & grey shortage ***
+          if (!this._greyShortageAlertActive) {
+            // immediate green‐shortage message
+            activeScenes.forEach((s) =>
+              s.showError(
+                "Groene energie is op. Alle gebouwen gebruiken nu grijze energie."
+              )
+            );
+            // after 4 s, fire the grey‐shortage warning once
+            setTimeout(() => {
+              activeScenes.forEach((s) =>
+                s.showError(
+                  "Te weinig stroomvoorziening: de belastingen worden gehalveerd en de stroomtekort wordt elke minuut betaald met coins."
+                )
+              );
+            }, 4000);
+            // then repeat that grey‐shortage warning every minute
+            this._greyShortageInterval = setInterval(() => {
+              activeScenes.forEach((s) =>
+                s.showError(
+                  "Te weinig stroomvoorziening: de belastingen worden gehalveerd en de stroomtekort wordt elke minuut betaald met coins."
+                )
+              );
+            }, 60_000);
+            this._greyShortageAlertActive = true;
+          }
+        }
+
+        // 5) re-render detail pane if it’s open on a building
         const { type, id } = this._currentDetail;
         if (
           type === "building" &&
           id != null &&
           !this._detailContainer.classList.contains("hidden")
         ) {
-          // Clear whatever was inside detail‐container, then call showDetail(...) again:
           this._detailContainer.innerHTML = "";
           showDetail(
             this._detailContainer,
