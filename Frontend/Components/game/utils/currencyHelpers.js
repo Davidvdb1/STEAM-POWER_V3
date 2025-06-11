@@ -1,3 +1,8 @@
+import {
+  calculateTotalGreyProduction,
+  calculateTotalGreyCost,
+} from "../utils/gameDataHelpers.js";
+
 /**
  * @module currencyHelpers
  * @description Contains utility functions for handling currency updates in the game.
@@ -16,6 +21,15 @@ import { computeUpdatedGreenEnergy } from "./gameDataHelpers.js";
  * @return {Object} A new currency object with updated green energy, retaining the other properties from the old currency.
  */
 export function buildUpdatedCurrency(oldCurrency, totalGreenCost) {
+  const greyEnergyProduction = calculateTotalGreyProduction(assets);
+  const greyEnergyUse = calculateTotalGreyCost(buildingList);
+
+  let fine = 0
+
+  if (greyEnergyProduction < greyEnergyUse) {
+    fine -= ((greyEnergyUse - greyEnergyProduction) / 10);
+  }
+
   const newGreen = computeUpdatedGreenEnergy({
     oldGreenEnergy: oldCurrency.greenEnergy,
     totalGreenProduction: 0,
@@ -27,7 +41,7 @@ export function buildUpdatedCurrency(oldCurrency, totalGreenCost) {
     payload: {
       greenEnergy: newGreen,
       greyEnergy: oldCurrency.greyEnergy,
-      coins: oldCurrency.coins,
+      coins: oldCurrency.coins - fine,
       score: oldCurrency.score,
     },
   };

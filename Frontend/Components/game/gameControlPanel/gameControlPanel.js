@@ -14,6 +14,8 @@ import {
   buildCurrencyDisplayPayload,
   calculateTotalGreenCost,
   unpackCheckpointPayload,
+  calculateTotalGreyProduction,
+  calculateTotalGreyCost,
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
@@ -904,10 +906,17 @@ class GameControlPanel extends HTMLElement {
     // Get the JWT token from the session
     const { token } = getAuthFromSession();
 
+    const greyEnergyProduction = calculateTotalGreyProduction(assets);
+    const greyEnergyUse = calculateTotalGreyCost(buildingList);
+
     // 1 coin for each score point, plus a base tax revenue of 10 coins
     // If the score is negative, we still collect a base tax revenue of 10 coins
-    const collectedTaxes =
+    let collectedTaxes =
       this._game.currency.score <= 0 ? 10 : 10 + this._game.currency.score;
+
+    if (greyEnergyProduction < greyEnergyUse) {
+      collectedTaxes /= 2;
+    }
 
     // Update the currency with the added tax revenue
     await updateCurrency(
