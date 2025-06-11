@@ -1,8 +1,3 @@
-import {
-  calculateTotalGreyProduction,
-  calculateTotalGreyCost,
-} from "../utils/gameDataHelpers.js";
-
 /**
  * @module currencyHelpers
  * @description Contains utility functions for handling currency updates in the game.
@@ -10,26 +5,40 @@ import {
  * particularly focusing on green energy, grey energy, coins, and score.
  */
 
+import {
+  calculateTotalGreyProduction,
+  calculateTotalGreyCost,
+} from "../utils/gameDataHelpers.js";
 import { computeUpdatedGreenEnergy } from "./gameDataHelpers.js";
 
 /**
- * Builds an updated currency object based on the old currency and total green cost.
- * This function computes the new green energy based on the old currency's green energy,
- * the total green production, and the total green cost.
- * @param {Object} oldCurrency - The previous currency state containing green energy, grey energy, coins, and score.
- * @param {number} totalGreenCost - The total cost in green energy to be applied.
- * @return {Object} A new currency object with updated green energy, retaining the other properties from the old currency.
+ * Builds an updated currency object based on the old currency, total green cost,
+ * plus the full asset- and building-data to compute grey‐energy shortfalls.
+ *
+ * @param {Object} oldCurrency      – previous currency state
+ * @param {number} totalGreenCost   – green‐energy cost this tick
+ * @param {Array}  assets           – full list of user assets
+ * @param {Array}  buildingList     – transformed building data
+ * @return {Object} { id, payload: { greenEnergy, greyEnergy, coins, score } }
  */
-export function buildUpdatedCurrency(oldCurrency, totalGreenCost) {
+export function buildUpdatedCurrency(
+  oldCurrency,
+  totalGreenCost,
+  assets,
+  buildingList
+) {
+  // total grey‐energy produced this tick
   const greyEnergyProduction = calculateTotalGreyProduction(assets);
+  // total grey‐energy consumed this tick
   const greyEnergyUse = calculateTotalGreyCost(buildingList);
 
-  let fine = 0
-
+  // if use > production, levy a “fine” (in coins)
+  let fine = 0;
   if (greyEnergyProduction < greyEnergyUse) {
-    fine -= ((greyEnergyUse - greyEnergyProduction) / 10);
+    fine = (greyEnergyUse - greyEnergyProduction) / 10;
   }
 
+  // compute new green bank (using your existing helper)
   const newGreen = computeUpdatedGreenEnergy({
     oldGreenEnergy: oldCurrency.greenEnergy,
     totalGreenProduction: 0,
