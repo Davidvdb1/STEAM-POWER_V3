@@ -6,6 +6,8 @@
 /**
  * Creates and displays game instructions overlay
  *
+ * @function showGameInstructionsOverlay
+ * @memberof gameInstructionsOverlay
  * @param {HTMLElement} wrapper - The wrapper element to attach the overlay to
  * @param {ShadowRoot} shadow - The shadow DOM root to append styles to
  * @returns {void}
@@ -25,6 +27,8 @@ export function showGameInstructionsOverlay(wrapper, shadow) {
 /**
  * Gets the existing overlay or creates a new one if it doesn't exist
  *
+ * @function getOrCreateOverlay
+ * @memberof gameInstructionsOverlay
  * @param {HTMLElement} wrapper - The wrapper element
  * @param {ShadowRoot} shadow - The shadow DOM root
  * @returns {HTMLElement} The instructions overlay element
@@ -52,7 +56,9 @@ function getOrCreateOverlay(wrapper, shadow) {
  * One-time initialization of the overlay's click handlers.
  * Prevents clicks through the backdrop and handles the close button.
  *
- * @param {HTMLElement} overlay
+ * @function initOverlay
+ * @memberof gameInstructionsOverlay
+ * @param {HTMLElement} overlay - The overlay element to initialize
  */
 function initOverlay(overlay) {
   // Block clicks on backdrop
@@ -73,6 +79,8 @@ function initOverlay(overlay) {
 /**
  * Ensures the styles for the instructions overlay exist in the shadow DOM
  *
+ * @function ensureStylesExist
+ * @memberof gameInstructionsOverlay
  * @param {ShadowRoot} shadow - The shadow DOM root
  */
 function ensureStylesExist(shadow) {
@@ -89,6 +97,8 @@ function ensureStylesExist(shadow) {
 /**
  * Returns the CSS styles for the instructions overlay
  *
+ * @function getStylesText
+ * @memberof gameInstructionsOverlay
  * @returns {string} The CSS text
  */
 function getStylesText() {
@@ -128,6 +138,7 @@ function getStylesText() {
       text-align: center;
       font-size: 24px;
       font-weight: bold;
+      margin: 0;
     }
 
     .instructions-content {
@@ -135,6 +146,75 @@ function getStylesText() {
       overflow-y: auto;
       padding: 20px;
       line-height: 1.5;
+    }
+
+    .instructions-content * {
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Heading styles with proper spacing */
+    .instructions-content h3 {
+      margin-top: 24px;
+      margin-bottom: 6px;
+      color: #008000;
+    }
+    
+    .instructions-content h4 {
+      margin-top: 16px;
+      margin-bottom: 4px;
+      color: #006600;
+    }
+    
+    /* The first heading should have less top margin */
+    .instructions-content h3:first-child,
+    .instructions-content h4:first-child {
+      margin-top: 0;
+    }
+    
+    /* Paragraph spacing */
+    .instructions-content p {
+      margin-bottom: 8px;
+    }
+    
+    /* List spacing */
+    .instructions-content ul, 
+    .instructions-content ol {
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+    
+    .instructions-content li {
+      margin-bottom: 4px;
+    }
+    
+    /* Space between sections */
+    .instructions-content h3 + ul,
+    .instructions-content h3 + ol,
+    .instructions-content h4 + ul,
+    .instructions-content h4 + ol {
+      margin-top: 6px;
+    }
+
+    /* Style the coin icon */
+    .coin-icon {
+      height: 24px;
+      width: 24px;
+      margin-right: 0px;
+      vertical-align: middle;
+      display: inline;
+    }
+
+    /* Style the energy icons */
+    .energy-icon {
+      height: 48px;
+      width: 48px;
+      margin-right: -16px;
+      margin-left: -16px;
+      margin-top: -16px;
+      margin-bottom: -16px;
+      vertical-align: middle;
+      display: inline;
     }
 
     .instructions-footer {
@@ -167,6 +247,8 @@ function getStylesText() {
 /**
  * Shows the overlay and initializes its content
  *
+ * @function showOverlay
+ * @memberof gameInstructionsOverlay
  * @param {HTMLElement} overlay - The overlay element
  */
 function showOverlay(overlay) {
@@ -187,21 +269,75 @@ function createOverlayHTML() {
     <div class="instructions-panel">
       <div class="instructions-header">SPELUITLEG</div>
       <div class="instructions-content">
-        <p>Welkom bij STEAM-POWER! In dit spel bouw je een duurzame stad door slimme keuzes te maken over energieverbruik en -productie.</p>
-        
+        <p>Welkom bij EcoCity Quest, een spel waarin je bijleert over belangrijke concepten zoals duurzaamheid, hernieuwbare energie en klimaatbewustzijn!</p>
+
+        <h3>Het Doel van het spel</h3>
+        <p>Bouw een stad die zowel economisch succesvol als ecologisch verantwoord is.</p>
+
+        <h3>Valuta in het spel</h3>
+        <p>Het spel heeft verschillende valuta die je moet beheren:</p>
+        <ul>
+          <li>
+            <img src="Assets/images/pixelCoin.png" class="coin-icon" alt="Coins" />
+            <strong>Coins</strong> - De basis munteenheid waarmee je gebouwen upgradet, energiebronnen aanschaft en natuurelementen plaatst.
+          </li>
+          <li>
+            <img src="Assets/images/pixelGreenEnergy.svg" class="energy-icon" alt="Green Energy" />
+            <strong>Groene Energie (kWh)</strong> - Hernieuwbare energie die door duurzame bronnen zoals windmolens, zonnepanelen en waterraderen wordt opgewekt. Hoe meer groene energie, hoe beter voor je luchtkwaliteit.
+          </li>
+          <li>
+            <img src="Assets/images/pixelGreyEnergy.svg" class="energy-icon" alt="Grey Energy" />
+            <strong>Grijze Energie (kW)</strong> - Conventionele energie die vervuilend is maar minder kost. Hoe meer grijze energie, hoe lager je luchtkwaliteitsscore.
+          </li>
+          <li>
+            <strong>Luchtkwaliteit (score)</strong> - Een indicatie voor hoe schoon je stad is. Hoe hoger je luchtkwaliteit, hoe meer mensen de stad aantrekt en hoe meer belastingsgeld je ontvangt.
+          </li>
+        </ul>
+
+        <h3>Stadsopbouw</h3>
+        <p>Je stad bestaat uit twee belangrijke zones:</p>
+        <ul>
+          <li><strong>Binnenstad</strong> - Dit is waar alle gebouwen zoals huizen, bedrijven en diensten zich bevinden. Hier kun je gebouwen upgraden om ze energiezuiniger te maken.</li>
+          <li><strong>Buitenstad</strong> - In dit gebied kun je energiebronnen plaatsen (windmolens, zonnepanelen, waterraderen, kerncentrales) en natuurelementen zoals bomen en struiken planten om je luchtkwaliteit te verbeteren.</li>
+        </ul>
+
         <h3>Hoe speel je:</h3>
-        <p>1. <strong>Bouw je stad</strong> - Klik op gebouwen om ze aan te kopen en te beheren. Ieder gebouw heeft specifieke kosten en opbrengsten.</p>
-        <p>2. <strong>Beheer je energie</strong> - Je kunt kiezen tussen grijze energie (goedkoper maar vervuilend) of groene energie (duurzamer maar duurder). Schakel gebouwen tussen deze opties door op de gebouwdetails te klikken.</p>
-        <p>3. <strong>Produceer duurzame energie</strong> - Plaats windmolens, zonnepanelen en waterkrachtcentrales in de buitenstad om groene energie te produceren.</p>
-        <p>4. <strong>Verzamel belastingen</strong> - Elke 5 minuten verzamel je belastinginkomsten. Een hogere luchtkwaliteit (score) levert meer belastinggeld op!</p>
-        
+        <p>1. <strong>Bheer je binnenstad</strong> - Upgrade gebouwen zodat ze energiezuiniger zijn. Elk gebouw heeft specifieke kosten en energieverbruik.</p>
+        <p>2. <strong>Beheer je energie</strong> - Kies tussen grijze energie (goedkoper maar vervuilend) of groene energie (duurder maar schoon). Schakel gebouwen tussen deze opties via de gebouwdetails.</p>
+        <p>3. <strong>Produceer duurzame energie</strong> - Plaats windmolens, zonnepanelen en waterraderen in de buitenstad om groene energie te produceren. Let op: deze hebben wisselende opbrengsten gebaseerd op natuurlijke factoren!</p>
+        <p>4. <strong>Plant bomen en natuur</strong> - Verbeter je luchtkwaliteit door natuurelementen zoals bomen en struiken te plaatsen die CO2 absorberen.</p>
+        <p>5. <strong>Verzamel belastingen</strong> - Elke 5 minuten verzamel je belastinginkomsten. De formule is: 10 coins (basisbedrag) + je luchtkwaliteitsscore. Een hogere luchtkwaliteit levert dus meer inkomsten op!</p>
+        <p>6. <strong>Behaal doelstellingen</strong> - Verdien extra coins (subsidies) door doelstellingen te halen die gericht zijn op duurzaamheid. Je vindt meer info over de doelstellingen op de menupagina.</p>
+
+        <h3>Link met de Echte Wereld</h3>
+        <p>EcoCity Quest is niet alleen een spel, maar ook een leermiddel om te begrijpen hoe duurzaamheid in de echte wereld werkt:</p>
+
+        <h4>Klimaatverandering</h4>
+        <p>In het spel ervaar je hoe de keuze voor grijze energie de luchtkwaliteit verslechtert, net zoals in de echte wereld waar fossiele brandstoffen bijdragen aan klimaatverandering. 
+        Door te kiezen voor groene energie in het spel, leer je over de positieve impact die hernieuwbare energie kan hebben op het milieu en op de samenleving.</p>
+
+        <h4>Energietransitie</h4>
+        <p>Je ervaart de uitdagingen van de energietransitie: groene energie is initieel duurder maar beter voor het milieu op lange termijn. Dit weerspiegelt de echte uitdagingen bij het overschakelen naar duurzame energiebronnen.</p>
+
+        <h4>Economische Impact</h4>
+        <p>Het belastingsysteem in het spel demonstreert hoe een schonere omgeving economische voordelen kan opleveren, vergelijkbaar met hoe duurzame steden in de werkelijkheid aantrekkelijker zijn voor bewoners en bedrijven.</p>
+
+        <h4>Natuurlijke Variabiliteit</h4>
+        <p>De wisselende opbrengst van windmolens, zonnepanelen en waterraderen simuleert de echte uitdagingen van hernieuwbare energie: de wind waait niet altijd, de zon schijnt niet 's nachts, en waterstanden kunnen variëren. Dit leert je over de noodzaak van een gevarieerde energiemix.</p>
+
+        <h4>Europese Doelstellingen</h4>
+        <p>Sommige doelstellingen in het spel zijn gebaseerd op echte EU-richtlijnen voor hernieuwbare energie en CO2-reductie, waardoor je inzicht krijgt in internationale klimaatakkoorden.</p>
+
         <h3>Tips:</h3>
-        <p>• Houd je groene energieproductie in evenwicht met je verbruik</p>
-        <p>• Let op je luchtkwaliteitsscore - deze beïnvloedt je belastinginkomsten</p>
-        <p>• Verdien achievements door bepaalde doelen te bereiken</p>
-        <p>• Sla je voortgang regelmatig op met de checkpoint-functie</p>
-        
-        <p>Veel plezier met het bouwen van jouw duurzame stad!</p>
+        <ul>
+          <li>Diversifieer je energiebronnen voor een stabiele energievoorziening</li>
+          <li>Investeer vroeg in het spel in hernieuwbare energiebronnen voor voordelen op lange termijn</li>
+          <li>Let op je luchtkwaliteitsscore, die beïnvloedt direct je belastinginkomsten</li>
+          <li>Upgrade gebouwen om hun energie-efficiëntie te verbeteren</li>
+          <li>Sla regelmatig je voortgang op met de checkpoint-functie</li>
+        </ul>
+
+        <p>Veel plezier met het bouwen van jullie duurzame stad, en vergeet niet: de keuzes die je maakt in het spel zijn een vereenvoudigde versie van de echte uitdagingen waarmee we als samenleving worden geconfronteerd in onze strijd tegen klimaatverandering!</p>
       </div>
       <div class="instructions-footer">
         <button class="close-button">Sluiten</button>
