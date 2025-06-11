@@ -75,19 +75,16 @@ class GameStatisticsRepository {
   }
 
 async deleteById(id) {
-  // 1. First get the currencyId
   const gameStats = await this.prisma.gameStatistics.findUnique({
     where: { id },
     select: { currencyId: true },
   });
 
-  // 2. Use findFirst instead of findUnique for checkpoint
   const checkpoint = await this.prisma.checkpoint.findFirst({
     where: { gameStatisticsId: id },
     select: { currencyId: true, id: true },
   });
 
-  // 3. Delete related records first
   await this.prisma.checkpoint.deleteMany({
     where: { gameStatisticsId: id },
   });
@@ -99,31 +96,27 @@ async deleteById(id) {
     await this.prisma.gameBuildings.deleteMany({
     where: { gameStatisticsId: null, checkpointId: null },
   });
-  
+
   await this.prisma.asset.deleteMany({
     where: { gameStatisticsId: id },
   });
 
-  // 4. Delete the main gameStatistics record
   await this.prisma.gameStatistics.delete({
     where: { id },
   });
 
-  // 5. Finally delete currencies if they exist
   if (gameStats?.currencyId) {
     await this.prisma.currency.delete({
       where: { id: gameStats.currencyId },
     });
   }
 
-  // Only delete checkpoint currency if it's different from gameStats currency
   if (checkpoint?.currencyId && checkpoint.currencyId !== gameStats?.currencyId) {
     await this.prisma.currency.delete({
       where: { id: checkpoint.currencyId },
     });
   }
 
-  // Delete assets that belong to the checkpoint (if checkpoint exists)
   if (checkpoint?.id) {
     await this.prisma.asset.deleteMany({
       where: { checkpointId: checkpoint.id },
