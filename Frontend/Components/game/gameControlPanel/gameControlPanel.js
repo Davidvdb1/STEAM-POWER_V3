@@ -14,6 +14,8 @@ import {
   buildCurrencyDisplayPayload,
   calculateTotalGreenCost,
   unpackCheckpointPayload,
+  calculateTotalGreyProduction,
+  calculateTotalGreyCost,
 } from "../utils/gameDataHelpers.js";
 import { getAuthFromSession } from "../utils/sessionHelper.js";
 import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
@@ -122,6 +124,8 @@ class GameControlPanel extends HTMLElement {
 
     this._lastEnergyTick = Date.now();
     this._lastTaxTick = Date.now();
+
+    this._greyShortageTimeout = null;
 
     this._onAssetDeleted = () => {
       this._detailContainer.classList.add("hidden");
@@ -420,6 +424,7 @@ async _updateStatistics() {
       const { token, groupId } = getAuthFromSession();
       const gs = await fetchGameStatistics(groupId, token);
 
+      // 1) Load & transform
       if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
         this._game.buildingData = transformBuildingData(gs.gameBuildings);
       }
@@ -429,31 +434,58 @@ async _updateStatistics() {
       this._game.gameStatisticsId = gs.id;
       this._game.currencyId = gs.currency.id;
 
+      // 2) Compute per-tick green cost & current bank
       const totalGreenCost =
         calculateTotalGreenCost(this._game.buildingData) / 60;
+      const greenBank = gs.currency.greenEnergy;
 
-      const { id: currencyId, payload: currencyPayload } = buildUpdatedCurrency(
+      // 3) Update green balance on backend
+      const { id: currencyId, payload: currencyPayload, fine: fine } = buildUpdatedCurrency(
         gs.currency,
-        totalGreenCost
+        totalGreenCost,
+        gs.assets,
+        this._game.buildingData
       );
-
       if (currencyPayload.greenEnergy < 0) {
         currencyPayload.greenEnergy = 0;
       }
-
       await updateCurrency(currencyId, currencyPayload, token);
-
       await this._updateStatistics();
 
-      //if greenEnergy is now zero, force all buildings off green, recolor, refresh detail ===
-      if (this._game.currency.greenEnergy <= 0) {
+      // 4) Determine green-shortage
+      const isGreenShort = totalGreenCost > greenBank;
+
+      // Ensure we clear grey-shortage flags if neither shortage persists
+      const totalGreyCost =
+        calculateTotalGreyCost(this._game.buildingData) / 60;
+      const totalGreyProduction = calculateTotalGreyProduction(gs.assets) / 60;
+      const isGreyShortGlobal = totalGreyCost > totalGreyProduction;
+      const greyShortMessage = `Te weinig stroomvoorziening: de belastingen worden gehalveerd en het stroomtekort wordt elke minuut betaald met ${fine} coins.`
+
+      if (
+        !isGreenShort &&
+        !isGreyShortGlobal &&
+        this._greyShortageAlertActive
+      ) {
+        // fully OK now → reset flags
+        this._greyShortageAlertActive = false;
+        this._greyShortageDelayScheduled = false;
+      }
+
+      const activeScenes = this._game.scene
+        .getScenes(true)
+        .filter((s) => typeof s.showError === "function");
+
+      // 5) Handle green-shortage first
+      if (isGreenShort) {
+        // a) Force off green
         await toggleAllBuildingsRunsOnGreenFalse(
           this._game.gameStatisticsId,
           token
         );
-
         await this._updateStatistics();
 
+        // b) Recolor
         const cityScene = this._game.scene.getScene("CityScene");
         if (cityScene) {
           for (const b of this._game.buildingData) {
@@ -461,31 +493,80 @@ async _updateStatistics() {
           }
         }
 
-        const actieveScenes = this._game.scene.getScenes(true);
-        actieveScenes.forEach(function (scene) {
-          if (typeof scene.showError === "function") {
-            scene.showError(
-              "Groene energie is op. Alle gebouwen gebruiken nu grijze energie."
+        // c) Recompute grey-shortage on updated buildings
+        const greyCostAfter =
+          calculateTotalGreyCost(this._game.buildingData) / 60;
+        const greyProduction = calculateTotalGreyProduction(gs.assets) / 60;
+        const isGreyShort = greyCostAfter > greyProduction;
+
+        if (isGreyShort) {
+          // **dual-shortage**: green + grey
+          if (
+            !this._greyShortageAlertActive &&
+            !this._greyShortageDelayScheduled
+          ) {
+            // first time: show green, then schedule grey after 4s
+            activeScenes.forEach((s) =>
+              s.showError(
+                "Groene energie is op. Alle gebouwen gebruiken nu grijze energie."
+              )
+            );
+            setTimeout(() => {
+              activeScenes.forEach((s) =>
+                s.showError(greyShortMessage)
+              );
+            }, 4000);
+            this._greyShortageAlertActive = true;
+            this._greyShortageDelayScheduled = true;
+          } else {
+            // subsequent calls: show grey shortage immediately
+            activeScenes.forEach((s) =>
+              s.showError(greyShortMessage)
             );
           }
-        });
-        // If the detail pane is currently showing a BUILDING, tear it down and re-render:
-        const { type, id } = this._currentDetail;
-        if (
-          type === "building" &&
-          id != null &&
-          !this._detailContainer.classList.contains("hidden")
-        ) {
-          // Clear whatever was inside detail‐container, then call showDetail(...) again:
-          this._detailContainer.innerHTML = "";
-          showDetail(
-            this._detailContainer,
-            this._game.buildingData,
-            this._game.assetData,
-            "building",
-            id
+        } else {
+          // **only green-shortage**
+          activeScenes.forEach((s) =>
+            s.showError(
+              "Groene energie is op. Alle gebouwen gebruiken nu grijze energie."
+            )
+          );
+          // reset any grey flags
+          this._greyShortageAlertActive = false;
+          this._greyShortageDelayScheduled = false;
+        }
+      } else if (isGreyShortGlobal) {
+        this._greyShortageDelayScheduled = false;
+        // 6) pure grey-shortage (green OK)
+        if (!this._greyShortageAlertActive) {
+          activeScenes.forEach((s) =>
+            s.showError(greyShortMessage)
+          );
+          this._greyShortageAlertActive = true;
+          this._greyShortageDelayScheduled = false;
+        } else {
+          // repeat on subsequent ticks
+          activeScenes.forEach((s) =>
+            s.showError(greyShortMessage)
           );
         }
+      }
+
+      // 7) Refresh detail pane if open on a building
+      const { type, id } = this._currentDetail;
+      if (
+        type === "building" &&
+        id != null &&
+        !this._detailContainer.classList.contains("hidden")
+      ) {
+        this._detailContainer.innerHTML = "";
+        showDetail(
+          this._detailContainer,
+          this._game.buildingData,
+          this._game.assetData,
+          "building",
+          id
+        );
       }
     } catch (e) {
       console.error("Error updating energy:", e);
@@ -964,15 +1045,25 @@ async _updateStatistics() {
    * @returns {Promise<void>} Resolves when the tax handling process is complete.
    */
   async _handleTaxes() {
-    // Get the JWT token from the session
     const { token } = getAuthFromSession();
 
-    // 1 coin for each score point, plus a base tax revenue of 10 coins
-    // If the score is negative, we still collect a base tax revenue of 10 coins
-    const collectedTaxes =
+    // compute grey‐energy production/usage
+    const greyEnergyProduction = calculateTotalGreyProduction(
+      this._game.assetData
+    );
+    const greyEnergyUse = calculateTotalGreyCost(this._game.buildingData);
+
+    // 1 coin per score point, plus base 10
+    let collectedTaxes =
       this._game.currency.score <= 0 ? 10 : 10 + this._game.currency.score;
 
-    // Update the currency with the added tax revenue
+    // if grey‐energy is insufficient, halve the taxes
+    const isGreyShort = greyEnergyProduction < greyEnergyUse;
+    if (isGreyShort) {
+      collectedTaxes = Math.floor(collectedTaxes / 2);
+    }
+
+    // Update the currency
     await updateCurrency(
       this._game.currency.id,
       {
@@ -984,20 +1075,28 @@ async _updateStatistics() {
       token
     );
 
-    // Show a popup on the active scene with the collected taxes
-    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
-      const scene = this._game.scene.getScene(key);
-      if (!scene || !scene.scene) continue;
-
-      if (scene.scene.isActive() && typeof scene.showError === "function") {
-        scene.showError(
-          `De stad verdiende ${collectedTaxes} coins van de belastingen!`
-        );
-        break;
+    // Show a popup on the active scene
+    const showTaxMessage = () => {
+      for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+        const scene = this._game.scene.getScene(key);
+        if (scene?.scene?.isActive() && typeof scene.showError === "function") {
+          scene.showError(
+            `De stad verdiende ${collectedTaxes} coins van de belastingen!`
+          );
+          break;
+        }
       }
+    };
+
+    if (isGreyShort) {
+      // delay the popup by 4 seconds when grey is short
+      setTimeout(showTaxMessage, 4000);
+    } else {
+      // show immediately otherwise
+      showTaxMessage();
     }
 
-    // Update the statistics after collecting taxes to rerender the currency display
+    // Refresh stats so the display updates
     await this._updateStatistics();
   }
 }
