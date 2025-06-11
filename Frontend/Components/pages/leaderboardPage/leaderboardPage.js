@@ -1,6 +1,10 @@
 //#region IMPORTS
 //#endregion IMPORTS
 
+import { getAuthFromSession } from '../../../Components/game/utils/sessionHelper.js';
+import { fetchGameStatistics } from '../../../Components/game/service/gameService.js';
+import { calculateGreenBuildingPercentage } from '../../../Components/game/utils/gameDataHelpers.js';
+
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
@@ -19,6 +23,9 @@ template.innerHTML = /*html*/`
                         <th>Bonus Score</th>
                         <th>Energy</th>
                         <th>Battery Level</th>
+                        <th>Luchtkwaliteit</th>
+                        <th>Coins</th>
+                        <th>Groene stad (%)</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboard-body">
@@ -47,7 +54,10 @@ window.customElements.define('leaderboard-れ', class extends HTMLElement {
             'Members': { key: 'members', sortable: false },
             'Bonus Score': { key: 'bonusScore', sortable: true },
             'Energy': { key: 'energy', sortable: true },
-            'Battery Level': { key: 'batteryLevel', sortable: true }
+            'Battery Level': { key: 'batteryLevel', sortable: true },
+            'Luchtkwaliteit': { key: 'airQuality', sortable: true },
+            'Coins': { key: 'coins', sortable: true },
+            'Groene stad (%)': { key: 'greenPercentage', sortable: true }
         };
     }
 
@@ -60,7 +70,7 @@ window.customElements.define('leaderboard-れ', class extends HTMLElement {
     }
 
     async connectedCallback() {
-        this.groupData = await this.getGroupData();
+        this.groupData = await this.getGameData();
         this.setupSorting();
         this.renderLeaderboard();
     }
@@ -140,6 +150,9 @@ window.customElements.define('leaderboard-れ', class extends HTMLElement {
                 <td>${group.bonusScore}</td>
                 <td>${group.energy.toFixed(2)} Wh</td>
                 <td>${group.batteryLevel.toFixed(2)} Wh</td>
+                <td>${group.airQuality == null ? "/" : group.airQuality}</td>
+                <td>${group.coins == null ? "/" : group.coins}</td>
+                <td>${group.greenPercentage == null ? "/" : `${group.greenPercentage}%`}</td>
             `;
             this.$tbody.appendChild(row);
         });
@@ -166,7 +179,20 @@ window.customElements.define('leaderboard-れ', class extends HTMLElement {
             console.error('Error fetching group data:', error);
             return [];
         }
+    }
 
+    async getGameData() {
+        const token = getAuthFromSession();
+        const oldGroupData = await this.getGroupData();
+        return Promise.all(oldGroupData.map(async (group) => {
+            const gameStatistics = await fetchGameStatistics(group.id, token);
+            return {
+                ...group,
+                airQuality: gameStatistics?.currency?.score || null,
+                coins: gameStatistics?.currency?.coins || null,
+                greenPercentage: gameStatistics ? calculateGreenBuildingPercentage(gameStatistics.gameBuildings) : null
+            };
+        }));
     }
 
 });
