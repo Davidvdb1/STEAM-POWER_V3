@@ -958,11 +958,14 @@ async function main() {
   });
   // const checkpoint3 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency3.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }, { id: buildingLevels[2].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset2.id }, { id: asset3.id }] } } });
 
+  const multiplier = await prisma.multiplier.create({ data: { solar: 1.0, wind: 1.0, water: 1.0} });
+
   // GAME STATISTICS
   const gameStats = await prisma.gameStatistics.create({
     data: {
       group: { connect: { id: group1.id } },
       currency: { connect: { id: currency3.id } },
+      multiplier: {connect: { id: multiplier.id } }
     },
   });
 

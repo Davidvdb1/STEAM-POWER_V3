@@ -113,9 +113,12 @@ class GameControlPanel extends HTMLElement {
 
     this._currentDetail = { type: null, id: null };
 
+    this._lastMessageShown = null;
+
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
+    this._hasInitializedMessages = false; 
 
     this._lastEnergyTick = Date.now();
     this._lastTaxTick = Date.now();
@@ -340,40 +343,69 @@ class GameControlPanel extends HTMLElement {
    * Emits an event when the statistics update is complete.
    * @returns {Promise<void>}
    * */
-  async _updateStatistics() {
-    try {
-      const { token, groupId } = getAuthFromSession();
-      const gs = await fetchGameStatistics(groupId, token);
+async _updateStatistics() {
+  try {
+    const { token, groupId } = getAuthFromSession();
+    const gs = await fetchGameStatistics(groupId, token);
 
-      if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
-        this._game.buildingData = transformBuildingData(gs.gameBuildings);
-      }
-      this._game.token = token;
-      this._game.groupId = groupId;
-      this._game.assetData = gs.assets;
-      this._game.gameStatisticsId = gs.id;
-      this._game.currencyId = gs.currency.id;
-      this._game.currency = gs.currency;
-
-      const payload = buildCurrencyDisplayPayload({
-        buildings: this._game.buildingData,
-        assets: gs.assets,
-        currency: gs.currency,
-        componentMultipliers: {
-          solar: this.solar,
-          water: this.water,
-          wind: this.wind,
-        },
-      });
-      this._statsContainer.data = payload;
-
-      // Emit event when statistics update is complete
-      this._game.events.emit("statsUpdateComplete");
-    } catch (e) {
-      console.error("Error fetching stats:", e);
-      // Still emit the event to prevent hanging
-      this._game.events.emit("statsUpdateComplete");
+    if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
+      this._game.buildingData = transformBuildingData(gs.gameBuildings);
     }
+
+    this._game.token = token;
+    this._game.groupId = groupId;
+    this._game.assetData = gs.assets;
+    this._game.gameStatisticsId = gs.id;
+    this._game.currencyId = gs.currency.id;
+    this._game.currency = gs.currency;
+    this._game.multipliers = gs.multiplier;
+
+    const newMessage = gs.multiplier?.message;
+
+    // Alleen tonen als:
+    // - de game al eerder geïnit is (dus niet bij opstart)
+    // - de message effectief nieuw is
+    if (this._hasInitializedMessages && newMessage && newMessage !== this._lastMessageShown) {
+      // voorkom tonen van allereerste boodschap
+      if (this._lastMessageShown !== null) {
+        for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+          const scene = this._game.scene.getScene(key);
+          if (scene?.scene?.isActive() && typeof scene.showError === "function") {
+            scene.showError(newMessage);
+            break;
+          }
+        }
+      }
+
+    // in alle gevallen updaten voor vergelijking met volgende messages
+    this._lastMessageShown = newMessage;
+  }
+
+    // Eens dit doorlopen is, zetten we de flag actief
+    this._hasInitializedMessages = true;
+
+    const payload = buildCurrencyDisplayPayload({
+      buildings: this._game.buildingData,
+      assets: gs.assets,
+      currency: gs.currency,
+      componentMultipliers: {
+        solar: this._game.multipliers.solar,
+        water: this._game.multipliers.water,
+        wind: this._game.multipliers.wind,
+      },
+    });
+    this._statsContainer.data = payload;
+
+    this._game.events.emit("statsUpdateComplete");
+  } catch (e) {
+    console.error("Error fetching stats:", e);
+    this._game.events.emit("statsUpdateComplete");
+  }
+}
+
+
+  async getEventMessage() {
+  
   }
 
   /**

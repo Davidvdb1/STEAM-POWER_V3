@@ -3,6 +3,8 @@ const GameBuildings = require("./gameBuildings");
 const Asset = require("./asset");
 const Checkpoint = require("./checkpoint");
 const Achievement = require("./achievement");
+const Multiplier = require("./multiplier");
+
 
 /**
  * Represents overall game statistics, including currency, buildings, checkpoints, assets, and achievements.
@@ -30,6 +32,7 @@ class GameStatistics {
       checkpoints = [],
       assets = [],
       achievements = [],
+      multiplier
     },
     validate = true
   ) {
@@ -40,6 +43,7 @@ class GameStatistics {
     this.checkpoints = checkpoints;
     this.assets = assets;
     this.achievements = achievements;
+    this.multiplier = multiplier;
 
     if (validate) this.validate();
   }
@@ -108,6 +112,7 @@ class GameStatistics {
       checkpoints: this.checkpoints,
       assets: this.assets,
       achievements: this.achievements,
+      multiplier: this.multiplier,
     };
   }
 
@@ -130,6 +135,7 @@ class GameStatistics {
       {
         id: prismaGS.id,
         currency: prismaGS.currency ? Currency.from(prismaGS.currency) : null,
+        multiplier: prismaGS.multiplier ? Multiplier.from(prismaGS.multiplier) : null,
         gameBuildings: [],
         groupId: prismaGS.groupId,
         checkpoints: [],

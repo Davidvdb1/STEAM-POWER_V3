@@ -1,6 +1,7 @@
 //#region IMPORTS
 import "../../game/gameControlPanel/gameControlPanel.js"
 import "../../game/gameAdminPanel/gameAdminPanel.js"
+import "../../game/components/randomEventButtons/randomEventButtons.js";
 //#endregion IMPORTS
 
 //#region GAMEPAGE
@@ -11,6 +12,7 @@ template.innerHTML = /*html*/`
     </style>
 
     <gameadminpanel-れ></gameadminpanel-れ>
+    <randomeventbuttons-れ></randomeventbuttons-れ>
     <gamecontrolpanel-れ></gamecontrolpanel-れ>
 `;
 //#endregion GAMEPAGE
@@ -22,6 +24,7 @@ window.customElements.define('gamepage-れ', class extends HTMLElement {
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$adminPanel = this._shadowRoot.querySelector("gameadminpanel-れ");
+        this.$randomEventButtons = this._shadowRoot.querySelector("randomeventbuttons-れ");
     }
 
     // component attributes
@@ -41,6 +44,7 @@ window.customElements.define('gamepage-れ', class extends HTMLElement {
         
         if (!isAdmin && !isTeacher) {
             this.$adminPanel?.remove();
+            this.$randomEventButtons?.remove();
         }
     }
 

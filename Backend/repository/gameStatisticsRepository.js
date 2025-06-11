@@ -45,6 +45,7 @@ class GameStatisticsRepository {
    * @param {number} params.currency.greyEnergy - The amount of grey energy.
    * @param {number} params.currency.coins - The number of coins.
    * @param {number} params.currency.score - The score value.
+   * 
    * @returns {Promise<GameStatistics>} The created GameStatistics instance.
    */
   async create({ groupId, currency }) {
@@ -58,6 +59,13 @@ class GameStatisticsRepository {
             greyEnergy: currency.greyEnergy,
             coins: currency.coins,
             score: currency.score,
+          },
+        },
+        multiplier: {
+          create: {
+            solar: 1.0,
+            wind: 1.0,
+            water: 1.0,
           },
         },
       },
@@ -125,6 +133,7 @@ class GameStatisticsRepository {
       includeGameBuildings = true,
       includeAssets = true,
       includeCheckpoints = true,
+      includeMultiplier = true,
       includeGroup = false,
     } = {}
   ) {
@@ -141,6 +150,7 @@ class GameStatisticsRepository {
             }
           : false,
         assets: includeAssets,
+        multiplier: includeMultiplier,
         checkpoints: includeCheckpoints
           ? {
               include: {
@@ -192,6 +202,7 @@ class GameStatisticsRepository {
               }
             : false,
         assets: opts.includeAssets ?? true,
+        multiplier: opts.includeMultiplier ?? true,
         checkpoints: opts.includeCheckpoints
           ? {
               include: {
@@ -320,50 +331,58 @@ class GameStatisticsRepository {
     return currency ? Currency.from(currency) : null;
   }
 
-  /**
-   * Increments the green energy value for a group's currency based on the provided green energy amount,
-   * the type of green energy asset, and the energy multiplier of each matching asset owned by the group.
-   *
-   * @async
-   * @param {string|number} groupId - The unique identifier of the group.
-   * @param {number} greenEnergy - The base amount of green energy to increment per asset.
-   * @param {'WIND'|'SOLAR'|'WATER'} type - The type of green energy asset (case-insensitive).
-   * @returns {Promise<Currency>} The updated Currency instance after incrementing green energy.
-   * @throws {Error} If the group statistics, currency, or assets are not found, or if the type is unknown.
-   */
-  async incrementGreenEnergyWithMultiplier(groupId, greenEnergy, type) {
-    const gs = await this.findByGroupId(groupId);
+    /**
+     * Increments the green energy value for a group's currency based on the provided green energy amount,
+     * the type of green energy asset, and the energy multiplier of each matching asset owned by the group.
+     *
+     * @async
+     * @param {string|number} groupId - The unique identifier of the group.
+     * @param {number} greenEnergy - The base amount of green energy to increment per asset.
+     * @param {'WIND'|'SOLAR'|'WATER'} type - The type of green energy asset (case-insensitive).
+     * @returns {Promise<Currency>} The updated Currency instance after incrementing green energy.
+     * @throws {Error} If the group statistics, currency, or assets are not found, or if the type is unknown.
+     */
+    async incrementGreenEnergyWithMultiplier(currency, greenEnergy, type, assetMultiplier, assets) {
+      const typeToAssetLabel = {
+        SOLAR: "zonnepaneel",
+        WIND: "windmolen",
+        WATER: "waterrad",
+      };
 
-    if (!gs || !gs.currency || !gs.assets) {
-      throw new Error("GameStatistics, currency of assets niet gevonden");
+      const label = typeToAssetLabel[type?.toUpperCase()];
+      if (!label) throw new Error(`Onbekend asset type: ${type}`);
+
+      const relevantAssets = assets.filter(
+        (asset) => asset.type?.toLowerCase() === label
+      );
+
+      const typeMap = {
+        zonnepaneel: "solar",
+        windmolen: "wind",
+        waterrad: "water",
+      };
+
+      const multiplierKey = typeMap[label];
+      const typeMultiplier = assetMultiplier[multiplierKey];
+
+      if (typeof typeMultiplier !== "number") {
+        throw new Error(`Multiplier ontbreekt of ongeldig voor type ${multiplierKey}`);
+      }
+
+      const totalGain = relevantAssets.length * greenEnergy * typeMultiplier;
+
+      const updated = await this.prisma.currency.update({
+        where: { id: currency.id },
+        data: {
+          greenEnergy: { increment: totalGain },
+        },
+      });
+
+      return Currency.from(updated);
     }
 
-    const typeMap = {
-      WIND: "windmolen",
-      SOLAR: "zonnepaneel",
-      WATER: "waterrad",
-    };
 
-    const assetType = typeMap[type.toUpperCase()];
-    if (!assetType) throw new Error(`Onbekend green energy type: ${type}`);
 
-    const matchingAssets = gs.assets.filter(
-      (a) => a.type.toLowerCase() === assetType
-    );
-
-    const totalGain = matchingAssets.reduce((sum, asset) => {
-      return sum + greenEnergy * asset.energy;
-    }, 0);
-
-    const updated = await this.prisma.currency.update({
-      where: { id: gs.currency.id },
-      data: {
-        greenEnergy: { increment: totalGain },
-      },
-    });
-
-    return Currency.from(updated);
-  }
 
   //########################################################################
   //                                 ASSETS
@@ -1019,6 +1038,46 @@ class GameStatisticsRepository {
   async findAllAchievements() {
     const achievements = await this.prisma.achievement.findMany();
     return achievements.map((ach) => Achievement.from(ach));
+  }
+
+  //########################################################################
+  //                              RANDOM EVENTS
+  //########################################################################
+
+  async updateMultipliersAndMessage(data) {
+    const { zonnepaneel, waterrad, windmolen } = data.multipliers;
+    const message = data.message
+
+    const allMultipliers = await this.prisma.multiplier.findMany();
+
+    for (const multiplier of allMultipliers) {
+      await this.prisma.multiplier.update({
+        where: { id: multiplier.id },
+        data: {
+          solar: zonnepaneel,
+          water: waterrad,
+          wind: windmolen,
+          message: message,
+        },
+      });
+    }
+  }
+
+  async updateDamageAndMessage(data) {
+    const { zonnepaneel, waterrad, windmolen, message } = data;
+    const allMultipliers = await this.prisma.multiplier.findMany();
+
+    for (const multiplier of allMultipliers) {
+      await this.prisma.multiplier.update({
+        where: { id: multiplier.id },
+        data: {
+          solarDamage: zonnepaneel,
+          waterDamage: waterrad,
+          windDamage: windmolen,
+          message: message,
+        },
+      });
+    }
   }
 }
 

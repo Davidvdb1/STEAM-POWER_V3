@@ -1092,6 +1092,20 @@ class GameStatisticsService {
       isReached: reachedAchievementIds.has(achievement.id),
     }));
   }
+
+  //########################################################################
+  //                              RANDOM EVENTS
+  //########################################################################
+
+  async updateMultipliersAndMessage(multipliers) {
+    await gameStatisticsRepository.updateMultipliersAndMessage(multipliers);
+  }
+
+  async updateDamageAndMessage(multipliers) {
+    await gameStatisticsRepository.updateDamageAndMessage(multipliers);
+  }
 }
+
+
 
 module.exports = new GameStatisticsService();
