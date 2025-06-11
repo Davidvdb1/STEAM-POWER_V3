@@ -276,9 +276,8 @@ function createOverlayHTML() {
       <div class="instructions-header">SPELUITLEG</div>
       <div class="instructions-content">
         <p>Welkom bij EcoCity Quest, een spel waarin je bijleert over belangrijke concepten zoals duurzaamheid, hernieuwbare energie en klimaatbewustzijn!</p>
-        
-        <h3>Het Doel van het spel</h3>
-        <p>Bouw een stad die zowel economisch succesvol als ecologisch verantwoord is.</p>
+        <p>In dit spel bouw je een stad die zowel economisch succesvol als ecologisch verantwoord is. 
+        Je leert hoe je duurzame energiebronnen kunt gebruiken en wat de impact is van je keuzes op het milieu.</p>
 
         <h3>Valuta in het spel</h3>
         <p>Het spel heeft verschillende valuta die je moet beheren:</p>
@@ -345,6 +344,7 @@ function createOverlayHTML() {
         <h4>Belastingen</h4>
         <p>Elke 5 minuten verzamel je belastinginkomsten van de inwoners van je stad. De formule is: 10 coins (basisbedrag) + luchtkwaliteitsscore.</p>
         <p>Een hogere luchtkwaliteit betekent dat meer mensen in je stad willen wonen, wat leidt tot hogere belastinginkomsten.</p>
+        <p>Aan de hand van de timer naast de coins kan je zien wanneer je volgende belastinginkomsten worden ontvangen.</p>
 
         <h4>Inkomsten</h4>
         <p>Er zijn verschillende manieren om inkomsten te genereren:</p>
@@ -359,6 +359,10 @@ function createOverlayHTML() {
         <p>Als je meer groene energie verbruikt dan je produceert, dan worden alle gebouwen automatisch terug omgeschakeld naar grijze energie.</p>
         <p>Als je ook niet meer genoeg grijze energie hebt, dan moet je extra betalen om energie aan te kopen en krijg je maar 50% van je belastingsinkomsten omdat de inwoners last hadden van een stroompanne.</p>
         <p>Als je niet meer genoeg coins hebt om energie aan te kopen, dan ligt je stad volledig zonder stroom en vluchten alle inwoners. Je moet in dit geval het spel opnieuw beginnen</p>
+
+        <h3>Checkpoints</h3>
+        <p>Je kan je voortgang opslaan met de checkpoint-functie. Met deze functie kan je je huidige status volledig opslaan en later terugkeren naar dit punt in het spel.</p>
+        <p>Om een checkpoint te maken, klik je op de "Save" knop rechtsonder op het scherm. Om terug te keren naar een eerder checkpoint, klik je op de "Load" knop en selecteer je de gewenste checkpoint.</p>
 
         <h3>Hoe speel je:</h3>
         <p>1. <strong>Bheer je binnenstad</strong> - Upgrade gebouwen zodat ze energiezuiniger zijn. Elk gebouw heeft specifieke kosten en energieverbruik.</p>
