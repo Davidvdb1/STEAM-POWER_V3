@@ -83,11 +83,30 @@ export function createCityScene() {
      * @memberof CityScene
      */
     preload() {
-      this.load.tilemapTiledJSON("innerCityMap", "Assets/json/binnenstad.json");
-      this.load.image(
-        "tilesetImage",
-        "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
-      );
+      // this.load.tilemapTiledJSON("innerCityMap", "Assets/json/binnenstad.json");
+      // this.load.image(
+      //   "tilesetImage",
+      //   "Assets/images/Modern_Exteriors_Complete_Tileset_Custom.png"
+      // );
+      this.load.tilemapTiledJSON("innerCityMap", "assets/json/binnenstad-met-animaties.json");
+      // Main tileset
+      this.load.image("mainTileset", "assets/images/tilesets/Modern_Exteriors_Complete_Tileset_Custom.png");
+      // Additional tilesets for animations
+      this.load.image("billboardImage", "assets/images/tilesets/billboard.png");
+      this.load.image("busDoorImage", "assets/images/tilesets/Bus_Door.png");
+      this.load.image("charactersImage", "assets/images/tilesets/Characters.png");
+      this.load.image("clothesHangingImage", "assets/images/tilesets/Clothes_Hanging.png");
+      this.load.image("dumpsterImage", "assets/images/tilesets/Dumpster.png");
+      this.load.image("fountainImage", "assets/images/tilesets/Fountain.png");
+      this.load.image("helicopterDoorImage", "assets/images/tilesets/Helicopter_Door.png");
+      this.load.image("hospitalGarageDoorImage", "assets/images/tilesets/Hospital_Garage_Door.png");
+      this.load.image("hospitalStretcherImage", "assets/images/tilesets/Hospital_Stretcher.png");
+      this.load.image("policeStationDoorImage", "assets/images/tilesets/Police_Station_Door.png");
+      this.load.image("spotlightImage", "assets/images/tilesets/Spotlight.png");
+      this.load.image("subwayBuskerImage", "assets/images/tilesets/Subway_Busker.png");
+      this.load.image("subwayElevatorImage", "assets/images/tilesets/Subway_Elevator_Going_Down.png");
+      this.load.image("townHallDoorImage", "assets/images/tilesets/Town_Hall_Balcony_Door.png");
+
     }
 
     /**
@@ -96,16 +115,27 @@ export function createCityScene() {
      */
     create() {
       this.map = this.make.tilemap({ key: "innerCityMap" });
-      const tileset = this.map.addTilesetImage(
-        "Modern_Exteriors_Complete_Tileset_Custom",
-        "tilesetImage"
-      );
+      const mainTileset = this.map.addTilesetImage("Modern_Exteriors_Complete_Tileset_Custom", "mainTileset");
+      const billboardTileset = this.map.addTilesetImage("Billboard", "billboardImage");
+      const busDoorTileset = this.map.addTilesetImage("Bus_Door", "busDoorImage");
+      const charactersTileset = this.map.addTilesetImage("Characters", "charactersImage");
+      const clothesHangingTileset = this.map.addTilesetImage("Clothes_Hanging", "clothesHangingImage");
+      const dumpsterTileset = this.map.addTilesetImage("Dumpster", "dumpsterImage");
+      const fountainTileset = this.map.addTilesetImage("Fountain", "fountainImage");
+      const helicopterDoorTileset = this.map.addTilesetImage("Helicopter_Door", "helicopterDoorImage");
+      const hospitalGarageDoorTileset = this.map.addTilesetImage("Hospital_Garage_Door", "hospitalGarageDoorImage");
+      const hospitalStretcherTileset = this.map.addTilesetImage("Hospital_Stretcher", "hospitalStretcherImage");
+      const policeStationDoorTileset = this.map.addTilesetImage("Police_Station_Door", "policeStationDoorImage");
+      const spotlightTileset = this.map.addTilesetImage("Spotlight", "spotlightImage");
+      const subwayBuskerTileset = this.map.addTilesetImage("Subway_Busker", "subwayBuskerImage");
+      const subwayElevatorTileset = this.map.addTilesetImage("Subway_Elevator_Going_Down", "subwayElevatorImage");
+      const townHallDoorTileset = this.map.addTilesetImage("Town_Hall_Balcony_Door", "townHallDoorImage");
 
-      this.layer1 = this.map.createLayer("Layer-1", tileset);
-      this.layer2 = this.map.createLayer("Layer-2", tileset);
-      this.layer3 = this.map.createLayer("Layer-3", tileset);
-      this.layer4 = this.map.createLayer("Layer-4", tileset);
-      this.layer5 = this.map.createLayer("Layer-5", tileset);
+      this.layer1 = this.map.createLayer("Layer-1", mainTileset);
+      this.layer2 = this.map.createLayer("Layer-2", [mainTileset, fountainTileset, hospitalGarageDoorTileset, townHallDoorTileset]);
+      this.layer3 = this.map.createLayer("Layer-3", [mainTileset, billboardTileset, charactersTileset, dumpsterTileset, helicopterDoorTileset, hospitalStretcherTileset, policeStationDoorTileset, spotlightTileset, subwayElevatorTileset]);
+      this.layer4 = this.map.createLayer("Layer-4", [mainTileset, busDoorTileset, subwayBuskerTileset]);
+      this.layer5 = this.map.createLayer("Layer-5", [mainTileset, clothesHangingTileset]);
 
       setCameraBounds(this);
       handleZoom(this);
