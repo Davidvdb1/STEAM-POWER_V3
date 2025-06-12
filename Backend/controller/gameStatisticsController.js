@@ -199,7 +199,6 @@ router.get("/:id/currency", async (req, res) => {
  * @returns {Currency}                               – The updated Currency object.
  */
 router.put("/:currencyId/currency", async (req, res) => {
-  console.log("updateCurrency payload:", req.body);
   try {
     const updated = await gameStatisticsService.updateCurrency(
       req.params.currencyId,
@@ -272,7 +271,6 @@ router.post("/:id/currency/increment", async (req, res) => {
  * @returns {Asset}                                     – The created asset object.
  */
 router.post("/:id/assets", async (req, res) => {
-  console.log(req.body, req.params.id);
   try {
     const asset = await gameStatisticsService.addAsset(req.params.id, req.body);
     res.status(201).json(asset);
@@ -358,13 +356,11 @@ router.post("/:id/checkpoints", async (req, res) => {
  * @returns {Checkpoint[]}                 – An array of checkpoint objects.
  */
 router.get("/:id/checkpoints", async (req, res) => {
-  console.log(`→ HIT GET /gameStatistics/${req.params.id}/checkpoints`);
   try {
     const checkpoints =
       await gameStatisticsService.findAllCheckpointsByGameStatisticsId(
         req.params.id
       );
-    console.log(`   → Service returned ${checkpoints.length} checkpoint(s)`);
     return res.status(200).json(checkpoints);
   } catch (error) {
     console.error(`   ✖ Error in GET checkpoints for ${req.params.id}:`, error);
@@ -412,10 +408,6 @@ router.delete("/checkpoints/:checkpointId", async (req, res) => {
  */
 router.put("/refactor/:checkpointId", async (req, res) => {
   const { checkpointId } = req.params;
-  console.log(
-    "→ [gameStatistics] refactoring game statistics for checkpointId:",
-    checkpointId
-  );
 
   try {
     const gs = await gameStatisticsService.refactorGameStatistics(checkpointId);
@@ -758,6 +750,19 @@ router.put("/damage", async (req, res) => {
   }
 })
 
-
+router.put("/repair/:multiplierId/:type", async (req, res) => {
+   const { multiplierId, type } = req.params;
+  try {
+    const repair = await gameStatisticsService.repairAsset(multiplierId, type);
+    res.status(200).json(repair)
+  } catch (error) {
+    console.error(
+      `Error while repairing asset`,
+      error
+    );
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+})
 
 module.exports = router;

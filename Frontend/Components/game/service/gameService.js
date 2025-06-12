@@ -438,6 +438,36 @@ export async function toggleAllBuildingsRunsOnGreenFalse(
   return res.json();
 }
 
+export async function repairAsset(multiplierId, type, token) {
+  console.log("repairAsset called with:", multiplierId, type, token);
+  const url = `${window.env.BACKEND_URL}/gameStatistics/repair/${multiplierId}/${type}`;
+
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    let errorMessage = `Failed to repair asset: HTTP ${res.status}`;
+    try {
+      const errorJson = JSON.parse(errorText);
+      if (errorJson.error) {
+        errorMessage += ` - ${errorJson.error}`;
+      }
+    } catch {
+      
+    }
+    throw new Error(errorMessage);
+  }
+
+  const text = await res.text();
+  if (!text) return null; // of een default object zoals `{ success: true }`
+
+  return JSON.parse(text);
+}
+
+
 export async function getAchievementsOverviewByGroupId(groupId, token) {
   /**
    * Fetch achievements overview for a specific group ID.
