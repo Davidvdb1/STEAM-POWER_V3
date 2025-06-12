@@ -1,6 +1,7 @@
 import { createLogoScene } from "../components/scenes/logoScene.js";
 import { createCityScene } from "../components/scenes/cityScene.js";
 import { createOuterCityScene } from "../components/scenes/outerCityScene.js";
+import { createGameOverScene } from "../components/scenes/gameOverScene.js";
 import { createMenuScene } from "../components/scenes/menuScene.js";
 import {
   fetchGameStatistics,
@@ -59,7 +60,7 @@ template.innerHTML = /*html*/ `
       <img id="outer-button" data-cy="outer-city-btn" src="Assets/images/toOuter.png" alt="Ga naar buitenstad" />
       <div id="outer-text">Ga naar buitenstad</div>
     </div>
-
+    <button id="herstartButton" data-cy="herstart-game-btn" class="hidden">Herstart</button>
     <button id="startButton" data-cy="start-game-btn" class="hidden">Start</button>
   </div>
 
@@ -102,7 +103,8 @@ class GameControlPanel extends HTMLElement {
     this._onLoadCheckpointBound = this._onLoadCheckpoint.bind(this);
 
     this._onShowAchievementsBound = this._handleShowAchievements.bind(this);
-    this._onShowGameInstructionsBound = this._handleShowGameInstructions.bind(this);
+    this._onShowGameInstructionsBound =
+      this._handleShowGameInstructions.bind(this);
     this._onMenuOpenedBound = this._handleMenuOpened.bind(this);
     this._onMenuClosedBound = this._handleMenuClosed.bind(this);
 
@@ -120,7 +122,7 @@ class GameControlPanel extends HTMLElement {
     this.solar = 1;
     this.wind = 1;
     this.water = 1;
-    this._hasInitializedMessages = false; 
+    this._hasInitializedMessages = false;
 
     this._lastEnergyTick = Date.now();
     this._lastTaxTick = Date.now();
@@ -247,7 +249,7 @@ class GameControlPanel extends HTMLElement {
       this._onShowAchievementsBound
     );
     this._gameContainer.removeEventListener(
-      "show-game-instructions", 
+      "show-game-instructions",
       this._onShowGameInstructionsBound
     );
     this._gameContainer.removeEventListener(
@@ -317,13 +319,16 @@ class GameControlPanel extends HTMLElement {
     const LogoScene = createLogoScene(this._startButton);
     const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();
+    const GameOverScene = createGameOverScene(
+      this._shadow.getElementById("herstartButton")
+    );
 
     this._game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: this._shadow.getElementById("game-container"),
       width: 140 * 16,
       height: 70 * 16,
-      scene: [LogoScene, CityScene, OuterCityScene],
+      scene: [LogoScene, CityScene, OuterCityScene, GameOverScene],
       backgroundColor: "#9bd5e4",
       pixelArt: true,
       scale: {
@@ -343,73 +348,81 @@ class GameControlPanel extends HTMLElement {
   /**
    * Updates the game statistics and currency display.
    * Fetches the latest game statistics, transforms building data,
-   * and updates the currency display payload.
+   * and updates the currency display payload. Also checks for a
+   * “game over” condition (green ≤ 0, per-tick grey short, coins ≤ –100).
    * Emits an event when the statistics update is complete.
    * @returns {Promise<void>}
-   * */
-async _updateStatistics() {
-  try {
-    const { token, groupId } = getAuthFromSession();
-    const gs = await fetchGameStatistics(groupId, token);
+   */
+  async _updateStatistics() {
+    try {
+      const { token, groupId } = getAuthFromSession();
+      const gs = await fetchGameStatistics(groupId, token);
 
-    if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
-      this._game.buildingData = transformBuildingData(gs.gameBuildings);
-    }
+      // 1) Transform and stash scene data
+      if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
+        this._game.buildingData = transformBuildingData(gs.gameBuildings);
+      }
+      this._game.assetData = gs.assets;
+      this._game.token = token;
+      this._game.groupId = groupId;
+      this._game.gameStatisticsId = gs.id;
+      this._game.currencyId = gs.currency.id;
+      this._game.currency = gs.currency;
+      this._game.multipliers = gs.multiplier;
 
-    this._game.token = token;
-    this._game.groupId = groupId;
-    this._game.assetData = gs.assets;
-    this._game.gameStatisticsId = gs.id;
-    this._game.currencyId = gs.currency.id;
-    this._game.currency = gs.currency;
-    this._game.multipliers = gs.multiplier;
+      // 2) Check for GAME OVER
+      const greenBank = this._game.currency.greenEnergy;
+      const coins = this._game.currency.coins;
 
-    const newMessage = gs.multiplier?.message;
+      // Determine per-tick grey shortage
+      const totalGreyCost =
+        calculateTotalGreyCost(this._game.buildingData) / 60;
+      const totalGreyProduction = calculateTotalGreyProduction(gs.assets) / 60;
+      const isGreyShort = totalGreyCost > totalGreyProduction;
 
-    // Alleen tonen als:
-    // - de game al eerder geïnit is (dus niet bij opstart)
-    // - de message effectief nieuw is
-    if (this._hasInitializedMessages && newMessage && newMessage !== this._lastMessageShown) {
-      // voorkom tonen van allereerste boodschap
-      if (this._lastMessageShown !== null) {
-        for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
-          const scene = this._game.scene.getScene(key);
-          if (scene?.scene?.isActive() && typeof scene.showError === "function") {
-            scene.showError(newMessage);
-            break;
-          }
-        }
+      if (greenBank <= 0 && isGreyShort && coins <= -100) {
+        // hide all UI chrome
+        this._statsContainer.classList.add("hidden");
+        this._shadow.getElementById("detail-container").classList.add("hidden");
+        this._shadow.querySelector("shop-sidebar").classList.add("hidden");
+        this._innerContainer.style.display = "none";
+        this._outerContainer.style.display = "none";
+        this._startButton.classList.add("hidden");
+        this._shadow.getElementById("startSpinner")?.remove();
+
+        const canvasDiv = this._shadow.getElementById("game-container");
+        canvasDiv.style.backgroundColor = "#000";
+        // show restart button
+        this._shadow
+          .getElementById("herstartButton")
+          .classList.remove("hidden");
+
+        // transition into the Game Over scene
+        this._game.scene.stop("CityScene");
+        this._game.scene.stop("OuterCityScene");
+        this._game.scene.start("GameOverScene");
       }
 
-    // in alle gevallen updaten voor vergelijking met volgende messages
-    this._lastMessageShown = newMessage;
-  }
+      // 3) Build and push new currency‐display payload
+      const payload = buildCurrencyDisplayPayload({
+        buildings: this._game.buildingData,
+        assets: gs.assets,
+        currency: gs.currency,
+        componentMultipliers: {
+          solar: this._game.multipliers.solar,
+          water: this._game.multipliers.water,
+          wind: this._game.multipliers.wind,
+        },
+      });
+      this._statsContainer.data = payload;
 
-    // Eens dit doorlopen is, zetten we de flag actief
-    this._hasInitializedMessages = true;
-
-    const payload = buildCurrencyDisplayPayload({
-      buildings: this._game.buildingData,
-      assets: gs.assets,
-      currency: gs.currency,
-      componentMultipliers: {
-        solar: this._game.multipliers.solar,
-        water: this._game.multipliers.water,
-        wind: this._game.multipliers.wind,
-      },
-    });
-    this._statsContainer.data = payload;
-
-    this._game.events.emit("statsUpdateComplete");
-  } catch (e) {
-    console.error("Error fetching stats:", e);
-    this._game.events.emit("statsUpdateComplete");
-  }
-}
-
-
-  async getEventMessage() {
-  
+      // 4) Signal that stats rendering is done
+      this._game.events.emit("statsUpdateComplete");
+    } catch (e) {
+      console.error("Error fetching stats:", e);
+      // Prevent hanging
+      this._game.events.emit("statsUpdateComplete");
+    }
   }
 
   /**
@@ -440,7 +453,11 @@ async _updateStatistics() {
       const greenBank = gs.currency.greenEnergy;
 
       // 3) Update green balance on backend
-      const { id: currencyId, payload: currencyPayload, fine: fine } = buildUpdatedCurrency(
+      const {
+        id: currencyId,
+        payload: currencyPayload,
+        fine: fine,
+      } = buildUpdatedCurrency(
         gs.currency,
         totalGreenCost,
         gs.assets,
@@ -460,7 +477,7 @@ async _updateStatistics() {
         calculateTotalGreyCost(this._game.buildingData) / 60;
       const totalGreyProduction = calculateTotalGreyProduction(gs.assets) / 60;
       const isGreyShortGlobal = totalGreyCost > totalGreyProduction;
-      const greyShortMessage = `Te weinig stroomvoorziening: de belastingen worden gehalveerd en het stroomtekort wordt elke minuut betaald met ${fine} coins.`
+      const greyShortMessage = `Te weinig stroomvoorziening: de belastingen worden gehalveerd en het stroomtekort wordt elke minuut betaald met ${fine} coins.`;
 
       if (
         !isGreenShort &&
@@ -512,17 +529,13 @@ async _updateStatistics() {
               )
             );
             setTimeout(() => {
-              activeScenes.forEach((s) =>
-                s.showError(greyShortMessage)
-              );
+              activeScenes.forEach((s) => s.showError(greyShortMessage));
             }, 4000);
             this._greyShortageAlertActive = true;
             this._greyShortageDelayScheduled = true;
           } else {
             // subsequent calls: show grey shortage immediately
-            activeScenes.forEach((s) =>
-              s.showError(greyShortMessage)
-            );
+            activeScenes.forEach((s) => s.showError(greyShortMessage));
           }
         } else {
           // **only green-shortage**
@@ -539,16 +552,12 @@ async _updateStatistics() {
         this._greyShortageDelayScheduled = false;
         // 6) pure grey-shortage (green OK)
         if (!this._greyShortageAlertActive) {
-          activeScenes.forEach((s) =>
-            s.showError(greyShortMessage)
-          );
+          activeScenes.forEach((s) => s.showError(greyShortMessage));
           this._greyShortageAlertActive = true;
           this._greyShortageDelayScheduled = false;
         } else {
           // repeat on subsequent ticks
-          activeScenes.forEach((s) =>
-            s.showError(greyShortMessage)
-          );
+          activeScenes.forEach((s) => s.showError(greyShortMessage));
         }
       }
 
@@ -732,7 +741,7 @@ async _updateStatistics() {
    * Handles the event to show achievements overview.
    * Calls the utility function to display achievements overview
    * in the game control panel.
-   * 
+   *
    * @function _handleShowAchievements
    * @memberOf GameControlPanel
    * @returns {void}
@@ -745,7 +754,7 @@ async _updateStatistics() {
    * Handles the event to show game instructions.
    * Calls the utility function to display game instructions
    * in the game control panel.
-   * 
+   *
    * @function _handleShowGameInstructions
    * @memberOf GameControlPanel
    * @returns {void}
@@ -758,7 +767,7 @@ async _updateStatistics() {
    * Handles the event when the menu is opened.
    * Hides the inner and outer containers,
    * and the detail container to prevent interaction with the game.
-   * 
+   *
    * @function _handleMenuOpened
    * @memberOf GameControlPanel
    * @returns {void}
@@ -774,11 +783,11 @@ async _updateStatistics() {
    * Handles the event when the menu is closed.
    * Shows the correct navigation button and detail container
    * based on the target scene.
-   * 
+   *
    * @function _handleMenuClosed
    * @memberOf GameControlPanel
    * @param {CustomEvent} e - The event containing the target scene.
-   * @returns {void} 
+   * @returns {void}
    */
   _handleMenuClosed(e) {
     // Show correct nav button and detail when menu closes
