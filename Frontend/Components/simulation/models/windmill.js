@@ -31,7 +31,7 @@ export async function loadWindmill(scene, component, bladeCount = 3) {
                     component.windmill.rotation = new BABYLON.Vector3(0, radians, 0);
                 } catch (error) {
                     console.error("Error setting windmill direction:", error);
-                }
+            }
 
                 component.dragBehaviorWind = new BABYLON.PointerDragBehavior();
                 component.dragBehaviorWind.useObjectOrientationForDragging = false;
@@ -53,8 +53,19 @@ export async function loadWindmill(scene, component, bladeCount = 3) {
  * @param {number} bladeCount - Number of blades (0-5)
  */
 export async function updateWindmillBlades(scene, component, bladeCount) {
-    await loadWindmill(scene, component, bladeCount);
-}
+// onthoud huidige oriëntatie (radians)
+  const currentRotY = component.windmill ? component.windmill.rotation.y : null;
+
+  await loadWindmill(scene, component, bladeCount);
+
+  // herstel oriëntatie
+  if (currentRotY !== null && component.windmill) {
+    component.windmill.rotation.y = currentRotY;
+    // voorkom dat initialWindmillDirection weer overschreven wordt
+    component.initialWindmillDirection = BABYLON.Angle.FromRadians(
+      currentRotY
+    ).degrees();
+  }}
 
 export async function updateWindmillRotation(scene, component, manualDegrees) {
     if (!component.windmill || component.initialWindmillDirection === undefined) return;
