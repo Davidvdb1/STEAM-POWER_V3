@@ -367,52 +367,70 @@ class GameControlPanel extends HTMLElement {
    * Emits an event when the statistics update is complete.
    * @returns {Promise<void>}
    */
+
   async _updateStatistics() {
-    try {
-      const { token, groupId } = getAuthFromSession();
-      const gs = await fetchGameStatistics(groupId, token);
+  try {
+    const { token, groupId } = getAuthFromSession();
+    const gs = await fetchGameStatistics(groupId, token);
 
-      // 1) Transform and stash scene data
-      if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
-        this._game.buildingData = transformBuildingData(gs.gameBuildings);
-      }
-      this._game.assetData = gs.assets;
-      this._game.token = token;
-      this._game.groupId = groupId;
-      this._game.gameStatisticsId = gs.id;
-      this._game.currencyId = gs.currency.id;
-      this._game.currency = gs.currency;
-      this._game.multipliers = gs.multiplier;
+    if (gs.gameBuildings && Array.isArray(gs.gameBuildings)) {
+      this._game.buildingData = transformBuildingData(gs.gameBuildings);
+    }
 
-      // 2) Check for GAME OVER
-      const greenBank = this._game.currency.greenEnergy;
-      const coins = this._game.currency.coins;
+    this._game.token = token;
+    this._game.groupId = groupId;
+    this._game.assetData = gs.assets;
+    this._game.gameStatisticsId = gs.id;
+    this._game.currencyId = gs.currency.id;
+    this._game.currency = gs.currency;
+    this._game.multipliers = gs.multiplier;
 
-      // Determine per-tick grey shortage
-      const totalGreyCost =
-        calculateTotalGreyCost(this._game.buildingData) / 60;
-      const totalGreyProduction = calculateTotalGreyProduction(gs.assets) / 60;
-      const isGreyShort = totalGreyCost > totalGreyProduction;
+    // 2) Check for GAME OVER
+    const greenBank = this._game.currency.greenEnergy;
+    const coins = this._game.currency.coins;
 
-      if (greenBank <= 0 && isGreyShort && coins <= -100) {
-        // hide all UI chrome
-        this._statsContainer.classList.add("hidden");
-        this._shadow.getElementById("detail-container").classList.add("hidden");
-        this._shadow.querySelector("shop-sidebar").classList.add("hidden");
-        this._innerContainer.style.display = "none";
-        this._outerContainer.style.display = "none";
-        this._startButton.classList.add("hidden");
-        this._shadow.getElementById("startSpinner")?.remove();
+    // Determine per-tick grey shortage
+    const totalGreyCost =
+      calculateTotalGreyCost(this._game.buildingData) / 60;
+    const totalGreyProduction = calculateTotalGreyProduction(gs.assets) / 60;
+    const isGreyShort = totalGreyCost > totalGreyProduction;
 
-        const canvasDiv = this._shadow.getElementById("game-container");
-        canvasDiv.style.backgroundColor = "#000";
-        // show restart button
-        this._shadow.getElementById("restartButton").classList.remove("hidden");
+    if (greenBank <= 0 && isGreyShort && coins <= -100) {
+      // hide all UI chrome
+      this._statsContainer.classList.add("hidden");
+      this._shadow.getElementById("detail-container").classList.add("hidden");
+      this._shadow.querySelector("shop-sidebar").classList.add("hidden");
+      this._innerContainer.style.display = "none";
+      this._outerContainer.style.display = "none";
+      this._startButton.classList.add("hidden");
+      this._shadow.getElementById("startSpinner")?.remove();
 
-        // transition into the Game Over scene
-        this._game.scene.stop("CityScene");
-        this._game.scene.stop("OuterCityScene");
-        this._game.scene.start("GameOverScene");
+      const canvasDiv = this._shadow.getElementById("game-container");
+      canvasDiv.style.backgroundColor = "#000";
+      // show restart button
+      this._shadow.getElementById("restartButton").classList.remove("hidden");
+
+      // transition into the Game Over scene
+      this._game.scene.stop("CityScene");
+      this._game.scene.stop("OuterCityScene");
+      this._game.scene.start("GameOverScene");
+    }
+
+    const newMessage = gs.multiplier?.message;
+
+    // Alleen tonen als:
+    // - de game al eerder geïnit is (dus niet bij opstart)
+    // - de message effectief nieuw is
+    if (this._hasInitializedMessages && newMessage && newMessage !== this._lastMessageShown) {
+      // voorkom tonen van allereerste boodschap
+      if (this._lastMessageShown !== null) {
+        for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+          const scene = this._game.scene.getScene(key);
+          if (scene?.scene?.isActive() && typeof scene.showError === "function") {
+            scene.showError(newMessage);
+            break;
+          }
+        }
       }
 
     // in alle gevallen updaten voor vergelijking met volgende messages
