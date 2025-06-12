@@ -430,41 +430,28 @@ async deleteById(id) {
     };
 
     const multiplierKey = typeMap[label];
-    const typeMultiplier = assetMultiplier[multiplierKey];
+    let typeMultiplier = assetMultiplier[multiplierKey];
 
     if (typeof typeMultiplier !== "number") {
-      throw new Error(
-        `Multiplier ontbreekt of ongeldig voor type ${multiplierKey}`
-      );
-      const typeMap = {
-        zonnepaneel: "solar",
-        windmolen: "wind",
-        waterrad: "water",
-      };
-
-      const multiplierKey = typeMap[label];
-      let typeMultiplier = assetMultiplier[multiplierKey];
-
-      if (typeof typeMultiplier !== "number") {
-        throw new Error(`Multiplier ontbreekt of ongeldig voor type ${multiplierKey}`);
-      }
-
-      // Schade check: halveer multiplier indien schade-flag op true staat
-      const damageKey = `${multiplierKey}Damage`; // bv. "solarDamage"
-      if (assetMultiplier[damageKey] === true) {
-        typeMultiplier *= 0.5;
-      }
-
-      const totalGain = relevantAssets.length * greenEnergy * typeMultiplier;
-      const updated = await this.prisma.currency.update({
-        where: { id: currency.id },
-        data: {
-          greenEnergy: { increment: totalGain },
-        },
-      });
-
-      return Currency.from(updated);
+      throw new Error(`Multiplier ontbreekt of ongeldig voor type ${multiplierKey}`);
     }
+
+    // Schade check: halveer multiplier indien schade-flag op true staat
+    const damageKey = `${multiplierKey}Damage`; // bv. "solarDamage"
+    if (assetMultiplier[damageKey] === true) {
+      typeMultiplier *= 0.5;
+    }
+
+    const totalGain = relevantAssets.length * greenEnergy * typeMultiplier;
+    const updated = await this.prisma.currency.update({
+      where: { id: currency.id },
+      data: {
+        greenEnergy: { increment: totalGain },
+      },
+    });
+
+    return Currency.from(updated);
+  }
 
   //########################################################################
   //                                 ASSETS
