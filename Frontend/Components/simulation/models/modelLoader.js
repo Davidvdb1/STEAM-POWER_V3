@@ -2,6 +2,7 @@ import { loadSolarPanel, orientSolarPanelTowardsSun } from './solarPanel.js';
 import { loadWindmill } from './windmill.js';
 import { loadWaterWheel } from './waterWheel.js';
 import { getSunPosition, sunPositionToCartesian } from '../utils/sunCalculator.js';
+import { updateAutoRotateChange } from './windmill.js';
 
 /**
  * Loads all models needed for the simulation
@@ -10,10 +11,10 @@ import { getSunPosition, sunPositionToCartesian } from '../utils/sunCalculator.j
  */
 export async function loadModels(scene, component) {
     // Load environment
-    BABYLON.SceneLoader.Append("", "../Frontend/Assets/GLBs/environment.glb", scene, function () {});
+    BABYLON.SceneLoader.Append("", "./Assets/GLBs/environment.glb", scene, function () {});
 
     // Load House
-    BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/house.glb", scene, (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "", "./Assets/GLBs/House.glb", scene, (meshes) => {
         const houseRoot = meshes.find(m => m.name === "__root__");
         if (houseRoot) {
             houseRoot.scaling = new BABYLON.Vector3(0.00009, 0.00009, 0.00009);
@@ -37,7 +38,7 @@ export async function loadModels(scene, component) {
  * @param {SimulationComponent} component - The parent component for storing references
  */
 function loadSun(scene, component) {
-    BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/sun3.glb", scene, async (meshes) => {
+    BABYLON.SceneLoader.ImportMesh("", "", "./Assets/GLBs/sun3.glb", scene, async (meshes) => {
         const street = "Geldenaaksebaan 335";
         const city = "Leuven";
         const postal = "3001";
@@ -78,6 +79,15 @@ export async function updateSunAndSolarPanel(component, street, city, postal) {
         // Update solar panel orientation
         if (component.solarPanel) {
             await orientSolarPanelTowardsSun(component.solarPanel, street, city, postal);
+        }
+        /* -------------------  WINDMOLEN MEE DRAAIEN  -------------------- */
+        if (component.windmill) {
+            await updateAutoRotateChange(
+                component.scene,
+                component,
+                true,                // auto-mode aan
+                street, city, postal // adres dat net werd ingegeven
+            );
         }
     } catch (error) {
         console.error("Failed to update sun and solar panel:", error);

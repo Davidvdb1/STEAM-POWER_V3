@@ -9,7 +9,7 @@ import { getSunPosition, sunPositionToCartesian } from '../utils/sunCalculator.j
  */
 export async function loadSolarPanel(scene, component) {
     return new Promise((resolve) => {
-        BABYLON.SceneLoader.ImportMesh("", "", "../Frontend/Assets/GLBs/solar.glb", scene, async (meshes) => {
+        BABYLON.SceneLoader.ImportMesh("", "", "./Assets/GLBs/solar.glb", scene, async (meshes) => {
             component.solarPanel = meshes.find(m => m.name === "__root__");
             if (component.solarPanel) {
                 component.solarPanel.scaling = new BABYLON.Vector3(0.02, 0.02, 0.02);
