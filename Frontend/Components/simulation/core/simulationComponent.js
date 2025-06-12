@@ -8,6 +8,7 @@ import { updateWaterWheelDepth } from '../models/waterWheel.js';
 import { updateSolarRotation } from '../models/solarPanel.js';
 import { updateWaterWheelPosition } from '../models/waterWheel.js';
 import { updateWindmillModel } from '../models/windmill.js';
+import { createDataPanel } from '../ui/dataPanel.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
 
 //#region TEMPLATE
@@ -188,6 +189,8 @@ export class SimulationComponent extends HTMLElement {
             (depth) => this._handleWaterWheelDepth(depth),
             (model) => this._handleWindmillModel(model)
         );
+
+        createDataPanel();
 
         // Load all models
         await loadModels(this.scene, this);

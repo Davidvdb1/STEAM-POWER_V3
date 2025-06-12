@@ -22,7 +22,7 @@ export function createSettingsPanel(onBladeCountChange, onLocationChange, onManu
     settingsPanel.background = "rgba(0, 0, 0, 0.5)";
     settingsPanel.width = "400px";
     settingsPanel.height = "800px";
-    settingsPanel.color = "gray";
+    settingsPanel.color = "white";
     settingsPanel.cornerRadius = "10";
     settingsPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
     settingsPanel.paddingRight = "50px";
