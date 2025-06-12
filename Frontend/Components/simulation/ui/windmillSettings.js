@@ -137,10 +137,17 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
         toggleButton.textBlock.text = autoRotate ? "Aan" : "Uit";
 
         if (autoRotate) {
-            onAutoRotateChange(true);
-        } else {
-            onAutoRotateChange(false);
-        }
+    /* -------- Nieuw: reset slider en label ------------------------ */
+    slider.value            = 0;          // visueel
+    sliderValueText.text    = "0°";       // label
+    if (onManualRotationChange) {
+      onManualRotationChange(0);          // logica ↺ molen
+    }
+    /* -------------------------------------------------------------- */
+    onAutoRotateChange(true);
+  } else {
+    onAutoRotateChange(false);
+  }
     });
 
     // Create the text block
