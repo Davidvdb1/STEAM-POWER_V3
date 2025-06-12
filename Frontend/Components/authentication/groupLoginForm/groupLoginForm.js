@@ -73,25 +73,25 @@ window.customElements.define(
             const raw = sessionStorage.getItem("loggedInUser");
             if (!raw) throw new Error("Not logged in");
 
-            const { token, groupId } = JSON.parse(raw);
-            console.log(groupId)
-            const gameStatistics = await fetchGameStatistics(groupId, token);
+            // const { token, groupId } = JSON.parse(raw);
+            // console.log(groupId)
+            // const gameStatistics = await fetchGameStatistics(groupId, token);
 
-            if (!gameStatistics) {
-              console.log(
-                "GameStatistics bestaat nog niet, wordt aangemaakt..."
-              );
-              const created = await createGameStatistics(groupId, token);
+            // if (!gameStatistics) {
+            //   console.log(
+            //     "GameStatistics bestaat nog niet, wordt aangemaakt..."
+            //   );
+            //   const created = await createGameStatistics(groupId, token);
 
-              if (created && created.id) {
-                console.log("GameStatistics succesvol aangemaakt");
-                await createGameBuildings(created.id, token);
-              } else {
-                throw new Error("Aanmaken GameStatistics mislukt.");
-              }
-            } else {
-              console.log("GameStatistics bestaat al.");
-            }
+            //   if (created && created.id) {
+            //     console.log("GameStatistics succesvol aangemaakt");
+            //     await createGameBuildings(created.id, token);
+            //   } else {
+            //     throw new Error("Aanmaken GameStatistics mislukt.");
+            //   }
+            // } else {
+            //   console.log("GameStatistics bestaat al.");
+            // }
           } catch (err) {
             console.error(err);
             this.errorMessageElement.textContent =

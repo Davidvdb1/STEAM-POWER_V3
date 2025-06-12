@@ -54,6 +54,21 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) {
+      return res.status(400).json({ error: "Game Statistics ID is required" });
+    }
+    await gameStatisticsService.deleteGameStatistics(id);
+    res.status(204).send();
+  } catch (error) {
+    console.error("Error deleting game statistics:", error);
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ error: error.message });
+  }
+});
+
 /**
  * GET /gameStatistics<br>
  * Retrieves all game statistics entries.
