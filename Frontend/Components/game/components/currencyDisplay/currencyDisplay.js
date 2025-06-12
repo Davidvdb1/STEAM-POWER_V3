@@ -170,6 +170,8 @@ class CurrencyDisplay extends HTMLElement {
     this.solarLiveEl.textContent = "0.000 kW";
     this.waterLiveEl.textContent = "0.000 kW";
     this.windLiveEl.textContent = "0.000 kW";
+
+    this._clickableMultipliers = new Set();
   }
 
   /**
@@ -185,6 +187,8 @@ class CurrencyDisplay extends HTMLElement {
     window.removeEventListener('rawenergyreading', this._handleEnergyData);
     this.loadBtn.removeEventListener("click", this._onLoadBound);
     this.saveBtn.removeEventListener("click", this._onSaveBound);
+
+    this._clickableMultipliers.clear();
   }
 
   /**
@@ -246,18 +250,45 @@ class CurrencyDisplay extends HTMLElement {
    * @param {number} multipliers.water - The water multiplier.
    * @param {number} multipliers.wind - The wind multiplier.
    */
-  _updateMultipliers({ solar, water, wind }) {
+  _updateMultipliers({ solar, water, wind, solarDamage, windDamage, waterDamage }) {
+    const makeClickable = (element, type) => {
+      if (this._clickableMultipliers.has(element)) return;
+
+      element.style.cursor = "pointer";
+      element.title = "Klik om te repareren voor 20 coins";
+
+      element.addEventListener("click", () => {
+        this.dispatchEvent(new CustomEvent("repair-popup", {
+          detail: type,
+          bubbles: true,
+          composed: true
+        }));
+      });
+
+      this._clickableMultipliers.add(element);
+    };
+
     if (solar != null) {
-      this.solarMultiplierEl.textContent = `${solar}x`;
+      const value = solarDamage ? (solar / 2).toFixed(1) : solar;
+      this.solarMultiplierEl.textContent = `${value}x`;
+      this.solarMultiplierEl.style.color = solarDamage ? "red" : "#151515";
+      if (solarDamage) makeClickable(this.solarMultiplierEl, "Zonnepaneel");
     }
-    if (water != null) {
-      this.waterMultiplierEl.textContent = `${water}x`;
-    }
+
     if (wind != null) {
-      this.windMultiplierEl.textContent = `${wind}x`;
+      const value = windDamage ? (wind / 2).toFixed(1) : wind;
+      this.windMultiplierEl.textContent = `${value}x`;
+      this.windMultiplierEl.style.color = windDamage ? "red" : "#151515";
+      if (windDamage) makeClickable(this.windMultiplierEl, "Windturbine");
+    }
+
+    if (water != null) {
+      const value = waterDamage ? (water / 2).toFixed(1) : water;
+      this.waterMultiplierEl.textContent = `${value}x`;
+      this.waterMultiplierEl.style.color = waterDamage ? "red" : "#151515";
+      if (waterDamage) makeClickable(this.waterMultiplierEl, "Waterrad");
     }
   }
-
 
 
   /**
@@ -280,7 +311,7 @@ class CurrencyDisplay extends HTMLElement {
 
   _handleEnergyData = (e) => {
     const { type, value } = e.detail;
-    const calculated = value / 1024 * 3 * 0.5 * this.multiplier;
+    const calculated = value / 1024 * 3 * 0.5 * this.multiplier / 1000; // Convert to kW
     const formatted = `${calculated.toFixed(3)} kW`;
 
     let targetEl;
@@ -310,22 +341,21 @@ class CurrencyDisplay extends HTMLElement {
     }, 5000);
   };
 
-
   async getMicrobitMultiplier() {
-        try {
-            const url= window.env.BACKEND_URL;
-            const response = await fetch(url + `/groups/multiplier`, {
-                method: "GET",
-                headers:  {
-                    "Content-Type": "application/json"
-                },
-            })
-            const multiplier = await response.json();
-            this.multiplier = multiplier;
-        } catch (error) {
-            console.error("Error with applying event damages:", error)
-        }
+    try {
+        const url= window.env.BACKEND_URL;
+        const response = await fetch(url + `/groups/multiplier`, {
+            method: "GET",
+            headers:  {
+                "Content-Type": "application/json"
+            },
+        })
+        const multiplier = await response.json();
+        this.multiplier = multiplier;
+    } catch (error) {
+        console.error("Error with applying event damages:", error)
     }
+  }
 }
 
 window.customElements.define("currency-display", CurrencyDisplay);

@@ -8,6 +8,7 @@ import {
   recordCheckpoint,
   refactorGameStatistics,
   toggleAllBuildingsRunsOnGreenFalse,
+  repairAsset,
 } from "../service/gameService.js";
 import {
   transformBuildingData,
@@ -214,6 +215,8 @@ class GameControlPanel extends HTMLElement {
     if (JSON.parse(sessionStorage.getItem("bluetoothEnabled"))) {
       this._interval = setInterval(() => this._updateStatistics(), 5000);
     }
+
+    this._statsContainer.addEventListener("repair-popup", (e) => this._handleRepairPopup(e.detail));
   }
 
   /**
@@ -265,6 +268,7 @@ class GameControlPanel extends HTMLElement {
       "scene:refresh-detail",
       this._onSceneRefreshDetail
     );
+    this._statsContainer.removeEventListener("repair-popup", (e) => this._handleRepairPopup(e.detail));
 
     // 2) Remove the game container from the DOM
     if (this._game) {
@@ -396,6 +400,9 @@ async _updateStatistics() {
         solar: this._game.multipliers.solar,
         water: this._game.multipliers.water,
         wind: this._game.multipliers.wind,
+        solarDamage: this._game.multipliers.solarDamage,
+        waterDamage: this._game.multipliers.waterDamage,
+        windDamage: this._game.multipliers.windDamage,
       },
     });
     this._statsContainer.data = payload;
@@ -406,11 +413,6 @@ async _updateStatistics() {
     this._game.events.emit("statsUpdateComplete");
   }
 }
-
-
-  async getEventMessage() {
-  
-  }
 
   /**
    * Updates the energy levels in the game.
@@ -1099,6 +1101,51 @@ async _updateStatistics() {
     // Refresh stats so the display updates
     await this._updateStatistics();
   }
+
+  async _handleRepairPopup(type) {
+    const capitalized = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+
+    for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+      const scene = this._game.scene.getScene(key);
+
+      let cost = 20;
+      if (this._game.currency.coins - cost < 0) {
+        cost = 22
+      }
+
+      if (scene && typeof scene.showConfirmation === "function") {
+        scene.showConfirmation(
+          `Wil je de ${capitalized} weer herstellen voor ${cost} coins?`,
+          async (confirmed) => {
+            if (!confirmed) return;
+
+            if (this._game.currency.coins - 20 < -100) {
+              scene.showError(
+                `Je hebt al te veel schulden om de ${type} te herstellen. Je kan niet meer lenen.`
+              );
+              return
+            }
+
+            const { token } = getAuthFromSession();
+        
+            await updateCurrency(
+              this._game.currency.id,
+              {
+                greenEnergy: this._game.currency.greenEnergy,
+                greyEnergy: this._game.currency.greyEnergy,
+                coins: this._game.currency.coins - cost,
+                score: this._game.currency.score,
+              },
+              token
+            );
+            await repairAsset(this._game.multipliers.id, type, token)
+            await this._updateStatistics();
+          }
+        );
+      }
+    }
+  }
+
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);
