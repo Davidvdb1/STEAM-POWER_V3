@@ -1,11 +1,10 @@
-/**
- * Loads and positions the windmill model
- * @param {BABYLON.Scene} scene - The BabylonJS scene
- * @param {SimulationComponent} component - The parent component for storing references
- * @param {number} bladeCount - Number of blades (0-5)
- */
-export async function loadWindmill(scene, component, bladeCount = 3) {
-    const fileName = `turbine_${bladeCount}_blade${bladeCount === 1 ? '' : 's'}.glb`;
+export async function loadWindmill(scene, component, bladeCount = 3, modelVersion = 1) {
+    let fileName;
+    if (modelVersion === 1) {
+        fileName = `turbine_${bladeCount}_blade${bladeCount === 1 ? '' : 's'}.glb`;
+    } else {
+        fileName = `turbine_v${modelVersion}_${bladeCount}_blade${bladeCount === 1 ? '' : 's'}.glb`;
+    }
 
     // Dispose previous windmill if exists
     if (component.windmill) {
@@ -50,7 +49,16 @@ export async function loadWindmill(scene, component, bladeCount = 3) {
  * @param {number} bladeCount - Number of blades (0-5)
  */
 export async function updateWindmillBlades(scene, component, bladeCount) {
-    await loadWindmill(scene, component, bladeCount);
+    component.bladeCount = bladeCount; // Save current blade count
+    await loadWindmill(scene, component, bladeCount, component.modelVersion || 1);
+}
+
+export async function updateWindmillModel(scene, component, model) {
+    // Save selected model version (1, 2, or 3)
+    component.modelVersion = model;
+
+    // Reload windmill with existing blade count
+    await loadWindmill(scene, component, component.bladeCount || 3, model);
 }
 
 export async function updateWindmillRotation(scene, component, manualDegrees) {

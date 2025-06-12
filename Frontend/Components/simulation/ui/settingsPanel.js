@@ -13,7 +13,7 @@ import { createWaterWheelSettings } from './waterWheelSettings.js';
  * @param {Function} onLocationChange - Callback for when location changes
  * @returns {BABYLON.GUI.AdvancedDynamicTexture} The GUI texture
  */
-export function createSettingsPanel(onBladeCountChange, onLocationChange, onManualRotationChange, onAutoRotateChange, onManualRotationChangeSolar, onAutoRotateChangeSolar, position, depth) {
+export function createSettingsPanel(onBladeCountChange, onLocationChange, onManualRotationChange, onAutoRotateChange, onManualRotationChangeSolar, onAutoRotateChangeSolar, position, depth, model) {
     // creates a full-screen 2D GUI layer over the whole 3D scene
     const GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
@@ -108,7 +108,7 @@ export function createSettingsPanel(onBladeCountChange, onLocationChange, onManu
     createLocationSettings(page1, onLocationChange);
     
     // Add windmill settings section
-    createWindmillSettings(page1, onBladeCountChange, onManualRotationChange, onAutoRotateChange)
+    createWindmillSettings(page1, page2, onBladeCountChange, onManualRotationChange, onAutoRotateChange, model)
 
     createSolarPanelSettings(page2, onManualRotationChangeSolar, onAutoRotateChangeSolar)
 

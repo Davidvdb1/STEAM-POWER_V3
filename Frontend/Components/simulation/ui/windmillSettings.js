@@ -5,7 +5,7 @@ import { createLine } from '../utils/uiElements.js';
  * @param {BABYLON.GUI.StackPanel} page1 - The parent page1 panel
  * @param {Function} onBladeCountChange - Callback for when blade count changes
  */
-export function createWindmillSettings(page1, onBladeCountChange, onManualRotationChange, onAutoRotateChange) {
+export function createWindmillSettings(page1, page2, onBladeCountChange, onManualRotationChange, onAutoRotateChange, model) {
     // wind title
     const windTitle = new BABYLON.GUI.TextBlock();
     windTitle.text = "Windturbine";
@@ -142,4 +142,60 @@ export function createWindmillSettings(page1, onBladeCountChange, onManualRotati
             onAutoRotateChange(false);
         }
     });
+
+    // Create the text block
+    const rotateb2 = new BABYLON.GUI.TextBlock();
+    rotateb2.text = "Verander het model.";
+    rotateb2.fontSize = 18;
+    rotateb2.color = "white";
+    rotateb2.width = "90%";
+    rotateb2.height = "60px";
+    page2.addControl(rotateb2);
+
+    // Create the grid
+    const buttonGrid = new BABYLON.GUI.Grid();
+    buttonGrid.width = "90%";
+    buttonGrid.height = "40px";
+    buttonGrid.addColumnDefinition(1 / 3);
+    buttonGrid.addColumnDefinition(1 / 3);
+    buttonGrid.addColumnDefinition(1 / 3);
+    buttonGrid.addRowDefinition(1);
+    page2.addControl(buttonGrid);
+
+    // Store all buttons in an array for easy reset
+    const buttons = [];
+
+    // Create a function to create styled buttons
+    function createStyledButton(name, text) {
+        const button = BABYLON.GUI.Button.CreateSimpleButton(name, text);
+        button.width = "90%";
+        button.height = "100%";
+        button.color = "black";        // Text color
+        button.background = "white";   // Default background
+        button.thickness = 1;
+        button.borderColor = "black";
+
+        // Add selection behavior
+        button.onPointerUpObservable.add(() => {
+            buttons.forEach(b => b.background = "white"); // Reset all
+            button.background = "gray"; // Highlight selected
+
+            // Call the model function with the selected number
+            if (model) {
+                model(parseInt(text)); // Convert "1", "2", "3" to number
+            }
+        });
+
+        buttons.push(button);
+        return button;
+    }
+
+    // Create and add buttons
+    const leftButton = createStyledButton("leftButton", "1");
+    const centerButton = createStyledButton("centerButton", "2");
+    const rightButton = createStyledButton("rightButton", "3");
+
+    buttonGrid.addControl(leftButton, 0, 0);
+    buttonGrid.addControl(centerButton, 0, 1);
+    buttonGrid.addControl(rightButton, 0, 2);
 }
