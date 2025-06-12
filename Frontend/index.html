@@ -17,9 +17,32 @@
       margin: 0;
       padding: 0;
     }
+
+    #babylonjsLoadingDiv-0 {
+      display: none !important;
+    }
   </style>
 
   <body>
     <main-ɮ></main-ɮ>
+    <script>
+      // Hide BabylonJS loading div when it appears
+      const observer = new MutationObserver((mutations) => {
+        const loadingDiv = document.getElementById('babylonjsLoadingDiv-0');
+        if (loadingDiv) {
+          loadingDiv.style.display = 'none';
+        }
+      });
+      
+      observer.observe(document.body, { childList: true, subtree: true });
+      
+      // Also check when page is fully loaded
+      window.addEventListener('load', () => {
+        const loadingDiv = document.getElementById('babylonjsLoadingDiv-0');
+        if (loadingDiv) {
+          loadingDiv.style.display = 'none';
+        }
+      });
+    </script>
   </body>
 </html>
