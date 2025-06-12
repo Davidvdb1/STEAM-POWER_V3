@@ -17,6 +17,11 @@ import {
   yawAdjustedSpeed,
   ROTOR_RADIUS_M
 } from '../utils/weatherData.js';
+
+import { updateWindmillModel } from '../models/windmill.js';
+import { createDataPanel } from '../ui/dataPanel.js';
+import { getSunPosition } from '../utils/sunCalculator.js';
+
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
@@ -267,8 +272,11 @@ async _updateWindEnergy() {
             (degreesSolar) => this._handleSolarRotation(degreesSolar),
             (autoRotateSolar) => this._handleAutoRotateChangeSolar(autoRotateSolar),
             (position) => this._handleWaterWheelPosition(position),
-            (depth) => this._handleWaterWheelDepth(depth)
+            (depth) => this._handleWaterWheelDepth(depth),
+            (model) => this._handleWindmillModel(model)
         );
+
+        createDataPanel();
 
         // Load all models
         await loadModels(this.scene, this);
@@ -347,6 +355,10 @@ async _updateWindEnergy() {
 
     async _handleWaterWheelDepth(depth) {
         await updateWaterWheelDepth(this.scene, this, depth)
+    }
+
+    async _handleWindmillModel(model) {
+        await updateWindmillModel(this.scene, this, model)
     }
 }
 //#endregion CLASS

@@ -23,8 +23,8 @@ export async function loadSolarPanel(scene, component) {
                 // Position solar panel towards the sun
                 await orientSolarPanelTowardsSun(component.solarPanel, "Geldenaaksebaan 335", "Leuven", "3001");
                 
-                // Calculate power output
-                calculateSolarPowerOutput(component.solarPanel);
+                
+                
                 
                 resolve();
             } else {
@@ -48,6 +48,9 @@ export async function updateSolarRotation(scene, component, manualDegrees) {
 
     // Apply manual rotation relative to sun-facing base rotation
     component.solarPanel.rotation.y = component.baseSolarRotation.y + radians;
+
+    
+    
 }
 
 export async function updateAutoRotateChangeSolar(scene, component, enabledSolar) {
@@ -75,7 +78,7 @@ export async function updateAutoRotateChangeSolar(scene, component, enabledSolar
         }
     }
 
-    calculateSolarPowerOutput(component.solarPanel);
+    
 }
 
 /**
@@ -110,59 +113,83 @@ function animateRotation(mesh, targetRotation, frameRate = 30, totalFrames = 15)
 }
 
 /**
- * Orients the solar panel to face the sun based on current location and time
+ * Orients the solar panel to face the sun based on current location and time.
  * @param {BABYLON.Mesh} solarPanel - The solar panel mesh
  * @param {string} street - Street address
  * @param {string} city - City name
  * @param {string} postal - Postal code
+ * @returns {BABYLON.Vector3} The calculated panel normal direction (world space)
  */
 export async function orientSolarPanelTowardsSun(solarPanel, street, city, postal) {
-    try {
-        const { azimuth, altitude } = await getSunPosition(street, city, postal);
-        
-        // Calculate the sun position in 3D space
-        const distance = 4;
-        const target = sunPositionToCartesian(azimuth, altitude, distance);
+    const { azimuth, altitude } = await getSunPosition(street, city, postal);
 
-        // Calculate the direction from the solar panel to the sun
-        const dir = target.subtract(solarPanel.position).normalize();
-        
-        // Calculate yaw (rotation around y-axis) and pitch (rotation around x-axis)
-        const yaw = Math.atan2(dir.x, dir.z) + 1; // +1 is an adjustment for the model orientation
-        const pitch = Math.asin(dir.y);
+    const distance = 4;
+    const target = sunPositionToCartesian(azimuth, altitude, distance);
+    const dir = target.subtract(solarPanel.position).normalize();
+    
+    const yaw = Math.atan2(dir.x, dir.z) + (Math.PI) / 2; // Adjust for model orientation
 
-        // Set solar panel rotation
-        solarPanel.rotation = new BABYLON.Vector3(pitch, yaw, 0);
-    } catch (error) {
-        console.error("Error orienting solar panel:", error);
-    }
+    solarPanel.rotation = new BABYLON.Vector3(0, yaw, 0);
+    
+
+    return yaw;
 }
 
-/**
- * Calculates the estimated solar power output based on panel orientation and sun position
- * @param {BABYLON.Mesh} solarPanel - The solar panel mesh
- * @returns {number} The estimated power output in watts
- */
-function calculateSolarPowerOutput(solarPanel) {
-    // Create a normalized vector representing the panel's normal direction
-    const panelNormal = new BABYLON.Vector3(0, 0, 1);
-    const worldMatrix = solarPanel.getWorldMatrix();
-    const worldNormal = BABYLON.Vector3.TransformNormal(panelNormal, worldMatrix).normalize();
-    
-    // Get sun direction (needs to be calculated or obtained from the scene)
-    // For now, using a placeholder
-    const sunDirection = new BABYLON.Vector3(0, 1, 0).normalize();
-    
-    // Calculate angle factor (cosine of angle between panel normal and sun direction)
-    const angleFactor = BABYLON.Vector3.Dot(worldNormal, sunDirection);
-    
-    // Calculate power output
-    const irradiance = 1000; // W/m² at peak conditions
-    const area = 1.6; // m² panel area
-    const efficiency = 0.2; // 20% efficiency
-    
-    const powerOutput = Math.max(0, irradiance * area * efficiency * angleFactor);
-    console.log("Estimated solar power output (W):", powerOutput.toFixed(2));
-    
+
+
+export async function calculateSolarPowerOutput(solarPanel, sunRoot) {
+    console.log("=== Solar Power Calculation Start ===");
+
+    // Normalize a *copy* of sunRoot's position to avoid modifying it
+    const sunDirVec = BABYLON.Vector3.Normalize(sunRoot.position.clone());
+    console.log("sunDirVec:", sunDirVec);
+
+    // Panel tilt angle (fixed)
+    const tilt = Math.PI / 4; // 45 degrees
+
+    // Adjust for panel model orientation (panel front is rotated by +π/2)
+    const panelYaw = solarPanel.rotation.y - Math.PI / 2;
+
+    // Compute panel normal vector (based on yaw and fixed tilt)
+    const panelNormal = {
+        x: Math.sin(panelYaw) * Math.cos(tilt),
+        y: Math.sin(tilt),
+        z: Math.cos(panelYaw) * Math.cos(tilt)
+    };
+
+    // Convert sunDirVec from Babylon to plain object
+    const sunDir = {
+        x: sunDirVec.x,
+        y: sunDirVec.y,
+        z: sunDirVec.z
+    };
+
+    // Compute dot product
+    const dot = sunDir.x * panelNormal.x + sunDir.y * panelNormal.y + sunDir.z * panelNormal.z;
+    const incidenceFactor = Math.max(0, dot); // Clamp to [0, 1]
+
+    // Constants
+    const irradiance = 1000; // W/m²
+    const area = 1.6; // m²
+    const efficiency = 0.2; // 20%
+
+    // Power calculation
+    const effectiveIrradiance = irradiance * incidenceFactor;
+    const powerOutput = effectiveIrradiance * area * efficiency;
+
+    console.log("Sun Direction Vector:", sunDir);
+    console.log("Panel Normal Vector:", panelNormal);
+    console.log("Incidence Factor (cos(angle)):", incidenceFactor.toFixed(4));
+    console.log("Effective Irradiance (W/m²):", effectiveIrradiance.toFixed(2));
+    console.log("Estimated Solar Power Output (W):", powerOutput.toFixed(2));
+    console.log("=== Solar Power Calculation End ===\n");
+
     return powerOutput;
 }
+
+    
+
+
+
+
+

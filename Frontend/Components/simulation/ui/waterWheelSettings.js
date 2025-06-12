@@ -122,6 +122,4 @@ export function createWaterWheelSettings(page2, position, depth) {
         depthValueLabel.text = `${value.toFixed(2)}`;
         depth(value);
     });
-
-    page2.addControl(createLine());
 }
