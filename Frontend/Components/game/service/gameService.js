@@ -353,6 +353,32 @@ export async function createGameStatistics(groupId, token) {
   return res.json();
 }
 
+export async function deleteGameStatistics(gameStatsId, token) {
+  /**
+   * Delete a GameStatistics entry by its ID.
+   * @async
+   * @function deleteGameStatistics
+   * @memberof module:gameService
+   * @param {string} gameStatsId - The ID of the GameStatistics to delete.
+   * @param {string} token - Bearer token for authorization.
+   * @returns {Promise<Object>} The response object from the server.
+   * @throws {Error} If the HTTP request fails or returns a non-200 status.
+   * */
+  const url = `${window.env.BACKEND_URL}/gameStatistics/${gameStatsId}`;
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const errorBody = await res.json().catch(() => ({}));
+    throw new Error(
+      `Failed to delete GameStatistics: HTTP ${res.status}` +
+        (errorBody.error ? ` - ${errorBody.error}` : "")
+    );
+  }
+  return res.json();
+}
+
 export async function createGameBuildings(gameStatsId, token) {
   /**
    * Create initial game buildings for a specific GameStatistics ID.

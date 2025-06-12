@@ -23,6 +23,11 @@ import { buildUpdatedCurrency } from "../utils/currencyHelpers.js";
 import { animateWrapperAndStats } from "../utils/animationHandler.js";
 import { showDetail } from "../utils/detailHelper.js";
 import { setBuildingColor } from "../utils/buildingHandler.js";
+import {
+  deleteGameStatistics,
+  createGameStatistics,
+  createGameBuildings,
+} from "../service/gameService.js";
 
 const cssResponse = await fetch("./Components/game/gameControlPanel/style.css");
 const cssText = await cssResponse.text();
@@ -60,7 +65,7 @@ template.innerHTML = /*html*/ `
       <img id="outer-button" data-cy="outer-city-btn" src="Assets/images/toOuter.png" alt="Ga naar buitenstad" />
       <div id="outer-text">Ga naar buitenstad</div>
     </div>
-    <button id="herstartButton" data-cy="herstart-game-btn" class="hidden">Herstart</button>
+    <button id="restartButton" data-cy="restart-game-btn" class="hidden">Herstart</button>
     <button id="startButton" data-cy="start-game-btn" class="hidden">Start</button>
   </div>
 
@@ -88,6 +93,7 @@ class GameControlPanel extends HTMLElement {
     this._wrapper = this._shadow.getElementById("wrapper");
     this._statsContainer = this._shadow.getElementById("stats");
     this._startButton = this._shadow.getElementById("startButton");
+    this._restartButton = this._shadow.getElementById("restartButton");
     this._innerContainer = this._shadow.getElementById("inner-container");
     this._innerButton = this._shadow.getElementById("inner-button");
     this._outerContainer = this._shadow.getElementById("outer-container");
@@ -95,6 +101,7 @@ class GameControlPanel extends HTMLElement {
     this._gameContainer = this._shadow.getElementById("game-container");
 
     this._onStartClickBound = this._onStartClick.bind(this);
+    this._onRestartClickBound = this._onRestartClick.bind(this);
     this._onOuterClickBound = this._transitionToOuterCity.bind(this);
     this._onInnerClickBound = this._transitionToCity.bind(this);
     this._onCloseDetailBound = this._handleCloseDetail.bind(this);
@@ -172,6 +179,7 @@ class GameControlPanel extends HTMLElement {
    */
   connectedCallback() {
     this._startButton.addEventListener("click", this._onStartClickBound);
+    this._restartButton.addEventListener("click", this._onRestartClickBound);
     this._outerButton.addEventListener("click", this._onOuterClickBound);
     this._innerButton.addEventListener("click", this._onInnerClickBound);
 
@@ -226,6 +234,7 @@ class GameControlPanel extends HTMLElement {
   disconnectedCallback() {
     // 1) Remove all event listeners
     this._startButton.removeEventListener("click", this._onStartClickBound);
+    this._restartButton.removeEventListener("click", this._onRestartClickBound);
     this._outerButton.removeEventListener("click", this._onOuterClickBound);
     this._innerButton.removeEventListener("click", this._onInnerClickBound);
 
@@ -300,6 +309,7 @@ class GameControlPanel extends HTMLElement {
     this._onSceneRefreshDetail = null;
     this._statsContainer = null;
     this._startButton = null;
+    this._restartButton = null;
     this._innerContainer = null;
     this._outerContainer = null;
     this._wrapper = null;
@@ -320,7 +330,7 @@ class GameControlPanel extends HTMLElement {
     const CityScene = createCityScene();
     const OuterCityScene = createOuterCityScene();
     const GameOverScene = createGameOverScene(
-      this._shadow.getElementById("herstartButton")
+      this._shadow.getElementById("restartButton")
     );
 
     this._game = new Phaser.Game({
@@ -393,9 +403,7 @@ class GameControlPanel extends HTMLElement {
         const canvasDiv = this._shadow.getElementById("game-container");
         canvasDiv.style.backgroundColor = "#000";
         // show restart button
-        this._shadow
-          .getElementById("herstartButton")
-          .classList.remove("hidden");
+        this._shadow.getElementById("restartButton").classList.remove("hidden");
 
         // transition into the Game Over scene
         this._game.scene.stop("CityScene");
@@ -606,7 +614,27 @@ class GameControlPanel extends HTMLElement {
     this._startButton.replaceWith(spinner);
 
     // 2) **First load your stats** so buildingData is populated
-    await this._updateStatistics();
+    try {
+      await this._updateStatistics();
+
+      // Check if we have valid game statistics
+      const { token, groupId } = getAuthFromSession();
+      if (!this._game.gameStatisticsId || !this._game.buildingData) {
+        const created = await createGameStatistics(groupId, token);
+
+        if (created && created.id) {
+          console.log("GameStatistics succesvol aangemaakt");
+          await createGameBuildings(created.id, token);
+          await this._updateStatistics();
+        } else {
+          throw new Error("Aanmaken GameStatistics mislukt.");
+        }
+      }
+    } catch (error) {
+      console.log("geen gamestatistics");
+      console.error("Error loading game statistics:", error);
+      return;
+    }
 
     this._game.scene.run("CityScene", {
       buildings: this._game.buildingData,
@@ -698,6 +726,50 @@ class GameControlPanel extends HTMLElement {
       this._outerContainer.style.display = "flex";
       this._innerContainer.style.display = "none";
     });
+  }
+
+  async _onRestartClick() {
+    try {
+      const deleted = await deleteGameStatistics(
+        this._game.gameStatisticsId,
+        this._game.token
+      );
+
+      if (deleted) {
+        clearInterval(this._interval);
+        clearInterval(this._statsInterval);
+        clearInterval(this._energyInterval);
+        clearInterval(this._taxesInterval);
+        clearInterval(this._countdownPulse);
+
+        if (this._game) {
+          this._game.destroy(true);
+          this._game = null;
+        }
+
+        delete window.phaserGame;
+        delete window.gameContainer;
+
+        this.dispatchEvent(
+          new CustomEvent("tab", {
+            bubbles: true,
+            composed: true,
+            detail: "gamepage",
+          })
+        );
+      } else {
+        console.error("Failed to delete game statistics");
+      }
+    } catch (error) {
+      console.error("Error during restart:", error);
+      this.dispatchEvent(
+        new CustomEvent("tab", {
+          bubbles: true,
+          composed: true,
+          detail: "gamepage",
+        })
+      );
+    }
   }
 
   /**
