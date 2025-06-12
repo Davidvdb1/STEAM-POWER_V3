@@ -1140,6 +1140,10 @@ async _updateStatistics() {
             );
             await repairAsset(this._game.multipliers.id, type, token)
             await this._updateStatistics();
+
+            scene.showError(
+              `De ${type} werkt nu weer op volle capaciteit!`
+            );
           }
         );
       }
