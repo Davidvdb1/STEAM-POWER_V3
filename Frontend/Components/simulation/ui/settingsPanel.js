@@ -1,8 +1,10 @@
 import { createLocationSettings } from './locationSettings.js';
 import { createWindmillSettings } from './windmillSettings.js';
+import { createSolarPanelSettings } from './solarPanelSettings.js';
 import { createLine } from '../utils/uiElements.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
 import { sunPositionToCartesian } from '../utils/sunCalculator.js';
+import { createWaterWheelSettings } from './waterWheelSettings.js';
 
 /**
  * Creates the main settings panel UI
@@ -11,7 +13,7 @@ import { sunPositionToCartesian } from '../utils/sunCalculator.js';
  * @param {Function} onLocationChange - Callback for when location changes
  * @returns {BABYLON.GUI.AdvancedDynamicTexture} The GUI texture
  */
-export function createSettingsPanel(scene, onBladeCountChange, onLocationChange) {
+export function createSettingsPanel(onBladeCountChange, onLocationChange, onManualRotationChange, onAutoRotateChange, onManualRotationChangeSolar, onAutoRotateChangeSolar, position, depth, model) {
     // creates a full-screen 2D GUI layer over the whole 3D scene
     const GUI = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
@@ -26,27 +28,91 @@ export function createSettingsPanel(scene, onBladeCountChange, onLocationChange)
     settingsPanel.paddingRight = "50px";
     GUI.addControl(settingsPanel);
 
-    // layout container
-    const layout = new BABYLON.GUI.StackPanel();
-    layout.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    settingsPanel.addControl(layout);
+    // panel to hold both pages
+    const pagesContainer = new BABYLON.GUI.StackPanel();
+    pagesContainer.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+    settingsPanel.addControl(pagesContainer);
 
-    // settings title
-    const title = new BABYLON.GUI.TextBlock();
-    title.text = "Instellingen";
-    title.fontSize = 30;
-    title.color = "white";
-    title.height = "80px";
-    layout.addControl(title);
+    // Page 1
+    const page1 = new BABYLON.GUI.StackPanel();
+    page1.isVisible = true;
+    pagesContainer.addControl(page1);
+
+    // Page 2
+    const page2 = new BABYLON.GUI.StackPanel();
+    page2.isVisible = false;
+    pagesContainer.addControl(page2);
+
+    // NAVIGATION BUTTONS CONTAINER
+    const navContainer = new BABYLON.GUI.Rectangle();
+    navContainer.height = "50px";
+    navContainer.thickness = 0;
+    navContainer.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    navContainer.paddingBottom = "10px";
+    settingsPanel.addControl(navContainer);
+
+    const navGrid = new BABYLON.GUI.Grid();
+    navGrid.addColumnDefinition(0.5);
+    navGrid.addColumnDefinition(0.5);
+    navContainer.addControl(navGrid);
+
+    // BACK button (left)
+    const backBtn = BABYLON.GUI.Button.CreateSimpleButton("backBtn", "←");
+    backBtn.width = "70px";
+    backBtn.height = "40px";
+    backBtn.color = "black";
+    backBtn.background = "white";
+    backBtn.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+    backBtn.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    backBtn.paddingLeft = "20px";
+    backBtn.paddingBottom = "10px";
+    backBtn.isVisible = false;
+    navGrid.addControl(backBtn, 0, 0);
+
+    // NEXT button (right)
+    const nextBtn = BABYLON.GUI.Button.CreateSimpleButton("nextBtn", "→");
+    nextBtn.width = "70px";
+    nextBtn.height = "40px";
+    nextBtn.color = "black";
+    nextBtn.background = "white";
+    nextBtn.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_RIGHT;
+    nextBtn.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_BOTTOM;
+    nextBtn.paddingRight = "20px";
+    nextBtn.paddingBottom = "10px";
+    navGrid.addControl(nextBtn, 0, 1);
+
+    // Button logic
+    nextBtn.onPointerUpObservable.add(() => {
+        page1.isVisible = false;
+        page2.isVisible = true;
+        backBtn.isVisible = true;
+        nextBtn.isVisible = false;
+    });
+
+    backBtn.onPointerUpObservable.add(() => {
+        page1.isVisible = true;
+        page2.isVisible = false;
+        backBtn.isVisible = false;
+        nextBtn.isVisible = true;
+    });
     
     // separator line
-    layout.addControl(createLine());
+
+    const spacer = new BABYLON.GUI.TextBlock();
+    spacer.height = "20px"; // Adjust the height as needed
+    spacer.text = "";
+    page1.addControl(spacer);
+    page1.addControl(createLine());
 
     // Add location settings section with new callback
-    createLocationSettings(layout, onLocationChange);
+    createLocationSettings(page1, onLocationChange);
     
     // Add windmill settings section
-    createWindmillSettings(layout, onBladeCountChange);
+    createWindmillSettings(page1, page2, onBladeCountChange, onManualRotationChange, onAutoRotateChange, model)
+
+    createSolarPanelSettings(page2, onManualRotationChangeSolar, onAutoRotateChangeSolar)
+
+    createWaterWheelSettings(page2, position, depth)
 
     return GUI;
 }

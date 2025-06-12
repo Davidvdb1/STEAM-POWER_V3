@@ -1,6 +1,13 @@
 import { createSettingsPanel } from '../ui/settingsPanel.js';
 import { loadModels, updateSunAndSolarPanel } from '../models/modelLoader.js';
 import { updateWindmillBlades } from '../models/windmill.js';
+import { updateWindmillRotation } from '../models/windmill.js';
+import { updateAutoRotateChange } from '../models/windmill.js';
+import { updateAutoRotateChangeSolar } from '../models/solarPanel.js';
+import { updateWaterWheelDepth } from '../models/waterWheel.js';
+import { updateSolarRotation } from '../models/solarPanel.js';
+import { updateWaterWheelPosition } from '../models/waterWheel.js';
+import { updateWindmillModel } from '../models/windmill.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
 import { postEnergyData } from '../utils/service.js'
 
@@ -22,7 +29,10 @@ export class SimulationComponent extends HTMLElement {
         super();
         this._shadowRoot = this.attachShadow({ 'mode': 'open' });
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        
+        this.street = "Geldenaaksebaan 335";
+        this.city   = "Leuven";
+        this.postal = "3001";
+
         // BabylonJS properties
         this.engine = null;
         this.scene = null;
@@ -166,6 +176,11 @@ export class SimulationComponent extends HTMLElement {
     }
 
     async _updateSunAndSolarPanel(street, city, postal) {
+        // Onthoud huidig adres voor later gebruik
+        this.street = street;
+        this.city   = city;
+        this.postal = postal;
+
         await updateSunAndSolarPanel(this, street, city, postal);
     }
     
@@ -208,9 +223,15 @@ export class SimulationComponent extends HTMLElement {
 
         // Create settings UI
         createSettingsPanel(
-            this.scene, 
             (bladeCount) => this._handleBladeCountChange(bladeCount),
-            (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal)
+            (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal),
+            (degrees) => this._handleWindmillRotation(degrees),
+            (autoRotate) => this._handleAutoRotateChange(autoRotate),
+            (degreesSolar) => this._handleSolarRotation(degreesSolar),
+            (autoRotateSolar) => this._handleAutoRotateChangeSolar(autoRotateSolar),
+            (position) => this._handleWaterWheelPosition(position),
+            (depth) => this._handleWaterWheelDepth(depth),
+            (model) => this._handleWindmillModel(model)
         );
 
         // Load all models
@@ -257,6 +278,34 @@ export class SimulationComponent extends HTMLElement {
   
     async _handleBladeCountChange(bladeCount) {
         await updateWindmillBlades(this.scene, this, bladeCount);
+    }
+
+    async _handleWindmillRotation(degrees) {
+        await updateWindmillRotation(this.scene, this, degrees)
+    }
+
+    async _handleAutoRotateChange(enabled) {
+        await updateAutoRotateChange(this.scene, this, enabled, this.street, this.city, this.postal)
+    }
+
+    async _handleSolarRotation(degreesSolar) {
+        await updateSolarRotation(this.scene, this, degreesSolar)
+    }
+
+    async _handleAutoRotateChangeSolar(enabledSolar) {
+        await updateAutoRotateChangeSolar(this.scene, this, enabledSolar)
+    }
+
+    async _handleWaterWheelPosition(position) {
+        await updateWaterWheelPosition(this.scene, this, position)
+    }
+
+    async _handleWaterWheelDepth(depth) {
+        await updateWaterWheelDepth(this.scene, this, depth)
+    }
+
+    async _handleWindmillModel(model) {
+        await updateWindmillModel(this.scene, this, model)
     }
 }
 //#endregion CLASS

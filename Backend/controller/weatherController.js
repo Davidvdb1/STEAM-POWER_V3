@@ -66,8 +66,11 @@ router.get('/windrichting', async (req, res) => {
             return res.status(500).json({ error: 'Kon windrichting niet ophalen.' });
         }
 
-        const richtingen = ["N", "NO", "O", "ZO", "Z", "ZW", "W", "NW"];
-        const index = Math.round(degrees / 45) % 8;
+        const richtingen = [
+            "N", "NNO", "NO", "ONO", "O", "OZO", "ZO", "ZZO",
+            "Z", "ZZW", "ZW", "WZW", "W", "WNW", "NW", "NNW"
+        ];
+        const index = Math.round(degrees / 22.5) % 16;
         const richting = richtingen[index];
 
         res.json({
