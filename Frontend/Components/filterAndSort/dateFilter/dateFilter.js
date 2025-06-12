@@ -8,7 +8,7 @@ template.innerHTML = /*html*/`
         @import './Components/filterAndSort/dateFilter/style.css';
     </style>
      
-    <div>
+    <div class="date-filter-container">
         <div class="date">
             <label for="startDate">Van:</label>
             <input type="date" id="startDate" placeholder="Startdatum">

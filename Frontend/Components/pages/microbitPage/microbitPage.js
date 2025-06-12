@@ -158,7 +158,7 @@ window.customElements.define('microbitpage-れ', class extends HTMLElement {
         if (!isAdmin && !isTeacher) {
             this.groupSelectorContainer.style.display = 'none';
         } else {
-            this.groupSelectorContainer.style.display = 'block';
+            this.groupSelectorContainer.style.display = 'flex';
         }
 
         const groupSelector = this._shadowRoot.getElementById('groupSelector');

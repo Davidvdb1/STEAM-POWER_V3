@@ -7,7 +7,7 @@ template.innerHTML = /*html*/`
     <style>
         @import './Components/workshop/workshopForm/style.css';
     </style>
-
+    <h4>Klik in het onderste venster om de preview te zien</h4>
     <h1>Workshop Editor</h1>
     <input type="text" id="title" placeholder="Titel">
     <div id="toolbar">
