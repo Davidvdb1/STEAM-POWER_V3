@@ -415,12 +415,6 @@ class GameStatisticsService {
       }
     );
 
-    console.log(
-      `${gameStatistics.currency.coins} - ${removedAsset.destroyCost} = ${
-        gameStatistics.currency.coins - removedAsset.destroyCost
-      }`
-    );
-
     let scoreChange = 0;
 
     if (Nature.allowedTypes.includes(removedAsset.type)) {
@@ -597,9 +591,6 @@ class GameStatisticsService {
    * @throws {Error} If the GameBuilding or the next BuildingLevel is not found.
    */
   async upgradeGameBuilding(gameBuildingId, { nextLevel }) {
-    console.log(
-      `Upgrading GameBuilding with id=${gameBuildingId} to nextLevel=${nextLevel}`
-    );
     // 1) Fetch the GameBuilding record
     const gameBuilding = await gameStatisticsRepository.findGameBuildingById(
       gameBuildingId
@@ -888,8 +879,7 @@ class GameStatisticsService {
         }      
       }
     }
-    console.log(`Earned Achievements: ${earnedAchievements.length}`);
-    console.log(earnedAchievements);
+
     return earnedAchievements;
   }
 
@@ -1103,6 +1093,10 @@ class GameStatisticsService {
 
   async updateDamageAndMessage(multipliers) {
     await gameStatisticsRepository.updateDamageAndMessage(multipliers);
+  }
+
+  async repairAsset(multiplierId, type) {
+    await gameStatisticsRepository.repairAsset(multiplierId, type);
   }
 }
 

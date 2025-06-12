@@ -376,11 +376,6 @@ class GameStatisticsRepository {
       }
 
       const totalGain = relevantAssets.length * greenEnergy * typeMultiplier;
-      console.log(typeMultiplier)
-      console.log(greenEnergy)
-      console.log(relevantAssets.length)
-      console.log(totalGain)
-
       const updated = await this.prisma.currency.update({
         where: { id: currency.id },
         data: {
@@ -1085,6 +1080,30 @@ class GameStatisticsRepository {
         },
       });
     }
+  }
+
+  async repairAsset(multiplierId, type){
+    const typeToAssetLabel = {
+      Zonnepaneel: "solarDamage",
+      Windturbine: "windDamage",
+      Waterrad: "waterDamage",
+    };
+
+    const label = typeToAssetLabel[type];
+    if (!label) throw new Error(`Onbekend asset type: ${type}`);
+
+    const multiplier = await this.prisma.multiplier.findUnique({
+      where: { id: multiplierId },
+    });
+
+    if (!multiplier) {
+      throw new Error("Multiplier not found");
+    }
+
+    await this.prisma.multiplier.update({
+      where: { id: multiplierId },
+      data: { [label]: false },
+    });
   }
 }
 

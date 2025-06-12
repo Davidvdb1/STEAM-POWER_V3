@@ -8,6 +8,7 @@ import {
   recordCheckpoint,
   refactorGameStatistics,
   toggleAllBuildingsRunsOnGreenFalse,
+  repairAsset,
 } from "../service/gameService.js";
 import {
   transformBuildingData,
@@ -1008,17 +1009,44 @@ async _updateStatistics() {
     for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
       const scene = this._game.scene.getScene(key);
 
+      let cost = 20;
+      if (this._game.currency.coins - cost < 0) {
+        cost = 22
+      }
+
       if (scene && typeof scene.showConfirmation === "function") {
         scene.showConfirmation(
-          `Wil je de ${capitalized} weer herstellen voor 20 coins?`,
+          `Wil je de ${capitalized} weer herstellen voor ${cost} coins?`,
           async (confirmed) => {
             if (!confirmed) return;
 
+            if (this._game.currency.coins - 20 < -100) {
+              scene.showError(
+                `Je hebt al te veel schulden om de ${type} te herstellen. Je kan niet meer lenen.`
+              );
+              return
+            }
+
+            const { token } = getAuthFromSession();
+        
+            await updateCurrency(
+              this._game.currency.id,
+              {
+                greenEnergy: this._game.currency.greenEnergy,
+                greyEnergy: this._game.currency.greyEnergy,
+                coins: this._game.currency.coins - cost,
+                score: this._game.currency.score,
+              },
+              token
+            );
+            await repairAsset(this._game.multipliers.id, type, token)
+            await this._updateStatistics();
           }
         );
       }
     }
   }
+
 }
 
 window.customElements.define("gamecontrolpanel-れ", GameControlPanel);

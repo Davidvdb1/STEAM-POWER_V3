@@ -356,32 +356,7 @@ class CurrencyDisplay extends HTMLElement {
         console.error("Error with applying event damages:", error)
     }
   }
-
-  async _repairDamage(type) {
-    try {
-      const url = window.env.BACKEND_URL;
-      const response = await fetch(`${url}/groups/repair`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ type }), // "SOLAR", "WIND", "WATER"
-      });
-
-      if (!response.ok) {
-        throw new Error("Repair failed");
-      }
-
-      // Vraag de nieuwste multipliers opnieuw op na reparatie
-      const newMultipliers = await response.json();
-      this._updateMultipliers(newMultipliers);
-    } catch (err) {
-      console.error("Repair error:", err);
-    }
-  }
 }
-
-
 
 window.customElements.define("currency-display", CurrencyDisplay);
 export default CurrencyDisplay;
