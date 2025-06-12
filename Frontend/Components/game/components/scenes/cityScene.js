@@ -83,6 +83,12 @@ export function createCityScene() {
      * @memberof CityScene
      */
     preload() {
+      // In your preload method
+      this.load.scenePlugin({
+        key: 'AnimatedTiles',
+        url: 'https://raw.githubusercontent.com/nkholski/phaser-animated-tiles/master/dist/AnimatedTiles.js',
+        sceneKey: 'animatedTiles'
+      });
       // this.load.tilemapTiledJSON("innerCityMap", "Assets/json/binnenstad.json");
       // this.load.image(
       //   "tilesetImage",
@@ -106,7 +112,6 @@ export function createCityScene() {
       this.load.image("subwayBuskerImage", "assets/images/tilesets/Subway_Busker.png");
       this.load.image("subwayElevatorImage", "assets/images/tilesets/Subway_Elevator_Going_Down.png");
       this.load.image("townHallDoorImage", "assets/images/tilesets/Town_Hall_Balcony_Door.png");
-
     }
 
     /**
@@ -136,6 +141,9 @@ export function createCityScene() {
       this.layer3 = this.map.createLayer("Layer-3", [mainTileset, billboardTileset, charactersTileset, dumpsterTileset, helicopterDoorTileset, hospitalStretcherTileset, policeStationDoorTileset, spotlightTileset, subwayElevatorTileset]);
       this.layer4 = this.map.createLayer("Layer-4", [mainTileset, busDoorTileset, subwayBuskerTileset]);
       this.layer5 = this.map.createLayer("Layer-5", [mainTileset, clothesHangingTileset]);
+
+      // In your create method (after creating layers)
+      this.animatedTiles.init(this.map);
 
       setCameraBounds(this);
       handleZoom(this);
