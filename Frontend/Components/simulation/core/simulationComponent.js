@@ -7,15 +7,16 @@ import { updateAutoRotateChangeSolar } from '../models/solarPanel.js';
 import { updateWaterWheelDepth } from '../models/waterWheel.js';
 import { updateSolarRotation } from '../models/solarPanel.js';
 import { updateWaterWheelPosition } from '../models/waterWheel.js';
-import { getSunPosition } from '../utils/sunCalculator.js';
+import { getSunPosition }  from '../utils/sunCalculator.js';
+import { geocodeAddress }  from '../utils/geocode.js';
 //import { fetchWindSpeed, calcWindPowerKwh } from '../utils/weatherData.js'; //mag weg waardes waren te klein
 //import { fetchWindSpeed, calcWindPowerWh }  from '../utils/weatherData.js';
 import {
   fetchWindSpeed,
-  calcWindPowerWhTurbine,      // nieuw
-  ROTOR_RADIUS_M               // (alleen als je ‘m ergens wilt tonen)
+  calcWindPowerWhTurbine,
+  yawAdjustedSpeed,
+  ROTOR_RADIUS_M
 } from '../utils/weatherData.js';
-
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
@@ -51,6 +52,7 @@ export class SimulationComponent extends HTMLElement {
         this.wheel = null;
 
         this.currentBladeCount = 3;              // default
+        this.manualYawDeg = 0;               // handmatige offset in °
     }
 
     // component attributes
@@ -138,17 +140,47 @@ export class SimulationComponent extends HTMLElement {
         }
     }
 
-    /**
- * Haalt windsnelheid op en berekent kWh/m²/u op basis van huidig bladeCount
+   /**
+ * Berekent het turbine-vermogen (Wh/u) rekening houdend
+ * met het aantal wieken én de yaw-afwijking (slider).
  */
 async _updateWindEnergy() {
   try {
-    const v   = await fetchWindSpeed(this.lat ?? 50.8798, this.lon ?? 4.7005);
-    const Wh  = calcWindPowerWhTurbine(v, this.currentBladeCount);
-    console.log(`Wind (${this.currentBladeCount} wieken, R=${ROTOR_RADIUS_M} m): `+`${Wh.toFixed(0)} Wh/u`
-   );    // TODO: schrijf kWh naar energie-paneel wanneer dat er is
+    /* -----------------------------------------------------------
+     * 1) Windsnelheid bij de opgegeven locatie
+     * --------------------------------------------------------- */
+    const v = await fetchWindSpeed(
+      this.lat ?? 50.8798,
+      this.lon ?? 4.7005
+    );                                   // m/s
+
+    /* -----------------------------------------------------------
+     * 2) Yaw-fout Δ rechtstreeks uit sliderwaarde
+     *    (this.manualYawDeg kan bv. –270 … +720 zijn)
+     * --------------------------------------------------------- */
+    let delta = Math.abs(this.manualYawDeg % 360); // 0–360
+    if (delta > 180) delta = 360 - delta;          // kleinste hoek → 0–180°
+
+    /* -----------------------------------------------------------
+     * 3) Effectieve snelheid + vermogen
+     * --------------------------------------------------------- */
+    const vEff = yawAdjustedSpeed(v, delta);       // m/s
+    const Wh   = calcWindPowerWhTurbine(
+                   vEff,
+                   this.currentBladeCount
+                 );                                // Wh/u per turbine
+
+    /* -----------------------------------------------------------
+     * 4) Debug / UI-update
+     * --------------------------------------------------------- */
+    console.log(
+      `Aantal ${this.currentBladeCount}wieken | Δ=${delta.toFixed(0)}° → `
+      + `${Wh.toFixed(0)} Wh/u`
+    );
+
+    // TODO: schrijf Wh naar energie-paneel zodra aanwezig
   } catch (err) {
-    console.error('Wind-energie berekening faalde:', err);
+    console.error('Wind-energie-berekening faalde:', err);
   }
 }
 
@@ -158,8 +190,36 @@ async _updateWindEnergy() {
         this.city   = city;
         this.postal = postal;
 
-        await updateSunAndSolarPanel(this, street, city, postal);
-    }
+        // 1) geocode → lat/lon en opslaan
+ try {
+   const { lat, lon } = await geocodeAddress(street, city, postal);
+   this.lat = lat;
+   this.lon = lon;
+ } catch (err) {
+   console.warn('Geocode faalde, behoud vorige coördinaten', err);
+ }
+
+ // 2) zon & panelen verplaatsen
+ await updateSunAndSolarPanel(this, street, city, postal);
+ // windmolen opnieuw in de wind zetten (als auto-mode aan staat)
+  await updateAutoRotateChange(
+    this.scene,
+    this,
+    true,                 // auto-mode is actief
+    street,
+    city,
+    postal
+  );
+
+  // en meteen Wh/u herberekenen
+  await this._updateWindEnergy();
+ 
+
+ // 3) wind-energie opnieuw berekenen met nieuwe coördinaten
+ await this._updateWindEnergy();
+
+}
+    
     
     async _initializeBabylonJS() {
         // Get the canvas element from shadow DOM
@@ -260,10 +320,17 @@ async _updateWindEnergy() {
 
     async _handleWindmillRotation(degrees) {
         await updateWindmillRotation(this.scene, this, degrees)
+        this.manualYawDeg = degrees;
+        await this._updateWindEnergy();
     }
 
     async _handleAutoRotateChange(enabled) {
         await updateAutoRotateChange(this.scene, this, enabled, this.street, this.city, this.postal)
+        if (enabled) {
+        this.manualYawDeg = 0;           // offset terug naar 0°
+        await this._updateWindEnergy();  // direct nieuwe energie-waarde
+        }
+
     }
 
     async _handleSolarRotation(degreesSolar) {
