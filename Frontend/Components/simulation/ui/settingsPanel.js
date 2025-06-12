@@ -108,8 +108,9 @@ export function createSettingsPanel(onBladeCountChange, onLocationChange, onManu
     createLocationSettings(page1, onLocationChange);
     
     // Add windmill settings section
-    createWindmillSettings(page1, page2, onBladeCountChange, onManualRotationChange, onAutoRotateChange, model)
-
+createWindmillSettings(page1, page2, onBladeCountChange, onManualRotationChange, onAutoRotateChange,model,
+  true 
+);
     createSolarPanelSettings(page2, onManualRotationChangeSolar, onAutoRotateChangeSolar)
 
     createWaterWheelSettings(page2, position, depth)

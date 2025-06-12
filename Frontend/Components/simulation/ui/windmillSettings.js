@@ -102,6 +102,9 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
     page1.addControl(sliderValueText);
 
     slider.onValueChangedObservable.add((value) => {
+
+        if (ignoreSliderEvent) return;
+
         sliderValueText.text = `${Math.round(value)}°`;
         if (autoRotate) {
             autoRotate = false;
@@ -131,18 +134,21 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
     page1.addControl(toggleButton);
 
     let autoRotate = true;
-
+    let ignoreSliderEvent = false;
+    
     toggleButton.onPointerUpObservable.add(() => {
         autoRotate = !autoRotate;
         toggleButton.textBlock.text = autoRotate ? "Aan" : "Uit";
 
         if (autoRotate) {
     /* -------- Nieuw: reset slider en label ------------------------ */
+    ignoreSliderEvent = true; // Prevent slider event from triggering
     slider.value            = 0;          // visueel
     sliderValueText.text    = "0°";       // label
     if (onManualRotationChange) {
       onManualRotationChange(0);          // logica ↺ molen
     }
+    ignoreSliderEvent = false; // Re-enable slider event
     /* -------------------------------------------------------------- */
     onAutoRotateChange(true);
   } else {
