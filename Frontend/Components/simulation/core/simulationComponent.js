@@ -44,6 +44,9 @@ export class SimulationComponent extends HTMLElement {
     this.city = "Leuven";
     this.postal = "3001";
 
+    this.lat = 50.8798; // Default latitude for Leuven
+    this.lon = 4.7005; // Default longitude for Leuven
+
     this.engine = null;
     this.scene = null;
     this.camera = null;
