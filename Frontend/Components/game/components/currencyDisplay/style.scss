@@ -1,0 +1,248 @@
+/* src/components/currencyDisplay/style.css */
+
+:host {
+  display: block;
+}
+
+.currency-display {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: #d3d3d3;
+  padding: 10px;
+
+  &.hidden {
+    display: none;
+  }
+
+  .currency-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .currency-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &.grey-energy {
+      img {
+        height: 50px;
+      }
+      span {
+        color: #151515;
+        font-family: "PixelFont" !important;
+        margin-left: 6px;
+        font-weight: normal !important;
+      }
+    }
+
+    &.green-energy {
+      img {
+        height: 50px;
+      }
+      span {
+        color: #9ba143;
+        font-family: "PixelFont" !important;
+        margin-left: 6px;
+        font-weight: normal !important;
+      }
+    }
+
+    &.coins {
+      img {
+        height: 30px;
+        padding: 10px;
+      }
+      span {
+        color: #fbac2b;
+        font-family: "PixelFont" !important;
+        margin-left: 6px;
+        font-weight: normal !important;
+      }
+    }
+
+    &.score {
+      span {
+        font-family: "PixelFont" !important;
+        margin-left: 6px;
+      }
+    }
+  }
+
+  .currency-actions {
+    display: flex;
+    gap: 10px;
+
+    button {
+      font-family: "PixelFont";
+      font-size: 14px;
+      padding: 8px 12px;
+      background: #888;
+      border: 2px solid #555;
+      border-radius: 4px;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #aaa;
+      }
+    }
+  }
+
+  .progress-div {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50%;
+    margin-top: 8px;
+    gap: 8px;
+
+    .green-buildings {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      margin-left: 12px;
+
+      span {
+        font-family: "PixelFont" !important;
+        margin-left: 6px;
+        color: #151515;
+        white-space: nowrap;
+      }
+    }
+
+    .progress-container {
+      flex: 1 1 auto;
+      background: #888;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      height: 16px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+
+      .progress-bar {
+        width: 0%;
+        height: 100%;
+        background: #d2f7d2;
+        transition: width 0.3s ease;
+      }
+    }
+
+    .progress-percent {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+
+      span {
+        font-family: "PixelFont" !important;
+        margin-right: 6px;
+        color: #151515;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .multipliers {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    margin-top: 10px;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .multipliers .label {
+    font-family: "PixelFont" !important;
+    color: #151515;
+    font-weight: normal !important;
+    margin-bottom: 10px;
+  }
+
+  .multipliers .energy-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 60px;
+    font-family: "PixelFont" !important;
+    color: #151515;
+    font-weight: normal !important;
+  }
+
+  .multipliers .icon-multiplier {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end; /* icoon en 1x onderlijnen */
+    gap: 6px;
+  }
+
+  .multipliers .icon-multiplier img {
+    height: 30px;
+    margin: 0;
+  }
+
+  .multipliers .multiplier-value {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .multipliers .live-value {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #444;
+  }
+  .microbit {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 10px;
+    justify-content: center;
+    gap: 20px;
+    
+    span {
+      font-family: "PixelFont" !important;
+      color: #151515;
+      font-weight: normal !important;
+    }
+  }
+
+  .timer {
+    color: #000 !important;
+    font-family: "PixelFont", monospace !important;
+  }
+
+  .currency-display,
+  .currency-item,
+  .timer,
+  .currency-item.grey-energy span,
+  .currency-item.green-energy span {
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    -webkit-font-smoothing: none;
+    text-rendering: geometricPrecision;
+  }
+
+  .timer {
+    display: inline-block;
+    width: 4ch;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+    font-family: monospace !important;
+  }
+}

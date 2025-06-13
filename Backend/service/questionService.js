@@ -2,6 +2,7 @@ const QuestionRepository = require("../repository/questionRepository");
 const Question = require("../model/question");
 const Answer = require("../model/answer"); // added import for Answer model
 const AnswerRepository = require("../repository/answerRepository"); // added import for Answer repository
+const gameStatisticsRepository = require("../repository/gameStatisticsRepository");
 
 class QuestionService {
     constructor() {
@@ -78,6 +79,15 @@ class QuestionService {
             const res = await this.answerRepo.create(answer);
 
             const response = await this.answerRepo.findByGroupIdAndQuestionId(groupId, questionId);
+
+            const gameStats = await gameStatisticsRepository.findByGroupId(groupId);
+            const currency = gameStats.currency;
+
+            if (response.some(answer => answer.isCorrect)) {
+                await gameStatisticsRepository.incrementCurrency(currency.id, {
+                    coins: 20
+                });
+            }
 
             return {
                 ...question,
