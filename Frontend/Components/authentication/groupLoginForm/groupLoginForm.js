@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/authentication/groupLoginForm/style.css';
+        @import './Components/authentication/groupLoginForm/style.css';
     </style>
     <form class="group-login-form">
         <input type="text" name="code" placeholder="Code" required>

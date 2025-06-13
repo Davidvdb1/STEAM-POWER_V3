@@ -6,7 +6,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/user/userList/style.css';
+        @import './Components/user/userList/style.css';
     </style>
     <table id="user-list">
         <tr>

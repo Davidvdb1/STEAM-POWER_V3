@@ -1,1 +1,40 @@
+:host {
+  display: block;
+  font-family: Verdana, sans-serif;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+#container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+/* Empty state styling */
+#container:empty::after {
+  content: "Geen vragen beschikbaar";
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 1.1rem;
+  color: #666;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  font-weight: 500;
+  border: 1px solid #e0e0e0;
+}
+
+@media screen and (max-width: 768px) {
+  :host {
+    padding: 15px;
+  }
+  
+  #container {
+    gap: 15px;
+  }
+}
 /*# sourceMappingURL=style.css.map */

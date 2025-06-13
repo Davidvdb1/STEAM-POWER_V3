@@ -7,7 +7,7 @@ import '../../user/userList/userList.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/userOverviewPage/style.css';
+        @import './Components/pages/userOverviewPage/style.css';
     </style>
     <adduser-れ></adduser-れ>
     <userlist-れ></userlist-れ>

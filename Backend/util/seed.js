@@ -5,6 +5,7 @@ const fs = require('fs');
 const prisma = new PrismaClient();
 
 async function main() {
+    await prisma.energyData.deleteMany();
     await prisma.user.deleteMany();
     await prisma.workshop.deleteMany();
     await prisma.camp.deleteMany();
@@ -169,10 +170,25 @@ async function main() {
         data: {
             name: 'Groep 2',
             members: 'Yassine en David',
-            microbitId: 'gavuv',
+            microbitId: 'pavot',
         },
     });
 
+    const group3 = await prisma.group.create({
+        data: {
+            name: 'Groep 3',
+            members: 'Jasper en Joris',
+            microbitId: 'pavot',
+        },
+    });
+
+    const group4 = await prisma.group.create({
+        data: {
+            name: 'Groep 4',
+            members: 'Jasper en Joris',
+            microbitId: 'pavot',
+        },
+    }); 
 
     // Questions
 

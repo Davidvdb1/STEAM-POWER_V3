@@ -3,12 +3,109 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f0f0f0;
+  background-color: #f5f7fa;
+  font-family: Verdana, sans-serif;
 }
 
 .user-login-page .login-container {
   background-color: white;
   padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  max-width: 90%;
+}
+
+/* Form elements styling - these will apply to elements inside the userloginform-れ component */
+:host ::slotted(input),
+input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #e0e0e0;
   border-radius: 5px;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  font-family: Verdana, sans-serif;
+  font-size: 0.95rem;
+  transition: border-color 0.3s ease;
+}
+
+:host ::slotted(input:focus),
+input:focus {
+  outline: none;
+  border-color: #9FDAF9;
+}
+
+:host ::slotted(h2),
+h2 {
+  color: #002757;
+  margin-bottom: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+:host ::slotted(button),
+button {
+  background-color: #9FDAF9;
+  color: #002757;
+  border: none;
+  padding: 12px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+  font-size: 0.95rem;
+  margin-top: 10px;
+}
+
+:host ::slotted(button:hover),
+button:hover {
+  background-color: #E30147;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+:host ::slotted(button:active),
+button:active {
+  transform: translateY(0);
+}
+
+:host ::slotted(a),
+a {
+  color: #002757;
+  text-decoration: none;
+  font-size: 0.9rem;
+  display: block;
+  text-align: center;
+  margin-top: 15px;
+  transition: color 0.3s ease;
+}
+
+:host ::slotted(a:hover),
+a:hover {
+  color: #E30147;
+}
+
+/* Error message styling */
+:host ::slotted(.error-message),
+.error-message {
+  color: #E30147;
+  font-size: 0.85rem;
+  margin-top: -10px;
+  margin-bottom: 10px;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .user-login-page .login-container {
+    padding: 30px;
+  }
+  
+  :host ::slotted(button),
+  button {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
 }/*# sourceMappingURL=style.css.map */

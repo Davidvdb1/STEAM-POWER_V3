@@ -8,20 +8,20 @@ import '../locationFilter/locationFilter.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/filterAndSort/filterPanel/style.css';
+        @import './Components/filterAndSort/filterPanel/style.css';
     </style>
 
-    <img src="./Assets/SVGs/filter.png" alt="search" style="width: 35px; height: 35px;">
-    <select id="filter">
-        <option value="none" selected>Geen filtering</option>
-        <option value="location" >filter op locatie</option>
-        <option value="date">filter op datum</option>
-        <option value="age">filter op leeftijd</option>
-    </select>
+    <div class="filterPanelDiv-img-select">
+        <img src="./Assets/SVGs/filter.png" alt="search" style="width: 35px; height: 35px;">
+        <select id="filter">
+            <option value="none" selected>Geen filtering</option>
+            <option value="location" >filter op locatie</option>
+            <option value="date">filter op datum</option>
+            <option value="age">filter op leeftijd</option>
+        </select>
+    </div>
 
     <div id="filterPanel"></div>
-    
-
 `;
 //#endregion FILTERPANEL
 

@@ -1,56 +1,58 @@
-@charset "UTF-8";
 :host {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 80%;
-  max-width: 1500px;
-}
-
-#workshops {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(700px, 1fr));
-  gap: 50px;
-  justify-content: center;
-  align-items: stretch;
   width: 100%;
-  margin-top: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: Verdana, sans-serif;
+  padding: 20px;
 }
 
-button {
-  background-color: #9FDAF9;
-  white-space: nowrap;
-  font-size: 1.1rem;
+h1 {
   color: #002757;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.3s ease-in-out;
+  font-size: 2.5rem;
+  text-align: center;
+  margin: 20px 0 30px 0;
   font-weight: bold;
-  border-style: solid;
-  border-color: #9FDAF9;
-  width: 350px;
 }
 
-button:hover {
-  border-color: #002757;
-}
-
-#campinfo {
-  margin-top: 30px;
-  margin-bottom: 50px;
+h2 {
+  color: #002757;
+  font-size: 1.8rem;
+  text-align: center;
+  margin: 30px 0 20px 0;
+  font-weight: bold;
 }
 
 #buttons {
   display: flex;
-  gap: 50px;
+  gap: 20px;
   justify-content: center;
   align-items: center;
+  margin: 20px 0 30px 0;
+  flex-wrap: wrap;
 }
 
-/* 🌟 Dropdown Styling */
+#buttons button {
+  padding: 12px 20px;
+  border: 2px solid #9FDAF9;
+  background-color: #f2f2f2;
+  color: #002757;
+  cursor: pointer;
+  border-radius: 6px;
+  font-family: Verdana, sans-serif;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+#buttons button:hover {
+  background-color: #9FDAF9;
+  color: #002757;
+}
+
+/* Dropdown styling */
 .dropdown {
   position: relative;
   display: inline-block;
@@ -60,52 +62,140 @@ button:hover {
   display: none;
   position: absolute;
   background-color: white;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-  min-width: 330px;
-  border-radius: 5px;
-  padding: 10px;
-  z-index: 10;
-  max-height: 300px;
-  overflow-y: auto;
+  min-width: 300px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  border: 2px solid #9FDAF9;
+  border-radius: 10px;
+  padding: 20px;
+  top: 100%;
+  left: 0;
 }
 
 .dropdown.open .dropdown-content {
-  display: block;
-}
-
-/* 🌟 Styling voor de checkbox lijst */
-#workshopList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-#workshopList li {
-  padding: 5px;
-  display: flex;
-  align-items: center;
-}
-
-#workshopList li label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-#workshopList input[type=checkbox] {
-  transform: scale(1.2);
 }
 
 #confirmSelection {
   width: 100%;
-  margin-bottom: 10px;
-  background-color: #E30147;
+  padding: 10px 15px;
+  background-color: #9FDAF9;
   color: #002757;
-  border-color: #E30147;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 15px;
+  transition: background-color 0.2s;
 }
 
 #confirmSelection:hover {
-  border-color: #6d0123;
-}/*# sourceMappingURL=style.css.map */
+  background-color: #7bc8f0;
+}
+
+#workshopList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+#workshopList li {
+  padding: 10px 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#workshopList li:last-child {
+  border-bottom: none;
+}
+
+#workshopList li:hover {
+  background-color: #f0f8ff;
+}
+
+#workshopList label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: #002757;
+}
+
+#workshopList input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+#statusmessage {
+  text-align: center;
+  padding: 10px;
+  margin: 15px 0;
+  font-weight: bold;
+  font-size: 1rem;
+  min-height: 20px;
+  border-radius: 6px;
+}
+
+#workshops {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+  max-width: 1000px;
+  margin-top: 20px;
+}
+
+/* Workshop preview styling to match the overall design */
+workshoppreview-れ {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+}
+
+workshoppreview-れ:hover {
+  border-color: #9FDAF9;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  :host {
+    padding: 15px;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  #buttons {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  #buttons button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .dropdown-content {
+    min-width: 280px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+/*# sourceMappingURL=style.css.map */

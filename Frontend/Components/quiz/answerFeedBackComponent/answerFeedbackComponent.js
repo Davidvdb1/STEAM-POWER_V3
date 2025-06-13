@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/quiz/answerFeedBackComponent/style.css';
+        @import './Components/quiz/answerFeedBackComponent/style.css';
     </style>
 
     <div class="container">
@@ -90,8 +90,8 @@ window.customElements.define('answer-feedback-component-れ', class extends HTML
     getSVG() {
         let combinedCircleSectionsPaths = "";
         const sectionColors = [
-            "#98FBB0", // lighter green
-            "#90EE90", // light green
+            "#FF0000", // red
+            "#FFA500", // orange
             "#00D000", // green
             "#FFA500", // orange
             "#FF0000"  // red

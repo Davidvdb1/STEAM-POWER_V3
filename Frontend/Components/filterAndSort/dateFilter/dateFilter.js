@@ -5,10 +5,10 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/filterAndSort/dateFilter/style.css';
+        @import './Components/filterAndSort/dateFilter/style.css';
     </style>
      
-    <div>
+    <div class="date-filter-container">
         <div class="date">
             <label for="startDate">Van:</label>
             <input type="date" id="startDate" placeholder="Startdatum">

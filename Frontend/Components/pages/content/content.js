@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/content/style.css';
+        @import './Components/pages/content/style.css';
     </style>
 `;
 //#endregion CONTENT

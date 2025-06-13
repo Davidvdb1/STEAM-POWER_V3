@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/authentication/userLoginForm/style.css';
+        @import './Components/authentication/userLoginForm/style.css';
     </style>
     <form class="user-login-form">
         <input type="text" name="email" placeholder="Email" required>

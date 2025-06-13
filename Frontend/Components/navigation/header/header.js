@@ -1,16 +1,16 @@
 //#region IMPORTS
-import "../../../components/navigation/navigationList/navigationList.js"
+import "../../../Components/navigation/navigationList/navigationList.js"
 //#endregion IMPORTS
 
 //#region Header
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/navigation/header/style.css';
+        @import './Components/navigation/header/style.css';
     </style>
-
+ 
     <img src="./Assets/images/logo.jpg" alt="Logo" class="nav-logo">
-    <navigationList-れ></navigationList-れ>
+    <navigationList-れ class="navigationListComponent"></navigationList-れ>
 `;
 //#endregion Header
 
@@ -38,7 +38,5 @@ window.customElements.define('header-れ', class extends HTMLElement {
     connectedCallback() {
         
     }
-    
-
 });
 //#endregion CLASS

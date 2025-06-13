@@ -6,7 +6,7 @@ import '../quizQuestionComponent/quizQuestionComponent.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/quiz/questionList/style.css';
+        @import './Components/quiz/questionList/style.css';
     </style>
 
     <div id="container">

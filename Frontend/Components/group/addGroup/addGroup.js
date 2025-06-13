@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/group/addGroup/style.css';
+        @import './Components/group/addGroup/style.css';
     </style>
     <form>
         <label for="groupname">Groepsnaam:</label><br>

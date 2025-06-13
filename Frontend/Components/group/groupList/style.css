@@ -1,3 +1,95 @@
+/* Main table styling */
+#group-list {
+  width: 100%;
+  max-width: 1200px;
+  margin: 20px auto;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  font-family: Verdana, sans-serif;
+  overflow: hidden;
+}
+
+#group-list th {
+  background-color: #9FDAF9;
+  color: #002757;
+  padding: 15px;
+  text-align: left;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+#group-list tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#group-list td {
+  padding: 12px 15px;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.95rem;
+}
+
+/* Column widths */
+#group-list th:nth-child(1), #group-list td:nth-child(1) { width: 20%; }
+#group-list th:nth-child(2), #group-list td:nth-child(2) { width: 25%; }
+#group-list th:nth-child(3), #group-list td:nth-child(3) { width: 15%; }
+#group-list th:nth-child(4), #group-list td:nth-child(4) { width: 15%; }
+#group-list th:nth-child(5), #group-list td:nth-child(5) { width: 12.5%; }
+#group-list th:nth-child(6), #group-list td:nth-child(6) { width: 12.5%; }
+
+/* Button styling */
+.delete-btn, .edit-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+  max-width: 100px;
+  text-align: center;
+}
+
+.delete-btn {
+  background-color: #f2f2f2;
+  color: #E30147;
+  border: 1px solid #E30147;
+}
+
+.delete-btn:hover {
+  background-color: #E30147;
+  color: white;
+}
+
+.edit-btn {
+  background-color: #f2f2f2;
+  color: #002757;
+  border: 1px solid #9FDAF9;
+}
+
+.edit-btn:hover {
+  background-color: #9FDAF9;
+  color: #002757;
+}
+
+/* Edit mode input styling */
+.edit-name-input, .edit-members-input, .edit-microbitId-input {
+  width: 95%;
+  padding: 8px 10px;
+  border: 2px solid #9FDAF9;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.edit-name-input:focus, .edit-members-input:focus, .edit-microbitId-input:focus {
+  outline: none;
+  border-color: #9FDAF9;
+  box-shadow: 0 0 0 2px rgba(159, 218, 249, 0.2);
+}
+
+/* Confirmation Popup - most styles are already in the main CSS file */
 .popup-overlay {
   position: fixed;
   top: 0;
@@ -13,39 +105,73 @@
 
 .popup-content {
   background-color: white;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   max-width: 400px;
   text-align: center;
+}
+
+.popup-content h3 {
+  margin-top: 0;
+  color: #002757;
+  font-size: 1.3rem;
+}
+
+.popup-content p {
+  color: #444;
+  margin-bottom: 20px;
 }
 
 .popup-buttons {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 15px;
   margin-top: 20px;
 }
 
 #confirm-delete-btn {
-  background-color: #ff4d4d;
+  background-color: #E30147;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
 }
+
 #confirm-delete-btn:hover {
-  background-color: #ff3333;
+  background-color: #c80039;
 }
 
 #cancel-delete-btn {
   background-color: #f0f0f0;
   border: 1px solid #ddd;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 10px 20px;
+  border-radius: 6px;
   cursor: pointer;
+  font-weight: bold;
+  color: #444;
+  transition: background-color 0.2s;
 }
+
 #cancel-delete-btn:hover {
   background-color: #e0e0e0;
-}/*# sourceMappingURL=style.css.map */
+}
+
+@media screen and (max-width: 768px) {
+  #group-list {
+    font-size: 0.9rem;
+  }
+  
+  #group-list th, #group-list td {
+    padding: 10px;
+  }
+  
+  .delete-btn, .edit-btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+/*# sourceMappingURL=style.css.map */

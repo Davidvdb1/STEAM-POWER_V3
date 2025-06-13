@@ -7,6 +7,7 @@ const utility = require('../util/utility');
 class UserService {
     async register(userData) {
         try {
+            userData.email = userData.email.toLowerCase();
             const existingUser = await userRepository.findByEmail(userData.email);
             if (existingUser) throw new utility.ValidationError('Gebruiker met dit emailadres bestaat al');
 
@@ -32,6 +33,7 @@ class UserService {
 
     async login(userData) {
         try {
+            userData.email = userData.email.toLowerCase();
             const user = await userRepository.findByEmail(userData.email);
             if (!user) throw new utility.AuthenticationError('Gebruiker niet gevonden');
 
@@ -74,6 +76,7 @@ class UserService {
 
     async createUser(userData) {
         try {
+            userData.email = userData.email.toLowerCase();
             const existingUser = await userRepository.findByEmail(userData.email);
             if (existingUser) throw new utility.ValidationError('Gebruiker met dit emailadres bestaat al');
 
@@ -96,6 +99,7 @@ class UserService {
 
     async updateUser(userData) {
         try {
+            userData.email = userData.email.toLowerCase();
             const existingUser = await userRepository.findById(userData.id);
             if (!existingUser) throw new utility.NotFoundError('Gebruiker niet gevonden');
 

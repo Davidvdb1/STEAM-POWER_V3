@@ -19,4 +19,19 @@ input {
   border: 1px solid #ccc;
   border-radius: 4px;
   box-sizing: border-box;
-}/*# sourceMappingURL=style.css.map */
+}
+
+.filterPanelDiv-img-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;  
+}
+
+
+@media screen and (max-width: 768px) {
+  :host {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+/*# sourceMappingURL=style.css.map */

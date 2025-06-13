@@ -6,7 +6,7 @@ import '../microbitBasicPinController/microbitBasicPinController.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/microbit/microbitBasicPinController/style.css';
+        @import './Components/microbit/microbitBasicPinController/style.css';
     </style>
     <div id="pinFormsContainer">
         <!-- Forms will be dynamically generated here -->

@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/microbit/microbitAdvancedPinControllerForm/style.css';
+        @import './Components/microbit/microbitAdvancedPinControllerForm/style.css';
     </style>
     <form>
         <p>Pin <span id="pinNumber"></span></p>

@@ -41,7 +41,7 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         document.addEventListener('startbluetoothconnection', this.init.bind(this));
         document.addEventListener('pausebluetoothconnection', this.pause.bind(this));
         document.addEventListener('stopbluetoothconnection', this.disconnect.bind(this));
-    }
+    }    
 
     async init() {
         if (!navigator.bluetooth) return; // TODO: Show error message "Bluetooth not supported on this browser"
@@ -124,6 +124,8 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         const ioFlagsBuffer = new Uint8Array([Number(ioFlags)]).buffer;
         await this.pinIoConfigurationCharacteristic.writeValue(adFlagsBuffer);
         await this.pinAdConfigurationCharacteristic.writeValue(ioFlagsBuffer);
+        const pinconfig = await this.pinIoConfigurationCharacteristic.readValue();
+        console.log(pinconfig);
     }
 
     async readPinValues() {
@@ -143,8 +145,10 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
         pinValues.push({pin: 1, groupId, value: extract10BitValue(view.getUint8(3)), type: 'WIND', time});
         pinValues.push({pin: 2, groupId, value: extract10BitValue(view.getUint8(5)), type: 'WATER', time});
         pinValues.forEach(async (data) => {
+            if (data.value == 0) return;
             const response = await this.postEnergyData(data);
             const body = await response.json();
+            console.log(body);
             const datapoint = body.energyData;
             
             const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });

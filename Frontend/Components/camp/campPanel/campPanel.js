@@ -7,7 +7,7 @@ import "../../filterAndSort/filterPanel/filterPanel.js"
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/camp/campPanel/style.css';
+        @import './Components/camp/campPanel/style.css';
     </style>
 
     <div id="searchPanel">
@@ -48,9 +48,8 @@ window.customElements.define('camppanel-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log(this.loggedInUser);
         if (!this.loggedInUser || this.loggedInUser.role !== "ADMIN") {
-            this.$buttonPanel.style.display = "none";
+            this.$buttonPanel.remove();
         }
 
         this.$search.addEventListener('input', () => {

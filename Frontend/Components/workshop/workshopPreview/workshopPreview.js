@@ -5,7 +5,7 @@
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/workshop/workshopPreview/style.css';
+        @import './Components/workshop/workshopPreview/style.css';
     </style>
 
     <img id="edit" src="./Assets/SVGs/edit.png" class="buttons" alt="settings" style="top: 8px; width: 26px; height: 25px;">
@@ -55,6 +55,23 @@ window.customElements.define('workshoppreview-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
+
+        const user = JSON.parse(sessionStorage.getItem('loggedInUser')) || {};
+        const isAdmin = user.role === 'ADMIN';
+        const isTeacher = user.role === 'TEACHER'
+        
+        // Hide settings and visible icons if not admin
+        if (!isAdmin && !isTeacher) {
+            this.$edit?.remove();
+            this.$visible?.remove();
+            this.$arrowUp?.remove();
+            this.$arrowDown?.remove();
+            
+            if (this.getAttribute("archived") === "true") {
+                this.remove()
+            }
+        }
+
         this.$edit.addEventListener('click', () => {
             this.tabWithWorkshopHandler("workshoppage", "workshop", this.getAttribute("workshop"));
         })

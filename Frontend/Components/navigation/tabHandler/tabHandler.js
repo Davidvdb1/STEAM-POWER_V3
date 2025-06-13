@@ -1,5 +1,5 @@
 //#region IMPORTS
-import "../../../components/navigation/header/header.js"
+import "../../../Components/navigation/header/header.js"
 import "../../pages/content/content.js"
 import "../../pages/workshopPage/workshopPage.js"
 import "../../pages/campOverviewPage/campOverviewPage.js"
@@ -14,15 +14,17 @@ import "../../pages/workshopInfo/workshopInfo.js"
 import "../../authentication/logout/logout.js"
 import "../../pages/questionAdminPage/questionAdminPage.js"
 import "../../pages/quizPage/quizPage.js"
+import "../../pages/gamePage/gamePage.js"
 //#endregion IMPORTS
 
 //#region TABHANDLER
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/navigation/tabHandler/style.css';
+        @import './Components/navigation/tabHandler/style.css';
     </style>
 
+    <div class="background-layer"></div>
     <header-れ></header-れ>
     <content-れ></content-れ> 
 `;
@@ -93,7 +95,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "campoverviewpage", label: "Home" },
                 { id: "leaderboard", label: "Leaderboard" },
                 { id: "quiz", label: "Quiz" },
-                { id: "spel", label: "Spel" },
+                { id: "gamepage", label: "Spel" },
                 { id: "microbitpage", label: "Micro:bit" },
                 { id: "groupoverviewpage", label: "Groepen" },
                 { id: "useroverviewpage", label: "Gebruikers" },
@@ -104,7 +106,7 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "campoverviewpage", label: "Home" },
                 { id: "leaderboard", label: "Leaderboard" },
                 { id: "quiz", label: "Quiz" },
-                { id: "spel", label: "Spel" },
+                { id: "gamepage", label: "Spel" },
                 { id: "microbitpage", label: "Micro:bit" },
                 { id: "logout", label: "Logout" },
             ]

@@ -1,12 +1,12 @@
 //#region IMPORTS
-import "../../../components/authentication/groupLoginForm/groupLoginForm.js"
+import "../../../Components/authentication/groupLoginForm/groupLoginForm.js"
 //#endregion IMPORTS
 
 //#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/groupLoginPage/style.css';
+        @import './Components/pages/groupLoginPage/style.css';
     </style>
     <grouploginform-れ></grouploginform-れ>
 `;

@@ -7,7 +7,7 @@ import '../../group/groupList/groupList.js';
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
-        @import './components/pages/groupOverviewPage/style.css';
+        @import './Components/pages/groupOverviewPage/style.css';
     </style>
     <addgroup-れ></addgroup-れ>
     <grouplist-れ></grouplist-れ>

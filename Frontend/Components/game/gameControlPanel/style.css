@@ -1,0 +1,92 @@
+/* Updated style for gameControlPanel to match groupList design */
+.hidden {
+  display: none;
+}
+
+/* Main container styling */
+:host {
+  display: block;
+  max-width: 600px;
+  margin: 20px auto;
+  font-family: Verdana, sans-serif;
+}
+
+/* Input container styling */
+div {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  min-width: 500px;
+}
+
+/* Label styling */
+label {
+  display: block;
+  font-weight: bold;
+  color: #002757;
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
+/* Input field styling */
+input[type="number"] {
+  width: 100%;
+  padding: 10px 15px;
+  border: 2px solid #9FDAF9;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: Verdana, sans-serif;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: #002757;
+  box-shadow: 0 0 0 2px rgba(159, 218, 249, 0.2);
+}
+
+/* Button styling to match groupList */
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  font-family: Verdana, sans-serif;
+  transition: all 0.2s ease-in-out;
+  background-color: #f2f2f2;
+  color: #002757;
+  border: 1px solid #9FDAF9;
+  margin-top: 10px;
+}
+
+button:hover {
+  background-color: #9FDAF9;
+  color: #002757;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  div {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  label {
+    font-size: 0.9rem;
+  }
+  
+  input[type="number"] {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  
+  button {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+}/*# sourceMappingURL=style.css.map */
