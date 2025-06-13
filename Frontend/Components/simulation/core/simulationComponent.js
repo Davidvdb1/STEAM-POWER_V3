@@ -341,11 +341,14 @@ async _updateSolarEnergy(){
   }
 
   async _handleSolarRotation(degreesSolar) {
+    
     await updateSolarRotation(this.scene, this, degreesSolar);
+    await this._updateSolarEnergy();
   }
 
   async _handleAutoRotateChangeSolar(enabledSolar) {
     await updateAutoRotateChangeSolar(this.scene, this, enabledSolar);
+    await this._updateSolarEnergy();
   }
 
   // diepte
