@@ -16,7 +16,7 @@ import "../../pages/questionAdminPage/questionAdminPage.js";
 import "../../pages/quizPage/quizPage.js";
 import "../../pages/leaderboardPage/leaderboardPage.js";
 import "../../pages/gamePage/gamePage.js";
-
+import "../../pages/simulationPage/simulationPage.js";
 //#endregion IMPORTS
 
 //#region TABHANDLER
@@ -81,47 +81,44 @@ window.customElements.define(
     }
 
     renderHeader() {
-      const role = this.loggedInUser?.role;
-      const items = {
-        GUEST: [
-          { id: "campoverviewpage", label: "Home" },
-          { id: "userloginpage", label: "Leerkracht aanmelden" },
-          { id: "grouploginpage", label: "Groep aanmelden" },
-        ],
-        TEACHER: [
-          { id: "campoverviewpage", label: "Home" },
-          { id: "leaderboard", label: "Leaderboard" },
-          { id: "groupoverviewpage", label: "Groepen" },
-          { id: "quiz", label: "Quiz" },
-          { id: "microbitpage", label: "Micro:bit" },
-          { id: "questionadmin", label: "Vragen aanpassen" },
-          { id: "logout", label: "Logout" },
-        ],
-        ADMIN: [
-          { id: "campoverviewpage", label: "Home" },
-          { id: "leaderboard", label: "Leaderboard" },
-          { id: "quiz", label: "Quiz" },
-          { id: "gamepage", label: "Spel" },
-          { id: "microbitpage", label: "Micro:bit" },
-          { id: "groupoverviewpage", label: "Groepen" },
-          { id: "useroverviewpage", label: "Gebruikers" },
-          { id: "questionadmin", label: "Vragen aanpassen" },
-          { id: "logout", label: "Logout" },
-        ],
-        GROUP: [
-          { id: "campoverviewpage", label: "Home" },
-          { id: "leaderboard", label: "Leaderboard" },
-          { id: "quiz", label: "Quiz" },
-          { id: "gamepage", label: "Spel" },
-          { id: "microbitpage", label: "Micro:bit" },
-          { id: "logout", label: "Logout" },
-        ],
-      };
-
-      this.$header.setAttribute(
-        "tabs",
-        JSON.stringify(items[role] || items["GUEST"])
-      );
+        const role = this.loggedInUser?.role;
+        const items = {
+            "GUEST": [
+                { id: "campoverviewpage", label: "Home" },
+                { id: "userloginpage", label: "Leerkracht aanmelden" },
+                { id: "grouploginpage", label: "Groep aanmelden" },
+                { id: "simulationpage", label: "Simulatie" },
+            ],
+            "TEACHER": [
+                { id: "campoverviewpage", label: "Home" },
+                { id: "leaderboard", label: "Leaderboard" },
+                { id: "groupoverviewpage", label: "Groepen" },
+                { id: "quiz", label: "Quiz" },
+                { id: "microbitpage", label: "Micro:bit" },
+                { id: "questionadmin", label: "Vragen aanpassen" },
+                { id: "logout", label: "Logout" },
+            ],
+            "ADMIN": [
+                { id: "campoverviewpage", label: "Home" },
+                { id: "leaderboard", label: "Leaderboard" },
+                { id: "quiz", label: "Quiz" },
+                { id: "gamepage", label: "Spel" },
+                { id: "microbitpage", label: "Micro:bit" },
+                { id: "groupoverviewpage", label: "Groepen" },
+                { id: "useroverviewpage", label: "Gebruikers" },
+                { id: "questionadmin", label: "Vragen aanpassen" },
+                { id: "logout", label: "Logout" },
+            ],
+            "GROUP": [
+                { id: "campoverviewpage", label: "Home" },
+                { id: "leaderboard", label: "Leaderboard" },
+                { id: "quiz", label: "Quiz" },
+                { id: "gamepage", label: "Spel" },
+                { id: "microbitpage", label: "Micro:bit" },
+                { id: "logout", label: "Logout" },
+            ]
+        };
+        this.$header.setAttribute("tabs", JSON.stringify(items[role] || items["GUEST"]));
     }
 
     tabHandler(e) {
