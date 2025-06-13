@@ -44,32 +44,32 @@ const scoreCost = {
 
 const beginAssetCoordinates = [
   {
-    xLocation: 65,
-    yLocation: 42,
+    xLocation: 83,
+    yLocation: 59,
   },
   {
-    xLocation: 82,
-    yLocation: 32,
+    xLocation: 98,
+    yLocation: 59,
+  },
+  {
+    xLocation: 113,
+    yLocation: 59,
   },
   {
     xLocation: 128,
-    yLocation: 42,
-  },
-  {
-    xLocation: 46,
-    yLocation: 24,
-  },
-  {
-    xLocation: 123,
     yLocation: 59,
   },
   {
-    xLocation: 61,
-    yLocation: 59,
+    xLocation: 98,
+    yLocation: 41,
   },
   {
-    xLocation: 91,
-    yLocation: 59,
+    xLocation: 113,
+    yLocation: 41,
+  },
+  {
+    xLocation: 128,
+    yLocation: 41,
   },
 ];
 
