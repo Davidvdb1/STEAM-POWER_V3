@@ -8,6 +8,7 @@ const workshopRoutes = require('./controller/workshopController');
 const groupRoutes = require('./controller/groupController');
 const energyDataRoutes = require('./controller/energyDataController');
 const questionsRoutes = require('./controller/questionController');
+const gameStatisticsRoutes = require('./controller/gameStatisticsController');
 const weatherRoutes = require('./controller/weatherController');
 
 
@@ -43,6 +44,7 @@ app.use('/workshops', workshopRoutes);
 app.use('/groups', groupRoutes);
 app.use('/energydata', energyDataRoutes);
 app.use('/questions', questionsRoutes);
+app.use('/gameStatistics', gameStatisticsRoutes);
 app.use('/weather', weatherRoutes);
 
 

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: utils/buildingRegistry.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: utils/buildingRegistry.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { TileSelection } from "./tileSelection.js";
+
+/**
+ * Registry for managing multiple tile selections representing buildings.
+ */
+export class BuildingRegistry {
+  constructor() {
+    this.buildings = new Map();
+  }
+
+  /**
+   * Register a new building in the registry
+   * @param {TileSelection} tileSelection - The tile selection representing the building
+   */
+  registerBuilding(tileSelection) {
+    this.buildings.set(tileSelection.name, tileSelection);
+    return tileSelection;
+  }
+
+  /**
+   * Create and register a building defined by layer-specific selections
+   * @param {string} name - Building identifier
+   * @param {Phaser.Tilemaps.Tilemap} map - The tilemap
+   * @param {...Array|Object} selections - Layer selections in various formats
+   * @returns {TileSelection} The created building
+   */
+  createBuilding(name, map, ...selections) {
+    // If we only got one argument and it's an object (advanced format)
+    if (
+      selections.length === 1 &amp;&amp;
+      !Array.isArray(selections[0]) &amp;&amp;
+      typeof selections[0] === "object"
+    ) {
+      const options = selections[0];
+      const layerSelections = [];
+
+      // Convert object format to array format
+      for (const layerName in options) {
+        if (Array.isArray(options[layerName])) {
+          options[layerName].forEach((area) => {
+            if (Array.isArray(area) &amp;&amp; area.length === 2) {
+              layerSelections.push([layerName, area[0], area[1]]);
+            }
+          });
+        }
+      }
+
+      const building = new TileSelection(name, map, layerSelections);
+      return this.registerBuilding(building);
+    }
+
+    // Handle the standard format with multiple layer selections
+    const building = new TileSelection(name, map, selections);
+    return this.registerBuilding(building);
+  }
+
+  /**
+   * Get a building by name
+   * @param {string} name - Building identifier
+   * @returns {TileSelection}
+   */
+  getBuilding(name) {
+    return this.buildings.get(name);
+  }
+
+  /**
+   * Applies a grayscale effect to the specified building.
+   * @param {string} name - The name of the building to grayout.
+   * @param {number} intensity - The intensity of the grayscale effect, from 0 to 1 (default is 1).
+   */
+  grayoutBuilding(name, intensity = 1) {
+    const building = this.getBuilding(name);
+    if (building) {
+      building.applyGrayscale(intensity);
+    }
+  }
+
+  /**
+   * Applies a grayscale effect to a list of buildings by their names.
+   *
+   * @param {string[]} names - An array of building names to apply the grayscale effect to.
+   * @param {number} [intensity=1] - The intensity of the grayscale effect, from 0 to 1 (default is 1).
+   */
+  grayoutBuildings(names, intensity = 1) {
+    for (const name of names) {
+      const building = this.getBuilding(name);
+      if (building) {
+        building.applyGrayscale(intensity);
+      }
+    }
+  }
+
+  /**
+   * Apply grayscale to all buildings in the registry
+   * @param {number} intensity - The intensity of the grayscale effect, from 0 to 1 (default is 1).
+   */
+  grayoutAllBuildings(intensity = 1) {
+    for (const building of this.buildings.values()) {
+      building.applyGrayscale(intensity);
+    }
+  }
+
+  /**
+   * Remove grayscale from a specific building
+   * @param {string} name - Building identifier
+   */
+  restoreBuilding(name) {
+    const building = this.getBuilding(name);
+    if (building) {
+      building.removeGrayscale();
+    }
+  }
+
+  /**
+   * Restores the visual state of buildings by removing grayscale effect for each building name provided.
+   *
+   * @param {string[]} names - An array of building names to restore.
+   */
+  restoreBuildings(names) {
+    for (const name of names) {
+      const building = this.getBuilding(name);
+      if (building) {
+        building.removeGrayscale();
+      }
+    }
+  }
+
+  /**
+   * Remove grayscale from all buildings
+   */
+  restoreAllBuildings() {
+    for (const building of this.buildings.values()) {
+      building.removeGrayscale();
+    }
+  }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-AnimationHandler.html">AnimationHandler</a></li><li><a href="module-AssetConfig.html">AssetConfig</a></li><li><a href="module-achievementHandler.html">achievementHandler</a></li><li><a href="module-achievementOverview.html">achievementOverview</a></li><li><a href="module-assetHandler.html">assetHandler</a></li><li><a href="module-buildingDefinitions.html">buildingDefinitions</a></li><li><a href="module-buildingHandler.html">buildingHandler</a></li><li><a href="module-checkpointLoadPopup.html">checkpointLoadPopup</a></li><li><a href="module-currencyHelpers.html">currencyHelpers</a></li><li><a href="module-detailHelper.html">detailHelper</a></li><li><a href="module-gameDataHelpers.html">gameDataHelpers</a></li><li><a href="module-gameService.html">gameService</a></li><li><a href="module-gameadminpanel.html">gameadminpanel</a></li><li><a href="module-hoverUtils.html">hoverUtils</a></li><li><a href="module-phaserSceneUtils.html">phaserSceneUtils</a></li><li><a href="module-sessionHelper.html">sessionHelper</a></li><li><a href="module-uiPopups.html">uiPopups</a></li></ul><h3>Classes</h3><ul><li><a href="AssetDetail.html">AssetDetail</a></li><li><a href="BuildingDetail.html">BuildingDetail</a></li><li><a href="BuildingRegistry.html">BuildingRegistry</a></li><li><a href="CityScene.html">CityScene</a></li><li><a href="CurrencyDisplay.html">CurrencyDisplay</a></li><li><a href="GameControlPanel.html">GameControlPanel</a></li><li><a href="LogoScene.html">LogoScene</a></li><li><a href="MenuScene.html">MenuScene</a></li><li><a href="OuterCityScene.html">OuterCityScene</a></li><li><a href="ShopSidebar.html">ShopSidebar</a></li><li><a href="TileSelection.html">TileSelection</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Sun Jun 08 2025 16:36:57 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
