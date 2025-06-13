@@ -63,11 +63,11 @@ export async function updateAutoRotateChangeSolar(scene, component, enabledSolar
         const target = sunPositionToCartesian(azimuth, altitude, 4);
         const dir = target.subtract(component.solarPanel.position).normalize();
 
-        const yaw = Math.atan2(dir.x, dir.z) + 1;
+        const yaw = Math.atan2(dir.x, dir.z) + (Math.PI) / 2;
         const pitch = Math.asin(dir.y);
 
         // Animate rotation instead of snapping
-        animateRotation(component.solarPanel, new BABYLON.Vector3(pitch, yaw, 0), 30, 20);
+        animateRotation(component.solarPanel, new BABYLON.Vector3(0,yaw, 0), 30, 20);
 
         if (component.dragBehaviorSolar) {
             component.dragBehaviorSolar.enabled = false;
