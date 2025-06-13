@@ -25,8 +25,8 @@ async function main() {
   // ──────────────── USERS ────────────────
   await prisma.user.create({
     data: {
-      username: "admin",
-      email: "admin@admin.admin",
+      username: "Alex",
+      email: "alex@edugame.demo",
       password: await bcrypt.hash("admin123", 10),
       role: "ADMIN",
     },
@@ -163,16 +163,10 @@ async function main() {
 
   // ──────────────── GROUPS ────────────────
   const group1 = await prisma.group.create({
-    data: { name: "Groep 1", members: "Mees en Hendrik", microbitId: "pavot" },
+    data: { name: "Groep 1", members: "Ward en Hendrik", microbitId: "pavot" },
   });
   await prisma.group.create({
-    data: { name: "Groep 2", members: "Yassine en David", microbitId: "pavot" },
-  });
-  await prisma.group.create({
-    data: { name: "Groep 3", members: "Jasper en Joris", microbitId: "pavot" },
-  });
-  await prisma.group.create({
-    data: { name: "Groep 4", members: "Jasper en Joris", microbitId: "pavot" },
+    data: { name: "Groep 2", members: "Tim en Jasper", microbitId: "pavot" },
   });
 
   // ──────────────── GAME DATA FOR GROUP 1 ────────────────
@@ -941,24 +935,15 @@ async function main() {
     createdAchievements.push(createdAchievement);
   }
 
-  // ASSETS
-  // const asset1 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 4, yLocation: 5, xSize: 6, ySize: 7, type: "windmolen" } });
-  // const asset2 = await prisma.asset.create({ data: { buildCost: 1, destroyCost: 2, energy: 3, xLocation: 5, yLocation: 6, xSize: 3, ySize: 3, type: "waterrad" } });
-  // const asset3 = await prisma.asset.create({ data: { buildCost: 2, destroyCost: 1, energy: 2, xLocation: 8, yLocation: 2, xSize: 1, ySize: 1, type: "kernreactor" } });
-
-  // CURRENCIES
-  // const currency1 = await prisma.currency.create({ data: { greyEnergy: 10.6, greenEnergy: 0.0, coins: 0.0 } });
-  // const checkpoint1 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency1.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }] }, assets: { connect: [{ id: asset1.id }] } } });
-
-  // const currency2 = await prisma.currency.create({ data: { greyEnergy: 9.0, greenEnergy: 1.0, coins: 25.0 } });
-  // const checkpoint2 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency2.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset3.id }] } } });
-
+  // CURRENCY
   const currency3 = await prisma.currency.create({
-    data: { greyEnergy: 8.0, greenEnergy: 2.5, coins: 50.0, score: 0 },
+    data: { greyEnergy: 750, greenEnergy: 860, coins: 640, score: 65 },
   });
-  // const checkpoint3 = await prisma.checkpoint.create({ data: { currency: { connect: { id: currency3.id } }, buildings: { connect: [{ id: buildingLevels[0].id }, { id: buildingLevels[1].id }, { id: buildingLevels[2].id }] }, assets: { connect: [{ id: asset1.id }, { id: asset2.id }, { id: asset3.id }] } } });
 
-  const multiplier = await prisma.multiplier.create({ data: { solar: 1.0, wind: 1.0, water: 1.0} });
+  // MULTIPLIER
+  const multiplier = await prisma.multiplier.create({ 
+    data: { solar: 1.0, wind: 1.0, water: 1.0} 
+  });
 
   // GAME STATISTICS
   const gameStats = await prisma.gameStatistics.create({
@@ -977,6 +962,7 @@ async function main() {
         gameStatistics: { connect: { id: gameStats.id } },
         building: { connect: { id: createdBuildings[i].id } }, // Building
         buildingLevel: { connect: { id: buildingLevels[i * 5].id } }, // Level 1
+        runsOnGreen: i < 10 // First 10 buildings run on green energy, the rest on grey
       },
     });
     gameBuildings.push(gameBuilding);
