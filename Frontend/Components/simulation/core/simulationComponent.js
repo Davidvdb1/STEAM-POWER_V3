@@ -1,17 +1,30 @@
 import { createSettingsPanel } from '../ui/settingsPanel.js';
+import { createDataPanel } from '../ui/dataPanel.js';
 import { loadModels, updateSunAndSolarPanel } from '../models/modelLoader.js';
-import { updateWindmillBlades } from '../models/windmill.js';
-import { updateWindmillRotation } from '../models/windmill.js';
-import { updateAutoRotateChange } from '../models/windmill.js';
-import { updateAutoRotateChangeSolar } from '../models/solarPanel.js';
-import { updateWaterWheelDepth } from '../models/waterWheel.js';
-import { updateSolarRotation } from '../models/solarPanel.js';
-import { updateWaterWheelPosition } from '../models/waterWheel.js';
-import { updateWindmillModel } from '../models/windmill.js';
+import {
+  updateWindmillBlades,
+  updateWindmillRotation,
+  updateAutoRotateChange,
+  updateWindmillModel
+} from '../models/windmill.js';
+import {
+  updateSolarRotation,
+  updateAutoRotateChangeSolar
+} from '../models/solarPanel.js';
+import {
+  updateWaterWheelDepth,
+  updateWaterWheelPosition
+} from '../models/waterWheel.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
 import { postEnergyData } from '../utils/service.js'
+import { geocodeAddress } from '../utils/geocode.js';
+import {
+  fetchWindSpeed,
+  calcWindPowerWhTurbine,
+  yawAdjustedSpeed,
+  ROTOR_RADIUS_M
+} from '../utils/weatherData.js';
 
-//#region TEMPLATE
 let template = document.createElement('template');
 template.innerHTML = /*html*/`
     <style>
@@ -21,49 +34,50 @@ template.innerHTML = /*html*/`
         <canvas id="renderCanvas"></canvas>
     </div>
 `;
-//#endregion TEMPLATE
 
-//#region CLASS
 export class SimulationComponent extends HTMLElement {
-    constructor() {
-        super();
-        this._shadowRoot = this.attachShadow({ 'mode': 'open' });
-        this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.street = "Geldenaaksebaan 335";
-        this.city   = "Leuven";
-        this.postal = "3001";
+  constructor() {
+    super();
+    this._shadowRoot = this.attachShadow({ mode: 'open' });
+    this._shadowRoot.appendChild(template.content.cloneNode(true));
 
-        // BabylonJS properties
-        this.engine = null;
-        this.scene = null;
-        this.camera = null;
-        this.resizeObserver = null;
-        
-        // Component models
-        this.solarPanel = null;
-        this.windmill = null;
-        this.sunRoot = null;
-        this.wheel = null;
+    this.street = "Geldenaaksebaan 335";
+    this.city = "Leuven";
+    this.postal = "3001";
 
-        // Component state
-        this.initialized = false;
-        
-        this.solarWatts = 0;
-        this.windWatts = 0;
-        this.waterWatts = 0;
-        this.intervalId = null; // Store the interval ID
-    }
+    this.engine = null;
+    this.scene = null;
+    this.camera = null;
+    this.resizeObserver = null;
+    this.autoRotateEnabled = true;
 
-    // component attributes
-    static get observedAttributes() {
-        return [];
-    }
+    this.solarPanel = null;
+    this.windmill = null;
+    this.sunRoot = null;
+    this.wheel = null;
 
-    connectedCallback() {
-        if (this.initialized) return; // Prevent re-initialization
-        this.initialized = true;
+    this.currentBladeCount = 3;
+    this.manualYawDeg = 0;
+    this.modelVersion = 1;
 
-        // Initialize the BabylonJS scene
+    // Component state
+    this.initialized = false;
+    
+    this.solarWatts = 0;
+    this.windWatts = 0;
+    this.waterWatts = 0;
+    this.intervalId = null; // Store the interval ID
+  }
+
+  static get observedAttributes() {
+    return [];
+  }
+
+  connectedCallback() {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    // Initialize the BabylonJS scene
         this._initializeBabylonJS();
         
         // Start the render loop
@@ -112,200 +126,192 @@ export class SimulationComponent extends HTMLElement {
             document.dispatchEvent(event);
         });
     }
-    
-    _preventScroll = (event) => {
-        event.preventDefault();
+
+  _preventScroll = (event) => event.preventDefault();
+
+  _customWheelHandler = (event) => {
+    event.preventDefault();
+    const delta = event.deltaY * 0.0005;
+    this.camera.radius += delta * this.camera.radius;
+    if (this.camera.radius > this.camera.upperRadiusLimit) {
+      this.camera.radius = this.camera.upperRadiusLimit;
     }
-    
-    // Custom wheel handler for gentler scrolling
-    _customWheelHandler = (event) => {
-        event.preventDefault();
-        
-        // Apply a much smaller delta value to reduce zoom speed
-        const delta = event.deltaY * 0.0005;
-        this.camera.radius += delta * this.camera.radius;
-        
-        // Ensure radius stays within limits
-        if (this.camera.radius > this.camera.upperRadiusLimit) {
-            this.camera.radius = this.camera.upperRadiusLimit;
-        }
-        if (this.camera.radius < this.camera.lowerRadiusLimit) {
-            this.camera.radius = this.camera.lowerRadiusLimit;
-        }
+    if (this.camera.radius < this.camera.lowerRadiusLimit) {
+      this.camera.radius = this.camera.lowerRadiusLimit;
     }
-    
-    _handleResize = () => {
-        if (this.engine) {
-            this._updateCanvasSize();
-            this.engine.resize();
-        }
+  }
+
+  _setupResizeObserver() {
+    const container = this._shadowRoot.querySelector('.simulation-container');
+    this.resizeObserver = new ResizeObserver(() => {
+      this._updateCanvasSize();
+      if (this.engine) this.engine.resize();
+    });
+    this.resizeObserver.observe(container);
+    this._updateCanvasSize();
+  }
+
+  _updateCanvasSize() {
+    const container = this._shadowRoot.querySelector('.simulation-container');
+    const canvas = this._shadowRoot.getElementById('renderCanvas');
+    if (container && canvas) {
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
     }
-    
-    _setupResizeObserver() {
-        const container = this._shadowRoot.querySelector('.simulation-container');
-        
-        // Use ResizeObserver to detect size changes with higher precision
-        this.resizeObserver = new ResizeObserver(() => {
-            this._updateCanvasSize();
-            if (this.engine) {
-                this.engine.resize();
-            }
-        });
-        
-        this.resizeObserver.observe(container);
-        
-        // Initial size adjustment
-        this._updateCanvasSize();
+  }
+
+  async _updateWindEnergy() {
+    try {
+      const v = await fetchWindSpeed(this.lat ?? 50.8798, this.lon ?? 4.7005);
+      let delta = Math.abs(this.manualYawDeg % 360);
+      if (delta > 180) delta = 360 - delta;
+      const vEff = yawAdjustedSpeed(v, delta);
+      const Wh = calcWindPowerWhTurbine(vEff, this.currentBladeCount);
+      console.log(`Aantal ${this.currentBladeCount}wieken | Δ=${delta.toFixed(0)}° → ${Wh.toFixed(0)} Wh/u`);
+    } catch (err) {
+      console.error('Wind-energie-berekening faalde:', err);
     }
-    
-    _updateCanvasSize() {
-        const container = this._shadowRoot.querySelector('.simulation-container');
-        const canvas = this._shadowRoot.getElementById('renderCanvas');
-        
-        if (container && canvas) {
-            // Get the actual displayed size
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            
-            // Only update if needed to avoid unnecessary reflows
-            if (canvas.width !== width || canvas.height !== height) {
-                canvas.width = width;
-                canvas.height = height;
-            }
-        }
+  }
+
+  async _updateSunAndSolarPanel(street, city, postal) {
+    this.street = street;
+    this.city = city;
+    this.postal = postal;
+
+    try {
+      const { lat, lon } = await geocodeAddress(street, city, postal);
+      this.lat = lat;
+      this.lon = lon;
+    } catch (err) {
+      console.warn('Geocode faalde, behoud vorige coördinaten', err);
     }
 
-    async _updateSunAndSolarPanel(street, city, postal) {
-        // Onthoud huidig adres voor later gebruik
-        this.street = street;
-        this.city   = city;
-        this.postal = postal;
+    await updateSunAndSolarPanel(this, street, city, postal);
+    await updateAutoRotateChange(this.scene, this, true, street, city, postal);
+    await this._updateWindEnergy();
+  }
 
-        await updateSunAndSolarPanel(this, street, city, postal);
+  async _initializeBabylonJS() {
+    const canvas = this._shadowRoot.getElementById('renderCanvas');
+    this.engine = new BABYLON.Engine(canvas, true, {
+      preserveDrawingBuffer: true,
+      stencil: true,
+      adaptToDeviceRatio: true
+    });
+
+    this.scene = new BABYLON.Scene(this.engine);
+    this.scene.clearColor = new BABYLON.Color4(0.529, 0.808, 0.922, 1);
+
+    this.camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 2, Math.PI / 4, 10, new BABYLON.Vector3(0, 0, 0), this.scene);
+    this.camera.wheelPrecision = 50;
+    this.camera.inertia = 0.8;
+    this.camera.panningSensibility = 1000;
+    this.camera.angularSensibilityX = 1000;
+    this.camera.angularSensibilityY = 1000;
+    this.camera.attachControl(canvas, true);
+    this.camera.upperRadiusLimit = 10;
+    this.camera.lowerRadiusLimit = 3;
+
+    new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), this.scene);
+
+    this._create3DCompass(this.scene);
+
+    createSettingsPanel(
+      (bladeCount) => this._handleBladeCountChange(bladeCount),
+      (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal),
+      (degrees) => this._handleWindmillRotation(degrees),
+      (autoRotate) => this._handleAutoRotateChange(autoRotate),
+      (degreesSolar) => this._handleSolarRotation(degreesSolar),
+      (autoRotateSolar) => this._handleAutoRotateChangeSolar(autoRotateSolar),
+      (position) => this._handleWaterWheelPosition(position),
+      (depth) => this._handleWaterWheelDepth(depth),
+      (modelVersion) => this._handleWindmillModel(modelVersion)
+    );
+
+    createDataPanel();
+
+    await loadModels(this.scene, this);
+
+    canvas.removeEventListener('wheel', this._preventScroll);
+    canvas.addEventListener('wheel', this._customWheelHandler, { passive: false });
+    canvas.addEventListener('touchmove', this._preventScroll, { passive: false });
+  }
+
+  _create3DCompass(scene) {
+    this._create3DLabel("N", new BABYLON.Vector3(0, 0.5, -2.8), scene);
+    this._create3DLabel("Z", new BABYLON.Vector3(0, 0, 2.8), scene);
+    this._create3DLabel("O", new BABYLON.Vector3(-3, 0, -0.2), scene);
+    this._create3DLabel("W", new BABYLON.Vector3(3, 0, -0.2), scene);
+  }
+
+  _create3DLabel(text, position, scene) {
+    const plane = BABYLON.MeshBuilder.CreatePlane("labelPlane_" + text, { width: 1.5, height: 0.5 }, scene);
+    plane.position = position;
+
+    const dynamicTexture = new BABYLON.DynamicTexture("dt_" + text, { width: 512, height: 256 }, scene);
+    dynamicTexture.hasAlpha = true;
+    dynamicTexture.drawText(text, null, 140, "bold 80px Arial", "black", "transparent", true);
+
+    const material = new BABYLON.StandardMaterial("mat_" + text, scene);
+    material.diffuseTexture = dynamicTexture;
+    material.emissiveColor = new BABYLON.Color3(1, 1, 1);
+    material.backFaceCulling = false;
+    plane.material = material;
+    plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+
+    return plane;
+  }
+
+  _startRenderLoop() {
+    if (this.engine && this.scene) {
+      this.engine.runRenderLoop(() => {
+        this.scene.render();
+      });
     }
-    
-    async _initializeBabylonJS() {
-        // Get the canvas element from shadow DOM
-        const canvas = this._shadowRoot.getElementById('renderCanvas');
-        
-        // Initialize the BabylonJS engine with high DPI support
-        this.engine = new BABYLON.Engine(canvas, true, {
-            preserveDrawingBuffer: true,
-            stencil: true,
-            adaptToDeviceRatio: true
-        });
-        
-        // Create scene
-        this.scene = new BABYLON.Scene(this.engine);
-        this.scene.clearColor = new BABYLON.Color4(0.529, 0.808, 0.922, 1);
+  }
 
-        // Camera with gentler scrolling settings
-        this.camera = new BABYLON.ArcRotateCamera("Camera", 
-            Math.PI / 2, Math.PI / 4, 10, 
-            new BABYLON.Vector3(0, 0, 0), this.scene);
-            
-        // Make scrolling more gentle by adjusting camera properties
-        this.camera.wheelPrecision = 50; // Higher values make zooming more gentle (default is 3)
-        this.camera.inertia = 0.8; // Higher values (0-1) create smoother camera movement
-        this.camera.panningSensibility = 1000; // Higher values reduce panning speed
-        this.camera.angularSensibilityX = 1000; // Lower rotation sensitivity
-        this.camera.angularSensibilityY = 1000; // Lower rotation sensitivity
-        
-        this.camera.attachControl(canvas, true);
-        this.camera.upperRadiusLimit = 10;
-        this.camera.lowerRadiusLimit = 3;
-        
-        // Light
-        new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), this.scene);
-        
-        // Create 3D labels for directions
-        this._create3DCompass(this.scene);
+  async _handleBladeCountChange(bladeCount) {
+    await updateWindmillBlades(this.scene, this, bladeCount);
+    this.currentBladeCount = bladeCount;
+    await this._updateWindEnergy();
+  }
 
-        // Create settings UI
-        createSettingsPanel(
-            (bladeCount) => this._handleBladeCountChange(bladeCount),
-            (street, city, postal) => this._updateSunAndSolarPanel(street, city, postal),
-            (degrees) => this._handleWindmillRotation(degrees),
-            (autoRotate) => this._handleAutoRotateChange(autoRotate),
-            (degreesSolar) => this._handleSolarRotation(degreesSolar),
-            (autoRotateSolar) => this._handleAutoRotateChangeSolar(autoRotateSolar),
-            (position) => this._handleWaterWheelPosition(position),
-            (depth) => this._handleWaterWheelDepth(depth),
-            (model) => this._handleWindmillModel(model)
-        );
+  async _handleWindmillRotation(degrees) {
+    await updateWindmillRotation(this.scene, this, degrees);
+    this.manualYawDeg = degrees;
+    await this._updateWindEnergy();
+  }
 
-        // Load all models
-        await loadModels(this.scene, this);
-        
-        // Add custom wheel handler for even gentler scrolling
-        canvas.removeEventListener('wheel', this._preventScroll);
-        canvas.addEventListener('wheel', this._customWheelHandler, { passive: false });
-        canvas.addEventListener('touchmove', this._preventScroll, { passive: false });
+  async _handleAutoRotateChange(enabled) {
+    this.autoRotateEnabled = enabled;
+    await updateAutoRotateChange(this.scene, this, enabled, this.street, this.city, this.postal);
+    if (enabled) {
+      this.manualYawDeg = 0;
+      await this._updateWindEnergy();
     }
+  }
 
-    _create3DCompass(scene) {
-        this._create3DLabel("N", new BABYLON.Vector3(0, 0.5, -2.8), scene);
-        this._create3DLabel("Z", new BABYLON.Vector3(0, 0, 2.8), scene);
-        this._create3DLabel("O", new BABYLON.Vector3(-3, 0, -0.2), scene);
-        this._create3DLabel("W", new BABYLON.Vector3(3, 0, -0.2), scene);
-    }
-    
-    _create3DLabel(text, position, scene) {
-        const plane = BABYLON.MeshBuilder.CreatePlane("labelPlane_" + text, { width: 1.5, height: 0.5 }, scene);
-        plane.position = position;
+  async _handleSolarRotation(degreesSolar) {
+    await updateSolarRotation(this.scene, this, degreesSolar);
+  }
 
-        const dynamicTexture = new BABYLON.DynamicTexture("dt_" + text, { width: 512, height: 256 }, scene);
-        dynamicTexture.hasAlpha = true;
-        dynamicTexture.drawText(text, null, 140, "bold 80px Arial", "black", "transparent", true);
+  async _handleAutoRotateChangeSolar(enabledSolar) {
+    await updateAutoRotateChangeSolar(this.scene, this, enabledSolar);
+  }
 
-        const material = new BABYLON.StandardMaterial("mat_" + text, scene);
-        material.diffuseTexture = dynamicTexture;
-        material.emissiveColor = new BABYLON.Color3(1, 1, 1);
-        material.backFaceCulling = false;
-        plane.material = material;
-        plane.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+  async _handleWaterWheelPosition(position) {
+    await updateWaterWheelPosition(this.scene, this, position);
+  }
 
-        return plane;
-    }
-    
-    _startRenderLoop() {
-        if (this.engine && this.scene) {
-            this.engine.runRenderLoop(() => {
-                this.scene.render();
-            });
-        }
-    }
-  
-    async _handleBladeCountChange(bladeCount) {
-        await updateWindmillBlades(this.scene, this, bladeCount);
-    }
+  async _handleWaterWheelDepth(depth) {
+    await updateWaterWheelDepth(this.scene, this, depth);
+  }
 
-    async _handleWindmillRotation(degrees) {
-        await updateWindmillRotation(this.scene, this, degrees)
-    }
-
-    async _handleAutoRotateChange(enabled) {
-        await updateAutoRotateChange(this.scene, this, enabled, this.street, this.city, this.postal)
-    }
-
-    async _handleSolarRotation(degreesSolar) {
-        await updateSolarRotation(this.scene, this, degreesSolar)
-    }
-
-    async _handleAutoRotateChangeSolar(enabledSolar) {
-        await updateAutoRotateChangeSolar(this.scene, this, enabledSolar)
-    }
-
-    async _handleWaterWheelPosition(position) {
-        await updateWaterWheelPosition(this.scene, this, position)
-    }
-
-    async _handleWaterWheelDepth(depth) {
-        await updateWaterWheelDepth(this.scene, this, depth)
-    }
-
-    async _handleWindmillModel(model) {
-        await updateWindmillModel(this.scene, this, model)
-    }
+  async _handleWindmillModel(modelVersion) {
+    await updateWindmillModel(this.scene, this, modelVersion);
+  }
 }
-//#endregion CLASS

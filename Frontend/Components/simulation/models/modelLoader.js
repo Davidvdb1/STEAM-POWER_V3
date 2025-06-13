@@ -1,4 +1,4 @@
-import { loadSolarPanel, orientSolarPanelTowardsSun } from './solarPanel.js';
+import { loadSolarPanel, orientSolarPanelTowardsSun , calculateSolarPowerOutput} from './solarPanel.js';
 import { loadWindmill } from './windmill.js';
 import { loadWaterWheel } from './waterWheel.js';
 import { getSunPosition, sunPositionToCartesian } from '../utils/sunCalculator.js';
@@ -47,11 +47,14 @@ function loadSun(scene, component) {
             component.sunRoot = meshes.find(m => m.name === "__root__");
             if (component.sunRoot) {
                 const { azimuth, altitude } = await getSunPosition(street, city, postal);
+                
                 const position = sunPositionToCartesian(azimuth, altitude, 4);
                 
                 component.sunRoot.scaling = new BABYLON.Vector3(0.05, 0.05, 0.05);
                 component.sunRoot.position = position;
+                
                 component.sunRoot.rotation = new BABYLON.Vector3(0, 0.8, 0);
+                
             }
         } catch (error) {
             console.error("Error positioning sun:", error);
@@ -89,6 +92,7 @@ export async function updateSunAndSolarPanel(component, street, city, postal) {
                 street, city, postal // adres dat net werd ingegeven
             );
         }
+        calculateSolarPowerOutput(component.solarPanel,component.sunRoot);
     } catch (error) {
         console.error("Failed to update sun and solar panel:", error);
     }

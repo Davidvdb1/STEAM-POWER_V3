@@ -5,6 +5,7 @@ const router = express.Router();
 
 /**
  * GET /weather/windkracht?lat=...&lon=...
+ * alleen windsnelheid (m/s) - verdere berekening gebeurt in frontend
  */
 router.get('/windkracht', async (req, res) => {
     const { lat, lon } = req.query;
@@ -23,22 +24,8 @@ router.get('/windkracht', async (req, res) => {
             return res.status(500).json({ error: 'Kon windsnelheid niet ophalen.' });
         }
 
-        const thresholds = [0.3, 1.5, 3.3, 5.4, 7.9, 10.7, 13.8, 17.1, 20.7, 24.4, 28.4, 32.6];
-        const beaufort = thresholds.findIndex(t => windSpeed < t);
-
-        // Windenergie berekenen (in kWh/m²/u)
-        const rho = 1.225;         // kg/m³ (luchtdichtheid)
-        const eta = 0.4;           // rendementsfactor
-        const powerWatts = 0.5 * rho * Math.pow(windSpeed, 3) * eta; // in W/m²
-        const powerKwh = +(powerWatts / 1000).toFixed(2); // in kWh/m²/u
-
         res.json({
-            latitude: lat,
-            longitude: lon,
             wind_speed_m_s: windSpeed,
-            beaufort: beaufort === -1 ? 12 : beaufort,
-            geschatte_energie_kwh_per_m2_per_uur: powerKwh
-
         });
     } catch (error) {
         console.error('Fout bij ophalen windkracht:', error);

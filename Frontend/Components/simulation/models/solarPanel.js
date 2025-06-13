@@ -23,8 +23,8 @@ export async function loadSolarPanel(scene, component) {
                 // Position solar panel towards the sun
                 await orientSolarPanelTowardsSun(component.solarPanel, "Geldenaaksebaan 335", "Leuven", "3001");
                 
-                // Calculate power output
-                calculateSolarPowerOutput(component.solarPanel,"Geldenaaksebaan 335", "Leuven", "3001");
+                
+                
                 
                 resolve();
             } else {
@@ -50,7 +50,7 @@ export async function updateSolarRotation(scene, component, manualDegrees) {
     component.solarPanel.rotation.y = component.baseSolarRotation.y + radians;
 
     
-    calculateSolarPowerOutput(component.solarPanel,"Geldenaaksebaan 335", "Leuven", "3001");
+    
 }
 
 export async function updateAutoRotateChangeSolar(scene, component, enabledSolar) {
@@ -78,7 +78,7 @@ export async function updateAutoRotateChangeSolar(scene, component, enabledSolar
         }
     }
 
-    calculateSolarPowerOutput(component.solarPanel,"Geldenaaksebaan 335", "Leuven", "3001");
+    
 }
 
 /**
@@ -126,7 +126,7 @@ export async function orientSolarPanelTowardsSun(solarPanel, street, city, posta
     const distance = 4;
     const target = sunPositionToCartesian(azimuth, altitude, distance);
     const dir = target.subtract(solarPanel.position).normalize();
-
+    
     const yaw = Math.atan2(dir.x, dir.z) + (Math.PI) / 2; // Adjust for model orientation
 
     solarPanel.rotation = new BABYLON.Vector3(0, yaw, 0);
@@ -137,47 +137,43 @@ export async function orientSolarPanelTowardsSun(solarPanel, street, city, posta
 
 
 
-export async function calculateSolarPowerOutput(solarPanel, street, city, postal) {
+export async function calculateSolarPowerOutput(solarPanel, sunRoot) {
     console.log("=== Solar Power Calculation Start ===");
 
-    const { azimuth, altitude } = await getSunPosition(street, city, postal);
-    console.log("Sun Position (Azimuth, Altitude):", azimuth, altitude);
-
-    if (altitude <= 0) {
-        console.log("Sun is below the horizon. No power output.");
-        return 0;
-    }
+    // Normalize a *copy* of sunRoot's position to avoid modifying it
+    const sunDirVec = BABYLON.Vector3.Normalize(sunRoot.position.clone());
+    console.log("sunDirVec:", sunDirVec);
 
     // Panel tilt angle (fixed)
-    const tilt = Math.PI / 4; // 45 degrees in radians
+    const tilt = Math.PI / 4; // 45 degrees
 
-    // Sun direction vector in 3D (assuming unit vector)
-    const sunDir = {
-        x: Math.cos(altitude) * Math.sin(azimuth),
-        y: Math.sin(altitude),
-        z: Math.cos(altitude) * Math.cos(azimuth)
-    };
-
-    // Panel tracks the sun horizontally: it rotates around y-axis to face the sun's azimuth
+    // Adjust for panel model orientation (panel front is rotated by +π/2)
     const panelYaw = solarPanel.rotation.y - Math.PI / 2;
 
-    // Panel normal vector in world coordinates (fixed tilt, rotated by yaw)
+    // Compute panel normal vector (based on yaw and fixed tilt)
     const panelNormal = {
-        x: Math.sin(panelYaw) * Math.cos(tilt) ,
-        y: Math.sin(tilt) ,
+        x: Math.sin(panelYaw) * Math.cos(tilt),
+        y: Math.sin(tilt),
         z: Math.cos(panelYaw) * Math.cos(tilt)
     };
 
-    // Dot product gives cosine of angle between sun direction and panel normal
+    // Convert sunDirVec from Babylon to plain object
+    const sunDir = {
+        x: sunDirVec.x,
+        y: sunDirVec.y,
+        z: sunDirVec.z
+    };
+
+    // Compute dot product
     const dot = sunDir.x * panelNormal.x + sunDir.y * panelNormal.y + sunDir.z * panelNormal.z;
-    const incidenceFactor = Math.max(0, dot); // Clamp to zero (no negative irradiance)
+    const incidenceFactor = Math.max(0, dot); // Clamp to [0, 1]
 
     // Constants
     const irradiance = 1000; // W/m²
     const area = 1.6; // m²
     const efficiency = 0.2; // 20%
 
-    // Final power calculation
+    // Power calculation
     const effectiveIrradiance = irradiance * incidenceFactor;
     const powerOutput = effectiveIrradiance * area * efficiency;
 
@@ -190,6 +186,8 @@ export async function calculateSolarPowerOutput(solarPanel, street, city, postal
 
     return powerOutput;
 }
+
+    
 
 
 

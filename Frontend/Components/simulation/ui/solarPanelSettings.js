@@ -50,6 +50,7 @@ export function createSolarPanelSettings(page2, onManualRotationChangeSolar, onA
     page2.addControl(sliderValueText);
 
     slider.onValueChangedObservable.add((value) => {
+        if (ignoreSliderEvent) return;
         sliderValueText.text = `${Math.round(value)}°`;
         if (autoRotate) {
             autoRotate = false;
@@ -80,12 +81,18 @@ export function createSolarPanelSettings(page2, onManualRotationChangeSolar, onA
     page2.addControl(toggleButton);
 
     let autoRotate = true;
+    let ignoreSliderEvent = false;
 
     toggleButton.onPointerUpObservable.add(() => {
         autoRotate = !autoRotate;
         toggleButton.textBlock.text = autoRotate ? "Aan" : "Uit";
 
         if (autoRotate) {
+            ignoreSliderEvent = true;               // ↠ vlag AAN
+            slider.value      = 0;
+            sliderValueText.text = "0°";
+            onManualRotationChangeSolar?.(0);
+            ignoreSliderEvent = false;              // ↠ vlag UIT
             onAutoRotateChangeSolar(true);
         } else {
             onAutoRotateChangeSolar(false);
