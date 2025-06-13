@@ -175,7 +175,7 @@ export async function calculateSolarPowerOutput(solarPanel, sunRoot) {
 
     // Power calculation
     const effectiveIrradiance = irradiance * incidenceFactor;
-    const powerOutput = effectiveIrradiance * area * efficiency;
+    const powerOutput = Math.round(effectiveIrradiance * area * efficiency);
 
     console.log("Sun Direction Vector:", sunDir);
     console.log("Panel Normal Vector:", panelNormal);

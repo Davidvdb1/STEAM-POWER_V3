@@ -9,7 +9,8 @@ import {
 } from '../models/windmill.js';
 import {
   updateSolarRotation,
-  updateAutoRotateChangeSolar
+  updateAutoRotateChangeSolar,
+  calculateSolarPowerOutput
 } from '../models/solarPanel.js';
 import {
   updateWaterWheelDepth,
@@ -179,6 +180,14 @@ _updateWaterEnergy(pos = this.currentWheelPosition,
  this.dataPanel?.setWaterValue?.(disp);
 }
 
+
+async _updateSolarEnergy(){
+  console.log("aezfaef")
+  const energySolar =  await calculateSolarPowerOutput(this.solarPanel,this.sunRoot);
+  console.log("energySolar:", energySolar)
+  this.dataPanel?.setSolarValue?.(energySolar);
+}
+
   async _updateWindEnergy() {
   try {
     /* 1) windsnelheid en yaw-mismatch ---------------------------- */
@@ -222,6 +231,7 @@ _updateWaterEnergy(pos = this.currentWheelPosition,
     await updateSunAndSolarPanel(this, street, city, postal);
     await updateAutoRotateChange(this.scene, this, true, street, city, postal);
     await this._updateWindEnergy();
+    await this._updateSolarEnergy();
   }
 
   async _initializeBabylonJS() {
@@ -269,6 +279,7 @@ _updateWaterEnergy(pos = this.currentWheelPosition,
 
     this._updateWaterEnergy();  
     await this._updateWindEnergy();
+    await this._updateSolarEnergy();
   
     canvas.removeEventListener('wheel', this._preventScroll);
     canvas.addEventListener('wheel', this._customWheelHandler, { passive: false });
