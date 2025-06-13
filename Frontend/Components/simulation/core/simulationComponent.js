@@ -67,6 +67,7 @@ export class SimulationComponent extends HTMLElement {
 
     // Component state
     this.initialized = false;
+    this.active = false;
     
     this.solarWatts = 0;
     this.windWatts = 0;
@@ -96,6 +97,10 @@ export class SimulationComponent extends HTMLElement {
         
         // Set up the interval to trigger every 2 seconds
         this._setupInterval();
+
+        this.addEventListener('activate', (event) => {
+            this.active = event.detail.active;
+        });
     }
     
     disconnectedCallback() {
@@ -109,20 +114,63 @@ export class SimulationComponent extends HTMLElement {
         }, 2000);
     }
     
-    _calculateGeneratedEnergy() {
+    async _calculateGeneratedEnergy() {
+        if (!this.active) return;
+
         const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
 
-        // Calculate the total generated energy from all sources
-        this.solarWatts = 0;
-        this.windWatts = 0;
-        this.waterWatts = 0;
+        // Calculate solar power if we have both panel and sun
+        if (this.solarPanel && this.sunRoot) {
+            try {
+                this.solarWatts = await calculateSolarPowerOutput(this.solarPanel, this.sunRoot);
+                // Format for display based on value
+                const displayValue = this.solarWatts < 10 ? this.solarWatts.toFixed(1) : this.solarWatts.toFixed(0);
+                this.dataPanel?.setSolarValue?.(displayValue);
+            } catch (error) {
+                console.error("Error calculating solar power:", error);
+                this.solarWatts = 0;
+            }
+        } else {
+            this.solarWatts = 0;
+        }
+        
+        // Calculate wind energy using the functions from weatherData.js
+        try {
+            const windSpeed = await fetchWindSpeed(this.lat, this.lon);
+            let delta = Math.abs(this.manualYawDeg % 360);
+            if (delta > 180) delta = 360 - delta;
+            
+            const effectiveSpeed = yawAdjustedSpeed(windSpeed, delta);
+            this.windWatts = calcWindPowerWhTurbine(effectiveSpeed, this.currentBladeCount);
+            
+            // Update display if not already updated by _updateWindEnergy
+            const displayWind = this.windWatts < 10 ? this.windWatts.toFixed(1) : this.windWatts.toFixed(0);
+            this.dataPanel?.setWindValue?.(displayWind);
+        } catch (error) {
+            console.error("Error calculating wind power:", error);
+            this.windWatts = 0;
+        }
+        
+        // Calculate water energy using calcHydroPower from weatherData.js
+        try {
+            const { W } = calcHydroPower(this.currentWheelPosition, this.currentWheelDepth);
+            this.waterWatts = W;
+            
+            // Update display if not already updated by _updateWaterEnergy
+            const displayWater = this.waterWatts < 10 ? this.waterWatts.toFixed(1) : this.waterWatts.toFixed(0);
+            this.dataPanel?.setWaterValue?.(displayWater);
+        } catch (error) {
+            console.error("Error calculating water power:", error);
+            this.waterWatts = 0;
+        }
         
         const time = new Date().toISOString();
 
         const energyData = [];
-        energyData.push({ pin: 0, groupId, value: 500, type: 'SOLAR', time });
-        energyData.push({ pin: 1, groupId, value: 200, type: 'WIND', time });
-        energyData.push({ pin: 2, groupId, value: 100, type: 'WATER', time });
+        energyData.push({ pin: 0, groupId, value: this.solarWatts, type: 'SOLAR', time });
+        energyData.push({ pin: 1, groupId, value: this.windWatts, type: 'WIND', time });
+        energyData.push({ pin: 2, groupId, value: this.waterWatts, type: 'WATER', time });
+        
         energyData.forEach(async (data) => {
             if (data.value == 0) return;
             const response = await postEnergyData(data);
@@ -132,6 +180,7 @@ export class SimulationComponent extends HTMLElement {
             // send event to rest of website
             const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
             document.dispatchEvent(event);
+            console.log(`Energy data sent: ${JSON.stringify(datapoint.value)}`);
         });
     }
 
