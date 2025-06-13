@@ -1,0 +1,210 @@
+/* src/components/currencyDisplay/style.css */
+:host {
+  display: block;
+}
+
+.currency-display {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: #d3d3d3;
+  padding: 10px;
+}
+.currency-display.hidden {
+  display: none;
+}
+.currency-display .currency-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.currency-display .currency-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.currency-display .currency-item.grey-energy img {
+  height: 50px;
+}
+.currency-display .currency-item.grey-energy span {
+  color: #151515;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+  font-weight: normal !important;
+}
+.currency-display .currency-item.green-energy img {
+  height: 50px;
+}
+.currency-display .currency-item.green-energy span {
+  color: #9ba143;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+  font-weight: normal !important;
+}
+.currency-display .currency-item.coins img {
+  height: 30px;
+  padding: 10px;
+}
+.currency-display .currency-item.coins span {
+  color: #fbac2b;
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+  font-weight: normal !important;
+}
+.currency-display .currency-item.score span {
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+}
+.currency-display .currency-actions {
+  display: flex;
+  gap: 10px;
+}
+.currency-display .currency-actions button {
+  font-family: "PixelFont";
+  font-size: 14px;
+  padding: 8px 12px;
+  background: #888;
+  border: 2px solid #555;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.currency-display .currency-actions button:hover {
+  background: #aaa;
+}
+.currency-display .progress-div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.currency-display .progress-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50%;
+  margin-top: 8px;
+  gap: 8px;
+}
+.currency-display .progress-row .green-buildings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-left: 12px;
+}
+.currency-display .progress-row .green-buildings span {
+  font-family: "PixelFont" !important;
+  margin-left: 6px;
+  color: #151515;
+  white-space: nowrap;
+}
+.currency-display .progress-row .progress-container {
+  flex: 1 1 auto;
+  background: #888;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  height: 16px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.currency-display .progress-row .progress-container .progress-bar {
+  width: 0%;
+  height: 100%;
+  background: #d2f7d2;
+  transition: width 0.3s ease;
+}
+.currency-display .progress-row .progress-percent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.currency-display .progress-row .progress-percent span {
+  font-family: "PixelFont" !important;
+  margin-right: 6px;
+  color: #151515;
+  white-space: nowrap;
+}
+.currency-display .multipliers {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  margin-top: 10px;
+  justify-content: center;
+  gap: 20px;
+}
+.currency-display .multipliers .label {
+  font-family: "PixelFont" !important;
+  color: #151515;
+  font-weight: normal !important;
+  margin-bottom: 10px;
+}
+.currency-display .multipliers .energy-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-width: 60px;
+  font-family: "PixelFont" !important;
+  color: #151515;
+  font-weight: normal !important;
+}
+.currency-display .multipliers .icon-multiplier {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end; /* icoon en 1x onderlijnen */
+  gap: 6px;
+}
+.currency-display .multipliers .icon-multiplier img {
+  height: 30px;
+  margin: 0;
+}
+.currency-display .multipliers .multiplier-value {
+  font-size: 16px;
+  line-height: 1;
+}
+.currency-display .multipliers .live-value {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #444;
+}
+.currency-display .microbit {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 10px;
+  justify-content: center;
+  gap: 20px;
+}
+.currency-display .microbit span {
+  font-family: "PixelFont" !important;
+  color: #151515;
+  font-weight: normal !important;
+}
+.currency-display .timer {
+  color: #000 !important;
+  font-family: "PixelFont", monospace !important;
+}
+.currency-display .currency-display,
+.currency-display .currency-item,
+.currency-display .timer,
+.currency-display .currency-item.grey-energy span,
+.currency-display .currency-item.green-energy span {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-font-smoothing: none;
+  text-rendering: geometricPrecision;
+}
+.currency-display .timer {
+  display: inline-block;
+  width: 4ch;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  font-family: monospace !important;
+}/*# sourceMappingURL=style.css.map */

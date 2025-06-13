@@ -4,6 +4,8 @@ const Group = require('../model/group');
 
 class GroupService {
     async create(groupData) {
+        const existingGroup = await groupRepository.findByName(groupData.name);
+        if (existingGroup) throw new Error('Groep met deze naam bestaat al');
         const newgroup = new Group(groupData);
         return await groupRepository.create(newgroup);
     }

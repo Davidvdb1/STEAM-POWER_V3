@@ -2,6 +2,7 @@ const QuestionRepository = require("../repository/questionRepository");
 const Question = require("../model/question");
 const Answer = require("../model/answer"); // added import for Answer model
 const AnswerRepository = require("../repository/answerRepository"); // added import for Answer repository
+const gameStatisticsRepository = require("../repository/gameStatisticsRepository");
 
 class QuestionService {
     constructor() {
@@ -73,11 +74,20 @@ class QuestionService {
             if (!question) throw new Error(`Could not find question with id ${questionId}`);
 
             const answer = new Answer({ questionId, groupId, answerValue, energyReading });
-            answer.checkAnswerValue(question.wattage);
+            answer.checkAnswerValue(question.wattage, question.errorMargin);
 
             const res = await this.answerRepo.create(answer);
 
             const response = await this.answerRepo.findByGroupIdAndQuestionId(groupId, questionId);
+
+            const gameStats = await gameStatisticsRepository.findByGroupId(groupId);
+            const currency = gameStats.currency;
+
+            if (response.some(answer => answer.isCorrect)) {
+                await gameStatisticsRepository.incrementCurrency(currency.id, {
+                    coins: 20
+                });
+            }
 
             return {
                 ...question,
@@ -112,6 +122,14 @@ class QuestionService {
             return groupSpecificQuestions;
 
 
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateErrorMargin(errorMargin) {
+        try {
+            return await this.qRepo.updateErrorMargin(errorMargin);
         } catch (error) {
             throw error;
         }

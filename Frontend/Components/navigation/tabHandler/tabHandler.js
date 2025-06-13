@@ -1,25 +1,27 @@
 //#region IMPORTS
-import "../../../Components/navigation/header/header.js"
-import "../../pages/content/content.js"
-import "../../pages/workshopPage/workshopPage.js"
-import "../../pages/campOverviewPage/campOverviewPage.js"
-import "../../pages/groupOverviewPage/groupOverviewPage.js"
-import "../../pages/userOverviewPage/userOverviewPage.js"
-import "../../pages/campInfoPage/campInfoPage.js"
-import "../../pages/microbitPage/microbitPage.js"
-import "../../camp/formContainer/formContainer.js"
-import "../../pages/userLoginPage/userLoginPage.js"
-import "../../pages/groupLoginPage/groupLoginPage.js"
-import "../../pages/workshopInfo/workshopInfo.js"   
-import "../../authentication/logout/logout.js"
-import "../../pages/questionAdminPage/questionAdminPage.js"
-import "../../pages/quizPage/quizPage.js"
-import "../../pages/gamePage/gamePage.js"
+import "../../../Components/navigation/header/header.js";
+import "../../pages/content/content.js";
+import "../../pages/workshopPage/workshopPage.js";
+import "../../pages/campOverviewPage/campOverviewPage.js";
+import "../../pages/groupOverviewPage/groupOverviewPage.js";
+import "../../pages/userOverviewPage/userOverviewPage.js";
+import "../../pages/campInfoPage/campInfoPage.js";
+import "../../pages/microbitPage/microbitPage.js";
+import "../../camp/formContainer/formContainer.js";
+import "../../pages/userLoginPage/userLoginPage.js";
+import "../../pages/groupLoginPage/groupLoginPage.js";
+import "../../pages/workshopInfo/workshopInfo.js";
+import "../../authentication/logout/logout.js";
+import "../../pages/questionAdminPage/questionAdminPage.js";
+import "../../pages/quizPage/quizPage.js";
+import "../../pages/leaderboardPage/leaderboardPage.js";
+import "../../pages/gamePage/gamePage.js";
+import "../../pages/simulationPage/simulationPage.js";
 //#endregion IMPORTS
 
 //#region TABHANDLER
-let template = document.createElement('template');
-template.innerHTML = /*html*/`
+let template = document.createElement("template");
+template.innerHTML = /*html*/ `
     <style>
         @import './Components/navigation/tabHandler/style.css';
     </style>
@@ -31,48 +33,51 @@ template.innerHTML = /*html*/`
 //#endregion TABHANDLER
 
 //#region CLASS
-window.customElements.define('tabhandler-れ', class extends HTMLElement {
+window.customElements.define(
+  "tabhandler-れ",
+  class extends HTMLElement {
     constructor() {
-        super();
-        this._shadowRoot = this.attachShadow({ 'mode': 'open' });
-        this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$content = this._shadowRoot.querySelector("content-れ");
-        this.$header = this._shadowRoot.querySelector("header-れ");
-        this.landingPage = "campoverviewpage";
-        this.loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+      super();
+      this._shadowRoot = this.attachShadow({ mode: "open" });
+      this._shadowRoot.appendChild(template.content.cloneNode(true));
+      this.$content = this._shadowRoot.querySelector("content-れ");
+      this.$header = this._shadowRoot.querySelector("header-れ");
+      this.landingPage = "campoverviewpage";
+      this.loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+      this.allowNavigation = false;
     }
 
     // component attributes
     static get observedAttributes() {
-        return [];
+      return [];
     }
 
-    attributeChangedCallback(name, oldValue, newValue) {
-
-    }
+    attributeChangedCallback(name, oldValue, newValue) {}
 
     connectedCallback() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tabFromUrl = urlParams.get("tab");
-        const campIDFromUrl = urlParams.get("camp");
-        const workshopIDFromUrl = urlParams.get("workshop");
-    
-        this.landingPage = tabFromUrl || "campoverviewpage";
-        this.campID = campIDFromUrl
-        this.workshopID = workshopIDFromUrl
+      const urlParams = new URLSearchParams(window.location.search);
+      const tabFromUrl = urlParams.get("tab");
 
-        this.$content.setAttribute("active-tab", this.landingPage);
-        this.$content.setAttribute("camp", this.campID);
-        this.$content.setAttribute("workshop", this.workshopID);
+      this.landingPage = tabFromUrl || "campoverviewpage";
+      this.campID = null;
+      this.workshopID = null;
 
-        this.addEventListener("tab", this.tabHandler);
-        this.addEventListener("tabID", this.tabIdHandler);
+      this.$content.setAttribute("active-tab", this.landingPage);
+      this.$content.setAttribute("camp", this.campID);
+      this.$content.setAttribute("workshop", this.workshopID);
 
-        this.renderHeader();
+      this.addEventListener("tab", this.tabHandler.bind(this));
+      this.addEventListener("tabID", this.tabIdHandler.bind(this));
 
-        window.addEventListener('popstate', this.handlePopState.bind(this));
+      this.renderHeader();
 
+      window.addEventListener("popstate", this.handlePopState.bind(this));
+
+      this.updateURL(this.landingPage, this.campID, this.workshopID);
+
+          if (!tabFromUrl) {
         this.updateURL(this.landingPage, this.campID, this.workshopID);
+    }
     }
 
     renderHeader() {
@@ -82,14 +87,16 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "campoverviewpage", label: "Home" },
                 { id: "userloginpage", label: "Leerkracht aanmelden" },
                 { id: "grouploginpage", label: "Groep aanmelden" },
+                { id: "simulationpage", label: "Simulatie" },
             ],
             "TEACHER": [
                 { id: "campoverviewpage", label: "Home" },
                 { id: "leaderboard", label: "Leaderboard" },
                 { id: "groupoverviewpage", label: "Groepen" },
-                { id: "users", label: "Gebruikers" },
-                { id: "logout", label: "Logout" },
+                { id: "quiz", label: "Quiz" },
+                { id: "microbitpage", label: "Micro:bit" },
                 { id: "questionadmin", label: "Vragen aanpassen" },
+                { id: "logout", label: "Logout" },
             ],
             "ADMIN": [
                 { id: "campoverviewpage", label: "Home" },
@@ -111,55 +118,58 @@ window.customElements.define('tabhandler-れ', class extends HTMLElement {
                 { id: "logout", label: "Logout" },
             ]
         };
-
         this.$header.setAttribute("tabs", JSON.stringify(items[role] || items["GUEST"]));
     }
 
     tabHandler(e) {
-        if (this.loggedInUser?.role != JSON.parse(sessionStorage.getItem('loggedInUser'))?.role) {
-            this.loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
-            this.renderHeader();
-        }
-        this.$content.setAttribute("active-tab", e.detail);
-        this.$content.setAttribute("camp", "");
-        this.$content.setAttribute("workshop", "");
-        this.updateURL(e.detail, "");
+      if (
+        this.loggedInUser?.role !=
+        JSON.parse(sessionStorage.getItem("loggedInUser"))?.role
+      ) {
+        this.loggedInUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+        this.renderHeader();
+      }
+      this.$content.setAttribute("active-tab", e.detail);
+      this.$content.setAttribute("camp", "");
+      this.$content.setAttribute("workshop", "");
+      this.updateURL(e.detail, "");
     }
 
     tabIdHandler(e) {
-        this.$content.setAttribute("active-tab", e.detail.tabId);
-        this.$content.setAttribute(e.detail.componentName, e.detail.componentId);
-        this.updateURL(e.detail.tabId, e.detail.componentId);
+      this.$content.setAttribute("active-tab", e.detail.tabId);
+      this.$content.setAttribute(e.detail.componentName, e.detail.componentId);
+      this.updateURL(e.detail.tabId, e.detail.componentId);
     }
 
     handlePopState(event) {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tab = event.state?.tab || urlParams.get("tab")
-        const camp = event.state?.camp || urlParams.get("camp")
-        const workshop = event.state?.workshop || urlParams.get("workshop")
-
-        this.$content.setAttribute("active-tab", tab);
-        this.$content.setAttribute("camp", camp);
-        this.$content.setAttribute("workshop", workshop);
+      const { tab, camp, workshop } = event.state || {
+        tab: this.landingPage,
+        camp: null,
+        workshop: null,
+      };
+      this.$content.setAttribute("active-tab", tab);
+      this.$content.setAttribute("camp", camp);
+      this.$content.setAttribute("workshop", workshop);
     }
 
     updateURL(tab, camp, workshop) {
-        const url = new URL(window.location);
-        url.searchParams.set('tab', tab);
+      const url = new URL(window.location);
+      url.searchParams.set("tab", tab);
 
-        if (camp) {
-            url.searchParams.set('camp', camp);
-        } else {
-            url.searchParams.delete('camp');
-        }
+      if (camp) {
+        url.searchParams.set("camp", camp);
+      } else {
+        url.searchParams.delete("camp");
+      }
 
-        if (workshop) {
-            url.searchParams.set('workshop', workshop);
-        } else {
-            url.searchParams.delete('workshop');
-        }
+      if (workshop) {
+        url.searchParams.set("workshop", workshop);
+      } else {
+        url.searchParams.delete("workshop");
+      }
 
-        history.pushState({ tab, camp: camp, workshop: workshop }, '', url);
+      history.pushState({ tab, camp: camp, workshop: workshop }, "", url);
     }
-});
+  }
+);
 //#endregion CLASS

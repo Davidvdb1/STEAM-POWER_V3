@@ -5,14 +5,18 @@
     gap: 10px;
 }
 
-input {
+select {
+    max-width: 300px;
     width: 100%;
+    white-space: normal;
+    word-wrap: break-word; 
     padding: 10px;
     margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
 }
+
 
 .location {
     display: flex;

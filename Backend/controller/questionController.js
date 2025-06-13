@@ -30,6 +30,25 @@ router.get('/:id', async (req, res) => {
     }
 });
 
+// Update the error margin for all questions
+// endpoint registered before /:id to avoid conflicts
+router.put('/errormargin', async (req, res) => {
+    try {
+        const { errorMargin } = req.body;
+
+        if (typeof errorMargin !== 'number') {
+            return res.status(400).json({ error: "Error margin is required" });
+        }
+
+        const result = await questionService.updateErrorMargin(errorMargin);
+        res.status(200).json({ message: 'Foutmarge aangepast voor alle groepen', result });
+    } catch (error) {
+        console.error('Error updating error margin:', error);
+        const statusCode = error.statusCode || 400;
+        res.status(statusCode).json({ error: error.message });
+    }
+});
+
 // Update a question by ID
 router.put('/:id', async (req, res) => {
     try {
@@ -102,5 +121,6 @@ router.get('/group/:groupId', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
 
 module.exports = router;

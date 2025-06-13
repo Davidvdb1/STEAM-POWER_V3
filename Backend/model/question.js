@@ -1,16 +1,16 @@
 class Question {
-    constructor({ id = undefined, title, description, windQuestion, waterQuestion, solarQuestion, picture, wattage, score, maxTries, active = true }, validate = true) {
+    constructor({ id = undefined, title, description, questionStatement, energyType, picture, wattage, score, maxTries, errorMargin = 0.5, active = true }, validate = true) {
         this.id = id;
         this.title = title;
         this.description = description;
-        this.windQuestion = windQuestion;
-        this.waterQuestion = waterQuestion;
-        this.solarQuestion = solarQuestion;
+        this.questionStatement = questionStatement;
+        this.energyType = energyType;
         this.picture = typeof picture === 'string' ? picture : '';
         this.wattage = parseInt(wattage);
         this.score = parseInt(score);
         this.maxTries = parseInt(maxTries);
         this.active = active;
+        this.errorMargin = parseFloat(errorMargin);
 
         if (validate) {
             this.validate();
@@ -25,14 +25,8 @@ class Question {
         if (!this.description || this.description.trim() === "") {
             error += "Description is required\n";
         }
-        if (!this.windQuestion || this.windQuestion.trim() === "") {
-            error += "Wind question is required\n";
-        }
-        if (!this.waterQuestion || this.waterQuestion.trim() === "") {
-            error += "Water question is required\n";
-        }
-        if (!this.solarQuestion || this.solarQuestion.trim() === "") {
-            error += "Solar question is required\n";
+        if (!this.questionStatement || this.questionStatement.trim() === "") {
+            error += "Question statement is required\n";
         }
         if (typeof this.wattage !== 'number' || this.wattage <= 0) {
             error += "Wattage must be a positive number\n";
@@ -48,6 +42,12 @@ class Question {
         }
         if (typeof this.maxTries !== 'number' || this.maxTries < 0) {
             error += "Max tries must be a non-negative number\n";
+        }
+        if (this.energyType !== 'SOLAR' && this.energyType !== 'WIND' && this.energyType !== 'WATER') {
+            error += 'Invalid energy type';
+        }
+        if (typeof this.errorMargin !== 'number' || this.errorMargin < 0 || this.errorMargin > 1) {
+            error += "Error margin must be a number between 0 and 1\n";
         }
 
         if (error.length > 0) {

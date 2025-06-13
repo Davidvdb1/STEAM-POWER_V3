@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Namespace: Repository_GameBuildings</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Namespace: Repository_GameBuildings</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a>.</span>Repository_GameBuildings</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">All repository methods related to game buildings, including creation, retrieval, and upgrades.</div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line657">line 657</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".findAllGameBuildingsByGameStatisticsId"><span class="type-signature">(async, static) </span>findAllGameBuildingsByGameStatisticsId<span class="signature">(gameStatisticsId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves all game building records associated with a specific game statistics ID.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>gameStatisticsId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The unique identifier of the game statistics record.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line707">line 707</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A promise that resolves to an array of GameBuildings instances.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".findAllGameBuildingsByGroupId"><span class="type-signature">(async, static) </span>findAllGameBuildingsByGroupId<span class="signature">(groupId)</span><span class="type-signature"> &rarr; {Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves all game buildings associated with a specific group id.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>groupId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the group to fetch game buildings for.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line685">line 685</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A promise that resolves to an array of GameBuildings instances.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;Array.&lt;<a href="GameBuildings.html">GameBuildings</a>>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".findGameBuildingById"><span class="type-signature">(async, static) </span>findGameBuildingById<span class="signature">(gameBuildingId)</span><span class="type-signature"> &rarr; {Promise.&lt;(<a href="GameBuildings.html">GameBuildings</a>|null)>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Retrieves a game building by its id, including its associated game statistics, building, and building level objetcs.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>gameBuildingId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the game building to retrieve.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line664">line 664</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A promise that resolves to a GameBuildings instance if found, or null otherwise.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;(<a href="GameBuildings.html">GameBuildings</a>|null)></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".upgradeGameBuildingLevel"><span class="type-signature">(async, static) </span>upgradeGameBuildingLevel<span class="signature">(gameBuildingId, buildingLevelId)</span><span class="type-signature"> &rarr; {Promise.&lt;<a href="GameBuildings.html">GameBuildings</a>>}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Upgrades the level of a game building by updating its associated building level.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>gameBuildingId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the game building to upgrade.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>buildingLevelId</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">The id of the new building level to associate.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="repository_gameStatisticsRepository.js.html">repository/gameStatisticsRepository.js</a>, <a href="repository_gameStatisticsRepository.js.html#line728">line 728</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    The updated GameBuildings instance after the level upgrade.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;<a href="GameBuildings.html">GameBuildings</a>></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-controller_gameStatisticsController.html">controller/gameStatisticsController</a></li><li><a href="module-repository_gameStatisticsRepository.html">repository/gameStatisticsRepository</a></li><li><a href="module-service_gameStatisticsService.html">service/gameStatisticsService</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-controller_gameStatisticsController.Controller_Achievements.html">Controller_Achievements</a></li><li><a href="module-controller_gameStatisticsController.Controller_Assets.html">Controller_Assets</a></li><li><a href="module-controller_gameStatisticsController.Controller_Checkpoints.html">Controller_Checkpoints</a></li><li><a href="module-controller_gameStatisticsController.Controller_Currency.html">Controller_Currency</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameBuildings.html">Controller_GameBuildings</a></li><li><a href="module-controller_gameStatisticsController.Controller_GameStatistics.html">Controller_GameStatistics</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_Achievements.html">Repository_Achievements</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_Assets.html">Repository_Assets</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_BuildingLevels.html">Repository_BuildingLevels</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_Checkpoints.html">Repository_Checkpoints</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_Currency.html">Repository_Currency</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_GameBuildings.html">Repository_GameBuildings</a></li><li><a href="module-repository_gameStatisticsRepository.Repository_GameStatistics.html">Repository_GameStatistics</a></li><li><a href="module-service_gameStatisticsService.Service_Achievements.html">Service_Achievements</a></li><li><a href="module-service_gameStatisticsService.Service_Assets.html">Service_Assets</a></li><li><a href="module-service_gameStatisticsService.Service_Checkpoints.html">Service_Checkpoints</a></li><li><a href="module-service_gameStatisticsService.Service_Currency.html">Service_Currency</a></li><li><a href="module-service_gameStatisticsService.Service_GameBuildings.html">Service_GameBuildings</a></li><li><a href="module-service_gameStatisticsService.Service_GameStatistics.html">Service_GameStatistics</a></li></ul><h3>Classes</h3><ul><li><a href="Achievement.html">Achievement</a></li><li><a href="Asset.html">Asset</a></li><li><a href="Building.html">Building</a></li><li><a href="BuildingLevel.html">BuildingLevel</a></li><li><a href="Checkpoint.html">Checkpoint</a></li><li><a href="Currency.html">Currency</a></li><li><a href="GameBuildings.html">GameBuildings</a></li><li><a href="GameStatistics.html">GameStatistics</a></li><li><a href="Group.html">Group</a></li><li><a href="Nature.html">Nature</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Mon Jun 02 2025 09:11:08 GMT+0200 (Central European Summer Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

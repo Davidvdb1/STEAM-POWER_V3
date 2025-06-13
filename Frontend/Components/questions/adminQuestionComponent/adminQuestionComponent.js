@@ -14,9 +14,7 @@ template.innerHTML = /*html*/`
         <div class="text-content">
             <div class="title" id="title"></div>
             <div class="description" id="description"></div>
-            <div class="description"><b>Vraag voor windmolens:</b> <span id="wind-question">Lorem, ipsum dolor.</span></div>
-            <div class="description"><b>Vraag voor waterturbines:</b> <span id="water-question">Lorem, ipsum dolor.</span></div>
-            <div class="description"><b>Vraag voor zonnepanelen:</b> <span id="solar-question">Lorem, ipsum dolor.</span></div>
+            <div class="description"><b>Vraag:</b> <span id="question-statement">Lorem, ipsum dolor.</span></div>
         </div>
         <div>
             <div>P = <span id="wattage"></span>W</div>
@@ -28,7 +26,6 @@ template.innerHTML = /*html*/`
             <button id="edit">Edit</button>
             <button id="delete">Delete</button>
             <div id="toggle-control">
-                
                 <label for="toggleActive">
                     Actief?
                     <input id="active" type="checkbox">            
@@ -51,7 +48,7 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
 
     // component attributes
     static get observedAttributes() {
-        return ['data-id', 'data-title', 'data-description', 'data-wind-question', 'data-water-question', 'data-solar-question', 'data-wattage', 'data-score', 'data-max-tries', 'data-active', 'data-picture'];
+        return ['data-id', 'data-title', 'data-description', 'data-question-statement', 'data-energy-type', 'data-wattage', 'data-score', 'data-max-tries', 'data-active', 'data-picture'];
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -62,14 +59,8 @@ window.customElements.define('adminquestioncomponent-れ', class extends HTMLEle
             case 'data-description':
                 this._shadowRoot.querySelector('#description').innerText = newValue;
                 break;
-            case 'data-wind-question':
-                this._shadowRoot.querySelector('#wind-question').innerText = newValue;
-                break;
-            case 'data-water-question':
-                this._shadowRoot.querySelector('#water-question').innerText = newValue;
-                break;
-            case 'data-solar-question':
-                this._shadowRoot.querySelector('#solar-question').innerText = newValue;
+            case 'data-question-statement':
+                this._shadowRoot.querySelector('#question-statement').innerText = newValue;
                 break;
             case 'data-wattage':
                 this._shadowRoot.querySelector('#wattage').innerText = newValue;

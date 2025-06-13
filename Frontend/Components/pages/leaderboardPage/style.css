@@ -1,0 +1,95 @@
+#container {
+  background-color: white;
+  padding: 20px;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+#leaderboard-container {
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+table th, table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+table th.sortable {
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  padding-right: 25px;
+}
+table th.sortable:hover {
+  background-color: #e9ecef;
+}
+table th.sortable::before, table th.sortable::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  width: 0;
+  height: 0;
+  opacity: 0.3;
+  transition: opacity 0.2s ease;
+}
+table th.sortable::before {
+  top: 40%;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid #666;
+}
+table th.sortable::after {
+  top: 55%;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 4px solid #666;
+}
+table th.sortable:hover::before, table th.sortable:hover::after {
+  opacity: 0.7;
+}
+table th.sortable.sort-asc::before {
+  opacity: 1;
+  border-bottom-color: #333;
+}
+table th.sortable.sort-desc::after {
+  opacity: 1;
+  border-top-color: #333;
+}
+table th:not(.sortable) {
+  color: #666;
+  background-color: #f8f9fa;
+}
+table tbody tr {
+  transition: background-color 0.2s ease;
+}
+table tbody tr:hover {
+  background-color: #f5f5f5;
+}
+table tbody tr td {
+  transition: background-color 0.2s ease;
+}
+
+.members-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}/*# sourceMappingURL=style.css.map */

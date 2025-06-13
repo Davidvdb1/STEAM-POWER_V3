@@ -18,18 +18,6 @@ template.innerHTML = /*html*/`
             border-radius: 10px;
             background-color: #fafafa;
         }
-
-        .nodata {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
-            font-size: 1.2rem;
-            color: #999;
-            font-style: italic;
-            text-align: center;
-            padding: 10px;
-        }
     </style>
 
     <div id="barindicator"></div>
@@ -44,165 +32,96 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this.$liveEnergy = this._shadowRoot.querySelector('#barindicator');
         this.chart = null;
-        this.$icon = 'https://img.icons8.com/?size=100&id=648&format=png&color=000000'
         this.$data = [];
-        this.$allData = []; // <--- bewaar alle data
         this.$isChartReady = false;
-
     }
 
     static get observedAttributes() {
-        return ["range", "mode"];
+        return ['mode', 'range'];
     }
-    
 
     attributeChangedCallback(name, oldValue, newValue) {
-        if (name === "range") {
-            this.updateRange(newValue);
+        if (name === 'mode' || name === 'range') {
+            this.updateBar(); 
         }
-        if (name === "mode") {
-            this.updateRange(this.getAttribute("range") || "oneDay");
-        }
-    }
-    
+    }    
+
     connectedCallback() {
         setTimeout(() => {
             this.initChart();
-            const canvas = this.$liveEnergy.querySelector('canvas');
-            this.showNoDataMessage(`Niet genoeg ${this.id} data beschikbaar in deze tijdsrange.`);
-        }, 50); 
+        }, 50);
     }
 
     setFullData(data) {
-        this.$allData = data;
-    
-        const tryUpdate = () => {
-            if (this._isChartReady) {
-                this.updateRange(this.getAttribute('range') || 'oneDay');
-            } else {
-                setTimeout(tryUpdate, 50); // wacht tot chart klaar is
-            }
-        };
-    
-        tryUpdate();
-    }    
-
-    initChart() {
-
-        if (this.chart) {
-            this.chart.dispose();
-        }
-        this.chart = echarts.init(this.$liveEnergy);        
-        this.$isChartReady = true;
-
-        const min = 137.22;
-        const max = 141.36;
-        const current = 139.4;
-
-        if (!this.$liveEnergy) {
-            console.error("Chart container not found!");
-            return;
-        }
-
-        if (typeof echarts === 'undefined') {
-            console.error("ECharts is niet geladen! Voeg een script toe in je HTML.");
-            return;
-        }
-
-        try {
-            this.chart = echarts.init(this.$liveEnergy);
-            this.chart.setOption({
-                xAxis: {
-                    min: min,
-                    max: max,
-                    show: false,
-                    type: 'value'
-                },
-                yAxis: {
-                    type: 'category',
-                    data: ['Day Range'],
-                    axisLabel: { show: false },
-                    axisLine: { show: false },
-                    axisTick: { show: false }
-                },
-                grid: {
-                    left: '10%',
-                    right: '10%',
-                    top: '20%',
-                    bottom: '10%'
-                },
-                tooltip: {
-                    show: false
-                }
-            });
-
-            this.chart.resize();
-
-        } catch (error) {
-            console.error("Failed to initialize ECharts:", error);
-        }
+        this.$data = data;
+        this.updateBar();
     }
 
-    getDataForCurrentRange() {
-        const now = new Date();
-        let minTime;
-    
-        switch (this.getAttribute('range')) {
-            case 'minute':
-                minTime = new Date(now.getTime() - 60 * 1000); break;
-            case 'tenMinutes':
-                minTime = new Date(now.getTime() - 10 * 60 * 1000); break;
-            case 'oneHour':
-                minTime = new Date(now.getTime() - 60 * 60 * 1000); break;
-            case 'sixHour':
-                minTime = new Date(now.getTime() - 6 * 60 * 60 * 1000); break;
-            case 'oneDay':
-            default:
-                minTime = new Date(now.getTime() - 24 * 60 * 60 * 1000); break;
-        }
-    
-        return this.$allData.filter(d => new Date(d.time) >= minTime && d.value > 0);
-    }
-    
-
-    updateBar(dataList = null, newData = null) {
-        let dataToUse;
-    
+    updateBar(newData = null) {
         if (newData) {
-            this.$allData.push(newData);
-            dataToUse = this.getDataForCurrentRange();
-            if (newData.value === 0) {
-                this.showNoDataMessage(`Niet genoeg ${this.id} data beschikbaar in deze tijdsrange.`);
-                return;
-            }
-        } else if (dataList) {
-            dataToUse = dataList;
-            console.log(`data geladen voor bar ${this.id}`, dataToUse);
-        } else {
-            console.warn('Geen geldige data ontvangen');
-            return;
+            this.$data.push(newData);
         }
 
-        const validData = dataToUse.filter(d => d.value > 0);
-        if (validData.length === 0) {
-            console.warn(`Geen geldige meetwaarden voor ${this.id}`);
-            return;
+        const rangeMappings = {
+            minute: 1,
+            tenMinutes: 10,
+            oneHour: 60,
+            sixHour: 360,
+            oneDay: 1440
+        };
+
+        let filteredData = [...this.$data];
+        const rangeAttr = this.getAttribute('range');
+        if (rangeAttr) {
+            const rangeMinutes = rangeMappings[rangeAttr] || 1440;
+            const rangeMs = rangeMinutes * 60 * 1000;
+            const cutoff = Date.now() - rangeMs;
+            filteredData = filteredData.filter(d => {
+                const rawTs = d.time;
+                const ts = (rawTs instanceof Date)
+                    ? rawTs.getTime()
+                    : typeof rawTs === 'string'
+                        ? new Date(rawTs).getTime()
+                        : rawTs;                
+                return typeof ts === 'number' && !isNaN(ts) && ts >= cutoff;
+            });
         }
-    
-        const min = Math.min(...validData.map(d => this.convertValue(d.value)));
-        const max = Math.max(...validData.map(d => this.convertValue(d.value)));
-        const latest = validData.reduce((a, b) => new Date(a.time) > new Date(b.time) ? a : b);
-        const current = this.convertValue(latest.value);
+
+        const validData = filteredData.filter(d => d.value > 0);
+        let min = 0;
+        let max = 0;
+        let current = 0;
+
+        if (validData.length === 1) {
+            max = this.convertValue(validData[0].value);
+            current = max;
+        } else if (validData.length >= 2) {
+            const convertedValues = validData.map(d => this.convertValue(d.value));
+            const allSame = convertedValues.every(v => v === convertedValues[0]);
         
-    
+            if (allSame) {
+                // Behandel als één datapunt: links waarde, rechts 0
+                max = convertedValues[0];
+                current = max;
+                min = 0;
+            } else {
+                min = Math.min(...convertedValues);
+                max = Math.max(...convertedValues);
+                current = convertedValues[convertedValues.length - 1];
+            }
+        }
+
         if (!this.chart) {
             this.initChart();
         }
-    
+
+        const barWidth = max - min || 1;
+        const suffix = this.getAttribute('mode') === 'voltage' ? ' V' : '';
+
         this.chart.setOption({
             xAxis: {
                 min: min,
-                max: max
+                max: max || 1
             },
             series: [
                 {
@@ -210,14 +129,12 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
                     stack: 'range',
                     data: [min],
                     barWidth: 30,
-                    itemStyle: {
-                        color: 'transparent'
-                    }
+                    itemStyle: { color: 'transparent' }
                 },
                 {
                     type: 'bar',
                     stack: 'range',
-                    data: [max - min],
+                    data: [barWidth],
                     barWidth: 30,
                     itemStyle: {
                         color: new echarts.graphic.LinearGradient(1, 0, 0, 0, [
@@ -233,34 +150,24 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
                                 yAxis: 'Day Range',
                                 label: {
                                     show: true,
-                                    formatter: () => {
-                                        const mode = this.getAttribute('mode');
-                                        return mode === 'voltage' ? `${min} V` : `${min}`;
-                                    },
+                                    formatter: () => `${min}${suffix}`,
                                     position: 'left',
                                     fontWeight: 'bold',
                                     color: '#000'
                                 },
-                                itemStyle: {
-                                    color: 'transparent'
-                                }
+                                itemStyle: { color: 'transparent' }
                             },
                             {
-                                xAxis: max,
+                                xAxis: max || 1,
                                 yAxis: 'Day Range',
                                 label: {
                                     show: true,
-                                    formatter: () => {
-                                        const mode = this.getAttribute('mode');
-                                        return mode === 'voltage' ? `${max} V` : `${max}`;
-                                    },
+                                    formatter: () => `${max}${suffix}`,
                                     position: 'right',
                                     fontWeight: 'bold',
                                     color: '#000'
                                 },
-                                itemStyle: {
-                                    color: 'transparent'
-                                }
+                                itemStyle: { color: 'transparent' }
                             },
                             {
                                 symbol: `image://Assets/SVGs/${this.id}.png`,
@@ -268,94 +175,54 @@ window.customElements.define('rangeindicatorbar-れ', class extends HTMLElement 
                                 yAxis: 'Day Range',
                                 label: {
                                     show: true,
-                                    formatter: () => {
-                                        const mode = this.getAttribute('mode');
-                                        return mode === 'voltage' ? `${current} V` : `${current}`;
-                                    },
+                                    formatter: () => `${current}${suffix}`,
                                     position: 'top'
                                 },
                                 symbolOffset: [0, '-30px'],
                             }
                         ]
-                    }                    
+                    }
                 }
             ]
         });
-    }    
-    
-    updateRange(range) {
-        if (!this.chart) return;
-    
-        const now = new Date();
-        let minTime;
-    
-        switch (range) {
-            case 'minute':
-                minTime = new Date(now.getTime() - 60 * 1000);
-                break;
-            case 'tenMinutes':
-                minTime = new Date(now.getTime() - 10 * 60 * 1000);
-                break;
-            case 'oneHour':
-                minTime = new Date(now.getTime() - 60 * 60 * 1000);
-                break;
-            case 'sixHour':
-                minTime = new Date(now.getTime() - 6 * 60 * 60 * 1000);
-                break;
-            case 'oneDay':
-                minTime = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-                break;
-            default:
-                console.error(`Ongeldige range: ${range}`);
-                return;
-        }
-    
-        const filtered = this.$allData.filter(d =>
-            new Date(d.time) >= minTime && d.value > 0
-        );
-        
-    
-        if (filtered.length < 2) {
-            this.showNoDataMessage(`Niet genoeg ${this.id} data beschikbaar in deze tijdsrange.`);
-            return;
-        }
-        
-        const values = filtered.map(d => this.convertValue(d.value));
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        
-        if (min === max) {
-            this.showNoDataMessage(`Niet genoeg ${this.id} data beschikbaar in deze tijdsrange.`);
-            return;
-        }        
-    
-        this.updateBar(filtered); // <- Deze regel zorgt ervoor dat de grafiek wordt aangepast
     }
 
-    showNoDataMessage(message) {
-        this.clearChart(); // dispose de chart & maak inhoud leeg
-    
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'nodata';
-        msgDiv.textContent = message;
-    
-        this.$liveEnergy.appendChild(msgDiv); // voeg de melding toe in bestaande container
-    }
-    
-    
-    
-    clearChart() {
+    initChart() {
         if (this.chart) {
             this.chart.dispose();
-            this.chart = null;
         }
-        this.$liveEnergy.innerHTML = '';
+        this.chart = echarts.init(this.$liveEnergy);
+        this.$isChartReady = true;
+
+        this.chart.setOption({
+            xAxis: {
+                type: 'value',
+                show: false
+            },
+            yAxis: {
+                type: 'category',
+                data: ['Day Range'],
+                axisLabel: { show: false },
+                axisLine: { show: false },
+                axisTick: { show: false }
+            },
+            grid: {
+                left: '10%',
+                right: '10%',
+                top: '20%',
+                bottom: '10%'
+            },
+            tooltip: {
+                show: false
+            }
+        });
+
+        this.chart.resize();
     }
 
     convertValue(value) {
         const mode = this.getAttribute('mode');
         return mode === 'voltage' ? parseFloat((value / 341).toFixed(3)) : value;
     }
-    
 });
 //#endregion CLASS

@@ -41,6 +41,18 @@ class QuestionRepository {
 
         return prismaQuestions.map(Question.from);
     }
+
+    async updateErrorMargin(errorMargin) {
+        try {
+            const result = await prisma.question.updateMany({
+                data: { errorMargin }
+            });
+            return result ;
+        } catch (error) {
+            console.error('Error updating error margin:', error);
+            throw new Error('Kon foutmarge niet wijzigen');
+        }
+    }
 }
 
 module.exports = QuestionRepository;

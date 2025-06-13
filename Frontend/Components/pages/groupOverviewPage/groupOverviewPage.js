@@ -97,9 +97,27 @@ window.customElements.define('groupoverviewpage-れ', class extends HTMLElement 
     async handleCreateGroup(event) {
         const { name, members, microbitId } = event.detail;
         const response = await this.createGroup(name, members, microbitId);
-        const newGroup = await response.json().then(data => data.group);
-        this.groups.push(newGroup);
-        this.updateGroupList();
+        if (response.ok) {
+            const newGroup = await response.json().then(data => data.group);
+            this.groups.push(newGroup);
+            this.updateGroupList();
+            
+            // Reset the form on successful creation
+            this.addGroup.resetForm();
+        } else {
+            // Extract the error message from the response and display it
+            try {
+                const errorData = await response.json();
+                const errorMessage = errorData.message || errorData.error || 'Failed to create group';
+                console.error('Error creating group:', errorMessage);
+                
+                // Show error on the form
+                this.addGroup.showError(errorMessage);
+            } catch (e) {
+                console.error('Error creating group:', response.statusText);
+                this.addGroup.showError('Failed to create group: ' + response.statusText);
+            }
+        }
     }
 
     // service

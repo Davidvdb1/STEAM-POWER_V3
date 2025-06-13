@@ -1,0 +1,69 @@
+.shop {
+  position: absolute;
+  top: 0;
+  left: 102%;
+  transform: translateX(-10px);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "PixelFont" !important;
+  height: 100%;
+  overflow-y: auto;
+  border: 2px solid #555;
+}
+.shop .img-euro {
+  height: 30px;
+  padding: 10px;
+}
+.shop .card-asset {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 61%;
+  padding: 1rem 2rem 0;
+}
+.shop .card-asset:nth-child(-n+3) {
+  border-bottom: 2px solid #555;
+  background-color: rgb(210, 247, 210);
+}
+.shop .card-asset:nth-child(4) {
+  background-color: #d3d3d3;
+  border-bottom: 2px solid #555;
+}
+.shop .card-asset[data-type=Eik],
+.shop .card-asset[data-type=Beuk],
+.shop .card-asset[data-type=Buxus],
+.shop .card-asset[data-type=Hulst] {
+  background-color: #add8e6;
+  border-bottom: 2px solid #555;
+}
+.shop .card-asset[data-type=Hulst] {
+  border-bottom: none;
+}
+.shop .corner-icon {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+.shop .img-greenEnergy-card {
+  height: 60px;
+}
+.shop .assetCoinDiv {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.shop .windturbine {
+  height: 80px;
+  width: 48px;
+  margin-top: 30px;
+}
+.shop .kerncentrale {
+  height: 80px;
+  width: 98px;
+  margin-top: 40px;
+}/*# sourceMappingURL=style.css.map */

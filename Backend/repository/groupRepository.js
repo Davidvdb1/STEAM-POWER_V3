@@ -98,9 +98,16 @@ class GroupRepository {
 
     async deleteById(id) {
         try {
+            // First delete the group's energy data
+            await prisma.energyData.deleteMany({
+                where: { groupId: id }
+            });
+            
+            // Then delete the group
             await prisma.group.delete({ where: { id } });
             return true;
         } catch (error) {
+            console.error('[ERROR] deleteById failed:', error);
             throw new Error('Kon groep niet verwijderen');
         }
     }

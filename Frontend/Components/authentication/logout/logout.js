@@ -28,12 +28,18 @@ window.customElements.define('logout-れ', class extends HTMLElement {
     }
 
     connectedCallback() {
-        sessionStorage.removeItem('loggedInUser');
-        this.dispatchEvent(new CustomEvent('tab', {
-            bubbles: true,
-            composed: true,
-            detail: "campoverviewpage"
-        }));
+        const confirmation = confirm("Weet je zeker dat je wilt uitloggen?");
+        if (confirmation) {
+            sessionStorage.removeItem('loggedInUser');
+            this.dispatchEvent(new CustomEvent('tab', {
+                bubbles: true,
+                composed: true,
+                detail: "campoverviewpage"
+            }));
+        } else {
+            const currentUrl = window.location.href;
+            window.location.href = currentUrl; // Blijf op dezelfde pagina als de gebruiker annuleert
+        }
     }
 });
 //#endregion CLASS

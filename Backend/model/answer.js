@@ -3,8 +3,8 @@ class Answer {
         this.id = id;
         this.questionId = questionId;
         this.groupId = groupId;
-        this.answerValue = parseInt(answerValue);
-        this.energyReading = parseInt(energyReading);
+        this.answerValue = parseFloat(answerValue);
+        this.energyReading = parseFloat(energyReading);
 
         this.isCorrect = isCorrect;
         if (validate) {
@@ -12,9 +12,9 @@ class Answer {
         }
     }
 
-    checkAnswerValue(energyRequired) {
-        const lowerBound = energyRequired - (energyRequired * 0.05);
-        const upperBound = energyRequired + (energyRequired * 0.05);
+    checkAnswerValue(energyRequired, errorMargin) {
+        const lowerBound = energyRequired - (energyRequired * errorMargin);
+        const upperBound = energyRequired + (energyRequired * errorMargin);
         this.isCorrect = this.answerValue * this.energyReading >= lowerBound && this.answerValue * this.energyReading <= upperBound;
         this.errorMargin = (this.answerValue * this.energyReading - energyRequired) / energyRequired * 100;
     }
