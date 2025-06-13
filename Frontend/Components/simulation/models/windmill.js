@@ -1,4 +1,5 @@
 import { geocodeAddress } from '../utils/geocode.js';
+import { fetchWindDirection } from '../utils/weatherData.js';
 export async function loadWindmill(scene, component, bladeCount = 3, modelVersion = 1) {
     let fileName;
     if (modelVersion === 1) {
@@ -92,7 +93,7 @@ function animateRotationY(mesh, targetRadians, frameRate = 30, totalFrames = 15)
     mesh.getScene().beginAnimation(mesh, 0, totalFrames, false);
 }
 
-// Optioneel fetchWindDirection als fallback (zonder geocode)
+/* Optioneel fetchWindDirection als fallback (zonder geocode)
 async function fetchWindDirection() {
     try {
         const lat = 50.8798;
@@ -105,7 +106,6 @@ async function fetchWindDirection() {
         console.error("Error fetching wind direction:", error);
         return 0;
     }
-}
+}*/
 
 
-// ✅ De bijbehorende SimulationComponent.js volgt als tweede bestand indien je dat wil

@@ -21,7 +21,8 @@ import {
   fetchWindSpeed,
   calcWindPowerWhTurbine,
   yawAdjustedSpeed,
-  ROTOR_RADIUS_M
+  ROTOR_RADIUS_M,
+  calcHydroPower
 } from '../utils/weatherData.js';
 
 let template = document.createElement('template');
@@ -44,6 +45,9 @@ export class SimulationComponent extends HTMLElement {
     this.city = "Leuven";
     this.postal = "3001";
 
+    this.lat = 50.8798; // Default latitude for Leuven
+    this.lon = 4.7005; // Default longitude for Leuven
+
     this.engine = null;
     this.scene = null;
     this.camera = null;
@@ -58,6 +62,9 @@ export class SimulationComponent extends HTMLElement {
     this.currentBladeCount = 3;
     this.manualYawDeg = 0;
     this.modelVersion = 1;
+
+    this.currentWheelPosition = 1;
+    this.currentWheelDepth    = 0;
   }
 
   static get observedAttributes() {
@@ -109,19 +116,41 @@ export class SimulationComponent extends HTMLElement {
       }
     }
   }
+_updateWaterEnergy(pos = this.currentWheelPosition,
+                   depth = this.currentWheelDepth) {
+  const { kW } = calcHydroPower(pos, depth);
+ const Wh     = kW * 1000;                               // kW → Wh
+ const disp   = Wh < 10 ? Wh.toFixed(1) : Wh.toFixed(0);
+ console.log(`Water ${pos} | d=${depth.toFixed(2)} m → ${disp} Wh/u`);
+ this.dataPanel?.setWaterValue?.(disp);
+}
 
   async _updateWindEnergy() {
-    try {
-      const v = await fetchWindSpeed(this.lat ?? 50.8798, this.lon ?? 4.7005);
-      let delta = Math.abs(this.manualYawDeg % 360);
-      if (delta > 180) delta = 360 - delta;
-      const vEff = yawAdjustedSpeed(v, delta);
-      const Wh = calcWindPowerWhTurbine(vEff, this.currentBladeCount);
-      console.log(`Aantal ${this.currentBladeCount}wieken | Δ=${delta.toFixed(0)}° → ${Wh.toFixed(0)} Wh/u`);
-    } catch (err) {
-      console.error('Wind-energie-berekening faalde:', err);
-    }
+  try {
+    /* 1) windsnelheid en yaw-mismatch ---------------------------- */
+    const v = await fetchWindSpeed(this.lat ?? 50.8798, this.lon ?? 4.7005);
+    let delta = Math.abs(this.manualYawDeg % 360);
+    if (delta > 180) delta = 360 - delta;
+
+    /* 2) effectief v + vermogen ---------------------------------- */
+    const vEff = yawAdjustedSpeed(v, delta);
+    const Wh   = calcWindPowerWhTurbine(vEff, this.currentBladeCount);
+
+    /* 3) adaptieve notatie ( <10 ⇒ 1 decimaal, anders geheel ) ---- */
+    const dispWh = Wh < 10 ? Wh.toFixed(1) : Wh.toFixed(0);
+
+    console.log(
+      `Aantal ${this.currentBladeCount} wieken | Δ=${delta.toFixed(0)}° `
+      + `→ ${dispWh} Wh/u`
+    );
+
+    /* 4) naar Data-paneel ---------------------------------------- */
+    this.dataPanel?.setWindValue?.(dispWh);
+
+  } catch (err) {
+    console.error('Wind-energie-berekening faalde:', err);
   }
+}
 
   async _updateSunAndSolarPanel(street, city, postal) {
     this.street = street;
@@ -175,13 +204,18 @@ export class SimulationComponent extends HTMLElement {
       (autoRotateSolar) => this._handleAutoRotateChangeSolar(autoRotateSolar),
       (position) => this._handleWaterWheelPosition(position),
       (depth) => this._handleWaterWheelDepth(depth),
+      (pos, d)   => this._updateWaterEnergy(pos, d),
       (modelVersion) => this._handleWindmillModel(modelVersion)
+      
     );
 
-    createDataPanel();
+    this.dataPanel = createDataPanel();
 
     await loadModels(this.scene, this);
 
+    this._updateWaterEnergy();  
+    await this._updateWindEnergy();
+  
     canvas.removeEventListener('wheel', this._preventScroll);
     canvas.addEventListener('wheel', this._customWheelHandler, { passive: false });
     canvas.addEventListener('touchmove', this._preventScroll, { passive: false });
@@ -249,15 +283,22 @@ export class SimulationComponent extends HTMLElement {
     await updateAutoRotateChangeSolar(this.scene, this, enabledSolar);
   }
 
-  async _handleWaterWheelPosition(position) {
-    await updateWaterWheelPosition(this.scene, this, position);
-  }
-
-  async _handleWaterWheelDepth(depth) {
-    await updateWaterWheelDepth(this.scene, this, depth);
-  }
+  // diepte
+async _handleWaterWheelDepth(d) {
+  await updateWaterWheelDepth(this.scene, this, d);
+  this.currentWheelDepth = d;
+  this._updateWaterEnergy();
+}
+// positie
+async _handleWaterWheelPosition(p) {
+  await updateWaterWheelPosition(this.scene, this, p);
+  this.currentWheelPosition = p;
+  this.currentWheelDepth = 0;
+  this._updateWaterEnergy(p, 0);
+}
 
   async _handleWindmillModel(modelVersion) {
     await updateWindmillModel(this.scene, this, modelVersion);
   }
+
 }

@@ -37,6 +37,8 @@ export function loadWaterWheel(scene, component) {
 export async function updateWaterWheelDepth(scene, component, depth) {
     if (!component.wheel || !component.currentWheelPosition) return;
 
+    component.currentWheelDepth = depth;
+
     // Base Y positions for each of the 3 predefined positions
     const baseYPositions = [0.07, 0.1, 0.3];
 
@@ -52,6 +54,7 @@ export async function updateWaterWheelDepth(scene, component, depth) {
 
 export async function updateWaterWheelPosition(scene, component, position) {
     component.currentWheelPosition = position;
+    component.currentWheelDepth = 0;
     if (!component.wheel) return;
 
     // Define the target positions and rotations for each slot (position 1, 2, 3)
