@@ -1,6 +1,6 @@
 import { createLine } from '../utils/uiElements.js';
 
-export function createWaterWheelSettings(page2, position, depth) {
+export function createWaterWheelSettings(page2, positionCB, depthCB) {
     const waterTitle = new BABYLON.GUI.TextBlock();
     waterTitle.text = "Waterrad";
     waterTitle.fontSize = 22;
@@ -63,28 +63,29 @@ export function createWaterWheelSettings(page2, position, depth) {
     leftButton.onPointerUpObservable.add(() => {
         if (currentPosition > minPosition) {
             currentPosition--;
-            valueText.text = `Positie ${currentPosition}`;
-            position(currentPosition);
+      valueText.text = `Positie ${currentPosition}`;
+      positionCB(currentPosition);
 
-            // Reset depth slider and label to 0
-            depthSlider.value = 0;
-            depthValueLabel.text = "0.00";
-            depth(0);  // Call the depth update function with 0
+      depthSlider.value = 0;
+      depthValueLabel.text = '0.00';
+      depthCB(0);
+
         }
     });
 
     rightButton.onPointerUpObservable.add(() => {
         if (currentPosition < maxPosition) {
             currentPosition++;
-            valueText.text = `Positie ${currentPosition}`;
-            position(currentPosition);
+      valueText.text = `Positie ${currentPosition}`;
+      positionCB(currentPosition);
 
-            // Reset depth slider and label to 0
-            depthSlider.value = 0;
-            depthValueLabel.text = "0.00";
-            depth(0);  // Call the depth update function with 0
+      depthSlider.value = 0;
+      depthValueLabel.text = '0.00';
+      depthCB(0);
+
         }
     });
+    
 
     page2.addControl(createLine());
 
@@ -120,6 +121,6 @@ export function createWaterWheelSettings(page2, position, depth) {
     // === Update value label and callback ===
     depthSlider.onValueChangedObservable.add((value) => {
         depthValueLabel.text = `${value.toFixed(2)}`;
-        depth(value);
+        depthCB(value);
     });
 }

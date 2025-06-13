@@ -1,3 +1,27 @@
+/* --------------------------------------------------------------
+ *  WATER-ENERGIE  –  basis­fysica & helpers
+ * --------------------------------------------------------------*/
+export const RHO = 1_000;     // kg m-3
+export const G   = 9.81;      // m s-2
+export const ETA = 0.60;      // totaal rendement rad + generator
+
+/* Debiet Q (m³/s) en statische hoogte H (m) per vaste locatie */
+export const LOC_SPECS = {
+  1: { Q: 0.080, H: 2.5 },   // BENEDEN
+  2: { Q: 0.060, H: 1.8 },   // MIDDEN
+  3: { Q: 0.040, H: 1.2 }    // BOVEN
+};
+
+/**
+ * Bereken water­vermogen P (W en kW) bij positie 1-3 en diepte-offset d (m).
+ *   P = ρ · g · Q · (H + d) · η
+ */
+export function calcHydroPower(position = 1, depth = 0) {
+  const { Q, H } = LOC_SPECS[position] ?? LOC_SPECS[1];
+  const P = RHO * G * Q * (H + depth) * ETA;  // watt
+  return { W: P, kW: P / 1_000 };
+}
+
 /* === Rotor-constanten ============================================= */
 export const ROTOR_RADIUS_M = 1.5;                     // pas aan indien nodig
 const ROTOR_AREA = Math.PI * ROTOR_RADIUS_M ** 2;      // m²
