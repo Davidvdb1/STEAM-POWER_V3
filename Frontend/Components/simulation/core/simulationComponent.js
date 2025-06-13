@@ -16,6 +16,7 @@ import {
   updateWaterWheelPosition
 } from '../models/waterWheel.js';
 import { getSunPosition } from '../utils/sunCalculator.js';
+import { postEnergyData } from '../utils/service.js'
 import { geocodeAddress } from '../utils/geocode.js';
 import {
   fetchWindSpeed,
@@ -63,6 +64,14 @@ export class SimulationComponent extends HTMLElement {
     this.manualYawDeg = 0;
     this.modelVersion = 1;
 
+    // Component state
+    this.initialized = false;
+    
+    this.solarWatts = 0;
+    this.windWatts = 0;
+    this.waterWatts = 0;
+    this.intervalId = null; // Store the interval ID
+
     this.currentWheelPosition = 1;
     this.currentWheelDepth    = 0;
   }
@@ -75,10 +84,55 @@ export class SimulationComponent extends HTMLElement {
     if (this.initialized) return;
     this.initialized = true;
 
-    this._initializeBabylonJS();
-    this._startRenderLoop();
-    this._setupResizeObserver();
-  }
+    // Initialize the BabylonJS scene
+        this._initializeBabylonJS();
+        
+        // Start the render loop
+        this._startRenderLoop();
+        
+        // Set up resize observer for high resolution rendering
+        this._setupResizeObserver();
+        
+        // Set up the interval to trigger every 2 seconds
+        this._setupInterval();
+    }
+    
+    disconnectedCallback() {
+
+    }
+    
+    _setupInterval() {
+        // Set up an interval that triggers every 2 seconds (2000 milliseconds)
+        this.intervalId = setInterval(() => {
+            this._calculateGeneratedEnergy();
+        }, 2000);
+    }
+    
+    _calculateGeneratedEnergy() {
+        const groupId = JSON.parse(sessionStorage.getItem('loggedInUser'))?.groupId;
+
+        // Calculate the total generated energy from all sources
+        this.solarWatts = 0;
+        this.windWatts = 0;
+        this.waterWatts = 0;
+        
+        const time = new Date().toISOString();
+
+        const energyData = [];
+        energyData.push({ pin: 0, groupId, value: 500, type: 'SOLAR', time });
+        energyData.push({ pin: 1, groupId, value: 200, type: 'WIND', time });
+        energyData.push({ pin: 2, groupId, value: 100, type: 'WATER', time });
+        energyData.forEach(async (data) => {
+            if (data.value == 0) return;
+            const response = await postEnergyData(data);
+            const body = await response.json();
+            const datapoint = body.energyData;
+
+            // send event to rest of website
+            const event = new CustomEvent('energydatareading', { detail: datapoint, bubbles: true, composed: true });
+            document.dispatchEvent(event);
+        });
+    }
 
   _preventScroll = (event) => event.preventDefault();
 
