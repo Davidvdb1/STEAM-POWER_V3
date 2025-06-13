@@ -111,17 +111,31 @@ export class SimulationComponent extends HTMLElement {
   }
 
   async _updateWindEnergy() {
-    try {
-      const v = await fetchWindSpeed(this.lat ?? 50.8798, this.lon ?? 4.7005);
-      let delta = Math.abs(this.manualYawDeg % 360);
-      if (delta > 180) delta = 360 - delta;
-      const vEff = yawAdjustedSpeed(v, delta);
-      const Wh = calcWindPowerWhTurbine(vEff, this.currentBladeCount);
-      console.log(`Aantal ${this.currentBladeCount}wieken | Δ=${delta.toFixed(0)}° → ${Wh.toFixed(0)} Wh/u`);
-    } catch (err) {
-      console.error('Wind-energie-berekening faalde:', err);
-    }
+  try {
+    /* 1) windsnelheid en yaw-mismatch ---------------------------- */
+    const v = await fetchWindSpeed(this.lat ?? 50.8798, this.lon ?? 4.7005);
+    let delta = Math.abs(this.manualYawDeg % 360);
+    if (delta > 180) delta = 360 - delta;
+
+    /* 2) effectief v + vermogen ---------------------------------- */
+    const vEff = yawAdjustedSpeed(v, delta);
+    const Wh   = calcWindPowerWhTurbine(vEff, this.currentBladeCount);
+
+    /* 3) adaptieve notatie ( <10 ⇒ 1 decimaal, anders geheel ) ---- */
+    const dispWh = Wh < 10 ? Wh.toFixed(1) : Wh.toFixed(0);
+
+    console.log(
+      `Aantal ${this.currentBladeCount} wieken | Δ=${delta.toFixed(0)}° `
+      + `→ ${dispWh} Wh/u`
+    );
+
+    /* 4) naar Data-paneel ---------------------------------------- */
+    this.dataPanel?.setWindValue?.(dispWh);
+
+  } catch (err) {
+    console.error('Wind-energie-berekening faalde:', err);
   }
+}
 
   async _updateSunAndSolarPanel(street, city, postal) {
     this.street = street;
@@ -178,10 +192,12 @@ export class SimulationComponent extends HTMLElement {
       (modelVersion) => this._handleWindmillModel(modelVersion)
     );
 
-    createDataPanel();
+    this.dataPanel = createDataPanel();
 
     await loadModels(this.scene, this);
 
+    await this._updateWindEnergy();
+  
     canvas.removeEventListener('wheel', this._preventScroll);
     canvas.addEventListener('wheel', this._customWheelHandler, { passive: false });
     canvas.addEventListener('touchmove', this._preventScroll, { passive: false });

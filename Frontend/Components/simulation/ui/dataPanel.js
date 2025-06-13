@@ -97,5 +97,10 @@ export function createDataPanel() {
     windValue.fontSize = 16;
     windRect.addControl(windValue);
 
-    return GUI;
+    return {
+        gui: GUI,
+        setSolarValue(val) { solarValue.text = `${val} kW/u`; },
+        setWaterValue(val) { waterValue.text = `${val} kW/u`; },
+        setWindValue (val) { windValue .text = `${val} Wh/u`; }
+    };
 }
