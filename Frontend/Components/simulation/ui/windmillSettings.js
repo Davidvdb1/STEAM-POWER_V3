@@ -1,6 +1,4 @@
-/* === Nieuw ====================================================== */
 const OPT_OFFSET = 15;   // ° die als “perfect” geldt
-/* ================================================================ */
 
 import { createLine } from '../utils/uiElements.js';
 
