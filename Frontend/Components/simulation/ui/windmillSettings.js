@@ -1,3 +1,5 @@
+const OPT_OFFSET = 15;   // ° die als “perfect” geldt
+
 import { createLine } from '../utils/uiElements.js';
 
 /**
@@ -82,6 +84,7 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
     const slider = new BABYLON.GUI.Slider();
     slider.minimum = 0;
     slider.maximum = 360;
+    slider.value   = OPT_OFFSET; // Start at 15° offset
     slider.value = 0;
     slider.height = "20px";
     slider.width = "90%";
@@ -92,7 +95,7 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
 
     // Create the text block for the slider value
     const sliderValueText = new BABYLON.GUI.TextBlock();
-    sliderValueText.text = "0°";
+    sliderValueText.text  = `${OPT_OFFSET}°`;
     sliderValueText.fontSize = 18;
     sliderValueText.color = "white";
     sliderValueText.height = "50px";
@@ -143,10 +146,10 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
         if (autoRotate) {
     /* -------- Nieuw: reset slider en label ------------------------ */
     ignoreSliderEvent = true; // Prevent slider event from triggering
-    slider.value            = 0;          // visueel
-    sliderValueText.text    = "0°";       // label
+    slider.value            = OPT_OFFSET;          // visueel
+    sliderValueText.text    = `${OPT_OFFSET}°`;       // label
     if (onManualRotationChange) {
-      onManualRotationChange(0);          // logica ↺ molen
+      onManualRotationChange(OPT_OFFSET);          // logica ↺ molen
     }
     ignoreSliderEvent = false; // Re-enable slider event
     /* -------------------------------------------------------------- */

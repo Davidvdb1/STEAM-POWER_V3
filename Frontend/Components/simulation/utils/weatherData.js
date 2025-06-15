@@ -98,13 +98,17 @@ export function calcWindPowerWhTurbine(v, blades = 3, rho = 1.225) {
   const watts  = wPerM2 * ROTOR_AREA;                // W ( = Wh/u )
   return watts;                                      // Wh per uur
 }
+export const OPT_OFFSET_DEG = 15;   // 15° links/rechts is perfect ⚡️
+
 /**
  * Pas windsnelheid aan op yaw-mismatch Δ (graden).
  * v_eff = v · cos(Δ)   (Δ van 0 – 180 °)
  */
 export function yawAdjustedSpeed(v, deltaDeg) {
-  const f = Math.cos(Math.abs(deltaDeg) * Math.PI / 180);
-  return v * Math.max(f, 0);       // nooit negatief
+  // kleinste hoek 0-180°
+  const d   = Math.abs((((deltaDeg - OPT_OFFSET_DEG) % 360) + 540) % 360 - 180);
+  const f   = Math.max(Math.cos(d * Math.PI / 180), 0);   // cos in radialen
+  return v * f;
 }
 /**
  * Kleinste hoek tussen twee richtingen a en b (graden)

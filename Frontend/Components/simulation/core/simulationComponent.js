@@ -1,3 +1,5 @@
+const OPT_OFFSET = 15;        // ° optimaal
+
 import { createSettingsPanel } from '../ui/settingsPanel.js';
 import { createDataPanel } from '../ui/dataPanel.js';
 import { loadModels, updateSunAndSolarPanel } from '../models/modelLoader.js';
@@ -62,7 +64,7 @@ export class SimulationComponent extends HTMLElement {
     this.wheel = null;
 
     this.currentBladeCount = 3;
-    this.manualYawDeg = 0;
+    this.manualYawDeg = OPT_OFFSET;
     this.modelVersion = 1;
 
     // Component state
@@ -75,6 +77,8 @@ export class SimulationComponent extends HTMLElement {
 
     this.currentWheelPosition = 1;
     this.currentWheelDepth    = 0;
+
+    
   }
 
   static get observedAttributes() {
@@ -326,7 +330,7 @@ async _updateSolarEnergy(){
   }
 
   async _handleWindmillRotation(degrees) {
-    await updateWindmillRotation(this.scene, this, degrees);
+    await updateWindmillRotation(this.scene, this, OPT_OFFSET);
     this.manualYawDeg = degrees;
     await this._updateWindEnergy();
   }
@@ -335,7 +339,7 @@ async _updateSolarEnergy(){
     this.autoRotateEnabled = enabled;
     await updateAutoRotateChange(this.scene, this, enabled, this.street, this.city, this.postal);
     if (enabled) {
-      this.manualYawDeg = 0;
+      this.manualYawDeg = OPT_OFFSET;
       await this._updateWindEnergy();
     }
   }
