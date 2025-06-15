@@ -334,19 +334,21 @@ async _updateSolarEnergy(){
   }
 
   async _handleWindmillRotation(degrees) {
-    await updateWindmillRotation(this.scene, this, OPT_OFFSET);
+    await updateWindmillRotation(this.scene, this, degrees);
     this.manualYawDeg = degrees;
     await this._updateWindEnergy();
   }
 
   async _handleAutoRotateChange(enabled) {
-    this.autoRotateEnabled = enabled;
-    await updateAutoRotateChange(this.scene, this, enabled, this.street, this.city, this.postal);
-    if (enabled) {
-      this.manualYawDeg = OPT_OFFSET;
-      await this._updateWindEnergy();
-    }
+  this.autoRotateEnabled = enabled;
+  await updateAutoRotateChange(this.scene, this, enabled, this.street, this.city, this.postal);
+  if (enabled) {
+    // draai molen direct naar OPT_OFFSET tov de wind
+    this.manualYawDeg = OPT_OFFSET;
+    await updateWindmillRotation(this.scene, this, OPT_OFFSET);
+    await this._updateWindEnergy();
   }
+}
 
   async _handleSolarRotation(degreesSolar) {
     

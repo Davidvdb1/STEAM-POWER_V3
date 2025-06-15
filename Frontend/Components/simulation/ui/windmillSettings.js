@@ -94,7 +94,6 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
     slider.minimum = 0;
     slider.maximum = 360;
     slider.value   = OPT_OFFSET; // Start at 15° offset
-    slider.value = 0;
     slider.height = "20px";
     slider.width = "90%";
     slider.color = "white";
@@ -153,16 +152,18 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
         toggleButton.textBlock.text = autoRotate ? "Aan" : "Uit";
 
         if (autoRotate) {
-    /* -------- Nieuw: reset slider en label ------------------------ */
+    /*  reset slider en label ------------------------ */
     ignoreSliderEvent = true; // Prevent slider event from triggering
     slider.value            = OPT_OFFSET;          // visueel
     sliderValueText.text    = `${OPT_OFFSET}°`;       // label
+    ignoreSliderEvent     = false;
+
     if (onManualRotationChange) {
-      onManualRotationChange(OPT_OFFSET);          // logica ↺ molen
+      onManualRotationChange(OPT_OFFSET);
     }
-    ignoreSliderEvent = false; // Re-enable slider event
-    /* -------------------------------------------------------------- */
+
     onAutoRotateChange(true);
+    /* -------------------------------------------------------------- */
   } else {
     onAutoRotateChange(false);
   }

@@ -1,6 +1,4 @@
-/* === Nieuw: optimale offset ===================================== */
 const OPT_OFFSET = 15;   // ° vóór de ware windrichting
-/* ================================================================ */
 
 import { geocodeAddress } from '../utils/geocode.js';
 import { fetchWindDirection } from '../utils/weatherData.js';
@@ -25,11 +23,16 @@ export async function loadWindmill(scene, component, bladeCount = 3, modelVersio
                 component.windmill.position = new BABYLON.Vector3(-1.1, -0.1, 0.5);
 
                 try {
-                    const degrees = await fetchWindDirection();
-                    const initialDegrees = (degrees - 90) % 360;
-                    component.initialWindmillDirection = initialDegrees;
-                    const radians = BABYLON.Angle.FromDegrees(degrees - 90).radians();
-                    component.windmill.rotation = new BABYLON.Vector3(0, radians, 0);
+                    // 1) haal de echte windrichting
+          const degrees = await fetchWindDirection();
+          // 2) bereken facing = degrees-90, + OPT_OFFSET, en wrap in [0..360)
+          const facingDegNoOffset = (degrees - 90 + 360) % 360;
+          const initialDeg        = (facingDegNoOffset + OPT_OFFSET) % 360;
+
+          // 3) bewaar en roteer meteen mét offset
+          component.initialWindmillDirection = initialDeg;
+          const rad = BABYLON.Angle.FromDegrees(initialDeg).radians();
+          component.windmill.rotation = new BABYLON.Vector3(0, rad, 0);
                 } catch (error) {
                     console.error("Error setting windmill direction:", error);
                 }
@@ -77,11 +80,18 @@ export async function updateAutoRotateChange(scene, component, enabled, street =
     try {
         const { lat, lon } = await geocodeAddress(street, city, postal);
         const deg = await fetchWindDirection(lat, lon);
-        const facingDeg = (deg - 90) % 360;
-        const targetDeg  = (facingDeg + OPT_OFFSET) % 360;     // ✱ offset toepassen
+        // facingDeg zonder offset
+    const facingDeg = (deg - 90 + 360) % 360;
+    // target inclusief offset
+    const targetDeg = (facingDeg + OPT_OFFSET) % 360;
 
-        component.initialWindmillDirection = targetDeg;
-        animateRotationY(component.windmill, BABYLON.Angle.FromDegrees(facingDeg).radians());
+    // update component-state
+    component.initialWindmillDirection = targetDeg;
+        // animatie moet naar targetDeg, niet facingDeg
+        animateRotationY(
+            component.windmill,
+            BABYLON.Angle.FromDegrees(targetDeg).radians()
+  );
     } catch (err) {
         console.error("Auto-rotatie windmolen mislukt:", err);
     }
