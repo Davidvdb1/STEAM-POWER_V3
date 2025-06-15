@@ -1,3 +1,7 @@
+/* === Nieuw: optimale offset ===================================== */
+const OPT_OFFSET = 15;   // ° vóór de ware windrichting
+/* ================================================================ */
+
 import { geocodeAddress } from '../utils/geocode.js';
 import { fetchWindDirection } from '../utils/weatherData.js';
 export async function loadWindmill(scene, component, bladeCount = 3, modelVersion = 1) {
@@ -74,7 +78,9 @@ export async function updateAutoRotateChange(scene, component, enabled, street =
         const { lat, lon } = await geocodeAddress(street, city, postal);
         const deg = await fetchWindDirection(lat, lon);
         const facingDeg = (deg - 90) % 360;
-        component.initialWindmillDirection = facingDeg;
+        const targetDeg  = (facingDeg + OPT_OFFSET) % 360;     // ✱ offset toepassen
+
+        component.initialWindmillDirection = targetDeg;
         animateRotationY(component.windmill, BABYLON.Angle.FromDegrees(facingDeg).radians());
     } catch (err) {
         console.error("Auto-rotatie windmolen mislukt:", err);
