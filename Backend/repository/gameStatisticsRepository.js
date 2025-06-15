@@ -715,6 +715,7 @@ async deleteById(id) {
             greenEnergy: checkpoint.currency.greenEnergy,
             greyEnergy: checkpoint.currency.greyEnergy,
             coins: checkpoint.currency.coins,
+            score: checkpoint.currency.score
           },
         },
         gameBuildings: {
