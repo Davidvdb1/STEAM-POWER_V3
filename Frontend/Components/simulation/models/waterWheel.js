@@ -11,7 +11,7 @@ export function loadWaterWheel(scene, component) {
             component.wheel.scaling = new BABYLON.Vector3(0.15, 0.15, 0.15);
 
             // Use the same position and rotation as position 1
-            const position1 = new BABYLON.Vector3(1, 0.07, 0.7);
+            const position1 = new BABYLON.Vector3(1, 0.01, 0.7);
             const rotation1 = new BABYLON.Vector3(0, -2.1, 0);
 
             component.wheel.position = position1.clone();
@@ -34,20 +34,17 @@ export function loadWaterWheel(scene, component) {
  * @param {SimulationComponent} component - The parent component
  * @param {number} depth - A value between 0 and 1 indicating how much to lower the wheel
  */
-export async function updateWaterWheelDepth(scene, component, depth) {
+export async function updateWaterWheelDepth(scene, component, delta) {
     if (!component.wheel || !component.currentWheelPosition) return;
 
-    component.currentWheelDepth = depth;
+    component.currentWheelDepth = delta;
 
-    // Base Y positions for each of the 3 predefined positions
-    const baseYPositions = [0.07, 0.1, 0.3];
-
+    const baseYPositions = [0.01, 0.06, 0.25];
     const posIndex = component.currentWheelPosition - 1;
     const baseY = baseYPositions[posIndex];
-    const loweredY = baseY - depth;
 
-    // Instantly update only the Y value, preserving X and Z
-    component.wheel.position.y = loweredY;
+    // Apply delta directly: negative = lower, positive = higher
+    component.wheel.position.y = baseY + delta;
 }
 
 
@@ -59,9 +56,9 @@ export async function updateWaterWheelPosition(scene, component, position) {
 
     // Define the target positions and rotations for each slot (position 1, 2, 3)
     const positions = [
-        new BABYLON.Vector3(1, 0.07, 0.7),
-        new BABYLON.Vector3(-0.68, 0.1, -0.5),
-        new BABYLON.Vector3(-1.6, 0.3, -1.5)
+        new BABYLON.Vector3(1, 0.01, 0.7),
+        new BABYLON.Vector3(-0.68, 0.06, -0.5),
+        new BABYLON.Vector3(-1.6, 0.25, -1.5)
     ];
 
     // Rotation angles in radians for each position (Euler angles: x,y,z)
