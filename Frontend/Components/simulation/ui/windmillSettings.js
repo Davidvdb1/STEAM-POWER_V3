@@ -28,7 +28,7 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
 
     // Slider for blade count
     const bladeSlider = new BABYLON.GUI.Slider();
-    bladeSlider.minimum = 3;
+    bladeSlider.minimum = 0;
     bladeSlider.maximum = 5;
     bladeSlider.step = 1;
     bladeSlider.value = 3;
@@ -38,7 +38,6 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
     bladeSlider.background = "gray";
     bladeSlider.thumbColor = "white";
     bladeSlider.borderColor = "white";
-    bladeSlider.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
     page1.addControl(bladeSlider);
 
     bladeSlider.onValueChangedObservable.add((value) => {
@@ -48,34 +47,26 @@ export function createWindmillSettings(page1, page2, onBladeCountChange, onManua
     });
 
     // Grid for tick labels
-    // Tick container panel
-    const tickPanel = new BABYLON.GUI.Rectangle();
-    tickPanel.width = "90%"; // Match the slider width
-    tickPanel.height = "60px";
-    tickPanel.thickness = 0;
-    tickPanel.paddingTop = "10px"
-    tickPanel.paddingBottom = "10px"
-    tickPanel.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-    tickPanel.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-    page1.addControl(tickPanel);
+    const tickGrid = new BABYLON.GUI.Grid();
+    tickGrid.width = "100%";
+    tickGrid.height = "50px";
+    tickGrid.paddingTop = "10px";
+    tickGrid.paddingBottom = "20px";
 
-    // Add 3, 4, 5 ticks with manual positioning
-    [3, 4, 5].forEach((num, i) => {
+    // Create 6 columns (for 0 to 5)
+    for (let i = 0; i <= 5; i++) {
+        tickGrid.addColumnDefinition(1 / 6); // Each column is 1/6th of the width
+    }
+
+    // Add labels to the grid
+    for (let i = 0; i <= 5; i++) {
         const tick = new BABYLON.GUI.TextBlock();
-        tick.text = num.toString();
+        tick.text = i.toString();
         tick.color = "white";
-        tick.width = "30px";
-        tick.height = "30px";
         tick.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-        tick.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-
-        // Position: 0%, 50%, 100% of container width
-        const positions = ["-45%", "0%", "45%"];
-        tick.left = positions[i];
-        tick.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
-
-        tickPanel.addControl(tick);
-    });
+        tickGrid.addControl(tick, 0, i); // row 0, column i
+    }
+    page1.addControl(tickGrid);
 
     // line
     page1.addControl(createLine());

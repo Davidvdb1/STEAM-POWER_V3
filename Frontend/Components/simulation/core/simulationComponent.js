@@ -281,10 +281,6 @@ async _updateSolarEnergy(){
 
     await loadModels(this.scene, this);
 
-    await this._updateSunAndSolarPanel(this.street, this.city, this.postal);
-    
-    
-
     this._updateWaterEnergy();  
     await this._updateWindEnergy();
     await this._updateSolarEnergy();

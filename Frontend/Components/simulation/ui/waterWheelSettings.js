@@ -96,11 +96,12 @@ export function createWaterWheelSettings(page2, positionCB, depthCB) {
     waterTitle3.height = "60px";
     page2.addControl(waterTitle3);
 
+    // === Slider ===
     const depthSlider = new BABYLON.GUI.Slider();
-    depthSlider.minimum = -0.1;
-    depthSlider.maximum = 0.1;
-    depthSlider.value = 0; // Middle (default)
-    depthSlider.step = 0.005;
+    depthSlider.minimum = 0;
+    depthSlider.maximum = 0.5;
+    depthSlider.value = 0;
+    depthSlider.step = 0.01;
     depthSlider.height = "20px";
     depthSlider.width = "90%";
     depthSlider.color = "white";
@@ -114,12 +115,12 @@ export function createWaterWheelSettings(page2, positionCB, depthCB) {
     depthValueLabel.fontSize = 18;
     depthValueLabel.color = "white";
     depthValueLabel.height = "60px";
-    depthValueLabel.paddingBottom = "10px";
+    depthValueLabel.paddingBottom = "10px"
     page2.addControl(depthValueLabel);
 
     // === Update value label and callback ===
     depthSlider.onValueChangedObservable.add((value) => {
         depthValueLabel.text = `${value.toFixed(2)}`;
-        depthCB(value); // Calls updateWaterWheelDepth with positive or negative delta
+        depthCB(value);
     });
 }
