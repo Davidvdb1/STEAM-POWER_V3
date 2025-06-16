@@ -329,7 +329,7 @@ async _updateSolarEnergy(){
 
     this.dataPanel = createDataPanel();
 
-    createWindRoos(45)
+    createWindRoos(this.manualYawDeg+ 90)
 
     await loadModels(this.scene, this);
 
@@ -388,6 +388,7 @@ async _updateSolarEnergy(){
   async _handleWindmillRotation(degrees) {
     await updateWindmillRotation(this.scene, this, degrees);
     this.manualYawDeg = degrees;
+    createWindRoos(degrees + 90);
     await this._updateWindEnergy();
   }
 
@@ -398,6 +399,7 @@ async _updateSolarEnergy(){
     // draai molen direct naar OPT_OFFSET tov de wind
     this.manualYawDeg = OPT_OFFSET;
     await updateWindmillRotation(this.scene, this, OPT_OFFSET);
+    createWindRoos(this.manualYawDeg + 90);
     await this._updateWindEnergy();
   }
 }
