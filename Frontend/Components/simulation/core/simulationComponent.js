@@ -102,7 +102,7 @@ export class SimulationComponent extends HTMLElement {
         // Set up the interval to trigger every 2 seconds
         this._setupInterval();
 
-        this.addEventListener('activate', (event) => {
+        this.addEventListener('activate-simulation', (event) => {
             this.active = event.detail.active;
         });
     }
