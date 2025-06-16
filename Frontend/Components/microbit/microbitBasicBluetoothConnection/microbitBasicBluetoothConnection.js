@@ -103,6 +103,9 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
                 await this.readPinValues();
             }
         }, MONITOR_INTERVAL || 2000);
+
+        const event = new CustomEvent('activate-simulation', { bubbles: true, composed: true, detail: { active: false }});
+        document.dispatchEvent(event);
     }
 
     async startMockMonitoring() {
@@ -111,6 +114,9 @@ window.customElements.define('microbitbasicbluetoothconnection-れ', class exten
                 await this.readMockPinValues();
             }
         }, MONITOR_INTERVAL || 2000);
+        
+        const event = new CustomEvent('activate-simulation', { bubbles: true, composed: true, detail: { active: true }});
+        document.dispatchEvent(event);
     }
 
     async stopMonitoring() {
