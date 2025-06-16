@@ -418,26 +418,18 @@ class GameControlPanel extends HTMLElement {
 
     const newMessage = gs.multiplier?.message;
 
-    // Alleen tonen als:
-    // - de game al eerder geïnit is (dus niet bij opstart)
-    // - de message effectief nieuw is
     if (this._hasInitializedMessages && newMessage && newMessage !== this._lastMessageShown) {
-      // voorkom tonen van allereerste boodschap
-      if (this._lastMessageShown !== null) {
-        for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
-          const scene = this._game.scene.getScene(key);
-          if (scene?.scene?.isActive() && typeof scene.showError === "function") {
-            scene.showError(newMessage);
-            break;
-          }
+      for (const key of ["MenuScene", "CityScene", "OuterCityScene"]) {
+        const scene = this._game.scene.getScene(key);
+        if (scene?.scene?.isActive() && typeof scene.showError === "function") {
+          scene.showError(newMessage);
+          break;
         }
       }
 
-    // in alle gevallen updaten voor vergelijking met volgende messages
-    this._lastMessageShown = newMessage;
-  }
+      this._lastMessageShown = newMessage;
+    }
 
-    // Eens dit doorlopen is, zetten we de flag actief
     this._hasInitializedMessages = true;
 
     const payload = buildCurrencyDisplayPayload({
