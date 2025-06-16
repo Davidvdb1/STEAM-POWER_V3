@@ -3,6 +3,7 @@ const OPT_OFFSET = 15;        // ° optimaal
 import { createSettingsPanel } from '../ui/settingsPanel.js';
 import { createDataPanel } from '../ui/dataPanel.js';
 import { loadModels, updateSunAndSolarPanel } from '../models/modelLoader.js';
+import { createWindRoos } from '../ui/windRoos.js';
 import {
   updateWindmillBlades,
   updateWindmillRotation,
@@ -278,6 +279,8 @@ async _updateSolarEnergy(){
     );
 
     this.dataPanel = createDataPanel();
+
+    createWindRoos(45)
 
     await loadModels(this.scene, this);
 
