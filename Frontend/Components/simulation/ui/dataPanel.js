@@ -99,8 +99,8 @@ export function createDataPanel() {
 
     return {
         gui: GUI,
-        setSolarValue(val) { solarValue.text = `${val} kW/u`; },
-        setWaterValue(val) { waterValue.text = `${val} Wh/u`; },
-        setWindValue (val) { windValue .text = `${val} Wh/u`; }
+        setSolarValue(val) { solarValue.text = `${val} kW`; },
+        setWaterValue(val) { waterValue.text = `${val} kW`; },
+        setWindValue (val) { windValue .text = `${val} kW`; }
     };
 }
