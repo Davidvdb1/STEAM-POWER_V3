@@ -15,10 +15,11 @@ export const LOC_SPECS = {
 /**
  * Bereken water­vermogen P (W en kW) bij positie 1-3 en diepte-offset d (m).
  *   P = ρ · g · Q · (H + d) · η
+ * Output is halved to reduce energy generation.
  */
 export function calcHydroPower(position = 1, depth = 0) {
   const { Q, H } = LOC_SPECS[position] ?? LOC_SPECS[1];
-  const P = RHO * G * Q * (H + depth) * ETA;  // watt
+  const P = RHO * G * Q * (H + depth) * ETA * 0.5;  // watt (halved)
   return { W: P, kW: P / 1_000 };
 }
 
