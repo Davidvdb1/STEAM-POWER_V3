@@ -27,7 +27,8 @@ import {
   calcWindPowerWhTurbine,
   yawAdjustedSpeed,
   ROTOR_RADIUS_M,
-  calcHydroPower
+  calcHydroPower,
+  fetchWindDirection
 } from '../utils/weatherData.js';
 
 let template = document.createElement('template');
@@ -286,8 +287,21 @@ async _updateSolarEnergy(){
     await updateAutoRotateChange(this.scene, this, true, street, city, postal);
     await this._updateWindEnergy();
     await this._updateSolarEnergy();
+    await this._updateWindRoos();
   }
 
+  async _updateWindRoos() {
+  try {
+    // haal echte windrichting op
+    const deg = await fetchWindDirection(this.lat, this.lon);
+    // converteer naar Babylon-coördinaat (arrow naar “noord = 0°” etc.)
+    const arrowDeg = (deg + 180 + 360) % 360;
+    // teken windroos
+    createWindRoos(arrowDeg);
+  } catch (err) {
+    console.error('Windroos updaten mislukt:', err);
+  }
+}
   async _initializeBabylonJS() {
     const canvas = this._shadowRoot.getElementById('renderCanvas');
     this.engine = new BABYLON.Engine(canvas, true, {
@@ -340,6 +354,8 @@ async _updateSolarEnergy(){
     this._updateWaterEnergy();  
     await this._updateWindEnergy();
     await this._updateSolarEnergy();
+    await this._updateWindRoos();
+
   
     canvas.removeEventListener('wheel', this._preventScroll);
     canvas.addEventListener('wheel', this._customWheelHandler, { passive: false });
@@ -388,7 +404,7 @@ async _updateSolarEnergy(){
   async _handleWindmillRotation(degrees) {
     await updateWindmillRotation(this.scene, this, degrees);
     this.manualYawDeg = degrees;
-    createWindRoos(degrees + 90);
+    //createWindRoos(degrees + 90);
     await this._updateWindEnergy();
   }
 
@@ -399,7 +415,7 @@ async _updateSolarEnergy(){
     // draai molen direct naar OPT_OFFSET tov de wind
     this.manualYawDeg = OPT_OFFSET;
     await updateWindmillRotation(this.scene, this, OPT_OFFSET);
-    createWindRoos(this.manualYawDeg + 90);
+    //createWindRoos(this.manualYawDeg + 90);
     await this._updateWindEnergy();
   }
 }
