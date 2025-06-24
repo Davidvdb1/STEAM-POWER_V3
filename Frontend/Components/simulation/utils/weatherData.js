@@ -35,7 +35,7 @@ const ROTOR_AREA = Math.PI * ROTOR_RADIUS_M ** 2;      // m²
  */
 export async function fetchWindDirection(lat = 50.8798, lon = 4.7005) {
     try {
-        const response = await fetch(`http://localhost:3000/weather/windrichting?lat=${lat}&lon=${lon}`);
+        const response = await fetch(`https://twabackend.davidvandenbroeck.com/weather/windrichting?lat=${lat}&lon=${lon}`);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
@@ -53,7 +53,7 @@ export async function fetchWindDirection(lat = 50.8798, lon = 4.7005) {
  * @returns {Promise<number>} m/s
  */
 export async function fetchWindSpeed(lat = 50.8798, lon = 4.7005) {  //default
-  const res = await fetch(`http://localhost:3000/weather/windkracht?lat=${lat}&lon=${lon}`);
+  const res = await fetch(`https://twabackend.davidvandenbroeck.com/weather/windkracht?lat=${lat}&lon=${lon}`);
   if (!res.ok) throw new Error('Failed to fetch wind speed');
   const json = await res.json();
   return json.wind_speed_m_s;
