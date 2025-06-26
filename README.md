@@ -24,8 +24,11 @@ docker compose pull
 # Start the containers (remove -d if you want to see the logs)
 docker compose up -d
 
-# Open shell in a running container
+# Open shell in a running container (bij prisma foutmelding en crash backend)
 docker exec -it steam-power_v3-backend-1 sh
+
+npx prisma migrate dev --name init --schema=prisma/schema.prisma
+
 ```
 
 ### Docker Compose Configuration
