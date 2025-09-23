@@ -22,6 +22,11 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
+const path = require('path'); // nodig om paden correct te maken
+
+app.use(express.static(path.join(__dirname, '../Frontend')));
+
+
 // app.use(
 //     expressjwt({
 //         secret: process.env.JWT_SECRET || 'default_secret',
@@ -32,11 +37,15 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 // );
 
 
+
+
+
 app.use(cors({
     origin: '*', // Allow all origins
     methods: 'GET,POST,PUT,DELETE',
     allowedHeaders: 'Content-Type,Authorization'
 }));
+
 
 app.use('/users', userRoutes);
 app.use('/camps', campRoutes);
@@ -46,6 +55,10 @@ app.use('/energydata', energyDataRoutes);
 app.use('/questions', questionsRoutes);
 app.use('/gameStatistics', gameStatisticsRoutes);
 app.use('/weather', weatherRoutes);
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../Frontend/index.html'));
+});
 
 
 app.get('/status', (req, res) => {
