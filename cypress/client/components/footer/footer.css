@@ -1,0 +1,28 @@
+.logos {
+    display:block;
+    align-items:center;
+    max-width:70rem;
+    margin: 0 auto;
+    padding:0.3rem;
+}
+
+.logos a {
+    margin: 0.5rem auto;
+}
+
+.logos img {
+    display:block;
+    max-height: 50px;
+}
+
+@media(min-width: 720px){
+
+    .logos {
+        display: flex;
+        justify-content: center;
+    }
+
+    .logos a {
+        display:inline-block;
+    }
+}

@@ -1,0 +1,7 @@
+#playerPage{
+    display: flow-root;
+    margin: 0;
+    background-color: var(--primary-light-color);
+
+    height: 100svh;
+}

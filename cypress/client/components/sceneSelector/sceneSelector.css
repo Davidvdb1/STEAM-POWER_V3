@@ -1,0 +1,95 @@
+#container{
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    /*background-color: var(--primary-dark-color);*/
+
+
+    div {
+        width: 100%;
+
+    }
+
+    card-χ{
+        color: var(--primary-dark-color);
+    }
+}
+
+h1 {
+    font-family: var(--primary-font);
+    font-size: var(--font-size-title);
+    margin-bottom: 1rem;
+    text-shadow: var(--drop-shadow);
+    color: var(--secondary-2-color);
+
+}
+
+div[slot="topMiddle"] {
+    background-color: var(--secondary-2-color);
+    width: 35rem;
+    height: 3rem;
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+    box-shadow: var(--drop-shadow);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        color: var(--primary-light-color);
+        font-family: var(--secondary-font);
+        font-size: var(--font-size-text);
+        padding: 0 1rem;
+        text-align: center;
+    }
+}
+
+div[slot="bottomLeft"] {
+    background-color: var(--secondary-9-color);
+    width: 14rem;
+    height: 4rem;
+    border-top-right-radius: var(--border-radius);
+    box-shadow: var(--drop-shadow-top);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        color: var(--primary-light-color);
+        font-family: var(--secondary-font);
+        font-size: var(--font-size-subtitle);
+        padding-right: 1rem;
+    }
+}
+
+
+div[slot="bottomRight"] {
+    background-color: var(--secondary-6-color);
+    width: 14rem;
+    height: 4rem;
+    border-top-left-radius: var(--border-radius);
+    box-shadow: var(--drop-shadow-top);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        color: var(--primary-light-color);
+        font-family: var(--secondary-font);
+        font-size: var(--font-size-subtitle);
+        padding-left: 1rem;
+    }
+}
+
+div[slot="bottomLeft"]:hover, div[slot="bottomRight"]:hover {
+    background-color: var(--secondary-2-color);
+    cursor: pointer;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+

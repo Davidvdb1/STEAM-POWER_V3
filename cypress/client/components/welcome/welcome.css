@@ -1,0 +1,50 @@
+#welcomeComponent{
+    display: grid;
+    grid-template-rows: 1.5fr 2fr auto;
+    height: 100svh;
+    width: 100vw;
+}
+
+#alertLogo {
+    justify-self: center;
+    width: 20rem;
+    align-self: end;
+}
+
+#logoContainer{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    margin: 0.5rem 0;
+
+    img {
+        display: block;
+        width: 10rem;
+        height: auto;
+    }
+
+    #pxlLogo{
+        width: 12rem;
+        /*margin-left: 1rem;*/
+        /*margin-right: 0;*/
+    }
+}
+
+h1 {
+    font-size: 2.5rem;
+    align-self: end;
+    margin-bottom: 1rem;
+}
+
+.button-group{
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-self: center;
+    gap: 1rem;
+}
+a {
+    text-decoration: none;
+}

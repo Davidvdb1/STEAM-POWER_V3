@@ -1,0 +1,36 @@
+#container {
+    overflow: auto;
+    margin:0rem 2rem;
+}
+
+.nav-item {
+    text-decoration: none;
+    font-family: "Nunito sans", sans-serif;
+    font-size: 18px;
+    color: #2f487e;
+    text-align: center;
+    margin-top:2.5rem;
+    margin-right: 5px;
+    padding: 5px 10px;
+}
+
+.nav-item-logo {
+    text-decoration: none;
+    font-family: "Nunito sans", sans-serif;
+    font-size: 18px;
+    text-align: center;
+    margin-right: 5px;
+    padding: 5px 10px;
+}
+
+.nav-item:hover {
+    color: #D22B8A;
+    cursor: pointer;
+}
+
+.fr {
+    float:right;
+}
+.fl {
+    float:left;
+}

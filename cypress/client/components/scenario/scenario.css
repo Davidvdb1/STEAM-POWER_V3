@@ -1,0 +1,112 @@
+div[slot="topLeft"] {
+    background-color: var(--secondary-9-color);
+    width: 14rem;
+    height: 4rem;
+    border-bottom-right-radius: var(--border-radius);
+    box-shadow: var(--drop-shadow);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        color: var(--primary-light-color);
+        font-family: var(--secondary-font);
+        font-size: var(--font-size-subtitle);
+        padding-right: 2rem;
+    }
+}
+
+
+div[slot="topRight"] {
+    background-color: var(--secondary-2-color);
+    width: 14rem;
+    height: 4rem;
+    border-bottom-left-radius: var(--border-radius);
+    box-shadow: var(--drop-shadow);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        color: var(--primary-light-color);
+        font-family: var(--secondary-font);
+        font-size: var(--font-size-text);
+        padding-left: 1rem;
+    }
+}
+
+div[slot="topLeft"]:hover {
+    background-color: var(--secondary-2-color);
+    cursor: pointer;
+    transform: scale(1.05);
+    transition: all 0.3s ease;
+}
+
+#container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: minmax(40%, auto) 1fr;
+
+    justify-items: center;
+    align-items: center;
+    gap: 2rem;
+
+    #backgroundImg {
+        margin-left: 2rem;
+        display: flex;
+        width: max-content;
+
+        justify-self: end;
+
+        img {
+            border-radius: var(--border-radius-sm);
+            box-shadow: var(--drop-shadow);
+
+            max-width: 45vw;
+            max-height: 70svh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+    }
+
+    #node {
+        justify-self: start;
+        margin-right: 2rem;
+        border-radius: var(--border-radius-sm);
+        box-shadow: var(--drop-shadow);
+        background-color: var(--secondary-9-color);
+        width: 45vw;
+        height: 70svh;
+        display: flex;
+    }
+}
+
+
+div[slot="bottomMiddle"] {
+    background-color: var(--secondary-5-color);
+    width: 35rem;
+    height: 3rem;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
+    box-shadow: var(--drop-shadow-top);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    p {
+        color: var(--primary-dark-color);
+        font-family: var(--secondary-font);
+        font-size: var(--font-size-subtext);
+        padding: 0 1rem;
+        text-align: center;
+    }
+}
