@@ -1,0 +1,9 @@
+{
+  "realm": "xplab_alert-project",
+  "auth-server-url": "https://keycloak-dev.re-frame.io",
+  "ssl-required": "external",
+  "resource": "Backend",
+  "public-client": true,
+  "verify-token-audience": true,
+  "confidential-port": 0
+}

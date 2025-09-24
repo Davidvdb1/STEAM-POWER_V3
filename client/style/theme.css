@@ -1,0 +1,58 @@
+:root{
+
+    --primary-light-color: #dae6ec;
+    --primary-dark-color: #0c1f2c;
+    --secondary-1-color: #D22B8A;
+    --secondary-2-color: #a7337a;
+    --secondary-3-color: #2f487e;
+
+    --secondary-4-color: #19B5A5; /* teal complement to magenta; great for links/CTAs */
+    --secondary-5-color: #FFC857; /* warm highlight, pairs with your dark navy */
+    --secondary-6-color: #6ec1a2; /* success/positive */
+    --secondary-7-color: #E0525E; /* error/destructive that’s softer than pure red */
+    --secondary-8-color: #4DA3D9; /* info/state, lighter than your indigo */
+    --secondary-9-color: #7A8C99; /* cool gray for borders, secondary text */
+
+
+    --success-color: var(--secondary-6-color);
+    --error-color: var(--secondary-7-color);
+    --info-color: var(--secondary-8-color);
+    --warning-color: var(--secondary-5-color);
+
+/*linear-gradient(180deg,  0%, rgba(199, 87, 128, 1) 40%, rgba(47, 72, 126, 1) 100%)*/
+    --gradient-1: 180deg,rgba(210, 43, 138, 1) 0%, rgba(199, 87, 128, 1) 40%, rgba(47, 72, 126, 1) 100%;
+
+    /*--gradient-1: #F2FAFE 0%, #9DC6E5 100%; !* example  linear-gradient(90deg, var(--gradient-1)); *!*/
+    /*    --gradient-2: #D2E9E6  0%, #C9E8E4 100%; !* example  radial-gradient(circle, var(--gradient-1)); *!
+        --gradient-3: #DEEBE9  0%, #BDE6E0 100%; !* --gradient maybe not working*!*/
+
+    --drop-shadow-color: rgb(12, 37, 52, .25);
+    --drop-shadow: 0 0.2rem 0.5rem var(--drop-shadow-color);
+    --drop-shadow-top: 0 -0.2rem 0.5rem var(--drop-shadow-color);
+
+    --primary-font: Spartan MB, sans-serif;
+    --secondary-font: Archivo, sans-serif;
+
+    --font-size-title: 3rem;
+    --font-size-subtitle: 2rem;
+    --font-size-subtext: 1.5rem;
+    --font-size-text: 18px;
+    --font-size-text-sm: 14px;
+    --font-size-quote: 1.5rem;
+
+    --font-weight-n: 400;
+    --font-weight-l: 200;
+    --font-weight-b: 600;
+
+    --text-tracking: 1px; /* Space between letters (css letter-space)  */
+    --text-leading: normal; /* space between lines (css line-height)    */
+
+    --border-radius: 25px;
+    --border-radius-sm: 15px;
+
+    --margin: 1rem;
+    --margin-sm: calc(var(--margin) * 0.5);
+    --margin-md: calc(var(--margin) * 2);
+    --margin-lg: calc(var(--margin) * 3);
+
+}

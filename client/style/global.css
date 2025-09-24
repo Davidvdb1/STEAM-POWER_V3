@@ -1,0 +1,157 @@
+@import url("https://fonts.googleapis.com/css2?family=Archivo&display=swap");
+html,
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  min-height: 100%;
+  height: 100svh;
+  font-family: "League Spartan", "Spartan MB", sans-serif;
+  font-weight: var(--font-weight-n);
+  font-size: var(--font-size-text);
+  letter-spacing: var(--text-tracking);
+  color: var(--primary-dark-color);
+  background: linear-gradient(180deg, var(--gradient-1)) no-repeat fixed;
+}
+
+:root {
+  --color-main-darkblue: #0c1f2c;
+  --color-main-magenta: #a7337a;
+  --color-main-lightblue: #dae6ec;
+  --color-admin-mint: #6ec1a2;
+  --color-admin-light: #e3efe9;
+}
+
+/* Algemene font toepassing */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--primary-font);
+  color: #2f487e;
+}
+
+body,
+p,
+label,
+li,
+span {
+  font-family: var(--secondary-font);
+  color: #2f487e;
+  line-height:1.25rem;
+}
+
+a {
+  color: #D22B8A;
+}
+
+a {
+  font-family: var(--secondary-font);
+}
+
+
+.page {
+  display: block;
+  padding: 1rem 2rem;
+  min-height: 77.7vh;
+  background: #D22B8A;
+  background: linear-gradient(180deg,rgba(210, 43, 138, 1) 0%, rgba(199, 87, 128, 1) 40%, rgba(47, 72, 126, 1) 100%);
+}
+
+.container {
+  color: black;
+  padding: 2rem;
+  max-width: 78rem;
+  margin: auto;
+}
+
+.card {
+  padding: 2rem;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin: 0 auto;
+  background: #e3efe9;
+}
+
+hr {
+  border:2px solid #d22b8a
+}
+
+#logo {
+  width:15rem;
+  margin:auto;
+}
+
+.inline {
+  display: inline-flex;
+  margin:0rem 1rem;
+}
+
+input[type=password] {
+  width: 15rem;
+  padding: 0.5rem 0.85rem;
+  margin: 0.5rem 0.5rem;
+  box-sizing: border-box;
+  font-size:1rem;
+  text-align:center;
+}
+
+button {
+  cursor:pointer;
+  background-color: #d22b8a;
+  border: none;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size:1.2rem;
+}
+
+ul {
+   list-style: none;
+}
+
+li {
+  margin: 0.6rem 0rem;
+  padding-left:0.4rem;
+}
+
+li::marker{
+   content:"\27A3";
+   font-size: 1.2rem;
+}
+
+.error {
+  color:red;
+}
+
+.mt-0 {margin-top:0rem;}
+.mt-2 {margin-top:0.5rem;}
+.mt-4 {margin-top:1rem;}
+.mt-6 {margin-top:1.5rem;}
+.mt-8 {margin-top:2rem;}
+.mt-10 {margin-top:2.5rem;}
+
+.mb-0 {margin-bottom:0rem;}
+.mb-2 {margin-bottom:0.5rem;}
+.mb-4 {margin-bottom:1rem;}
+.mb-6 {margin-bottom:1.5rem;}
+.mb-8 {margin-bottom:2rem;}
+.mb-10 {margin-bottom:2.5rem;}
+
+.ml-0 {margin-left:0rem;}
+.ml-2 {margin-left:0.5rem;}
+.ml-4 {margin-left:1rem;}
+.ml-6 {margin-left:1.5rem;}
+.ml-8 {margin-left:2rem;}
+.ml-10 {margin-left:2.5rem;}
+
+.mr-0 {margin-right:0rem;}
+.mr-2 {margin-right:0.5rem;}
+.mr-4 {margin-right:1rem;}
+.mr-6 {margin-right:1.5rem;}
+.mr-8 {margin-right:2rem;}
+.mr-10 {margin-right:2.5rem;}
