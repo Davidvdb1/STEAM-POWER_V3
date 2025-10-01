@@ -1,18 +1,20 @@
-FROM node:lts
+FROM node:18
 
 WORKDIR /app
 
-# Kopieer alleen package.json en package-lock.json eerst (voor caching)
-COPY ./Server/package*.json ./
+# Kopieer package files
+COPY package*.json ./
+COPY prisma ./prisma/
 
 # Installeer dependencies
 RUN npm install
 
-# Kopieer de rest van de backend code
-COPY ./Server ./ 
-
-# Genereer Prisma client
+# Genereer Prisma Client tijdens build
 RUN npx prisma generate
 
-# Start server
-CMD ["node", "server.js"]
+# Kopieer rest van de applicatie
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
