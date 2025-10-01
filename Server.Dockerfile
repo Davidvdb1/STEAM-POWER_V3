@@ -1,8 +1,18 @@
 FROM node:lts
 
 WORKDIR /app
-COPY ./ ./
 
-WORKDIR /app/Server
-RUN npm i
-ENTRYPOINT [ "node", "server.js" ]
+# Kopieer alleen package.json en package-lock.json eerst (voor caching)
+COPY ./Server/package*.json ./
+
+# Installeer dependencies
+RUN npm install
+
+# Kopieer de rest van de backend code
+COPY ./Server ./ 
+
+# Genereer Prisma client
+RUN npx prisma generate
+
+# Start server
+CMD ["node", "server.js"]
